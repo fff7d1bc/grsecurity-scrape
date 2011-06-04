@@ -1,0 +1,47 @@
+#!/bin/bash
+
+baseurl='http://grsecurity.net'
+
+basename="${0##*/}"
+scriptpath="$(readlink -f $0)"
+workdir="${scriptpath%/${basename}}"
+
+cd "${workdir}" || exit 1
+
+if [ -f "${workdir}/lock" ]; then exit 2; fi
+touch "${workdir}/lock"
+
+while read line; do
+
+	if [[ "${line}" =~ grsecurity-[0-9\.\-]+\.patch$ ]]; then
+		grsecurity_files+=( "${line##*/}" )
+
+	fi
+
+	if [[ "${line}" =~ gradm-[0-9\.\-]+\.tar\.gz$ ]]; then
+		gradm_files+=( "${line##*/}" )
+	fi
+
+done < <(curl "${baseurl}/test.php" -s | awk -v RS='"' '!(--p){print}/href=$/{p=1}' )
+
+# grsecurity patches.
+for item in "${grsecurity_files[@]}"; do
+	if ! [ -f "test/${item}" ]; then
+		printf 'Downloading %s ...\n' "${item}"
+		curl -s "${baseurl}/test/${item}" > "${workdir}/test/${item}"
+		new_grsecurity_patches+=( "${item}" )
+	fi
+done; unset item
+
+date="$(date '+%d-%m-%Y %H:%M')"
+
+# If array have at least one element.
+if [ "${#new_grsecurity_patches[@]}" != '0' ]; then
+	printf 'Downloading changelog-test.txt ...\n'
+	curl -s "${baseurl}/changelog-test.txt" > "${workdir}/test/changelog-test.txt"
+	git add "${workdir}/test/" && git commit "${workdir}/test/" -m \
+		"$(printf 'grsec-scrape autocommit.\n\n'; printf 'New patch: %s\n' "${new_grsecurity_patches[@]}" )"
+	git push
+fi
+
+rm "${workdir}/lock"
