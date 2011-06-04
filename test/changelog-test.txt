@@ -1,3 +1,12 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106041748.patch:
+---------------------------------------------------------------
+fix compilation when making kernel packages
+
+ Makefile                 |    2 +-
+ arch/x86/mm/fault.c      |    4 ++--
+ arch/x86/vdso/vdso.lds.S |    4 ++--
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106040846.patch:
 ---------------------------------------------------------------
 update to test13 PaX patch, unify pax_track_stack names
