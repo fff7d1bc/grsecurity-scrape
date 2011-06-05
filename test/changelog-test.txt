@@ -1,3 +1,19 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106042120.patch:
+---------------------------------------------------------------
+prevent getattr on /proc/pid entries hidden from readdir by proc restrictions 
+(already prevented under RBAC)
+thanks to Arach of #grsecurity for reporting
+
+ fs/proc/base.c |    8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-2.6.39.1-201106042053.patch:
+---------------------------------------------------------------
+fix compilation with SSP
+
+ arch/x86/kernel/setup_percpu.c |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106041748.patch:
 ---------------------------------------------------------------
 fix compilation when making kernel packages
