@@ -1,3 +1,11 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106061735.patch:
+---------------------------------------------------------------
+revert PaX vdso change
+
+ arch/x86/mm/fault.c      |    4 ++--
+ arch/x86/vdso/vdso.lds.S |    4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106042120.patch:
 ---------------------------------------------------------------
 prevent getattr on /proc/pid entries hidden from readdir by proc restrictions 
