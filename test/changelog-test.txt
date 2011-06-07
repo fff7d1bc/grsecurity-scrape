@@ -1,3 +1,10 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106061957.patch:
+---------------------------------------------------------------
+backport cdrom mount oops fix from mainline (fixes boot for some systems)
+
+ fs/block_dev.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106061735.patch:
 ---------------------------------------------------------------
 revert PaX vdso change
