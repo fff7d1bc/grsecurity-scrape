@@ -1,3 +1,32 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106071941.patch:
+---------------------------------------------------------------
+move < 1MB check to allow through ISA/BIOS
+
+ arch/x86/mm/init.c |    8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-2.6.39.1-201106071907.patch:
+---------------------------------------------------------------
+reject everything else under 1MB
+
+ arch/x86/mm/init.c |    3 +++
+ 1 file changed, 3 insertions(+)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-2.6.39.1-201106071832.patch:
+---------------------------------------------------------------
+update to latest PaX patch, fixes usercopy false positive in jfs
+allow BDA and EBDA in /dev/mem, reported by specs on the forums
+
+ arch/x86/mm/init.c                    |   12 ++++++++----
+ drivers/gpu/drm/nouveau/nouveau_drv.h |    6 +++---
+ drivers/media/video/au0828/au0828.h   |    2 +-
+ drivers/net/ixgbe/ixgbe_type.h        |    6 +++---
+ drivers/net/vxge/vxge-config.h        |    2 +-
+ drivers/net/wireless/ath/ath9k/hw.h   |    4 +++-
+ fs/jfs/super.c                        |    2 +-
+ fs/ocfs2/stack_o2cb.c                 |    1 +
+ 8 files changed, 21 insertions(+), 14 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106061957.patch:
 ---------------------------------------------------------------
 backport cdrom mount oops fix from mainline (fixes boot for some systems)
