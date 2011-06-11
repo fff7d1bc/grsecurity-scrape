@@ -1,3 +1,13 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106111626.patch:
+---------------------------------------------------------------
+make the fakefs object for RBAC default to rw instead of the (old compat) rwx.  
+add a new subject mode, 'x' to allow executable shared memory per-subject
+thanks to cnu for the report!
+
+ grsecurity/gracl.c     |   16 +++++++++++-----
+ include/linux/grdefs.h |    3 ++-
+ 2 files changed, 13 insertions(+), 6 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106071941.patch:
 ---------------------------------------------------------------
 move < 1MB check to allow through ISA/BIOS
