@@ -1,3 +1,13 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106120643.patch:
+---------------------------------------------------------------
+while Ingo's busy spouting nonsense about how -stable isn't selective backports 
+and how it gets all the bugfixes, backport some months-old (definitely not) 
+bugfixes for (definitely not) security vulnerabilities
+
+ net/bluetooth/l2cap_sock.c  |    1 +
+ net/bluetooth/rfcomm/sock.c |    1 +
+ 2 files changed, 2 insertions(+)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106111626.patch:
 ---------------------------------------------------------------
 make the fakefs object for RBAC default to rw instead of the (old compat) rwx.  
