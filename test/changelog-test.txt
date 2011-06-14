@@ -1,3 +1,14 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106132135.patch:
+---------------------------------------------------------------
+add arm/ppc32/ppc64/sparc32/sparc64 support to KERN_LOCKOUT
+
+ arch/arm/kernel/traps.c      |    5 +++++
+ arch/powerpc/kernel/traps.c  |    4 ++++
+ arch/sparc/kernel/traps_32.c |    6 +++++-
+ arch/sparc/kernel/traps_64.c |    6 +++++-
+ grsecurity/Kconfig           |    4 ++--
+ 5 files changed, 21 insertions(+), 4 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106131719.patch:
 ---------------------------------------------------------------
 backport some security-circus fixes
