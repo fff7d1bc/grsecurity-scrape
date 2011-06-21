@@ -1,3 +1,16 @@
+Changes in grsecurity-2.2.2-2.6.39.1-201106211740.patch:
+---------------------------------------------------------------
+backport security fixes from upstream
+disable PROC_CONNECTOR
+
+ drivers/connector/Kconfig |    4 ++--
+ grsecurity/grsec_chroot.c |    2 +-
+ grsecurity/grsec_mount.c  |    2 +-
+ mm/ksm.c                  |    6 ++++++
+ net/ipv4/inet_diag.c      |   14 ++++++--------
+ security/tomoyo/mount.c   |    2 +-
+ 8 files changed, 19 insertions(+), 14 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.1-201106132135.patch:
 ---------------------------------------------------------------
 add arm/ppc32/ppc64/sparc32/sparc64 support to KERN_LOCKOUT
