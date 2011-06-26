@@ -1,3 +1,10 @@
+Changes in grsecurity-2.2.2-2.6.39.2-201106251441.patch:
+---------------------------------------------------------------
+backport a security fix from upstream
+
+ net/bluetooth/l2cap_core.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.2-201106251302.patch:
 ---------------------------------------------------------------
 port to latest stable kernel
