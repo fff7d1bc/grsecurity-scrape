@@ -1,3 +1,10 @@
+Changes in grsecurity-2.2.2-2.6.39.2-201106281648.patch:
+---------------------------------------------------------------
+revert CONNECTOR change, doesn't violate our model as it requires CAP_NET_ADMIN
+
+ drivers/connector/Kconfig |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.2-201106251441.patch:
 ---------------------------------------------------------------
 backport a security fix from upstream
