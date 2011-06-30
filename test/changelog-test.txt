@@ -1,3 +1,22 @@
+Changes in grsecurity-2.2.2-2.6.39.2-201106292104.patch:
+---------------------------------------------------------------
+add new sysctl entry for GRKERNSEC_BRUTE: "deter_bruteforce" requested by 
+sponsor
+add ARM support for PAX_USERCOPY
+
+ arch/arm/include/asm/uaccess.h     |   21 +++++++++++++++++++--
+ arch/arm/lib/copy_from_user.S      |    6 +++---
+ arch/arm/lib/copy_to_user.S        |    6 +++---
+ arch/arm/lib/uaccess.S             |   12 ++++++------
+ arch/arm/lib/uaccess_with_memcpy.c |    2 +-
+ grsecurity/Kconfig                 |   13 ++++++++-----
+ grsecurity/grsec_init.c            |    4 ++++
+ grsecurity/grsec_sig.c             |    3 +++
+ grsecurity/grsec_sysctl.c          |    9 +++++++++
+ include/linux/grinternal.h         |    1 +
+ security/Kconfig                   |    2 +-
+ 11 files changed, 58 insertions(+), 21 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.2-201106281648.patch:
 ---------------------------------------------------------------
 revert CONNECTOR change, doesn't violate our model as it requires CAP_NET_ADMIN
