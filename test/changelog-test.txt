@@ -1,3 +1,11 @@
+Changes in grsecurity-2.2.2-2.6.39.2-201107011911.patch:
+---------------------------------------------------------------
+backport XD_DISABLED resetting fix
+
+ arch/x86/kernel/acpi/realmode/wakeup.S |    4 ++++
+ arch/x86/kernel/verify_cpu.S           |    1 +
+ 2 files changed, 5 insertions(+)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.2-201106292104.patch:
 ---------------------------------------------------------------
 add new sysctl entry for GRKERNSEC_BRUTE: "deter_bruteforce" requested by 
