@@ -1,3 +1,34 @@
+Changes in grsecurity-2.2.2-2.6.39.2-201107062003.patch:
+---------------------------------------------------------------
+update to latest PaX patch, fixes false reported high I/O loads, adds SLOB 
+support for USERCOPY
+backport security fixes from upstream
+
+ Makefile                              |   31 +++++++++++++++---------------
+ arch/arm/kernel/armksyms.c            |    4 +--
+ arch/sparc/include/asm/cache.h        |    2 -
+ arch/x86/include/asm/cache.h          |    4 +--
+ arch/x86/include/asm/stackprotector.h |    2 -
+ arch/x86/kernel/head_32.S             |    2 -
+ arch/x86/kernel/irq_32.c              |    2 -
+ arch/x86/kernel/traps.c               |   11 ++++++++++
+ arch/x86/mm/mmio-mod.c                |    2 -
+ arch/x86/mm/pf_in.c                   |   10 ++++-----
+ crypto/gf128mul.c                     |    4 +--
+ drivers/edac/i7core_edac.c            |    2 -
+ fs/exec.c                             |    2 -
+ fs/locks.c                            |   30 +++++++++++++++++++----------
+ fs/nfs/inode.c                        |    2 -
+ grsecurity/Kconfig                    |    4 +--
+ include/asm-generic/cache.h           |    4 +--
+ include/linux/sched.h                 |    8 +++----
+ include/linux/skbuff.h                |    2 -
+ mm/slob.c                             |   35 ++++++++++++++++++++++++++--------
+ scripts/mod/modpost.c                 |    2 -
+ security/Kconfig                      |    2 -
+ tools/gcc/pax_plugin.c                |    1 
+ 23 files changed, 104 insertions(+), 64 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.2-201107011911.patch:
 ---------------------------------------------------------------
 backport XD_DISABLED resetting fix
