@@ -1,3 +1,30 @@
+Changes in grsecurity-2.2.2-2.6.39.3-201107142110.patch:
+---------------------------------------------------------------
+fix security issue with apps that create threads prior to chrooting and 
+dropping privileges from a thread within a chroot
+glibc signals to other threads within the same group behind the scenes when a 
+thread changes uid/gid/supplementary groups.  These undocumented signals, sent 
+only in newer glibc versions, cause the other threads in the process group to 
+adjust their uid/gid/supplementary groups to match.  As the findtask feature 
+prevented sending signals outside of the chroot, it prevented the sending of 
+these necessary signals.  For now, whitelist this scenario.  Soon we'll revisit 
+the ridiculous idea of allowing threads within the same process to run under 
+different uids.  This bug can be triggered when running qemu --runas and a 
+small number of other lesser-used apps.  Many thanks to Andrew Griffith 
+(andrewg) for the report and discussion.
+clean up findtask code
+fix memory leak when disabling RBAC learning
+
+ grsecurity/gracl.c         |    3 ---
+ grsecurity/gracl_learn.c   |   27 ++++++++++++---------------
+ grsecurity/grsec_chroot.c  |   32 ++++++++++----------------------
+ include/linux/grinternal.h |    1 -
+ include/linux/grsecurity.h |    3 +++
+ include/linux/sched.h      |    1 +
+ kernel/pid.c               |    7 +++++++
+ kernel/signal.c            |   15 +++++++++++++--
+ 8 files changed, 46 insertions(+), 43 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.3-201107090923.patch:
 ---------------------------------------------------------------
 port to 2.6.39.3, update to latest PaX patch, fixes STACKLEAK compilation
