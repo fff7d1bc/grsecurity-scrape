@@ -1,3 +1,13 @@
+Changes in grsecurity-2.2.2-2.6.39.3-201107161559.patch:
+---------------------------------------------------------------
+fixes chroot af_unix restrictions broken by the last patch
+
+ grsecurity/grsec_chroot.c  |    2 +-
+ include/linux/grsecurity.h |    2 +-
+ kernel/pid.c               |    1 -
+ net/unix/af_unix.c         |    2 +-
+ 4 files changed, 3 insertions(+), 4 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.3-201107142110.patch:
 ---------------------------------------------------------------
 fix security issue with apps that create threads prior to chrooting and 
