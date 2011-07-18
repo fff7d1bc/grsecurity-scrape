@@ -1,3 +1,21 @@
+Changes in grsecurity-2.2.2-2.6.39.3-201107181818.patch:
+---------------------------------------------------------------
+no need to reset peercred pid
+
+ net/unix/af_unix.c |    5 -----
+ 1 file changed, 5 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-2.6.39.3-201107181720.patch:
+---------------------------------------------------------------
+Fix chroot_shmat security problem reported by Marian Marinov where if the 
+creator of some shared memory outside of the chroot exited (say due to 
+daemonizing after creating the shared memory), we would allow tasks inside of 
+the chroot to attach to it without first checking their root against the root 
+of the last attaching process
+
+ grsecurity/grsec_chroot.c |   20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.3-201107161559.patch:
 ---------------------------------------------------------------
 fixes chroot af_unix restrictions broken by the last patch
