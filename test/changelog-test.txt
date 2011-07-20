@@ -1,3 +1,13 @@
+Changes in grsecurity-2.2.2-2.6.39.3-201107191826.patch:
+---------------------------------------------------------------
+fix stack-protector detection for biarch gcc that defaults to 32bit when 
+building a 64bit kernel (unfixed vanilla bug)
+fix code generation for PARAVIRT
+
+ arch/x86/Makefile          |    1 +
+ arch/x86/kernel/paravirt.c |   14 +++++++++++++-
+ 2 files changed, 14 insertions(+), 1 deletion(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.3-201107181818.patch:
 ---------------------------------------------------------------
 no need to reset peercred pid
