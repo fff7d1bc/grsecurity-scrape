@@ -1,3 +1,18 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108060941.patch:
+---------------------------------------------------------------
+Fix use of out-of-scope timer structs in PaX patch
+
+ kernel/posix-cpu-timers.c |    4 ++--
+ kernel/posix-timers.c     |   12 ++++++------
+ 2 files changed, 8 insertions(+), 8 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-2.6.39.4-201108060831.patch:
+---------------------------------------------------------------
+fix null deref in PaX posix-timers changes
+
+ kernel/posix-timers.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108052113.patch:
 ---------------------------------------------------------------
 update to latest kernel
