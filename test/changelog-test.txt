@@ -1,3 +1,11 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108071438.patch:
+---------------------------------------------------------------
+Add more descriptive error message when gcc plugin headers aren't installed, 
+actually make it an error
+
+ Makefile |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108060941.patch:
 ---------------------------------------------------------------
 Fix use of out-of-scope timer structs in PaX patch
