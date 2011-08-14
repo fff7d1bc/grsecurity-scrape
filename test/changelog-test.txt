@@ -1,3 +1,16 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108141242.patch:
+---------------------------------------------------------------
+fix more compilation failures in staging drivers
+
+ drivers/staging/ath6kl/os/linux/ar6000_drv.c       |    2 +-
+ drivers/staging/ath6kl/os/linux/include/ar6k_pal.h |    2 +-
+ drivers/staging/gma500/psb_ttm_glue.c              |    6 ++++--
+ drivers/staging/sbe-2t3e3/netdev.c                 |    2 +-
+ fs/notify/fanotify/fanotify_user.c                 |    3 ++-
+ net/ipv4/raw.c                                     |    8 ++++----
+ net/ipv6/raw.c                                     |    8 ++++----
+ 7 files changed, 17 insertions(+), 14 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108132040.patch:
 ---------------------------------------------------------------
 fix compilation failures in staging drivers reported on forums
