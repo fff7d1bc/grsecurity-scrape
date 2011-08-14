@@ -1,3 +1,15 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108132040.patch:
+---------------------------------------------------------------
+fix compilation failures in staging drivers reported on forums
+
+ drivers/staging/hv/hv_mouse.c         |    6 ++++--
+ drivers/staging/iio/ring_generic.h    |    2 +-
+ drivers/staging/rtl8712/rtl871x_io.h  |    2 +-
+ drivers/staging/usbip/stub_dev.c      |    8 +++++---
+ drivers/staging/usbip/vhci_hcd.c      |    8 +++++---
+ drivers/staging/wlan-ng/hfa384x_usb.c |    2 +-
+ 6 files changed, 17 insertions(+), 11 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108071438.patch:
 ---------------------------------------------------------------
 Add more descriptive error message when gcc plugin headers aren't installed, 
