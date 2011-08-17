@@ -1,3 +1,10 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108162115.patch:
+---------------------------------------------------------------
+fix boot crash reported on forums
+
+ kernel/signal.c |    5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108141242.patch:
 ---------------------------------------------------------------
 fix more compilation failures in staging drivers
