@@ -1,3 +1,17 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108172006.patch:
+---------------------------------------------------------------
+fix compilation under CONFIG_NET=n, reported by Hunger
+fix the most annoying compile warnings under gcc 4.5+
+
+ arch/x86/include/asm/apic.h        |    2 +-
+ arch/x86/include/asm/mmu_context.h |    4 ++--
+ arch/x86/kernel/apic/apic.c        |    2 +-
+ arch/x86/mm/fault.c                |    2 ++
+ grsecurity/Kconfig                 |    2 ++
+ grsecurity/Makefile                |    4 ++--
+ kernel/exit.c                      |    2 ++
+ 7 files changed, 12 insertions(+), 6 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108162115.patch:
 ---------------------------------------------------------------
 fix boot crash reported on forums
