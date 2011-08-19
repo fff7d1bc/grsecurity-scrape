@@ -1,3 +1,14 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108182325.patch:
+---------------------------------------------------------------
+fix sparc compilation, thanks to nayr for reporting
+convert some staging open/close to __no_const fields
+
+ arch/sparc/include/asm/atomic_64.h   |   19 ++++++++++++++++---
+ drivers/staging/usbip/stub_dev.c     |    8 +++-----
+ drivers/staging/usbip/usbip_common.h |    2 +-
+ drivers/staging/usbip/vhci_hcd.c     |    8 +++-----
+ 4 files changed, 23 insertions(+), 14 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108172006.patch:
 ---------------------------------------------------------------
 fix compilation under CONFIG_NET=n, reported by Hunger
