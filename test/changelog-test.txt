@@ -1,3 +1,10 @@
+Changes in grsecurity-2.2.2-2.6.39.4-201108192305.patch:
+---------------------------------------------------------------
+export another atomic op on sparc, reported by nayr
+
+ arch/sparc/lib/ksyms.c |    1 +
+ 1 file changed, 1 insertion(+)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-2.6.39.4-201108182325.patch:
 ---------------------------------------------------------------
 fix sparc compilation, thanks to nayr for reporting
