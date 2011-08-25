@@ -1,3 +1,25 @@
+Changes in grsecurity-2.2.2-3.0.3-201108241901.patch:
+---------------------------------------------------------------
+update to latest PaX patch
+
+ Makefile                                |    3 ++-
+ arch/x86/kernel/kvm.c                   |    1 +
+ arch/x86/xen/mmu.c                      |    2 ++
+ drivers/acpi/ec_sys.c                   |   12 ++++++++----
+ drivers/media/dvb/dvb-core/dvb_demux.h  |    4 ++--
+ drivers/media/dvb/dvb-core/dvbdev.c     |    2 +-
+ drivers/media/dvb/dvb-usb/cxusb.c       |    2 +-
+ drivers/media/dvb/dvb-usb/dibusb.h      |    2 +-
+ drivers/media/dvb/dvb-usb/dw2102.c      |    2 +-
+ drivers/media/dvb/frontends/dib3000.h   |    3 ++-
+ drivers/media/dvb/frontends/dib3000mb.c |    2 +-
+ drivers/media/video/timblogiw.c         |    2 +-
+ include/linux/fsnotify.h                |    2 +-
+ include/media/saa7146_vv.h              |    2 +-
+ include/media/v4l2-ioctl.h              |    1 +
+ tools/gcc/constify_plugin.c             |   25 +++++++++++++------------
+ 16 files changed, 39 insertions(+), 28 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.3-201108232250.patch:
 ---------------------------------------------------------------
 update to latest kernel and PaX patch
