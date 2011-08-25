@@ -1,3 +1,27 @@
+Changes in grsecurity-2.2.2-3.0.3-201108251825.patch:
+---------------------------------------------------------------
+update to latest PaX patch
+backport Vasiliy's execve/setuid patch, remove GRKERNSEC_EXECVE
+
+ arch/x86/ia32/ia32entry.S  |    5 ++---
+ arch/x86/kernel/entry_64.S |   11 ++++++++---
+ fs/cifs/cifs_debug.c       |    8 ++++----
+ fs/cifs/cifsfs.c           |    8 ++++----
+ fs/cifs/cifsglob.h         |    4 ++--
+ fs/cifs/misc.c             |    4 ++--
+ fs/exec.c                  |   26 +++++++++++++++++++-------
+ grsecurity/Kconfig         |   12 ------------
+ grsecurity/grsec_exec.c    |   15 ---------------
+ grsecurity/grsec_init.c    |    4 ----
+ grsecurity/grsec_sysctl.c  |    9 ---------
+ include/linux/grmsg.h      |    1 -
+ include/linux/grsecurity.h |    1 -
+ include/linux/sched.h      |    1 +
+ kernel/cred.c              |    6 ++----
+ kernel/fork.c              |    1 +
+ kernel/sys.c               |   15 +++++++++++----
+ 17 files changed, 56 insertions(+), 75 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.3-201108241901.patch:
 ---------------------------------------------------------------
 update to latest PaX patch
