@@ -1,3 +1,26 @@
+Changes in grsecurity-2.2.2-3.0.3-201108262310.patch:
+---------------------------------------------------------------
+update to latest PaX patch
+
+ Makefile                               |   10 ++--
+ arch/x86/include/asm/kvm_host.h        |    4 -
+ arch/x86/kernel/cpu/intel.c            |    2 
+ arch/x86/kernel/cpu/mtrr/mtrr.h        |    6 +-
+ arch/x86/kernel/entry_64.S             |    2 
+ drivers/gpu/drm/nouveau/nouveau_bios.c |    2 
+ include/linux/blkdev.h                 |    4 -
+ include/linux/compiler-gcc4.h          |    3 +
+ include/linux/compiler.h               |    4 +
+ include/linux/dma-mapping.h            |    4 -
+ include/linux/fs.h                     |    4 -
+ include/linux/kgdb.h                   |   12 ++---
+ include/linux/libata.h                 |    4 -
+ include/net/neighbour.h                |    2 
+ include/scsi/scsi_transport_fc.h       |   54 +++++++++++-----------
+ include/sound/soc.h                    |    4 -
+ tools/gcc/constify_plugin.c            |   79 ++++++++++++++++++++++-----------
+ 17 files changed, 119 insertions(+), 81 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.3-201108251825.patch:
 ---------------------------------------------------------------
 update to latest PaX patch
