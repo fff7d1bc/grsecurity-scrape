@@ -1,3 +1,18 @@
+Changes in grsecurity-2.2.2-3.0.3-201108281458.patch:
+---------------------------------------------------------------
+fix compilation dependency ordering
+
+ Makefile |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-3.0.3-201108270835.patch:
+---------------------------------------------------------------
+fix gcc plugin warning, fix compilation dependency order
+
+ Makefile                    |    5 +++--
+ tools/gcc/constify_plugin.c |    1 +
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.3-201108262310.patch:
 ---------------------------------------------------------------
 update to latest PaX patch
