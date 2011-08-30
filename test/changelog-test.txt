@@ -1,3 +1,10 @@
+Changes in grsecurity-2.2.2-3.0.4-201108300001.patch:
+---------------------------------------------------------------
+add new boot logo
+
+ drivers/video/logo/logo_linux_clut224.ppm | 2721 ++++++++++++------------------
+ 1 file changed, 1120 insertions(+), 1601 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201108292329.patch:
 ---------------------------------------------------------------
 update to latest kernel
