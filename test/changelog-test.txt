@@ -1,3 +1,11 @@
+Changes in grsecurity-2.2.2-3.0.4-201108300622.patch:
+---------------------------------------------------------------
+fix compilation with const plugin
+
+ arch/x86/platform/olpc/olpc_dt.c |    2 +-
+ include/linux/of_pdt.h           |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201108300001.patch:
 ---------------------------------------------------------------
 add new boot logo
