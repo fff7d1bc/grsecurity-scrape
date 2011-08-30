@@ -1,3 +1,14 @@
+Changes in grsecurity-2.2.2-3.0.4-201108301903.patch:
+---------------------------------------------------------------
+update to latest PaX patch, fixes compilation issues and vm86 compatibility 
+with RANDKSTACK
+
+ Makefile                    |   27 ++++++++++++++-------------
+ arch/x86/kernel/entry_32.S  |    2 ++
+ arch/x86/kernel/process.c   |    5 ++++-
+ tools/gcc/constify_plugin.c |    8 ++++++--
+ 4 files changed, 26 insertions(+), 16 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201108300622.patch:
 ---------------------------------------------------------------
 fix compilation with const plugin
