@@ -1,3 +1,12 @@
+Changes in grsecurity-2.2.2-3.0.3-201108292233.patch:
+---------------------------------------------------------------
+fix gcc 4.5 compilation
+fix const-plugin-related compilation failure
+
+ arch/x86/platform/olpc/olpc_dt.c |    2 +-
+ tools/gcc/constify_plugin.c      |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.3-201108281458.patch:
 ---------------------------------------------------------------
 fix compilation dependency ordering
