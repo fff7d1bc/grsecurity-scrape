@@ -1,3 +1,13 @@
+Changes in grsecurity-2.2.2-3.0.4-201109011725.patch:
+---------------------------------------------------------------
+update to latest PaX patch
+
+ Makefile                     |   23 ++++++++++++++---------
+ arch/x86/include/asm/vgtod.h |    1 -
+ include/net/neighbour.h      |    2 +-
+ scripts/gcc-plugin.sh        |    2 +-
+ 4 files changed, 16 insertions(+), 12 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201108301903.patch:
 ---------------------------------------------------------------
 update to latest PaX patch, fixes compilation issues and vm86 compatibility 
