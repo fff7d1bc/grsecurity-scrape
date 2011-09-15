@@ -1,3 +1,21 @@
+Changes in grsecurity-2.2.2-3.0.4-201109150655.patch:
+---------------------------------------------------------------
+compilation fix
+documentation update
+forgot from previous changelog:
+Fix unbounded copy_to_user in /proc/<pid>/auxv
+
+When accessing /proc/<pid>/auxv with GRKERNSEC_PROC_MEMMAP enabled
+from a process not ptracing the target, an erroneous value is
+returned from proc_pid_auxv() to proc_info_read(), resulting
+in a potentially unbounded access to kernel memory and leading
+to a potential information leak to userspace.
+Signed-off-by: Matteo Panella <morpheus@level28.org>
+
+ grsecurity/Kconfig        |    2 +-
+ grsecurity/grsec_chroot.c |    4 ----
+ 2 files changed, 1 insertion(+), 5 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109142336.patch:
 ---------------------------------------------------------------
 Rewrite chroot capability restrictions to tie into capable() calls, so 
