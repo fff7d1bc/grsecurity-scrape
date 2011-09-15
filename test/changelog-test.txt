@@ -1,3 +1,34 @@
+Changes in grsecurity-2.2.2-3.0.4-201109142336.patch:
+---------------------------------------------------------------
+Rewrite chroot capability restrictions to tie into capable() calls, so 
+attempted capability usages will be logged and visibly associated with the 
+feature
+Rewrite log flooding code, should allow for disabling flood protection entirely 
+by setting flood time to 0
+add /lib64/modules to HIDESYM protection
+update to latest PaX patch, adding new gcc plugin, fixing an RCU refcount false 
+positive, and fixing compilation race with plugins
+
+ Makefile                      |   27 +++---
+ fs/open.c                     |    5 -
+ fs/proc/base.c                |    2 
+ grsecurity/Kconfig            |    2 
+ grsecurity/Makefile           |    1 
+ grsecurity/gracl_cap.c        |   48 +-----------
+ grsecurity/grsec_chroot.c     |   46 ++++++-----
+ grsecurity/grsec_exec.c       |   73 ++++++++++++++++++
+ grsecurity/grsec_log.c        |   21 +++--
+ include/linux/grmsg.h         |    1 
+ include/linux/grsecurity.h    |    1 
+ kernel/events/core.c          |    4 -
+ kernel/rcutree.c              |   22 ++---
+ kernel/rcutree.h              |    2 
+ scripts/gcc-plugin.sh         |    2 
+ tools/gcc/Makefile            |    3 
+ tools/gcc/kallocstat_plugin.c |  163 ++++++++++++++++++++++++++++++++++++++++++
+ tools/gcc/stackleak_plugin.c  |   42 ++++++----
+ 18 files changed, 339 insertions(+), 126 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109011725.patch:
 ---------------------------------------------------------------
 update to latest PaX patch
