@@ -1,3 +1,24 @@
+Changes in grsecurity-2.2.2-3.0.4-201109170101.patch:
+---------------------------------------------------------------
+update to latest PaX patch, introduces a new gcc plugin for KERNEXEC on x64 
+that removes the need of enabling UDEREF to get protection equivalent to 
+KERNEXEC on x86.  Previously, code in userland could be executed by the kernel 
+without the (currently) expensive UDEREF feature being enabled.  Also adds EFI 
+compatibility to KERNEXEC
+Fixes compilation with ccache, thanks to ncopa
+
+ Makefile                            |    9 -
+ arch/x86/Kconfig                    |    2 
+ arch/x86/include/asm/segment.h      |    5 
+ arch/x86/platform/efi/efi_32.c      |   19 ++
+ arch/x86/platform/efi/efi_stub_32.S |   12 +
+ security/Kconfig                    |    4 
+ tools/gcc/Makefile                  |    3 
+ tools/gcc/kallocstat_plugin.c       |    2 
+ tools/gcc/kernexec_plugin.c         |  267 ++++++++++++++++++++++++++++++++++++
+ tools/gcc/stackleak_plugin.c        |   12 -
+ 10 files changed, 323 insertions(+), 12 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109150655.patch:
 ---------------------------------------------------------------
 compilation fix
