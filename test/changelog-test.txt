@@ -1,3 +1,28 @@
+Changes in grsecurity-2.2.2-3.0.4-201109171832.patch:
+---------------------------------------------------------------
+update to latest PaX patch, adds instrumentation normally emitted by plugin to 
+assembly
+
+ arch/x86/crypto/aes-x86_64-asm_64.S     |    6 ++++++
+ arch/x86/crypto/salsa20-x86_64-asm_64.S |    9 +++++++++
+ arch/x86/crypto/twofish-x86_64-asm_64.S |    6 ++++++
+ arch/x86/kernel/entry_64.S              |   15 +++++++++++++++
+ arch/x86/lib/atomic64_cx8_32.S          |   30 ++++++++++++++++++++++++++++++
+ arch/x86/lib/clear_page_64.S            |    9 +++++++++
+ arch/x86/lib/copy_page_64.S             |    6 ++++++
+ arch/x86/lib/copy_user_64.S             |   12 ++++++++++++
+ arch/x86/lib/copy_user_nocache_64.S     |    3 +++
+ arch/x86/lib/csum-copy_64.S             |    3 +++
+ arch/x86/lib/iomap_copy_64.S            |    3 +++
+ arch/x86/lib/memcpy_64.S                |   18 ++++++++++++++++++
+ arch/x86/lib/memmove_64.S               |    6 ++++++
+ arch/x86/lib/memset_64.S                |    9 +++++++++
+ arch/x86/lib/rwlock_64.S                |    6 ++++++
+ arch/x86/lib/rwsem_64.S                 |   12 ++++++++++++
+ arch/x86/lib/thunk_64.S                 |    3 +++
+ arch/x86/platform/efi/efi_stub_64.S     |   21 +++++++++++++++++++++
+ 18 files changed, 177 insertions(+)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109170101.patch:
 ---------------------------------------------------------------
 update to latest PaX patch, introduces a new gcc plugin for KERNEXEC on x64 
