@@ -1,3 +1,12 @@
+Changes in grsecurity-2.2.2-3.0.4-201109190917.patch:
+---------------------------------------------------------------
+update to latest PaX patch
+
+ arch/x86/platform/efi/efi_32.c      |    4 ++--
+ arch/x86/platform/efi/efi_stub_32.S |    1 +
+ tools/gcc/kernexec_plugin.c         |   20 +++++++++-----------
+ 3 files changed, 12 insertions(+), 13 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109171832.patch:
 ---------------------------------------------------------------
 update to latest PaX patch, adds instrumentation normally emitted by plugin to 
