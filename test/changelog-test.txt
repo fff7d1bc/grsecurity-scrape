@@ -1,3 +1,20 @@
+Changes in grsecurity-2.2.2-3.0.4-201109240842.patch:
+---------------------------------------------------------------
+force /sys/kernel/slab off if GRKERNSEC_PROC_ADD is enabled, even if the sysfs 
+restriction option is disabled
+add CAP_SYSLOG to denied chroot capability list
+
+ include/linux/grinternal.h |    2 +-
+ mm/slub.c                  |    8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-3.0.4-201109240813.patch:
+---------------------------------------------------------------
+fix compilation with grsecurity disabled
+
+ grsecurity/grsec_disabled.c |   14 --------------
+ 1 file changed, 14 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109190917.patch:
 ---------------------------------------------------------------
 update to latest PaX patch
