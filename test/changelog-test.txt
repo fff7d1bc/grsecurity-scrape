@@ -1,3 +1,11 @@
+Changes in grsecurity-2.2.2-3.0.4-201109261052.patch:
+---------------------------------------------------------------
+Fix missing logs and skip flood processing when disabled by kernel 
+configuration, from Zbyniu Krzystolik
+
+ grsecurity/grsec_log.c |   22 ++++++++++++----------
+ 1 file changed, 12 insertions(+), 10 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109252223.patch:
 ---------------------------------------------------------------
 compilation fix
