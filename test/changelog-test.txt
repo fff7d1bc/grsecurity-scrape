@@ -1,3 +1,10 @@
+Changes in grsecurity-2.2.2-3.0.4-201109252223.patch:
+---------------------------------------------------------------
+compilation fix
+
+ mm/slub.c |    4 ++++
+ 1 file changed, 4 insertions(+)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109240842.patch:
 ---------------------------------------------------------------
 force /sys/kernel/slab off if GRKERNSEC_PROC_ADD is enabled, even if the sysfs 
