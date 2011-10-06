@@ -1,3 +1,139 @@
+Changes in grsecurity-2.2.2-3.0.4-201110060421.patch:
+---------------------------------------------------------------
+update to latest PaX patch, adds new gcc address space plugin (disabled by 
+default)
+
+ Makefile                                |   17 ++-
+ arch/x86/crypto/aes-x86_64-asm_64.S     |    8 -
+ arch/x86/crypto/salsa20-x86_64-asm_64.S |   14 --
+ arch/x86/crypto/twofish-x86_64-asm_64.S |    9 -
+ arch/x86/ia32/ia32_signal.c             |   10 -
+ arch/x86/ia32/sys_ia32.c                |   18 +--
+ arch/x86/include/asm/alternative-asm.h  |    9 +
+ arch/x86/include/asm/futex.h            |   10 -
+ arch/x86/include/asm/i387.h             |    2 
+ arch/x86/include/asm/module.h           |    8 +
+ arch/x86/include/asm/sys_ia32.h         |    2 
+ arch/x86/include/asm/uaccess.h          |    2 
+ arch/x86/include/asm/uaccess_64.h       |   22 ++--
+ arch/x86/include/asm/vdso.h             |    2 
+ arch/x86/include/asm/xsave.h            |    2 
+ arch/x86/kernel/cpu/perf_event.c        |    2 
+ arch/x86/kernel/entry_64.S              |   21 +--
+ arch/x86/kernel/microcode_intel.c       |    4 
+ arch/x86/kernel/setup.c                 |    2 
+ arch/x86/kernel/xsave.c                 |    4 
+ arch/x86/kvm/paging_tmpl.h              |    2 
+ arch/x86/kvm/x86.c                      |    4 
+ arch/x86/lib/atomic64_cx8_32.S          |   40 +------
+ arch/x86/lib/clear_page_64.S            |   12 --
+ arch/x86/lib/copy_page_64.S             |    9 -
+ arch/x86/lib/copy_user_64.S             |   16 ---
+ arch/x86/lib/copy_user_nocache_64.S     |    5 
+ arch/x86/lib/csum-copy_64.S             |    5 
+ arch/x86/lib/csum-wrappers_64.c         |    4 
+ arch/x86/lib/iomap_copy_64.S            |    5 
+ arch/x86/lib/memcpy_64.S                |   24 +---
+ arch/x86/lib/memmove_64.S               |    9 -
+ arch/x86/lib/memset_64.S                |   12 --
+ arch/x86/lib/rwlock_64.S                |    8 -
+ arch/x86/lib/rwsem_64.S                 |   16 ---
+ arch/x86/lib/thunk_64.S                 |    9 -
+ arch/x86/lib/usercopy_64.c              |    4 
+ arch/x86/mm/fault.c                     |   10 -
+ arch/x86/mm/init_64.c                   |    4 
+ arch/x86/oprofile/backtrace.c           |    6 -
+ arch/x86/platform/efi/efi_32.c          |    8 -
+ arch/x86/platform/efi/efi_stub_64.S     |   29 +----
+ block/bsg.c                             |   12 +-
+ block/compat_ioctl.c                    |    2 
+ drivers/base/devtmpfs.c                 |    2 
+ drivers/block/drbd/drbd_int.h           |   16 +--
+ drivers/block/loop.c                    |    2 
+ drivers/char/tpm/tpm_bios.c             |    2 
+ drivers/char/virtio_console.c           |    4 
+ drivers/firmware/dmi_scan.c             |    2 
+ drivers/gpu/drm/drm_crtc.c              |   22 ++--
+ drivers/gpu/drm/drm_drv.c               |    2 
+ drivers/gpu/drm/drm_ioc32.c             |    4 
+ drivers/gpu/drm/i915/i915_debugfs.c     |    2 
+ drivers/gpu/drm/vmwgfx/vmwgfx_execbuf.c |    2 
+ drivers/gpu/drm/vmwgfx/vmwgfx_fifo.c    |    2 
+ drivers/scsi/scsi_tgt_lib.c             |    2 
+ drivers/scsi/sg.c                       |    2 
+ fs/autofs4/waitq.c                      |    2 
+ fs/bio.c                                |    2 
+ fs/btrfs/ioctl.c                        |    2 
+ fs/cachefiles/rdwr.c                    |    2 
+ fs/compat.c                             |   10 -
+ fs/compat_ioctl.c                       |    4 
+ fs/ecryptfs/inode.c                     |    4 
+ fs/ecryptfs/read_write.c                |    4 
+ fs/exec.c                               |   14 +-
+ fs/ext3/ioctl.c                         |    4 
+ fs/ext4/ioctl.c                         |    4 
+ fs/fcntl.c                              |    4 
+ fs/nfsd/vfs.c                           |    6 -
+ fs/readdir.c                            |    2 
+ fs/splice.c                             |    6 -
+ include/linux/compiler.h                |   33 ++++++
+ include/linux/uaccess.h                 |    2 
+ init/do_mounts.c                        |    8 -
+ init/do_mounts.h                        |    8 -
+ init/do_mounts_initrd.c                 |   28 ++---
+ init/do_mounts_md.c                     |    6 -
+ init/initramfs.c                        |   38 +++----
+ init/main.c                             |    4 
+ kernel/acct.c                           |    2 
+ kernel/compat.c                         |   44 ++++----
+ kernel/kexec.c                          |    3 
+ kernel/kmod.c                           |    2 
+ kernel/sys.c                            |   10 -
+ kernel/sysctl_binary.c                  |   14 +-
+ kernel/trace/trace_kprobe.c             |    8 -
+ lib/bitmap.c                            |    8 -
+ lib/devres.c                            |    4 
+ mm/maccess.c                            |    4 
+ mm/memory-failure.c                     |    2 
+ net/9p/trans_fd.c                       |    2 
+ net/9p/trans_virtio.c                   |    4 
+ net/compat.c                            |   32 +++---
+ net/core/iovec.c                        |    4 
+ net/core/scm.c                          |    8 -
+ net/ipv4/ip_sockglue.c                  |    2 
+ net/ipv4/ipconfig.c                     |    6 -
+ net/ipv6/addrconf.c                     |    2 
+ net/ipv6/ipv6_sockglue.c                |    2 
+ net/rds/tcp.c                           |    2 
+ net/rds/tcp_send.c                      |    2 
+ net/socket.c                            |   34 +++---
+ net/sunrpc/svcsock.c                    |    2 
+ net/tipc/link.c                         |    6 -
+ net/tipc/msg.c                          |    2 
+ net/tipc/subscr.c                       |    2 
+ scripts/basic/fixdep.c                  |    6 -
+ scripts/mod/file2alias.c                |    2 
+ security/Kconfig                        |    4 
+ security/keys/compat.c                  |    2 
+ security/keys/keyctl.c                  |    8 -
+ sound/core/oss/pcm_oss.c                |   18 +--
+ sound/core/pcm_compat.c                 |    2 
+ sound/core/pcm_native.c                 |    4 
+ tools/gcc/Makefile                      |    9 +
+ tools/gcc/checker_plugin.c              |  169 ++++++++++++++++++++++++++++++++
+ tools/gcc/kallocstat_plugin.c           |    2 
+ tools/gcc/kernexec_plugin.c             |   76 +++++++-------
+ 120 files changed, 667 insertions(+), 534 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-3.0.4-201110060340.patch:
+---------------------------------------------------------------
+fix symlink dereference bug in RBAC system reported by 'nice': hidden symlinks 
+were able to be dereferenced via open/stat/etc if the target of the symlink was 
+non-hidden.  The hidden symlink however could not be viewed via readlink.
+
+ fs/namei.c |    7 +++++++
+ 1 file changed, 7 insertions(+)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.4-201109261052.patch:
 ---------------------------------------------------------------
 Fix missing logs and skip flood processing when disabled by kernel 
