@@ -1,3 +1,17 @@
+Changes in grsecurity-2.2.2-3.0.6-201110170706.patch:
+---------------------------------------------------------------
+Track the entering and leaving of the inode cache for /proc/sys entries and 
+base /proc entries in the RBAC system, resolves issue posted by Undine and tjh 
+on the forums
+
+ fs/proc/base.c             |    3 ++
+ fs/proc/inode.c            |    9 +++++-
+ fs/proc/proc_sysctl.c      |    6 ++++
+ grsecurity/Makefile        |    1 
+ grsecurity/gracl.c         |   61 +++++++++++++++++++++++++++++++++++++++++----
+ include/linux/grsecurity.h |    2 +
+ 6 files changed, 76 insertions(+), 6 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.6-201110170302.patch:
 ---------------------------------------------------------------
 backport some non-existent security fixes missing from the vanilla kernels
