@@ -1,3 +1,13 @@
+Changes in grsecurity-2.2.2-3.0.7-201110180733.patch:
+---------------------------------------------------------------
+Don't force ref-walking anymore
+Fix vanilla bug that returned -ECHILD instead of the real error in some 
+scenarios
+Protect /lib32/modules as part of HIDESYM
+
+ fs/namei.c |   14 +-------------
+ 1 file changed, 1 insertion(+), 13 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.7-201110172337.patch:
 ---------------------------------------------------------------
 update to 3.0.7 kernel
