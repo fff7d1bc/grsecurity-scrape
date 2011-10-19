@@ -1,3 +1,11 @@
+Changes in grsecurity-2.2.2-3.0.7-201110191214.patch:
+---------------------------------------------------------------
+Rever change in handling of symlinks in RBAC system until it can pass my new 
+regression tests
+
+ fs/namei.c |    7 -------
+ 1 file changed, 7 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.7-201110190635.patch:
 ---------------------------------------------------------------
 Additional fixes for /proc policy recreation
