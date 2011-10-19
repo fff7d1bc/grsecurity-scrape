@@ -1,3 +1,20 @@
+Changes in grsecurity-2.2.2-3.0.7-201110190635.patch:
+---------------------------------------------------------------
+Additional fixes for /proc policy recreation
+
+ fs/namei.c |   10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-3.0.7-201110190409.patch:
+---------------------------------------------------------------
+Fix/optimize /proc policy re-creation
+
+ fs/namei.c            |   33 +++++++++++++++++++++++++++++----
+ fs/proc/base.c        |    2 --
+ fs/proc/inode.c       |   20 +++++++++++++-------
+ fs/proc/proc_sysctl.c |   14 +++++++-------
+ 4 files changed, 49 insertions(+), 20 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.7-201110180733.patch:
 ---------------------------------------------------------------
 Don't force ref-walking anymore
