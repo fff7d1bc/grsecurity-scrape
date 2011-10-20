@@ -1,7 +1,16 @@
+Changes in grsecurity-2.2.2-3.0.7-201110200052.patch:
+---------------------------------------------------------------
+add CAP_SETFCAP and CAP_MAC_ADMIN to the removed chroot capabilities
+add support for new CAP_WAKE_ALARM
+
+ grsecurity/grsec_exec.c    |    3 ++-
+ include/linux/grinternal.h |    3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.7-201110191214.patch:
 ---------------------------------------------------------------
-Rever change in handling of symlinks in RBAC system until it can pass my new 
-regression tests
+Revert change in handling of symlinks in RBAC system until it can pass
+my new regression tests
 
  fs/namei.c |    7 -------
  1 file changed, 7 deletions(-)
