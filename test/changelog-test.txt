@@ -1,3 +1,13 @@
+Changes in grsecurity-2.2.2-3.0.9-201111161802.patch:
+---------------------------------------------------------------
+fix policy recreation on directory removal renaming
+fix bad port of vmalloc change in 3.0.9
+
+ fs/namei.c         |    6 ++----
+ grsecurity/gracl.c |    9 +++++----
+ mm/vmalloc.c       |    2 +-
+ 3 files changed, 8 insertions(+), 9 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.0.9-201111152003.patch:
 ---------------------------------------------------------------
 update documentation
