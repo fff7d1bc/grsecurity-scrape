@@ -1,3 +1,33 @@
+Changes in grsecurity-2.2.2-3.1.1-201111171911.patch:
+---------------------------------------------------------------
+resync with PaX patch
+fix btrfs compilation
+fix timblogiw compilation
+
+ Makefile                                |    8 +++-----
+ arch/x86/Makefile                       |    2 +-
+ arch/x86/ia32/ia32entry.S               |    4 ++--
+ arch/x86/kernel/entry_64.S              |    4 ++--
+ arch/x86/kernel/paravirt.c              |    2 +-
+ arch/x86/mm/init.c                      |    1 -
+ drivers/char/mem.c                      |    2 +-
+ drivers/media/dvb/dvb-core/dvb_demux.h  |    2 +-
+ drivers/media/dvb/dvb-usb/dibusb.h      |    2 +-
+ drivers/media/dvb/frontends/dib3000.h   |    5 ++---
+ drivers/media/dvb/frontends/dib3000mb.c |    2 +-
+ drivers/media/video/timblogiw.c         |    2 +-
+ drivers/staging/mei/interface.c         |    4 ++--
+ fs/btrfs/inode.c                        |    2 +-
+ fs/exec.c                               |    1 -
+ fs/open.c                               |    3 +--
+ fs/partitions/ldm.c                     |    1 -
+ fs/proc/array.c                         |    2 +-
+ fs/proc/base.c                          |    1 -
+ include/media/v4l2-ioctl.h              |    1 -
+ mm/Kconfig                              |    6 +++---
+ net/ipv4/raw.c                          |    3 +--
+ 22 files changed, 25 insertions(+), 35 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.1.1-201111170037.patch:
 ---------------------------------------------------------------
 update to 3.1.1 kernel
