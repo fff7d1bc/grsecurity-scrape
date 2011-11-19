@@ -1,3 +1,26 @@
+Changes in grsecurity-2.2.2-3.1.1-201111181902.patch:
+---------------------------------------------------------------
+backport some non-existent security fixes
+disable BPF JIT
+
+ fs/hfs/btree.c               |   21 ++++++++++++++++-----
+ fs/hfs/trans.c               |    2 ++
+ fs/proc/proc_sysctl.c        |    1 +
+ fs/xfs/xfs_vnodeops.c        |   10 +++++++---
+ mm/oom_kill.c                |    2 +-
+ net/Kconfig                  |    1 +
+ security/keys/user_defined.c |    3 ++-
+ 7 files changed, 30 insertions(+), 10 deletions(-)
+---------------------------------------------------------------
+Changes in grsecurity-2.2.2-3.1.1-201111181810.patch:
+---------------------------------------------------------------
+update to latest PaX patch
+fix bpf jit oops on module free
+
+ arch/x86/net/bpf_jit_comp.c |    6 +++---
+ tools/gcc/kernexec_plugin.c |    2 +-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.1.1-201111171911.patch:
 ---------------------------------------------------------------
 resync with PaX patch
