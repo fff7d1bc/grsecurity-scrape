@@ -1,3 +1,16 @@
+Changes in grsecurity-2.2.2-3.1.1-201111201943.patch:
+---------------------------------------------------------------
+add DISABLE_PAX_CONSTIFY_PLUGIN option to make
+add DISABLE_PAX_PLUGINS option to make
+update to latest PaX patch
+
+ Makefile                    |    6 +++++-
+ arch/x86/net/bpf_jit_comp.c |   18 ++++++++++++++----
+ include/linux/filter.h      |    4 ++++
+ net/Kconfig                 |    1 -
+ scripts/gcc-plugin.sh       |    2 +-
+ 5 files changed, 24 insertions(+), 7 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.1.1-201111181902.patch:
 ---------------------------------------------------------------
 backport some non-existent security fixes
