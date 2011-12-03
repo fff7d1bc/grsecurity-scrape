@@ -1,3 +1,43 @@
+Changes in grsecurity-2.2.2-3.1.4-201112021740.patch:
+---------------------------------------------------------------
+update to latest PaX patch, includes new KERNEXEC plugin instrumentation mode 
+using 'or' instead of 'bts' for improved performance
+
+ Documentation/dontdiff                        |    3 
+ Makefile                                      |    1 
+ arch/x86/crypto/aes-x86_64-asm_64.S           |    2 
+ arch/x86/crypto/aesni-intel_asm.S             |   31 ++++++++
+ arch/x86/crypto/salsa20-x86_64-asm_64.S       |    2 
+ arch/x86/crypto/twofish-x86_64-asm_64.S       |    4 -
+ arch/x86/ia32/ia32entry.S                     |   87 +++++++++++------------
+ arch/x86/include/asm/alternative-asm.h        |   29 +++++++
+ arch/x86/include/asm/module.h                 |    6 +
+ arch/x86/kernel/cpu/mcheck/mce.c              |    4 -
+ arch/x86/kernel/cpu/mcheck/p5.c               |    2 
+ arch/x86/kernel/cpu/mcheck/winchip.c          |    2 
+ arch/x86/kernel/entry_64.S                    |   73 ++++++++++++-------
+ arch/x86/kernel/head_64.S                     |    4 +
+ arch/x86/kernel/relocate_kernel_64.S          |    4 -
+ arch/x86/lib/copy_page_64.S                   |    8 +-
+ arch/x86/lib/copy_user_64.S                   |    8 +-
+ arch/x86/lib/copy_user_nocache_64.S           |    8 +-
+ arch/x86/lib/csum-copy_64.S                   |    2 
+ arch/x86/lib/memcpy_64.S                      |   12 +--
+ arch/x86/lib/memmove_64.S                     |   32 ++++----
+ arch/x86/lib/memset_64.S                      |    4 -
+ arch/x86/lib/msr-reg.S                        |   16 ++--
+ arch/x86/platform/efi/efi_stub_64.S           |   14 +--
+ drivers/platform/x86/thinkpad_acpi.c          |   72 ++++++++++---------
+ kernel/module.c                               |    8 +-
+ kernel/rcutree_plugin.h                       |    2 
+ kernel/rcutree_trace.c                        |    4 -
+ mm/huge_memory.c                              |    2 
+ security/Kconfig                              |   28 +++++++
+ tools/gcc/checker_plugin.c                    |    2 
+ tools/gcc/kernexec_plugin.c                   |   95 ++++++++++++++++++++++----
+ tools/perf/util/include/asm/alternative-asm.h |    2 
+ 33 files changed, 384 insertions(+), 189 deletions(-)
+---------------------------------------------------------------
 Changes in grsecurity-2.2.2-3.1.4-201111292107.patch:
 ---------------------------------------------------------------
 update to latest stable kernel
