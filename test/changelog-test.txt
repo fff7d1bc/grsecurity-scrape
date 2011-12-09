@@ -1,35 +1,50 @@
-commit 8b71dc42b77da0bbd9cf64c98f6300ab4fd0d58f
+commit 88a42a1a24e74c80b89f93a09c6e43b264b297d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 7 19:58:31 2011 -0500
+
+    Remove harmless duplicate code -- exec_file would be null already so the
+    second check would never pass.
+
+commit 17adb82e9789d71d7328a44b449c55bca5029875
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 7 19:50:39 2011 -0500
+
+    Revert back to (possibly?) undocumented /proc/pid behavior that gdb
+    depended on for attaching to a thread.  Entries exist in /proc for
+    threads, but are not visible in a readdir.
+
+commit c09d9fdce9670a6c291ee59de79fca08d3195bb5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 18:03:28 2011 -0500
 
     Put the already-walked path if in RCU-walk mode
 
-commit be5df4c08c1654a485a2054cb88ae38715ddc91e
+commit 44144dcdc735778888016ead3e46952d8e1b539d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 17:35:21 2011 -0500
 
     Fix memory leak introduced by recent (unpublished) commit
     75ab998b94a29d464518d6d501bdde3fbfcbfa14
 
-commit 0974f1bcc0a14b88c555ec2d748c2708cf0e7de1
+commit 03afcde18a72b649839c96a49fe97bc5f0a17143
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:56:10 2011 -0500
 
     Explicitly check size copied to userland in override_release to silence gcc
 
-commit 56b46c69949c9915186c521aace22a48982922a4
+commit 9baeeda8a379ea73c561b77af5d52934b4e124d9
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:54:02 2011 -0500
 
     Initialize variable to silence erroneous gcc warning
 
-commit 75ab998b94a29d464518d6d501bdde3fbfcbfa14
+commit f1abba024ea55b313be7ee80f43cdd9c535d447d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:47:47 2011 -0500
 
     Future-proof other potential RCU-aware locations where we can log.
 
-commit 95dd6f56d3ed8ffef6c5448ccbc190d3ab387c07
+commit a1a22979772fe2f826dc7f61128dbac19f486bbe
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:02:54 2011 -0500
 
@@ -42,7 +57,7 @@ Date:   Sun Dec 4 13:02:54 2011 -0500
     as being required when CAP_DAC_OVERRIDE is present (consistent with
     older patches).
 
-commit 0bf83c211554785d826028716781c15e8ff9c1e3
+commit c015b5e0a0c16f92797421bcf4718d94393f5206
 Author: Xi Wang <xi.wang@gmail.com>
 Date:   Tue Nov 29 09:26:30 2011 +0000
 
@@ -75,7 +90,7 @@ Date:   Tue Nov 29 09:26:30 2011 +0000
     Cc: Vlad Yasevich <vladislav.yasevich@hp.com>
     Signed-off-by: David S. Miller <davem@davemloft.net>
 
-commit 1a75cfacf858feea4adb1f112e1a9edee785a231
+commit 3bc7dcd28acfcc62244694a50e92c1ee730169fb
 Author: Xi Wang <xi.wang@gmail.com>
 Date:   Wed Nov 23 01:12:01 2011 -0500
 
@@ -91,7 +106,7 @@ Date:   Wed Nov 23 01:12:01 2011 -0500
     Cc: stable@kernel.org
     Signed-off-by: Dave Airlie <airlied@redhat.com>
 
-commit e01feb5d7f67ed763e2c6c1aecb2ae3e582e7526
+commit 2726588227c14ea84d4e85537e45d7ec5786c5d9
 Author: Josh Boyer <jwboyer@redhat.com>
 Date:   Fri Aug 19 14:50:26 2011 -0400
 
@@ -111,7 +126,7 @@ Date:   Fri Aug 19 14:50:26 2011 -0400
     Signed-off-by: Josh Boyer <jwboyer@redhat.com>
     Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 
-commit 260a04d6b7d74ef939f724adddaf50a708f829e0
+commit 3edf419ffd7d67fc02c80f6777de14a450879fae
 Author: Julia Lawall <julia@diku.dk>
 Date:   Tue Nov 15 14:53:11 2011 -0800
 
@@ -125,11 +140,17 @@ Date:   Tue Nov 15 14:53:11 2011 -0800
     Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
     Signed-off-by: Dave Airlie <airlied@redhat.com>
 
-commit 41d04f3796e1c5d73a78bd8cf2e35b7bd096ad35
+commit 3b9b62b1326f6e345e35da3b6cd07787ab8a437d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Dec 3 21:33:28 2011 -0500
 
     Import changes between pax-linux-3.1.4-test18.patch and grsecurity-2.2.2-3.1.4-201112021740.patch
+
+commit 8314b6368b874a38d5bf32a2453aa16774b7cb9b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 8 20:55:54 2011 -0500
+
+    Import changes from pax-linux-3.1.4-test19.patch
 
 commit 4a920fe999bc083c84d6cd27f5f4a08da17ffea6
 Author: Brad Spengler <spender@grsecurity.net>
