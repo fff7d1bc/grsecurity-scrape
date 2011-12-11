@@ -1,11 +1,11 @@
-commit 88a42a1a24e74c80b89f93a09c6e43b264b297d3
+commit 7d125a16a5245b2bafc9184b8f93e864394ba1cb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Dec 7 19:58:31 2011 -0500
 
     Remove harmless duplicate code -- exec_file would be null already so the
     second check would never pass.
 
-commit 17adb82e9789d71d7328a44b449c55bca5029875
+commit 4e3304e94aa72737810bc50169519af157dce4ce
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Dec 7 19:50:39 2011 -0500
 
@@ -13,38 +13,38 @@ Date:   Wed Dec 7 19:50:39 2011 -0500
     depended on for attaching to a thread.  Entries exist in /proc for
     threads, but are not visible in a readdir.
 
-commit c09d9fdce9670a6c291ee59de79fca08d3195bb5
+commit 1bd899335f23815cfe8deac44c6b346398f3b95e
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 18:03:28 2011 -0500
 
     Put the already-walked path if in RCU-walk mode
 
-commit 44144dcdc735778888016ead3e46952d8e1b539d
+commit ec7ae36b7159f10649709779443a988662965d66
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 17:35:21 2011 -0500
 
     Fix memory leak introduced by recent (unpublished) commit
     75ab998b94a29d464518d6d501bdde3fbfcbfa14
 
-commit 03afcde18a72b649839c96a49fe97bc5f0a17143
+commit 1e2318a8ea2e67eaf17236be374b5da8a5ba5e04
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:56:10 2011 -0500
 
     Explicitly check size copied to userland in override_release to silence gcc
 
-commit 9baeeda8a379ea73c561b77af5d52934b4e124d9
+commit c30a85d0fff67e0724e726febb934c0b6fa01c6c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:54:02 2011 -0500
 
     Initialize variable to silence erroneous gcc warning
 
-commit f1abba024ea55b313be7ee80f43cdd9c535d447d
+commit 2cf8e7a3bf4e97b2cd3de9ebc453bc505dc7eb78
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:47:47 2011 -0500
 
     Future-proof other potential RCU-aware locations where we can log.
 
-commit a1a22979772fe2f826dc7f61128dbac19f486bbe
+commit 0c904e8c7ea0338c47c7ae825e093a152dc8f8a8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 4 13:02:54 2011 -0500
 
@@ -57,7 +57,7 @@ Date:   Sun Dec 4 13:02:54 2011 -0500
     as being required when CAP_DAC_OVERRIDE is present (consistent with
     older patches).
 
-commit c015b5e0a0c16f92797421bcf4718d94393f5206
+commit ab694e5eccfbc369baa593ebc1269d1908cf16dc
 Author: Xi Wang <xi.wang@gmail.com>
 Date:   Tue Nov 29 09:26:30 2011 +0000
 
@@ -90,23 +90,7 @@ Date:   Tue Nov 29 09:26:30 2011 +0000
     Cc: Vlad Yasevich <vladislav.yasevich@hp.com>
     Signed-off-by: David S. Miller <davem@davemloft.net>
 
-commit 3bc7dcd28acfcc62244694a50e92c1ee730169fb
-Author: Xi Wang <xi.wang@gmail.com>
-Date:   Wed Nov 23 01:12:01 2011 -0500
-
-    drm: integer overflow in drm_mode_dirtyfb_ioctl()
-    
-    There is a potential integer overflow in drm_mode_dirtyfb_ioctl()
-    if userspace passes in a large num_clips.  The call to kmalloc would
-    allocate a small buffer, and the call to fb->funcs->dirty may result
-    in a memory corruption.
-    
-    Reported-by: Haogang Chen <haogangchen@gmail.com>
-    Signed-off-by: Xi Wang <xi.wang@gmail.com>
-    Cc: stable@kernel.org
-    Signed-off-by: Dave Airlie <airlied@redhat.com>
-
-commit 2726588227c14ea84d4e85537e45d7ec5786c5d9
+commit e565e28c3635a1d50f80541fbf6b606d742fec76
 Author: Josh Boyer <jwboyer@redhat.com>
 Date:   Fri Aug 19 14:50:26 2011 -0400
 
@@ -126,7 +110,7 @@ Date:   Fri Aug 19 14:50:26 2011 -0400
     Signed-off-by: Josh Boyer <jwboyer@redhat.com>
     Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 
-commit 3edf419ffd7d67fc02c80f6777de14a450879fae
+commit 6e134e398ec1a3f428261680e83df4319e64bed9
 Author: Julia Lawall <julia@diku.dk>
 Date:   Tue Nov 15 14:53:11 2011 -0800
 
@@ -140,19 +124,31 @@ Date:   Tue Nov 15 14:53:11 2011 -0800
     Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
     Signed-off-by: Dave Airlie <airlied@redhat.com>
 
-commit 3b9b62b1326f6e345e35da3b6cd07787ab8a437d
+commit 2b9057b321e36860e8d63985b5c4e496f254b717
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Dec 3 21:33:28 2011 -0500
 
     Import changes between pax-linux-3.1.4-test18.patch and grsecurity-2.2.2-3.1.4-201112021740.patch
 
-commit 8314b6368b874a38d5bf32a2453aa16774b7cb9b
+commit 5dfe6091dca281a456eaff5e7b4692d768a05cfd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 3 21:29:37 2011 -0500
+
+    Import pax-linux-3.1.4-test18.patch
+
+commit 285eb4ea45d853ae00426b3315a61c1368080dad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 10 18:33:46 2011 -0500
+
+    Import changes from pax-linux-3.1.5-test20.patch
+
+commit a6bda918fc90ec1d5c387e978d147ad2044153f1
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Dec 8 20:55:54 2011 -0500
 
     Import changes from pax-linux-3.1.4-test19.patch
 
-commit 4a920fe999bc083c84d6cd27f5f4a08da17ffea6
+commit e6d987bdb782b280f882cc20055e3d9cb28ad3a5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Dec 3 21:29:37 2011 -0500
 
