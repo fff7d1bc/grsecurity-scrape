@@ -1,3 +1,38 @@
+commit 76f82df18ba181687f454426fa9ced7a92b2ac1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 22 20:15:02 2011 -0500
+
+    Only further restrict futex targeting another process -- our modified
+    permission check also happened to allow a case where a process retaining
+    uid 0 could issue futex syscalls against other uid 0 tasks, despite the euid
+    being non-zero (reported on forums by ben_w)
+
+commit 6b235a4450a5fea41663ec35fa0608988b6078c6
+Merge: 97c16f0 3e59cb5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 22 19:11:06 2011 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/hfs/btree.c
+
+commit 3e59cb503d4ca6ce0954b8d3eb508cf7d1a31f50
+Merge: 285eb4e c26f60b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 22 19:09:57 2011 -0500
+
+    Merge branch 'linux-3.1.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/process.c
+
+commit 97c16f0fcff592160c1787bd1c56ae7ad070ac17
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 19 21:54:01 2011 -0500
+
+    Add new option: "Enforce consistent multithreaded privileges"
+
 commit 7d125a16a5245b2bafc9184b8f93e864394ba1cb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Dec 7 19:58:31 2011 -0500
