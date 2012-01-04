@@ -1,3 +1,558 @@
+commit 69919c6da7cf8a781439da15b597a7d6bc9b3abe
+Author: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+Date:   Wed Dec 28 15:57:11 2011 -0800
+
+    mm/mempolicy.c: refix mbind_range() vma issue
+    
+    commit 8aacc9f550 ("mm/mempolicy.c: fix pgoff in mbind vma merge") is the
+    slightly incorrect fix.
+    
+    Why? Think following case.
+    
+    1. map 4 pages of a file at offset 0
+    
+       [0123]
+    
+    2. map 2 pages just after the first mapping of the same file but with
+       page offset 2
+    
+       [0123][23]
+    
+    3. mbind() 2 pages from the first mapping at offset 2.
+       mbind_range() should treat new vma is,
+    
+       [0123][23]
+         |23|
+         mbind vma
+    
+       but it does
+    
+       [0123][23]
+         |01|
+         mbind vma
+    
+       Oops. then, it makes wrong vma merge and splitting ([01][0123] or similar).
+    
+    This patch fixes it.
+    
+    [testcase]
+      test result - before the patch
+    
+    	case4: 126: test failed. expect '2,4', actual '2,2,2'
+           	case5: passed
+    	case6: passed
+    	case7: passed
+    	case8: passed
+    	case_n: 246: test failed. expect '4,2', actual '1,4'
+    
+    	------------[ cut here ]------------
+    	kernel BUG at mm/filemap.c:135!
+    	invalid opcode: 0000 [#4] SMP DEBUG_PAGEALLOC
+    
+    	(snip long bug on messages)
+    
+      test result - after the patch
+    
+    	case4: passed
+           	case5: passed
+    	case6: passed
+    	case7: passed
+    	case8: passed
+    	case_n: passed
+    
+      source:  mbind_vma_test.c
+    ============================================================
+     #include <numaif.h>
+     #include <numa.h>
+     #include <sys/mman.h>
+     #include <stdio.h>
+     #include <unistd.h>
+     #include <stdlib.h>
+     #include <string.h>
+    
+    static unsigned long pagesize;
+    void* mmap_addr;
+    struct bitmask *nmask;
+    char buf[1024];
+    FILE *file;
+    char retbuf[10240] = "";
+    int mapped_fd;
+    
+    char *rubysrc = "ruby -e '\
+      pid = %d; \
+      vstart = 0x%llx; \
+      vend = 0x%llx; \
+      s = `pmap -q #{pid}`; \
+      rary = []; \
+      s.each_line {|line|; \
+        ary=line.split(\" \"); \
+        addr = ary[0].to_i(16); \
+        if(vstart <= addr && addr < vend) then \
+          rary.push(ary[1].to_i()/4); \
+        end; \
+      }; \
+      print rary.join(\",\"); \
+    '";
+    
+    void init(void)
+    {
+    	void* addr;
+    	char buf[128];
+    
+    	nmask = numa_allocate_nodemask();
+    	numa_bitmask_setbit(nmask, 0);
+    
+    	pagesize = getpagesize();
+    
+    	sprintf(buf, "%s", "mbind_vma_XXXXXX");
+    	mapped_fd = mkstemp(buf);
+    	if (mapped_fd == -1)
+    		perror("mkstemp "), exit(1);
+    	unlink(buf);
+    
+    	if (lseek(mapped_fd, pagesize*8, SEEK_SET) < 0)
+    		perror("lseek "), exit(1);
+    	if (write(mapped_fd, "\0", 1) < 0)
+    		perror("write "), exit(1);
+    
+    	addr = mmap(NULL, pagesize*8, PROT_NONE,
+    		    MAP_SHARED, mapped_fd, 0);
+    	if (addr == MAP_FAILED)
+    		perror("mmap "), exit(1);
+    
+    	if (mprotect(addr+pagesize, pagesize*6, PROT_READ|PROT_WRITE) < 0)
+    		perror("mprotect "), exit(1);
+    
+    	mmap_addr = addr + pagesize;
+    
+    	/* make page populate */
+    	memset(mmap_addr, 0, pagesize*6);
+    }
+    
+    void fin(void)
+    {
+    	void* addr = mmap_addr - pagesize;
+    	munmap(addr, pagesize*8);
+    
+    	memset(buf, 0, sizeof(buf));
+    	memset(retbuf, 0, sizeof(retbuf));
+    }
+    
+    void mem_bind(int index, int len)
+    {
+    	int err;
+    
+    	err = mbind(mmap_addr+pagesize*index, pagesize*len,
+    		    MPOL_BIND, nmask->maskp, nmask->size, 0);
+    	if (err)
+    		perror("mbind "), exit(err);
+    }
+    
+    void mem_interleave(int index, int len)
+    {
+    	int err;
+    
+    	err = mbind(mmap_addr+pagesize*index, pagesize*len,
+    		    MPOL_INTERLEAVE, nmask->maskp, nmask->size, 0);
+    	if (err)
+    		perror("mbind "), exit(err);
+    }
+    
+    void mem_unbind(int index, int len)
+    {
+    	int err;
+    
+    	err = mbind(mmap_addr+pagesize*index, pagesize*len,
+    		    MPOL_DEFAULT, NULL, 0, 0);
+    	if (err)
+    		perror("mbind "), exit(err);
+    }
+    
+    void Assert(char *expected, char *value, char *name, int line)
+    {
+    	if (strcmp(expected, value) == 0) {
+    		fprintf(stderr, "%s: passed\n", name);
+    		return;
+    	}
+    	else {
+    		fprintf(stderr, "%s: %d: test failed. expect '%s', actual '%s'\n",
+    			name, line,
+    			expected, value);
+    //		exit(1);
+    	}
+    }
+    
+    /*
+          AAAA
+        PPPPPPNNNNNN
+        might become
+        PPNNNNNNNNNN
+        case 4 below
+    */
+    void case4(void)
+    {
+    	init();
+    	sprintf(buf, rubysrc, getpid(), mmap_addr, mmap_addr+pagesize*6);
+    
+    	mem_bind(0, 4);
+    	mem_unbind(2, 2);
+    
+    	file = popen(buf, "r");
+    	fread(retbuf, sizeof(retbuf), 1, file);
+    	Assert("2,4", retbuf, "case4", __LINE__);
+    
+    	fin();
+    }
+    
+    /*
+           AAAA
+     PPPPPPNNNNNN
+     might become
+     PPPPPPPPPPNN
+     case 5 below
+    */
+    void case5(void)
+    {
+    	init();
+    	sprintf(buf, rubysrc, getpid(), mmap_addr, mmap_addr+pagesize*6);
+    
+    	mem_bind(0, 2);
+    	mem_bind(2, 2);
+    
+    	file = popen(buf, "r");
+    	fread(retbuf, sizeof(retbuf), 1, file);
+    	Assert("4,2", retbuf, "case5", __LINE__);
+    
+    	fin();
+    }
+    
+    /*
+    	    AAAA
+    	PPPPNNNNXXXX
+    	might become
+    	PPPPPPPPPPPP 6
+    */
+    void case6(void)
+    {
+    	init();
+    	sprintf(buf, rubysrc, getpid(), mmap_addr, mmap_addr+pagesize*6);
+    
+    	mem_bind(0, 2);
+    	mem_bind(4, 2);
+    	mem_bind(2, 2);
+    
+    	file = popen(buf, "r");
+    	fread(retbuf, sizeof(retbuf), 1, file);
+    	Assert("6", retbuf, "case6", __LINE__);
+    
+    	fin();
+    }
+    
+    /*
+        AAAA
+    PPPPNNNNXXXX
+    might become
+    PPPPPPPPXXXX 7
+    */
+    void case7(void)
+    {
+    	init();
+    	sprintf(buf, rubysrc, getpid(), mmap_addr, mmap_addr+pagesize*6);
+    
+    	mem_bind(0, 2);
+    	mem_interleave(4, 2);
+    	mem_bind(2, 2);
+    
+    	file = popen(buf, "r");
+    	fread(retbuf, sizeof(retbuf), 1, file);
+    	Assert("4,2", retbuf, "case7", __LINE__);
+    
+    	fin();
+    }
+    
+    /*
+        AAAA
+    PPPPNNNNXXXX
+    might become
+    PPPPNNNNNNNN 8
+    */
+    void case8(void)
+    {
+    	init();
+    	sprintf(buf, rubysrc, getpid(), mmap_addr, mmap_addr+pagesize*6);
+    
+    	mem_bind(0, 2);
+    	mem_interleave(4, 2);
+    	mem_interleave(2, 2);
+    
+    	file = popen(buf, "r");
+    	fread(retbuf, sizeof(retbuf), 1, file);
+    	Assert("2,4", retbuf, "case8", __LINE__);
+    
+    	fin();
+    }
+    
+    void case_n(void)
+    {
+    	init();
+    	sprintf(buf, rubysrc, getpid(), mmap_addr, mmap_addr+pagesize*6);
+    
+    	/* make redundunt mappings [0][1234][34][7] */
+    	mmap(mmap_addr + pagesize*4, pagesize*2, PROT_READ|PROT_WRITE,
+    	     MAP_FIXED|MAP_SHARED, mapped_fd, pagesize*3);
+    
+    	/* Expect to do nothing. */
+    	mem_unbind(2, 2);
+    
+    	file = popen(buf, "r");
+    	fread(retbuf, sizeof(retbuf), 1, file);
+    	Assert("4,2", retbuf, "case_n", __LINE__);
+    
+    	fin();
+    }
+    
+    int main(int argc, char** argv)
+    {
+    	case4();
+    	case5();
+    	case6();
+    	case7();
+    	case8();
+    	case_n();
+    
+    	return 0;
+    }
+    =============================================================
+    
+    Signed-off-by: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+    Acked-by: Johannes Weiner <hannes@cmpxchg.org>
+    Cc: Minchan Kim <minchan.kim@gmail.com>
+    Cc: Caspar Zhang <caspar@casparzhang.com>
+    Cc: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+    Cc: Christoph Lameter <cl@linux.com>
+    Cc: Hugh Dickins <hugh.dickins@tiscali.co.uk>
+    Cc: Mel Gorman <mel@csn.ul.ie>
+    Cc: Lee Schermerhorn <lee.schermerhorn@hp.com>
+    Cc: <stable@vger.kernel.org>		[3.1.x]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit f3a1082005781777086df235049f8c0b7efe524e
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Tue Dec 27 22:32:41 2011 -0500
+
+    packet: fix possible dev refcnt leak when bind fail
+    
+    If bind is fail when bind is called after set PACKET_FANOUT
+    sock option, the dev refcnt will leak.
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 915f8b08dac68839dc7204ee81cf9852fda16d24
+Author: Haogang Chen <haogangchen@gmail.com>
+Date:   Mon Dec 19 17:11:56 2011 -0800
+
+    nilfs2: potential integer overflow in nilfs_ioctl_clean_segments()
+    
+    There is a potential integer overflow in nilfs_ioctl_clean_segments().
+    When a large argv[n].v_nmembs is passed from the userspace, the subsequent
+    call to vmalloc() will allocate a buffer smaller than expected, which
+    leads to out-of-bound access in nilfs_ioctl_move_blocks() and
+    lfs_clean_segments().
+    
+    The following check does not prevent the overflow because nsegs is also
+    controlled by the userspace and could be very large.
+    
+    		if (argv[n].v_nmembs > nsegs * nilfs->ns_blocks_per_segment)
+    			goto out_free;
+    
+    This patch clamps argv[n].v_nmembs to UINT_MAX / argv[n].v_size, and
+    returns -EINVAL when overflow.
+    
+    Signed-off-by: Haogang Chen <haogangchen@gmail.com>
+    Signed-off-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 006afb6eb7a7398edc0068c3a7b9510ffaf80f72
+Author: Kautuk Consul <consul.kautuk@gmail.com>
+Date:   Mon Dec 19 17:12:04 2011 -0800
+
+    mm/vmalloc.c: remove static declaration of va from __get_vm_area_node
+    
+    Static storage is not required for the struct vmap_area in
+    __get_vm_area_node.
+    
+    Removing "static" to store this variable on the stack instead.
+    
+    Signed-off-by: Kautuk Consul <consul.kautuk@gmail.com>
+    Acked-by: David Rientjes <rientjes@google.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 461ecdf221edb089e5fa0d5563e1688cd0a36f66
+Author: Michel Lespinasse <walken@google.com>
+Date:   Mon Dec 19 17:12:06 2011 -0800
+
+    binary_sysctl(): fix memory leak
+    
+    binary_sysctl() calls sysctl_getname() which allocates from names_cache
+    slab usin __getname()
+    
+    The matching function to free the name is __putname(), and not putname()
+    which should be used only to match getname() allocations.
+    
+    This is because when auditing is enabled, putname() calls audit_putname
+    *instead* (not in addition) to __putname().  Then, if a syscall is in
+    progress, audit_putname does not release the name - instead, it expects
+    the name to get released when the syscall completes, but that will happen
+    only if audit_getname() was called previously, i.e.  if the name was
+    allocated with getname() rather than the naked __getname().  So,
+    __getname() followed by putname() ends up leaking memory.
+    
+    Signed-off-by: Michel Lespinasse <walken@google.com>
+    Acked-by: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Christoph Hellwig <hch@infradead.org>
+    Cc: Eric Paris <eparis@redhat.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 0a2cd3ef50c0bae70d59c74a77db0455d26fde56
+Author: Sean Hefty <sean.hefty@intel.com>
+Date:   Tue Dec 6 21:17:11 2011 +0000
+
+    RDMA/cma: Verify private data length
+    
+    private_data_len is defined as a u8.  If the user specifies a large
+    private_data size (> 220 bytes), we will calculate a total length that
+    exceeds 255, resulting in private_data_len wrapping back to 0.  This
+    can lead to overwriting random kernel memory.  Avoid this by verifying
+    that the resulting size fits into a u8.
+    
+    Reported-by: B. Thery <benjamin.thery@bull.net>
+    Addresses: <http://bugs.openfabrics.org/bugzilla/show_bug.cgi?id=2335>
+    Signed-off-by: Sean Hefty <sean.hefty@intel.com>
+    Signed-off-by: Roland Dreier <roland@purestorage.com>
+
+commit 6b618c54aaec99078629ec5b9575cb7d6fc31176
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Sun Dec 11 23:40:56 2011 -0800
+
+    Input: cma3000_d0x - fix signedness bug in cma3000_thread_irq()
+    
+    The error check (intr_status < 0) didn't work because intr_status is
+    a u8.  Change its type to signed int.
+    
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Signed-off-by: Dmitry Torokhov <dtor@mail.ru>
+
+commit e27f34e383d7863b2528a63b81b23db09781f6b6
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Fri Dec 16 12:44:15 2011 +0000
+
+    sctp: fix incorrect overflow check on autoclose
+    
+    Commit 8ffd3208 voids the previous patches f6778aab and 810c0719 for
+    limiting the autoclose value.  If userspace passes in -1 on 32-bit
+    platform, the overflow check didn't work and autoclose would be set
+    to 0xffffffff.
+    
+    This patch defines a max_autoclose (in seconds) for limiting the value
+    and exposes it through sysctl, with the following intentions.
+    
+    1) Avoid overflowing autoclose * HZ.
+    
+    2) Keep the default autoclose bound consistent across 32- and 64-bit
+       platforms (INT_MAX / HZ in this patch).
+    
+    3) Keep the autoclose value consistent between setsockopt() and
+       getsockopt() calls.
+    
+    Suggested-by: Vlad Yasevich <vladislav.yasevich@hp.com>
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 8ebdfaad2f46ff0ac9fef9858e436bcc712a1ac8
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Wed Dec 21 05:18:33 2011 -0500
+
+    vmwgfx: fix incorrect VRAM size check in vmw_kms_fb_create()
+    
+    Commit e133e737 didn't correctly fix the integer overflow issue.
+    
+    -	unsigned int required_size;
+    +	u64 required_size;
+    	...
+    	required_size = mode_cmd->pitch * mode_cmd->height;
+    -	if (unlikely(required_size > dev_priv->vram_size)) {
+    +	if (unlikely(required_size > (u64) dev_priv->vram_size)) {
+    
+    Note that both pitch and height are u32.  Their product is still u32 and
+    would overflow before being assigned to required_size.  A correct way is
+    to convert pitch and height to u64 before the multiplication.
+    
+    	required_size = (u64)mode_cmd->pitch * (u64)mode_cmd->height;
+    
+    This patch calls the existing vmw_kms_validate_mode_vram() for
+    validation.
+    
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Reviewed-and-tested-by: Thomas Hellstrom <thellstrom@vmware.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+    
+    Conflicts:
+    
+    	drivers/gpu/drm/vmwgfx/vmwgfx_kms.c
+
+commit eb8f0bd01fb994c9abc77dc84729794cd841753d
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Thu Dec 22 13:35:22 2011 +0000
+
+    rps: fix insufficient bounds checking in store_rps_dev_flow_table_cnt()
+    
+    Setting a large rps_flow_cnt like (1 << 30) on 32-bit platform will
+    cause a kernel oops due to insufficient bounds checking.
+    
+    	if (count > 1<<30) {
+    		/* Enforce a limit to prevent overflow */
+    		return -EINVAL;
+    	}
+    	count = roundup_pow_of_two(count);
+    	table = vmalloc(RPS_DEV_FLOW_TABLE_SIZE(count));
+    
+    Note that the macro RPS_DEV_FLOW_TABLE_SIZE(count) is defined as:
+    
+    	... + (count * sizeof(struct rps_dev_flow))
+    
+    where sizeof(struct rps_dev_flow) is 8.  (1 << 30) * 8 will overflow
+    32 bits.
+    
+    This patch replaces the magic number (1 << 30) with a symbolic bound.
+    
+    Suggested-by: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 648188958672024b616c42c1f6c98c8cfc85619d
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Fri Dec 30 10:40:17 2011 -0500
+
+    netfilter: ctnetlink: fix timeout calculation
+    
+    The sanity check (timeout < 0) never works; the dividend is unsigned
+    and so is the division, which should have been a signed division.
+    
+    	long timeout = (ct->timeout.expires - jiffies) / HZ;
+    	if (timeout < 0)
+    		timeout = 0;
+    
+    This patch converts the time values to signed for the division.
+    
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
 commit ab03a0973cee73f88655ff4981812ad316a6cd59
 Merge: 76f82df 7bdddeb
 Author: Brad Spengler <spender@grsecurity.net>
