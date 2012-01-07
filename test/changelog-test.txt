@@ -1,3 +1,62 @@
+commit e6578ff3e7629c432ed9b99bde6af2a1c00279b5
+Merge: 8859ec3 a120549
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 21:45:56 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a12054967a77090de1caa07c41e694a77db4e237
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 21:45:30 2012 -0500
+
+    Merge changes from pax-linux-3.1.8-test22.patch
+
+commit 8859ec32f9815c274df65448f9f2960176c380d3
+Merge: a5016b4 ddd4114
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 21:26:08 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/binfmt_elf.c
+    	security/Kconfig
+
+commit ddd41147e158a79704983a409b7433eba797cf66
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 21:12:42 2012 -0500
+
+    Resync with PaX patch (whitespace difference)
+
+commit 29e569df8205c5f0e043fe4803aa984406c8b118
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 21:09:47 2012 -0500
+
+    Merge changes from pax-linux-3.1.8-test21.patch
+
+commit a5016b4f9c09c337b17e063a7f369af1e86d944d
+Merge: 0124c92 04231d5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 18:52:20 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 04231d52dc8d0d6788a6bc6709dc046d3eb37097
+Merge: 7bdddeb a919904
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 18:51:50 2012 -0500
+
+    Merge branch 'linux-3.1.y' into pax-test
+    
+    Conflicts:
+    	include/net/flow.h
+
+commit 0124c9264234c450904a0a5fa2f8c608ab8e3796
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 18:33:05 2012 -0500
+
+    Make GRKERNSEC_SETXID option compatible with credential debugging
+
 commit 69919c6da7cf8a781439da15b597a7d6bc9b3abe
 Author: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
 Date:   Wed Dec 28 15:57:11 2011 -0800
