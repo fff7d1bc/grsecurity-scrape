@@ -1,3 +1,9 @@
+commit d48751f3919ae855fda0ff6c149db82442329253
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 11 19:05:47 2012 -0500
+
+    Call our own set_user when forcing change to new id
+
 commit 26d9d497f6b926bc1699980aa18c360a3d3c52a0
 Merge: e6578ff fcd8129
 Author: Brad Spengler <spender@grsecurity.net>
