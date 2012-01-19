@@ -1,3 +1,196 @@
+commit 814d38c72b1ee3338294576a05af4f6ca9cffa6c
+Merge: 0394a3f 7e6299b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 18 20:22:09 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7e6299b4733c082dde930375dd207b63237751ec
+Merge: 83555fb 9bb1282
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 18 20:21:37 2012 -0500
+
+    Merge branch 'linux-3.1.y' into pax-test
+
+commit 0394a3f36c6195dcaf22e265c94d11bb7338c6f7
+Author: Jesper Juhl <jj@chaosbits.net>
+Date:   Sun Jan 8 22:44:29 2012 +0100
+
+    audit: always follow va_copy() with va_end()
+    
+    A call to va_copy() should always be followed by a call to va_end() in
+    the same function.  In kernel/autit.c::audit_log_vformat() this is not
+    always done.  This patch makes sure va_end() is always called.
+    
+    Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Eric Paris <eparis@redhat.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit fcbb39319e88bfdf70efe3931cf80a9f23b1a4d9
+Author: Andi Kleen <ak@linux.intel.com>
+Date:   Thu Jan 12 17:20:30 2012 -0800
+
+    panic: don't print redundant backtraces on oops
+    
+    When an oops causes a panic and panic prints another backtrace it's pretty
+    common to have the original oops data be scrolled away on a 80x50 screen.
+    
+    The second backtrace is quite redundant and not needed anyways.
+    
+    So don't print the panic backtrace when oops_in_progress is true.
+    
+    [akpm@linux-foundation.org: add comment]
+    Signed-off-by: Andi Kleen <ak@linux.intel.com>
+    Cc: Michael Holzheu <holzheu@linux.vnet.ibm.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 22e4717d04333e2aff6d5d1b2c1b16045f367a1f
+Author: Miklos Szeredi <mszeredi@suse.cz>
+Date:   Thu Jan 12 17:59:46 2012 +0100
+
+    fsnotify: don't BUG in fsnotify_destroy_mark()
+    
+    Removing the parent of a watched file results in "kernel BUG at
+    fs/notify/mark.c:139".
+    
+    To reproduce
+    
+      add "-w /tmp/audit/dir/watched_file" to audit.rules
+      rm -rf /tmp/audit/dir
+    
+    This is caused by fsnotify_destroy_mark() being called without an
+    extra reference taken by the caller.
+    
+    Reported by Francesco Cosoleto here:
+    
+      https://bugzilla.novell.com/show_bug.cgi?id=689860
+    
+    Fix by removing the BUG_ON and adding a comment about not accessing mark after
+    the iput.
+    
+    Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 1a90cff66ed00cd57bf00a990d13e95060fa362c
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Thu Jan 12 16:01:28 2012 +0100
+
+    block: fail SCSI passthrough ioctls on partition devices
+    
+    Linux allows executing the SG_IO ioctl on a partition or LVM volume, and
+    will pass the command to the underlying block device.  This is
+    well-known, but it is also a large security problem when (via Unix
+    permissions, ACLs, SELinux or a combination thereof) a program or user
+    needs to be granted access only to part of the disk.
+    
+    This patch lets partitions forward a small set of harmless ioctls;
+    others are logged with printk so that we can see which ioctls are
+    actually sent.  In my tests only CDROM_GET_CAPABILITY actually occurred.
+    Of course it was being sent to a (partition on a) hard disk, so it would
+    have failed with ENOTTY and the patch isn't changing anything in
+    practice.  Still, I'm treating it specially to avoid spamming the logs.
+    
+    In principle, this restriction should include programs running with
+    CAP_SYS_RAWIO.  If for example I let a program access /dev/sda2 and
+    /dev/sdb, it still should not be able to read/write outside the
+    boundaries of /dev/sda2 independent of the capabilities.  However, for
+    now programs with CAP_SYS_RAWIO will still be allowed to send the
+    ioctls.  Their actions will still be logged.
+    
+    This patch does not affect the non-libata IDE driver.  That driver
+    however already tests for bd != bd->bd_contains before issuing some
+    ioctl; it could be restricted further to forbid these ioctls even for
+    programs running with CAP_SYS_ADMIN/CAP_SYS_RAWIO.
+    
+    Cc: linux-scsi@vger.kernel.org
+    Cc: Jens Axboe <axboe@kernel.dk>
+    Cc: James Bottomley <JBottomley@parallels.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+    [ Make it also print the command name when warning - Linus ]
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit b41a1178caa15bd7d6d5b36c04c7b1ead05717e2
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Thu Jan 12 16:01:27 2012 +0100
+
+    block: add and use scsi_blk_cmd_ioctl
+    
+    Introduce a wrapper around scsi_cmd_ioctl that takes a block device.
+    
+    The function will then be enhanced to detect partition block devices
+    and, in that case, subject the ioctls to whitelisting.
+    
+    Cc: linux-scsi@vger.kernel.org
+    Cc: Jens Axboe <axboe@kernel.dk>
+    Cc: James Bottomley <JBottomley@parallels.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 97a79814903fc350e1d13704ea31528a42705401
+Author: Kees Cook <keescook@chromium.org>
+Date:   Sat Jan 7 10:41:04 2012 -0800
+
+    audit: treat s_id as an untrusted string
+    
+    The use of s_id should go through the untrusted string path, just to be
+    extra careful.
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Acked-by: Mimi Zohar <zohar@us.ibm.com>
+    Signed-off-by: Eric Paris <eparis@redhat.com>
+
+commit 2d3f39e9dd73f26a8248fd4442f110d983c5b419
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Tue Dec 20 18:39:41 2011 -0500
+
+    audit: fix signedness bug in audit_log_execve_info()
+    
+    In the loop, a size_t "len" is used to hold the return value of
+    audit_log_single_execve_arg(), which returns -1 on error.  In that
+    case the error handling (len <= 0) will be bypassed since "len" is
+    unsigned, and the loop continues with (p += len) being wrapped.
+    Change the type of "len" to signed int to fix the error handling.
+    
+    	size_t len;
+    	...
+    	for (...) {
+    		len = audit_log_single_execve_arg(...);
+    		if (len <= 0)
+    			break;
+    		p += len;
+    	}
+    
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Signed-off-by: Eric Paris <eparis@redhat.com>
+
+commit 1b3dc2ea3204fb22b9d0d30b2b7953991f5be594
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Jan 17 03:28:51 2012 -0300
+
+    [media] ds3000: using logical && instead of bitwise &
+    
+    The intent here was to test if the FE_HAS_LOCK was set.  The current
+    test is equivalent to "if (status) { ..."
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@redhat.com>
+
+commit 36522330dc59d2fc70c042f3f081d75c32b6259a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 16 13:10:38 2012 -0500
+
+    Ignore the 0 signal for protected task RBAC checks
+
+commit d513acd55f7a683f6e146a4f570cdb63300479ab
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 16 11:56:13 2012 -0500
+
+    whitespace cleanup
+
 commit ced261c4b82818c700aff8487f647f6f3e5b5122
 Merge: d48751f 83555fb
 Author: Brad Spengler <spender@grsecurity.net>
