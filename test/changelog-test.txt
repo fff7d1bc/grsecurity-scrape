@@ -1,3 +1,30 @@
+commit 34083ddf5c0b2b1c0f5e9f7d9e32ddcba223446b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 19 20:23:14 2012 -0500
+
+    Introduce new GRKERNSEC_SETXID implementation
+    We're not able to change the credentials of other threads in the process until at most
+    one syscall after the first thread does it, since we mark the threads as needing rescheduling
+    and such work occurs on syscall exit.
+    This does however ensure that we're only modifying the current task's credentials
+    which upholds RCU expectations
+    
+    Many thanks to corsac for testing
+
+commit 5f900ad54d3992a4e1cda88273acc2f897a42e71
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 19 17:42:48 2012 -0500
+
+    Simplify backport
+
+commit f02e444f7b2fb286f99d3b4031ff4e44a4606c37
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 19 17:08:16 2012 -0500
+
+    Commit the latest silent fix for a local privilege escalation from Linus
+    Also disable writing to /proc/pid/mem
+    http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=e268337dfe26dfc7efd422a804dbb27977a3cccc
+
 commit 814d38c72b1ee3338294576a05af4f6ca9cffa6c
 Merge: 0394a3f 7e6299b
 Author: Brad Spengler <spender@grsecurity.net>
