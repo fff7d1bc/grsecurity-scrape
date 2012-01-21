@@ -1,3 +1,18 @@
+commit 873ac13576506cd48ddb527c2540f274e249da50
+Merge: 34083dd 8a44fcc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 20 18:04:02 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8a44fcc90cf3368003dc84e1ed013b2e4248c9b2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 20 18:02:15 2012 -0500
+
+    Merge the diff between pax-linux-3.2.1-test4.patch and pax-linux-3.2.1-test5.patch
+    Denies executable shared memory when MPROTECT is active
+    Fixes ia32 emulation crash on 64bit host introduced in a recent patch
+
 commit 34083ddf5c0b2b1c0f5e9f7d9e32ddcba223446b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jan 19 20:23:14 2012 -0500
