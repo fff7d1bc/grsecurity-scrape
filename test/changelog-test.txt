@@ -1,3 +1,26 @@
+commit 11a7bb25c411c9dccfdca5718639b4becdffd388
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 22 14:37:10 2012 -0500
+
+    Compilation fixes
+
+commit cd400e21c7c352baba47d6f375297a7847afb33a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 22 14:20:27 2012 -0500
+
+    Initial port of grsecurity 2.2.2 for Linux 3.2.1
+    Note that the new syscalls added to this kernel for remote process read/write
+    are subject to ptrace hardening/other relevant RBAC features
+    /proc/slabinfo is S_IRUSR via mainline now, so I made slab_allocators S_IRUSR by default
+    as well
+    pax_track_stack has been removed from support for this kernel -- if you're running this kernel
+    you should be using a version of gcc with plugin support
+
+commit c6d443d1270f455c56a4ffe0f1dd3d3e7ec12a2f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 22 11:47:31 2012 -0500
+
+    Import pax-linux-3.2.1-test5.patch
 commit bfd7db842f835f9837cd43644459b3a95b0b488d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jan 22 11:02:02 2012 -0500
