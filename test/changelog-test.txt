@@ -1,3 +1,11 @@
+commit bfd7db842f835f9837cd43644459b3a95b0b488d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 22 11:02:02 2012 -0500
+
+    Allow processes to access others' /proc/pid/maps files (subject to the normal modification of data)
+    instead of returning -EACCES
+    thanks to Wraith from irc for the report
+
 commit 873ac13576506cd48ddb527c2540f274e249da50
 Merge: 34083dd 8a44fcc
 Author: Brad Spengler <spender@grsecurity.net>
