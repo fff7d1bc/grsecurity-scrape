@@ -1,3 +1,20 @@
+commit 7b3f3afd7444613c759d68ff8c2efaebfae3bab1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 24 19:42:01 2012 -0500
+
+    Add two new features, one is automatic by enabling CONFIG_GRKERNSEC
+    (may be changed if it breaks some userland), the other has its own
+    config option
+    
+    First feature requires CAP_SYS_ADMIN to write to any sysctl entry via
+    the syscall or /proc/sys.
+    
+    Second feature requires read access to a suid/sgid binary in order
+    to ptrace it, preventing infoleaking of binaries in situations where
+    the admin has specified 4711 or 2711 perms.  Feature has been
+    given the config option CONFIG_GRKERNSEC_PTRACE_READEXEC and
+    a sysctl entry of ptrace_readexec
+
 commit 11a7bb25c411c9dccfdca5718639b4becdffd388
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jan 22 14:37:10 2012 -0500
