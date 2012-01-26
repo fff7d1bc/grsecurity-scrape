@@ -1,3 +1,31 @@
+commit 98fdf4ab69eba7a72efb2054295daafdbbc2fb8f
+Merge: 7b3f3af 05a1349
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 25 20:52:09 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	block/scsi_ioctl.c
+    	drivers/scsi/sd.c
+    	fs/proc/base.c
+
+commit 05a134966efb9cb9346ad3422888969ffc79ac1d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 25 20:47:36 2012 -0500
+
+    Resync with pax-linux-3.2.2-test5.patch
+
+commit 5ecaafd81b229aeeb5656df36f9c8da86307f82a
+Merge: c6d443d 3499d64
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 25 20:45:16 2012 -0500
+
+    Merge branch 'linux-3.2.y' into pax-test (and pax-linux-3.2.2-test5.patch)
+    
+    Conflicts:
+    	ipc/shm.c
+
 commit 7b3f3afd7444613c759d68ff8c2efaebfae3bab1
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jan 24 19:42:01 2012 -0500
