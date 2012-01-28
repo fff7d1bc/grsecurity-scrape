@@ -1,3 +1,9 @@
+commit 627b7fe22799a86e2f81a74f0e0c53474bec3100
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 28 13:17:06 2012 -0500
+
+    log more information about the reason for a TPE denial for novice users, requested by a sponsor
+
 commit efefd67008cbad8a8591e2484410966a300a39a5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Jan 27 19:58:53 2012 -0500
