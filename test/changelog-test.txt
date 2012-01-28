@@ -1,3 +1,191 @@
+commit efefd67008cbad8a8591e2484410966a300a39a5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 19:58:53 2012 -0500
+
+    merge upstream sha512 changes
+
+commit 8a79280377db78fb2091fe01eddb9e24f75d9fe1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 19:49:07 2012 -0500
+
+    drop lock on error in xfs_readlink
+    
+    http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=commitdiff;h=aaad641eadfd3e74b0fbb68fcf539b9cef0415d0
+
+commit aa5f2f63e37f426bf2211c5fb8f7bc70de14f08a
+Author: Li Wang <liwang@nudt.edu.cn>
+Date:   Thu Jan 19 09:44:36 2012 +0800
+
+    eCryptfs: Infinite loop due to overflow in ecryptfs_write()
+    
+    ecryptfs_write() can enter an infinite loop when truncating a file to a
+    size larger than 4G. This only happens on architectures where size_t is
+    represented by 32 bits.
+    
+    This was caused by a size_t overflow due to it incorrectly being used to
+    store the result of a calculation which uses potentially large values of
+    type loff_t.
+    
+    [tyhicks@canonical.com: rewrite subject and commit message]
+    Signed-off-by: Li Wang <liwang@nudt.edu.cn>
+    Signed-off-by: Yunchuan Wen <wenyunchuan@kylinos.com.cn>
+    Reviewed-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+
+commit a7607747d0f74f357d78bb796d70635dd05f46e8
+Author: Tyler Hicks <tyhicks@canonical.com>
+Date:   Thu Jan 19 20:33:44 2012 -0600
+
+    eCryptfs: Check inode changes in setattr
+    
+    Most filesystems call inode_change_ok() very early in ->setattr(), but
+    eCryptfs didn't call it at all. It allowed the lower filesystem to make
+    the call in its ->setattr() function. Then, eCryptfs would copy the
+    appropriate inode attributes from the lower inode to the eCryptfs inode.
+    
+    This patch changes that and actually calls inode_change_ok() on the
+    eCryptfs inode, fairly early in ecryptfs_setattr(). Ideally, the call
+    would happen earlier in ecryptfs_setattr(), but there are some possible
+    inode initialization steps that must happen first.
+    
+    Since the call was already being made on the lower inode, the change in
+    functionality should be minimal, except for the case of a file extending
+    truncate call. In that case, inode_newsize_ok() was never being
+    called on the eCryptfs inode. Rather than inode_newsize_ok() catching
+    maximum file size errors early on, eCryptfs would encrypt zeroed pages
+    and write them to the lower filesystem until the lower filesystem's
+    write path caught the error in generic_write_checks(). This patch
+    introduces a new function, called ecryptfs_inode_newsize_ok(), which
+    checks if the new lower file size is within the appropriate limits when
+    the truncate operation will be growing the lower file.
+    
+    In summary this change prevents eCryptfs truncate operations (and the
+    resulting page encryptions), which would exceed the lower filesystem
+    limits or FSIZE rlimits, from ever starting.
+    
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Reviewed-by: Li Wang <liwang@nudt.edu.cn>
+    Cc: <stable@vger.kernel.org>
+
+commit 0d96f190a39505254ace4e9330219aaeda9b64e3
+Author: Tyler Hicks <tyhicks@canonical.com>
+Date:   Wed Jan 18 18:30:04 2012 -0600
+
+    eCryptfs: Make truncate path killable
+    
+    ecryptfs_write() handles the truncation of eCryptfs inodes. It grabs a
+    page, zeroes out the appropriate portions, and then encrypts the page
+    before writing it to the lower filesystem. It was unkillable and due to
+    the lack of sparse file support could result in tying up a large portion
+    of system resources, while encrypting pages of zeros, with no way for
+    the truncate operation to be stopped from userspace.
+    
+    This patch adds the ability for ecryptfs_write() to detect a pending
+    fatal signal and return as gracefully as possible. The intent is to
+    leave the lower file in a useable state, while still allowing a user to
+    break out of the encryption loop. If a pending fatal signal is detected,
+    the eCryptfs inode size is updated to reflect the modified inode size
+    and then -EINTR is returned.
+    
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Cc: <stable@vger.kernel.org>
+
+commit a02d0d2516b9e92edffeb8fca87462bca49c1f6f
+Author: Tyler Hicks <tyhicks@canonical.com>
+Date:   Tue Jan 24 10:02:22 2012 -0600
+
+    eCryptfs: Fix oops when printing debug info in extent crypto functions
+    
+    If pages passed to the eCryptfs extent-based crypto functions are not
+    mapped and the module parameter ecryptfs_verbosity=1 was specified at
+    loading time, a NULL pointer dereference will occur.
+    
+    Note that this wouldn't happen on a production system, as you wouldn't
+    pass ecryptfs_verbosity=1 on a production system. It leaks private
+    information to the system logs and is for debugging only.
+    
+    The debugging info printed in these messages is no longer very useful
+    and rather than doing a kmap() in these debugging paths, it will be
+    better to simply remove the debugging paths completely.
+    
+    https://launchpad.net/bugs/913651
+    
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Reported-by: Daniel DeFreez
+    Cc: <stable@vger.kernel.org>
+
+commit b1c44d3054dc7f293b2e0a98c0e9e5e03e01f04c
+Author: Tyler Hicks <tyhicks@canonical.com>
+Date:   Thu Jan 12 11:30:44 2012 +0100
+
+    eCryptfs: Sanitize write counts of /dev/ecryptfs
+    
+    A malicious count value specified when writing to /dev/ecryptfs may
+    result in a a very large kernel memory allocation.
+    
+    This patch peeks at the specified packet payload size, adds that to the
+    size of the packet headers and compares the result with the write count
+    value. The resulting maximum memory allocation size is approximately 532
+    bytes.
+    
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Reported-by: Sasha Levin <levinsasha928@gmail.com>
+    Cc: <stable@vger.kernel.org>
+
+commit 96dcb7282d323813181a1791f51c0ab7696b675b
+Merge: 6c09fa5 201c0db
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 19:44:15 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 201c0dbf177527367676028151e36d340923f033
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 19:43:24 2012 -0500
+
+    Merge changes from pax-linux-3.2.2-test6.patch, fixes 0 order vmalloc allocation errors
+    on loading modules with empty sections
+
+commit 6c09fa566a7c29f00556ca12f343f2db91c4f42b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 19:42:13 2012 -0500
+
+    compile fix
+
+commit 917ae526b4fcec2b3e1afefa13de9dff7d8a5423
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 19:39:28 2012 -0500
+
+    use LSM flags instead of duplicating checks
+
+commit 0cf3be2ea2ae43c9dd4933fb26c0429041b8acb8
+Merge: 44b9f11 558718b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 18:56:23 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 558718b2217beff69edf60f34a6f9893d910e9ac
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 18:56:04 2012 -0500
+
+    Merge changes from pax-linux-3.2.2-test6.patch
+
+commit 44b9f1132b2de7cbf5f57525fe0f7f9fb0a76507
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 18:53:55 2012 -0500
+
+    don't increase the size of task_struct when unnecessary
+    change ptrace_readexec log message
+
+commit a9c9626e054adb885883aa64f85506852894dd33
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 27 18:16:28 2012 -0500
+
+    Update documentation for CONFIG_GRKERNSEC_PTRACE_READEXEC --
+    the protection applies to all unreadable binaries.
+
 commit 98fdf4ab69eba7a72efb2054295daafdbbc2fb8f
 Merge: 7b3f3af 05a1349
 Author: Brad Spengler <spender@grsecurity.net>
