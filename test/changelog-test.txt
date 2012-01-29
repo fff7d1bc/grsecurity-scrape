@@ -1,3 +1,9 @@
+commit e3618feaa7e63807f1b88c199882075b3ec9bd05
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 29 01:12:19 2012 -0500
+
+    perform RBAC check if TPE is on but match fails, matches previous behavior
+
 commit 627b7fe22799a86e2f81a74f0e0c53474bec3100
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jan 28 13:17:06 2012 -0500
