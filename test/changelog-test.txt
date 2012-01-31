@@ -1,3 +1,16 @@
+commit 3903f0172ecadf7a575ba3535402a1506133640a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 30 23:26:44 2012 -0500
+
+    Implement new version of CONFIG_GRKERNSEC_SYSFS_RESTRICT
+    
+    We'll whitelist required directories for compatibility instead of requiring
+    that people disable the feature entirely if they use SELinux, fuse, etc
+    
+    Conflicts:
+    
+    	fs/sysfs/mount.c
+
 commit e3618feaa7e63807f1b88c199882075b3ec9bd05
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jan 29 01:12:19 2012 -0500
