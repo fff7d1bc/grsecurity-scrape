@@ -1,3 +1,152 @@
+commit ca4ca5a1027b41f9528794e52a53ce9c47926101
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 3 20:42:55 2012 -0500
+
+    fix typo
+
+commit d54ec64b7078f1dcb71b5d8a29e47d4a0f46c111
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 3 20:25:38 2012 -0500
+
+    Reported by lavish on IRC:
+    If a suid/sgid binary did not learn any setuid/setgid call during learning,
+    we would not any CAP_SETUID/CAP_SETGID capability to the task, nor
+    any restrictions on uid/gid changes.  uid and gid can however be changed
+    within a suid/sgid binary via setresuid/setresgid with ruid/rgid set to
+    euid/egid.
+    
+    My fix:
+    POSIX doesn't specify whether unprivileged users can perform the above
+    setresuid/setresgid as an unprivileged user, though Linux has historically
+    permitted them.  Modify this behavior when RBAC is enabled to require
+    CAP_SETUID/CAP_SETGID for these operations.
+    
+    Thanks to Lavish for the report!
+    
+    Conflicts:
+    
+    	kernel/sys.c
+
+commit e55be1f30908f1ad4450cb0558cde71ff5c7247f
+Merge: ba586eb 7e4169c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 3 20:10:21 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7e4169c6c880ec9641f1178c88545913c8a21e1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 3 20:10:05 2012 -0500
+
+    Merge changes from pax-linux-3.2.4-test9.patch
+
+commit ba586ebbcd0ed781e38a99c580a757a00347c6eb
+Author: Christopher Yeoh <cyeoh@au1.ibm.com>
+Date:   Thu Feb 2 11:34:09 2012 +1030
+
+    Fix race in process_vm_rw_core
+    
+    This fixes the race in process_vm_core found by Oleg (see
+    
+      http://article.gmane.org/gmane.linux.kernel/1235667/
+    
+    for details).
+    
+    This has been updated since I last sent it as the creation of the new
+    mm_access() function did almost exactly the same thing as parts of the
+    previous version of this patch did.
+    
+    In order to use mm_access() even when /proc isn't enabled, we move it to
+    kernel/fork.c where other related process mm access functions already
+    are.
+    
+    Signed-off-by: Chris Yeoh <yeohc@au1.ibm.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	fs/proc/base.c
+    	mm/process_vm_access.c
+
+commit b9194d60fb9fe579f5c34817ed822abde18939a0
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Tue Jan 31 17:15:11 2012 +0100
+
+    proc: make sure mem_open() doesn't pin the target's memory
+    
+    Once /proc/pid/mem is opened, the memory can't be released until
+    mem_release() even if its owner exits.
+    
+    Change mem_open() to do atomic_inc(mm_count) + mmput(), this only
+    pins mm_struct. Change mem_rw() to do atomic_inc_not_zero(mm_count)
+    before access_remote_vm(), this verifies that this mm is still alive.
+    
+    I am not sure what should mem_rw() return if atomic_inc_not_zero()
+    fails. With this patch it returns zero to match the "mm == NULL" case,
+    may be it should return -EINVAL like it did before e268337d.
+    
+    Perhaps it makes sense to add the additional fatal_signal_pending()
+    check into the main loop, to ensure we do not hold this memory if
+    the target task was oom-killed.
+    
+    Cc: stable@kernel.org
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit d4500134f9363bc79556e0e7a1fd811cd8552cc4
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Tue Jan 31 17:14:38 2012 +0100
+
+    proc: mem_release() should check mm != NULL
+    
+    mem_release() can hit mm == NULL, add the necessary check.
+    
+    Cc: stable@kernel.org
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 5d1c11221a86f233fdbb232312a561f85d0a3a05
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Tue Jan 31 17:14:54 2012 +0100
+
+    note: redisabled mem_write
+    
+    proc: unify mem_read() and mem_write()
+    
+    No functional changes, cleanup and preparation.
+    
+    mem_read() and mem_write() are very similar. Move this code into the
+    new common helper, mem_rw(), which takes the additional "int write"
+    argument.
+    
+    Cc: stable@kernel.org
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	fs/proc/base.c
+
+commit af966b421d9f55ab7e1a8b2741beba44b22bc2e0
+Merge: 3903f01 01fee18
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 3 19:50:40 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 01fee1851aef26b898ccba5312cabf1f919b74cb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 3 19:49:46 2012 -0500
+
+    Merge changes from pax-linux-3.2.4-test8.patch
+
+commit c2490ddbfc3f5dd664dd0e1b8575856c3be01879
+Merge: 201c0db 141936c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 3 19:49:01 2012 -0500
+
+    Merge branch 'linux-3.2.y' into pax-test
+
 commit 3903f0172ecadf7a575ba3535402a1506133640a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jan 30 23:26:44 2012 -0500
