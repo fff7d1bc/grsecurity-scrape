@@ -1,3 +1,23 @@
+commit 0e058dd6d14e0c67c44dd332a871f1fe1bb06095
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 5 19:24:45 2012 -0500
+
+    We now allow configurations with no PaX markings, giving the system no way to override the defaults
+
+commit 9afb0110287e31c3c56d861b4927f64f8dbd7857
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 5 10:01:23 2012 -0500
+
+    Increase the buffer size of logged TPE reason, otherwise we could truncate the "y" in directory
+
+commit a6a0ad24a5f7bef90236d94c1bdfe21d291fc834
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 4 21:01:16 2012 -0500
+
+    Improve security of ptrace-based monitoring/sandboxing
+    See:
+    http://article.gmane.org/gmane.linux.kernel.lsm/15156
+
 commit ca4ca5a1027b41f9528794e52a53ce9c47926101
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Feb 3 20:42:55 2012 -0500
