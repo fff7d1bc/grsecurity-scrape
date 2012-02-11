@@ -1,3 +1,9 @@
+commit 0c61cb1cfbbfec7d07647268c922d51434d22621
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 11 14:22:46 2012 -0500
+
+    copy exec_id on fork
+
 commit 000c08e0890630086b2ed04084050ed856a7ec31
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Feb 10 20:00:36 2012 -0500
