@@ -1,3 +1,23 @@
+commit 000c08e0890630086b2ed04084050ed856a7ec31
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 10 20:00:36 2012 -0500
+
+    compile fix
+
+commit 54b8c8f54484e5ee18040657827158bc4b63bccc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 10 19:19:52 2012 -0500
+
+    Introduce enhancement to CONFIG_GRKERNSEC_PROC_MEMMAP
+    denies reading of sensitive /proc/pid entries where the file descriptor
+    was opened in a different task than the one performing the read
+
+commit dd19579049186e2648b9ae5e42af04cfda7ab2dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 10 17:43:24 2012 -0500
+
+    Remove duplicate signal check
+
 commit 6ff60c34155bb73a4eec7bbfe6f59e9d35e1c0c6
 Merge: 4eba97e 1413df2
 Author: Brad Spengler <spender@grsecurity.net>
