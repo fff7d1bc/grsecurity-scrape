@@ -1,3 +1,26 @@
+commit b1baadf5047ab67cf61cd20bf58c6afb09c37c7d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 16:44:05 2012 -0500
+
+    add missing declaration
+
+commit 3981059c35e8463002517935c28f3d74b8e3703c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 16:36:04 2012 -0500
+
+    Require CAP_SETUID/CAP_SETGID in a subject in order to change roles
+    in addition to existing checks (this handles the setresuid ruid = euid case)
+
+commit 0beab03263c773f463412c350ad9064b44b6ede0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 16:13:40 2012 -0500
+
+    Revert setreuid changes when RBAC is enabled, breaks freeradius
+    I'll fix the learning issue Lavish reported a different way through
+    gradm modifications
+    
+    This reverts commit d54ec64b7078f1dcb71b5d8a29e47d4a0f46c111.
+
 commit 0c61cb1cfbbfec7d07647268c922d51434d22621
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Feb 11 14:22:46 2012 -0500
