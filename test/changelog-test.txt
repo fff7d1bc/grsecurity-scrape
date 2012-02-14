@@ -1,3 +1,85 @@
+commit 4feb07e7cb64b3d0f0f8cca1aef70bc725cae6fa
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Thu Feb 9 00:46:47 2012 +0000
+
+    isdn: type bug in isdn_net_header()
+    
+    We use len to store the return value from eth_header().  eth_header()
+    can return -ETH_HLEN (-14).  We want to pass this back instead of
+    truncating it to 65522 and returning that.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 134ac8545b47f0f27d550ea6e1edb3a1ed7a9748
+Author: Heiko Carstens <heiko.carstens@de.ibm.com>
+Date:   Sat Feb 4 10:47:10 2012 +0100
+
+    exec: fix use-after-free bug in setup_new_exec()
+    
+    Setting the task name is done within setup_new_exec() by accessing
+    bprm->filename. However this happens after flush_old_exec().
+    This may result in a use after free bug, flush_old_exec() may
+    "complete" vfork_done, which will wake up the parent which in turn
+    may free the passed in filename.
+    To fix this add a new tcomm field in struct linux_binprm which
+    contains the now early generated task name until it is used.
+    
+    Fixes this bug on s390:
+    
+      Unable to handle kernel pointer dereference at virtual kernel address 0000000039768000
+      Process kworker/u:3 (pid: 245, task: 000000003a3dc840, ksp: 0000000039453818)
+      Krnl PSW : 0704000180000000 0000000000282e94 (setup_new_exec+0xa0/0x374)
+      Call Trace:
+      ([<0000000000282e2c>] setup_new_exec+0x38/0x374)
+       [<00000000002dd12e>] load_elf_binary+0x402/0x1bf4
+       [<0000000000280a42>] search_binary_handler+0x38e/0x5bc
+       [<0000000000282b6c>] do_execve_common+0x410/0x514
+       [<0000000000282cb6>] do_execve+0x46/0x58
+       [<00000000005bce58>] kernel_execve+0x28/0x70
+       [<000000000014ba2e>] ____call_usermodehelper+0x102/0x140
+       [<00000000005bc8da>] kernel_thread_starter+0x6/0xc
+       [<00000000005bc8d4>] kernel_thread_starter+0x0/0xc
+      Last Breaking-Event-Address:
+       [<00000000002830f0>] setup_new_exec+0x2fc/0x374
+    
+      Kernel panic - not syncing: Fatal exception: panic_on_oops
+    
+    Reported-by: Sebastian Ott <sebott@linux.vnet.ibm.com>
+    Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit d758ee9f5230893dabb5aab737b3109684bde196
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Fri Feb 10 09:03:58 2012 +0100
+
+    relay: prevent integer overflow in relay_open()
+    
+    "subbuf_size" and "n_subbufs" come from the user and they need to be
+    capped to prevent an integer overflow.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Jens Axboe <axboe@kernel.dk>
+
+commit 40ed7b34848b8e0d7bf9a3fc21a7c75ce1ae507c
+Merge: b1baadf 1daebf1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 13 17:47:04 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/proc/base.c
+
+commit 1daebf1d623fe5b0efdd329f78562eb7078bc772
+Merge: 1413df2 c2db2e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 13 17:45:54 2012 -0500
+
+    Merge branch 'linux-3.2.y' into pax-test
+
 commit b1baadf5047ab67cf61cd20bf58c6afb09c37c7d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Feb 12 16:44:05 2012 -0500
