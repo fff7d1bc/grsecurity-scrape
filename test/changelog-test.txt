@@ -1,3 +1,34 @@
+commit 07af3d8e76a6a47ce1836e5b20ed8c0f879c8201
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 18:38:32 2012 -0500
+
+    Update configuration help and name for GRKERNSEC_PROC_MEMMAP
+
+commit 5ced6f8def06c2176b40b5fa07345fc723dc4dcb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 18:18:01 2012 -0500
+
+    optimize the check a bit
+
+commit 03159050f64989be44ae03be769cbed62a7cd2e5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 18:00:45 2012 -0500
+
+    smile VUPEN :D
+    (limit argv+env to 1MB for suid/sgid binaries)
+
+commit dd759d8800d225a397e4de49fe729c7d601298d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 17:49:33 2012 -0500
+
+    Address Space Protection -> Memory Protections (suggested on IRC for consistency)
+
+commit 4de635bda8ebfb85312e3bf851bdbff93de400da
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 17:45:06 2012 -0500
+
+    Change the long long type for exec_id to the proper u64
+
 commit 4feb07e7cb64b3d0f0f8cca1aef70bc725cae6fa
 Author: Dan Carpenter <dan.carpenter@oracle.com>
 Date:   Thu Feb 9 00:46:47 2012 +0000
