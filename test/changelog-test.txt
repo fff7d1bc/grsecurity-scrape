@@ -1,3 +1,10 @@
+commit 4fd554e3a097b22c5049fcdc423897477deff5ef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 20 09:17:57 2012 -0500
+
+    Fix wrong logic on capability checks for switching roles, broke policies
+    Thanks to Richard Kojedzinszky for reporting
+
 commit 12f97d52ac603f24344f8d71569c412a307e9422
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Feb 16 21:20:10 2012 -0500
