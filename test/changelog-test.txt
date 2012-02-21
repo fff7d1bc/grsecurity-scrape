@@ -1,3 +1,31 @@
+commit ad5ac943fe58199f1cc475912a39edb157acb77b
+Merge: dda0bb5 41722e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 20 20:04:42 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 41722e342e116d95f3d3556d66c97c888d752d39
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 20 20:04:00 2012 -0500
+
+    Merge changes from pax-linux-3.2.7-test12.patch, fixes KVM incompatibility with
+    KERNEXEC plugin
+
+commit dda0bb57137846a476a866c60db2681aaf6052c0
+Merge: 4fd554e d70927a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 20 20:01:41 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d70927afec977d489a54c106a3c3ddc32e953050
+Merge: 1daebf1 9d0231c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 20 20:01:33 2012 -0500
+
+    Merge branch 'linux-3.2.y' into pax-test
+
 commit 4fd554e3a097b22c5049fcdc423897477deff5ef
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Feb 20 09:17:57 2012 -0500
