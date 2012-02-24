@@ -1,3 +1,42 @@
+commit 12db8453f6bb0a756f369c9151668ba1249bc478
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 21:10:12 2012 -0500
+
+    Remove unnecessary copies, as suggested by solar
+
+commit cc02cab84368467ea03cb35f861a8a7092d91ab4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 20:59:35 2012 -0500
+
+    Make global_exec_counter static, as suggested by solar
+
+commit e642091a475ebb3a30e81f85e7751233d0c2af43
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 19:00:26 2012 -0500
+
+    sync with stable tree
+
+commit 6df09c3d8e371905b7b8fe90c4188f23614c6be5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 18:48:47 2012 -0500
+
+    Remove unneeded gr_acl_handle_fchmod, as the code is shared now by gr_acl_handle_chmod
+    Remove handling of old kludge in chmod/fchmod
+
+commit 815cb62f2ca7b58efc39778b3a855feb675ab56c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 18:18:49 2012 -0500
+
+    Apply umask checks to chmod/fchmod as well, as requested by sponsor
+    Union the enforced umask with the existing one to produce minimal privilege
+    Change umask type to u16
+
+commit 0e7668c6abbdbcd3f7f9759e3994d6f4bc9953f0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 22 18:16:11 2012 -0500
+
+    Add per-role umask enforcement to RBAC, requested by a sponsor
+
 commit ad5ac943fe58199f1cc475912a39edb157acb77b
 Merge: dda0bb5 41722e3
 Author: Brad Spengler <spender@grsecurity.net>
