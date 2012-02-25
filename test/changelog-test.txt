@@ -1,3 +1,23 @@
+commit 62f35fdbecc58f2988fe13638d907b87a15776bb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 25 09:08:55 2012 -0500
+
+    We could log on attempted exploits of writing /proc/self/mem, but the current
+    log function declares the access a read, so just swap the ordering for now
+
+commit 066ee8f9c26f1549b4ad893508777b549c8d4b79
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 25 08:46:14 2012 -0500
+
+    Log /proc/pid/mem attempts
+
+commit 674471e581893a94d475acac3e3c4496209b3ac9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 25 08:15:00 2012 -0500
+
+    Make use of f_version for protecting /proc file structs (fine since we're not a directory
+    or seq_file)
+
 commit eab42cfdd237ffcdd8ec24bedecc275a3a9e987f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Feb 24 20:02:19 2012 -0500
