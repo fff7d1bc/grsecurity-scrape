@@ -1,3 +1,23 @@
+commit eab42cfdd237ffcdd8ec24bedecc275a3a9e987f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 24 20:02:19 2012 -0500
+
+    Fix ia64 compilation
+
+commit 50dfea412fd395e0183c2ade368efa525d38b267
+Merge: 12db845 4c6f99b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 24 19:00:53 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 4c6f99bf338e03966356b147d0360cb3b522a44f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 24 19:00:36 2012 -0500
+
+    (6:57:09 PM) pipacs: but you can be proactive
+    (Fix other-arch atomic64/REFCOUNT compilation failures)
+
 commit 12db8453f6bb0a756f369c9151668ba1249bc478
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Feb 23 21:10:12 2012 -0500
