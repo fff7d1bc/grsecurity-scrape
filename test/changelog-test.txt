@@ -1,3 +1,25 @@
+commit 44306d7b3097f77e73040dd25f4f6750751bae7a
+Merge: 29d0b07 521c411
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 26 19:04:15 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	Makefile
+
+commit 521c411bb4ca66ce01146fde8bac9dd22414076d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 26 19:03:33 2012 -0500
+
+    Update to pax-linux-3.2.7-test16.patch
+
+commit 29d0b07290bb9a10cdfcc3c30058e16265330dea
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 26 17:12:44 2012 -0500
+
+    fix typo
+
 commit 344f6d84e5d3fdc6ec40a078fc2f5861d340b2ef
 Merge: f45b3be caa8f83
 Author: Brad Spengler <spender@grsecurity.net>
