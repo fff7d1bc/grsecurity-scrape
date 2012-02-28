@@ -1,3 +1,36 @@
+commit 9e667456c03eadea2f305be761abe4de9a5877a3
+Merge: 5e4e200 b255baf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 27 20:53:59 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b255baf50365d39b406f43aab2c64745607baaa2
+Merge: 340ce90 1de504e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 27 20:53:29 2012 -0500
+
+    Merge branch 'linux-3.2.y' into pax-test
+    Update to pax-linux-3.2.8-test17.patch
+    
+    Conflicts:
+    	arch/x86/include/asm/i387.h
+    	arch/x86/kernel/process_32.c
+    	arch/x86/kernel/traps.c
+
+commit 5e4e200ac530452884b625cb75de240e1e98c731
+Merge: 44306d7 340ce90
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 27 18:02:13 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 340ce90d98a043fa8e4ed9ffc229d4c1f86e2fec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 27 18:01:48 2012 -0500
+
+    Update to pax-linux-3.2.7-test17.patch
+
 commit 44306d7b3097f77e73040dd25f4f6750751bae7a
 Merge: 29d0b07 521c411
 Author: Brad Spengler <spender@grsecurity.net>
