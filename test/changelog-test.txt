@@ -1,3 +1,23 @@
+commit 0a56be884bbd7ce733cac0b879c45383494d73b0
+Merge: 9e66745 3f5c52a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 1 20:18:01 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3f5c52aba100b3bb252980f9d363aafde52da1a2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 1 20:16:56 2012 -0500
+
+    Update to pax-linux-3.2.9-test18.patch
+
+commit ae53ec231d12719a36bf871f8c5841020ed692ee
+Merge: b255baf 44fb317
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 1 20:15:31 2012 -0500
+
+    Merge branch 'linux-3.2.y' into pax-test
+
 commit 9e667456c03eadea2f305be761abe4de9a5877a3
 Merge: 5e4e200 b255baf
 Author: Brad Spengler <spender@grsecurity.net>
