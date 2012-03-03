@@ -1,3 +1,23 @@
+commit 3127bd581a292966b1057c7433219dac188c3720
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 2 21:30:37 2012 -0500
+
+    Fix memory leak on logged exec_id check failure in /proc/pid/statm
+    Thanks to Djalal Harouni for the report
+
+commit d9f1a3be0e97e0632f97379322712d8deeb3ce23
+Merge: 0a56be8 9aa8288
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 2 18:38:22 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9aa8288a09e6e03ce37c08136b26bff17a093b5c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 2 18:37:43 2012 -0500
+
+    Update to pax-linux-3.2.9-test19.patch
+
 commit 0a56be884bbd7ce733cac0b879c45383494d73b0
 Merge: 9e66745 3f5c52a
 Author: Brad Spengler <spender@grsecurity.net>
