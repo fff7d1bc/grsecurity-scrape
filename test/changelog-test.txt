@@ -1,3 +1,55 @@
+commit a831bd53764695ea680cc1fa3c98759a610ed2ac
+Author: Christian König <deathsimple@vodafone.de>
+Date:   Tue Feb 28 23:19:20 2012 +0100
+
+    drm/radeon: fix uninitialized variable
+    
+    Without this fix the driver randomly treats
+    textures as arrays and I'm really wondering
+    why gcc isn't complaining about it.
+    
+    Signed-off-by: Christian König <deathsimple@vodafone.de>
+    Reviewed-by: Jerome Glisse <jglisse@redhat.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+commit aa2cd55f97f3cc03bdd895b6e8ba99619ee69dfc
+Author: H. Peter Anvin <hpa@zytor.com>
+Date:   Fri Mar 2 10:43:48 2012 -0800
+
+    regset: Prevent null pointer reference on readonly regsets
+    
+    The regset common infrastructure assumed that regsets would always
+    have .get and .set methods, but not necessarily .active methods.
+    Unfortunately people have since written regsets without .set methods.
+    
+    Rather than putting in stub functions everywhere, handle regsets with
+    null .get or .set methods explicitly.
+    
+    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
+    Reviewed-by: Oleg Nesterov <oleg@redhat.com>
+    Acked-by: Roland McGrath <roland@hack.frob.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 072ddd99401c79b53c6bf6bff9deb93022124c79
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 5 18:12:57 2012 -0500
+
+    Fix compiler errors reported on forums
+
+commit 1606774b48af24e6f99d99c624c0e447d4b66474
+Merge: 3127bd5 4ca2ffd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 5 17:31:35 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 4ca2ffd9da024f4ba2d0cb6245ba1b2726169452
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 5 17:31:21 2012 -0500
+
+    Update to pax-linux-3.2.9-test20.patch
+
 commit 3127bd581a292966b1057c7433219dac188c3720
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Mar 2 21:30:37 2012 -0500
