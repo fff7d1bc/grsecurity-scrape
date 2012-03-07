@@ -1,3 +1,54 @@
+commit 9cd8dd4d56051099f11563f72fcd91cd0ce19604
+Author: Hugh Dickins <hughd@google.com>
+Date:   Tue Mar 6 12:28:52 2012 -0800
+
+    mmap: EINVAL not ENOMEM when rejecting VM_GROWS
+    
+    Currently error is -ENOMEM when rejecting VM_GROWSDOWN|VM_GROWSUP
+    from shared anonymous: hoist the file case's -EINVAL up for both.
+    
+    Signed-off-by: Hugh Dickins <hughd@google.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 97745dce6c87f9d9ca5b4be9bd4c2fc1684ca04c
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Mon Mar 5 06:38:42 2012 +0000
+
+    aout: move setup_arg_pages() prior to reading/mapping the binary
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 3b20ce55ae8cffee43cb4afdf5be438b5ac4fef0
+Author: Jan Beulich <JBeulich@suse.com>
+Date:   Mon Mar 5 16:49:24 2012 +0000
+
+    vsprintf: make %pV handling compatible with kasprintf()
+    
+    kasprintf() (and potentially other functions that I didn't run across so
+    far) want to evaluate argument lists twice.  Caring to do so for the
+    primary list is obviously their job, but they can't reasonably be
+    expected to check the format string for instances of %pV, which however
+    need special handling too: On architectures like x86-64 (as opposed to
+    e.g.  ix86), using the same argument list twice doesn't produce the
+    expected results, as an internally managed cursor gets updated during
+    the first run.
+    
+    Fix the problem by always acting on a copy of the original list when
+    handling %pV.
+    
+    Signed-off-by: Jan Beulich <jbeulich@suse.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 4146896ab9674f51d4909f3a52bc7fe80f04e4cb
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Mon Mar 5 06:39:47 2012 +0000
+
+    VM_GROWS{UP,DOWN} shouldn't be set on shmem VMAs
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
 commit a831bd53764695ea680cc1fa3c98759a610ed2ac
 Author: Christian König <deathsimple@vodafone.de>
 Date:   Tue Feb 28 23:19:20 2012 +0100
