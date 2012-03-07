@@ -1,3 +1,39 @@
+commit a366d0ed963ce93fce10121c1100989d5f064e75
+Author: Mikulas Patocka <mpatocka@redhat.com>
+Date:   Sun Mar 4 19:52:03 2012 -0500
+
+    mm: fix find_vma_prev
+    
+    Commit 6bd4837de96e ("mm: simplify find_vma_prev()") broke memory
+    management on PA-RISC.
+    
+    After application of the patch, programs that allocate big arrays on the
+    stack crash with segfault, for example, this will crash if compiled
+    without optimization:
+    
+      int main()
+      {
+    	char array[200000];
+    	array[199999] = 0;
+    	return 0;
+      }
+    
+    The reason is that PA-RISC has up-growing stack and the stack is usually
+    the last memory area.  In the above example, a page fault happens above
+    the stack.
+    
+    Previously, if we passed too high address to find_vma_prev, it returned
+    NULL and stored the last VMA in *pprev.  After "simplify find_vma_prev"
+    change, it stores NULL in *pprev.  Consequently, the stack area is not
+    found and it is not expanded, as it used to be before the change.
+    
+    This patch restores the old behavior and makes it return the last VMA in
+    *pprev if the requested address is higher than address of any other VMA.
+    
+    Signed-off-by: Mikulas Patocka <mpatocka@redhat.com>
+    Acked-by: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
 commit 9cd8dd4d56051099f11563f72fcd91cd0ce19604
 Author: Hugh Dickins <hughd@google.com>
 Date:   Tue Mar 6 12:28:52 2012 -0800
