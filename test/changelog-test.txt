@@ -1,3 +1,81 @@
+commit c4650f14b13f84735fe3de06a1f3ff5776473eff
+Merge: fb2abee 1015790
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 11 21:08:28 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit 101579028a736c224e590c7e12a7357018c424e1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 11 21:07:27 2012 -0400
+
+    Update to pax-linux-3.2.9-test22.patch
+
+commit fb2abee4b9b49f5f18342a8cdf7aa3ba2b7c9100
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 11 11:02:17 2012 -0400
+
+    Allow 4096 CPUs
+
+commit 96bae28cbe6a41d48e3b56e5904814096e956000
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 11 10:25:58 2012 -0400
+
+    Use a per-cpu 48-bit counter instead of a global atomic64
+    Initialize each counter to have the cpu number in the lower 16 bits
+    instead of incrementing the counter each time by 1, perform the increments
+    above the cpu number so that wrapping/exhausting the counter doesn't corrupt
+    any state
+    idea from PaX Team
+
+commit b975688101da6e966aebb1bc6b8c5c5983974f9c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 10 20:33:12 2012 -0500
+
+    Special vnsec edition! :)
+    Further reduce argv/env allowance for suid/sgid apps to 512KB
+    Clamp suid/sgid stack resource limit to 8MB (preventing compat mmap layout fallback/too large stack gap)
+    Clear 3GB personality on suid/sgid binaries
+    Restore 4 bits entropy in the lowest bits of arg/env strings (now 28 bits on x86, 39 bits on x64)
+      with the main purpose of throwing off program stack -> arg/env alignment
+    Update documentation
+
+commit e5cfa902c4e891d11dd2086543d2555aa0c27d33
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 10 19:54:47 2012 -0500
+
+    Resolve skbuff.h warnings that turn into errors during compilation in
+    the grsecurity directory with -Werror
+
+commit 2023210ad43a944033fcacc660ce410888f562ee
+Merge: ece4383 5f66adf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 9 19:48:01 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5f66adf72f83730a07bc79a2fab56afed6dbbd0e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 9 19:47:06 2012 -0500
+
+    Add colorize plugin
+
+commit ece4383e5e91c92d138c4df84225a70b552f4d69
+Merge: a366d0e ab4a5a1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 9 17:56:46 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ab4a5a1a67289c3585e2ff8aa64ecece7bd17eea
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 9 17:56:26 2012 -0500
+
+    Update to pax-linux-3.2.9-test21.patch
+
 commit a366d0ed963ce93fce10121c1100989d5f064e75
 Author: Mikulas Patocka <mpatocka@redhat.com>
 Date:   Sun Mar 4 19:52:03 2012 -0500
