@@ -1,3 +1,59 @@
+commit 8f95ea9f718c293794a1f6bdd2a5f5f336f7bd64
+Merge: c8786a2 886ac5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 13 17:38:13 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Greets and thanks to snq for his assistance in testing/debugging REFCOUNT on ARM :)
+
+commit 886ac5eeb1835e87cf7398b8aae9e9ba6b36bf77
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 13 17:37:44 2012 -0400
+
+    Update to pax-linux-3.2.10-test26.patch
+
+commit c8786a2abed5e5327f68efa520c04db99bb6a63a
+Merge: 219c982 c061fcf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 13 17:25:06 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c061fcfa6b78f3774800821144d8ac2d94d7da3e
+Merge: 89373d2 3f4b3b2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 13 17:25:02 2012 -0400
+
+    Merge branch 'linux-3.2.y' into pax-test
+
+commit 219c982a05abe47be4ea7d749e1b408e0cb86f1f
+Merge: 54e19a3 89373d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 12 17:23:57 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 89373d2abafb9bda97f78bdb157d1d05cf21e008
+Merge: a778588 7459f11
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 12 17:23:49 2012 -0400
+
+    Merge branch 'linux-3.2.y' into pax-test
+
+commit 54e19a3979978fca902b14ae25125f26fbbbc7a7
+Merge: c4650f1 a778588
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 12 16:51:25 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a778588c9d1b75c48c1f09aac98c1b28bd87a749
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 12 16:51:12 2012 -0400
+
+    Update to pax-linux-3.2.9-test24.patch
+
 commit c4650f14b13f84735fe3de06a1f3ff5776473eff
 Merge: fb2abee 1015790
 Author: Brad Spengler <spender@grsecurity.net>
