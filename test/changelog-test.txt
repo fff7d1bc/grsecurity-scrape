@@ -1,3 +1,29 @@
+commit e4b05b65c645c412eceb9c950ee7b4771627e6b1
+Merge: e55aa68 258c015
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 15 20:59:19 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 258c0159fa6dd5044ca984eeaad57bb6e21bacea
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 15 20:59:05 2012 -0400
+
+    fix ARM compilation
+
+commit e55aa68f4bb20e75cd7423123aa612c2a69590c0
+Merge: 8f95ea9 55b7573
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 14 19:33:41 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 55b7573f6c2f3be26fb39c7bd6a9d742d02811ca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 14 19:33:15 2012 -0400
+
+    Update to pax-linux-3.2.10-test28.patch
+
 commit 8f95ea9f718c293794a1f6bdd2a5f5f336f7bd64
 Merge: c8786a2 886ac5e
 Author: Brad Spengler <spender@grsecurity.net>
