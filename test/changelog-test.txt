@@ -1,3 +1,21 @@
+commit cf83f735a5571f4341ee6eab947a1f7d833cea6e
+Merge: e4b05b6 eae671f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 16 21:04:27 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit eae671fafe93f04685c04a089cc13efebc05d600
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 16 20:58:01 2012 -0400
+
+    Update to pax-linux-3.2.11-test31.patch
+    Introduction of the size_overflow plugin from Emese Revfy
+    Many thanks to Emese for her hard work :)
+
 commit e4b05b65c645c412eceb9c950ee7b4771627e6b1
 Merge: e55aa68 258c015
 Author: Brad Spengler <spender@grsecurity.net>
