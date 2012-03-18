@@ -1,3 +1,329 @@
+commit 8e012dcf7a50b7cde34c2cec93ecedd049123b75
+Author: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+Date:   Fri Mar 16 17:08:39 2012 -0700
+
+    nilfs2: fix NULL pointer dereference in nilfs_load_super_block()
+    
+    According to the report from Slicky Devil, nilfs caused kernel oops at
+    nilfs_load_super_block function during mount after he shrank the
+    partition without resizing the filesystem:
+    
+     BUG: unable to handle kernel NULL pointer dereference at 00000048
+     IP: [<d0d7a08e>] nilfs_load_super_block+0x17e/0x280 [nilfs2]
+     *pde = 00000000
+     Oops: 0000 [#1] PREEMPT SMP
+     ...
+     Call Trace:
+      [<d0d7a87b>] init_nilfs+0x4b/0x2e0 [nilfs2]
+      [<d0d6f707>] nilfs_mount+0x447/0x5b0 [nilfs2]
+      [<c0226636>] mount_fs+0x36/0x180
+      [<c023d961>] vfs_kern_mount+0x51/0xa0
+      [<c023ddae>] do_kern_mount+0x3e/0xe0
+      [<c023f189>] do_mount+0x169/0x700
+      [<c023fa9b>] sys_mount+0x6b/0xa0
+      [<c04abd1f>] sysenter_do_call+0x12/0x28
+     Code: 53 18 8b 43 20 89 4b 18 8b 4b 24 89 53 1c 89 43 24 89 4b 20 8b 43
+     20 c7 43 2c 00 00 00 00 23 75 e8 8b 50 68 89 53 28 8b 54 b3 20 <8b> 72
+     48 8b 7a 4c 8b 55 08 89 b3 84 00 00 00 89 bb 88 00 00 00
+     EIP: [<d0d7a08e>] nilfs_load_super_block+0x17e/0x280 [nilfs2] SS:ESP 0068:ca9bbdcc
+     CR2: 0000000000000048
+    
+    This turned out due to a defect in an error path which runs if the
+    calculated location of the secondary super block was invalid.
+    
+    This patch fixes it and eliminates the reported oops.
+    
+    Reported-by: Slicky Devil <slicky.dvl@gmail.com>
+    Signed-off-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+    Tested-by: Slicky Devil <slicky.dvl@gmail.com>
+    Cc: <stable@vger.kernel.org>	[2.6.30+]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 8067d7f69bf27dc08057a771cf125e71e4575bf2
+Author: Haogang Chen <haogangchen@gmail.com>
+Date:   Fri Mar 16 17:08:38 2012 -0700
+
+    nilfs2: clamp ns_r_segments_percentage to [1, 99]
+    
+    ns_r_segments_percentage is read from the disk.  Bogus or malicious
+    value could cause integer overflow and malfunction due to meaningless
+    disk usage calculation.  This patch reports error when mounting such
+    bogus volumes.
+    
+    Signed-off-by: Haogang Chen <haogangchen@gmail.com>
+    Signed-off-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit e1a90645643f9b0194a5984ec8febd06360d5c8b
+Author: Eric Dumazet <eric.dumazet@gmail.com>
+Date:   Sat Mar 10 09:20:21 2012 +0000
+
+    tcp: fix syncookie regression
+    
+    commit ea4fc0d619 (ipv4: Don't use rt->rt_{src,dst} in ip_queue_xmit())
+    added a serious regression on synflood handling.
+    
+    Simon Kirby discovered a successful connection was delayed by 20 seconds
+    before being responsive.
+    
+    In my tests, I discovered that xmit frames were lost, and needed ~4
+    retransmits and a socket dst rebuild before being really sent.
+    
+    In case of syncookie initiated connection, we use a different path to
+    initialize the socket dst, and inet->cork.fl.u.ip4 is left cleared.
+    
+    As ip_queue_xmit() now depends on inet flow being setup, fix this by
+    copying the temp flowi4 we use in cookie_v4_check().
+    
+    Reported-by: Simon Kirby <sim@netnation.com>
+    Bisected-by: Simon Kirby <sim@netnation.com>
+    Signed-off-by: Eric Dumazet <eric.dumazet@gmail.com>
+    Tested-by: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 06c6c8628bf38b08b4d97f4c55cde9fdecfb5d65
+Author: Stanislav Kinsbursky <skinsbursky@parallels.com>
+Date:   Mon Mar 12 02:59:41 2012 +0000
+
+    tun: don't hold network namespace by tun sockets
+    
+    v3: added previously removed sock_put() to the tun_release() callback, because
+    sk_release_kernel() doesn't drop the socket reference.
+    
+    v2: sk_release_kernel() used for socket release. Dummy tun_release() is
+    required for sk_release_kernel() ---> sock_release() ---> sock->ops->release()
+    call.
+    
+    TUN was designed to destroy it's socket on network namesapce shutdown. But this
+    will never happen for persistent device, because it's socket holds network
+    namespace.
+    This patch removes of holding network namespace by TUN socket and replaces it
+    by creating socket in init_net and then changing it's net it to desired one. On
+    shutdown socket is moved back to init_net prior to final put.
+    
+    Signed-off-by: Stanislav Kinsbursky <skinsbursky@parallels.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 46ae7374bd387c58d673a9e58852a9fd31042c5c
+Author: Tyler Hicks <tyhicks@canonical.com>
+Date:   Mon Dec 12 10:02:30 2011 -0600
+
+    vfs: Correctly set the dir i_mutex lockdep class
+    
+    9a7aa12f3911853a introduced additional logic around setting the i_mutex
+    lockdep class for directory inodes. The idea was that some filesystems
+    may want their own special lockdep class for different directory
+    inodes and calling unlock_new_inode() should not clobber one of
+    those special classes.
+    
+    I believe that the added conditional, around the *negated* return value
+    of lockdep_match_class(), caused directory inodes to be placed in the
+    wrong lockdep class.
+    
+    inode_init_always() sets the i_mutex lockdep class with i_mutex_key for
+    all inodes. If the filesystem did not change the class during inode
+    initialization, then the conditional mentioned above was false and the
+    directory inode was incorrectly left in the non-directory lockdep class.
+    If the filesystem did set a special lockdep class, then the conditional
+    mentioned above was true and that class was clobbered with
+    i_mutex_dir_key.
+    
+    This patch removes the negation from the conditional so that the i_mutex
+    lockdep class is properly set for directory inodes. Special classes are
+    preserved and directory inodes with unmodified classes are set with
+    i_mutex_dir_key.
+    
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Reviewed-by: Jan Kara <jack@suse.cz>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+commit 603590b0d2eca61ce26499eac9c563bc567a18c9
+Author: Jan Kara <jack@suse.cz>
+Date:   Mon Feb 20 17:54:00 2012 +0100
+
+    udf: Fix deadlock in udf_release_file()
+    
+    udf_release_file() can be called from munmap() path with mmap_sem held.  Thus
+    we cannot take i_mutex there because that ranks above mmap_sem. Luckily,
+    i_mutex is not needed in udf_release_file() anymore since protection by
+    i_data_sem is enough to protect from races with write and truncate.
+    
+    Reported-by: Al Viro <viro@ZenIV.linux.org.uk>
+    Reviewed-by: Namjae Jeon <linkinjeon@gmail.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+commit ca79ab9034f3c2f7e3f65c35e0d9ed3ecea529bf
+Author: Miklos Szeredi <mszeredi@suse.cz>
+Date:   Tue Mar 6 13:56:33 2012 +0100
+
+    vfs: fix double put after complete_walk()
+    
+    complete_walk() already puts nd->path, no need to do it again at cleanup time.
+    
+    This would result in Oopses if triggered, apparently the codepath is not too
+    well exercised.
+    
+    Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+commit 13885ba2b18400f3ef6540497d30f1af896605e5
+Author: Miklos Szeredi <mszeredi@suse.cz>
+Date:   Tue Mar 6 13:56:34 2012 +0100
+
+    vfs: fix return value from do_last()
+    
+    complete_walk() returns either ECHILD or ESTALE.  do_last() turns this into
+    ECHILD unconditionally.  If not in RCU mode, this error will reach userspace
+    which is complete nonsense.
+    
+    Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    
+    Conflicts:
+    
+    	fs/namei.c
+
+commit f5ab7572c99ffb58953eb1070622307e904c3b7f
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sat Mar 10 17:07:28 2012 -0500
+
+    restore smp_mb() in unlock_new_inode()
+    
+    wait_on_inode() doesn't have ->i_lock
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+commit f3e758cd08e3881982d4b78eb72fe8a1ead6b872
+Author: David S. Miller <davem@davemloft.net>
+Date:   Tue Mar 13 18:19:51 2012 -0700
+
+    sparc32: Add -Av8 to assembler command line.
+    
+    Newer version of binutils are more strict about specifying the
+    correct options to enable certain classes of instructions.
+    
+    The sparc32 build is done for v7 in order to support sun4c systems
+    which lack hardware integer multiply and divide instructions.
+    
+    So we have to pass -Av8 when building the assembler routines that
+    use these instructions and get patched into the kernel when we find
+    out that we have a v8 capable cpu.
+    
+    Reported-by: Paul Gortmaker <paul.gortmaker@windriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 66276ec78b2a971d2e704e5ef963cdc8b6a049a4
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Fri Mar 9 20:55:10 2012 +0100
+
+    x86: Derandom delay_tsc for 64 bit
+    
+    Commit f0fbf0abc093 ("x86: integrate delay functions") converted
+    delay_tsc() into a random delay generator for 64 bit.  The reason is
+    that it merged the mostly identical versions of delay_32.c and
+    delay_64.c.  Though the subtle difference of the result was:
+    
+     static void delay_tsc(unsigned long loops)
+     {
+    -	unsigned bclock, now;
+    +	unsigned long bclock, now;
+    
+    Now the function uses rdtscl() which returns the lower 32bit of the
+    TSC. On 32bit that's not problematic as unsigned long is 32bit. On 64
+    bit this fails when the lower 32bit are close to wrap around when
+    bclock is read, because the following check
+    
+           if ((now - bclock) >= loops)
+           	  	break;
+    
+    evaluated to true on 64bit for e.g. bclock = 0xffffffff and now = 0
+    because the unsigned long (now - bclock) of these values results in
+    0xffffffff00000001 which is definitely larger than the loops
+    value. That explains Tvortkos observation:
+    
+    "Because I am seeing udelay(500) (_occasionally_) being short, and
+     that by delaying for some duration between 0us (yep) and 491us."
+    
+    Make those variables explicitely u32 again, so this works for both 32
+    and 64 bit.
+    
+    Reported-by: Tvrtko Ursulin <tvrtko.ursulin@onelan.co.uk>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    Cc: stable@vger.kernel.org # >= 2.6.27
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 2d0ddb60f5031bdf79b4d51225f9f2d5856255bf
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Thu Mar 8 17:51:19 2012 +0000
+
+    aio: fix the "too late munmap()" race
+    
+    Current code has put_ioctx() called asynchronously from aio_fput_routine();
+    that's done *after* we have killed the request that used to pin ioctx,
+    so there's nothing to stop io_destroy() waiting in wait_for_all_aios()
+    from progressing.  As the result, we can end up with async call of
+    put_ioctx() being the last one and possibly happening during exit_mmap()
+    or elf_core_dump(), neither of which expects stray munmap() being done
+    to them...
+    
+    We do need to prevent _freeing_ ioctx until aio_fput_routine() is done
+    with that, but that's all we care about - neither io_destroy() nor
+    exit_aio() will progress past wait_for_all_aios() until aio_fput_routine()
+    does really_put_req(), so the ioctx teardown won't be done until then
+    and we don't care about the contents of ioctx past that point.
+    
+    Since actual freeing of these suckers is RCU-delayed, we don't need to
+    bump ioctx refcount when request goes into list for async removal.
+    All we need is rcu_read_lock held just over the ->ctx_lock-protected
+    area in aio_fput_routine().
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Reviewed-by: Jeff Moyer <jmoyer@redhat.com>
+    Acked-by: Benjamin LaHaise <bcrl@kvack.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 002124c055afbf09b52226af65621999e8316448
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Wed Mar 7 05:16:35 2012 +0000
+
+    aio: fix io_setup/io_destroy race
+    
+    Have ioctx_alloc() return an extra reference, so that caller would drop it
+    on success and not bother with re-grabbing it on failure exit.  The current
+    code is obviously broken - io_destroy() from another thread that managed
+    to guess the address io_setup() would've returned would free ioctx right
+    under us; gets especially interesting if aio_context_t * we pass to
+    io_setup() points to PROT_READ mapping, so put_user() fails and we end
+    up doing io_destroy() on kioctx another thread has just got freed...
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Acked-by: Benjamin LaHaise <bcrl@kvack.org>
+    Reviewed-by: Jeff Moyer <jmoyer@redhat.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit a1cd2719b8ed8e40dbd98c87713ac23a2169f6d8
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Thu Mar 15 15:17:12 2012 -0700
+
+    drivers/video/backlight/s6e63m0.c: fix corruption storing gamma mode
+    
+    strict_strtoul() writes a long but ->gamma_mode only has space to store an
+    int, so on 64 bit systems we end up scribbling over ->gamma_table_count as
+    well.  I've changed it to use kstrtouint() instead.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Acked-by: Inki Dae <inki.dae@samsung.com>
+    Signed-off-by: Florian Tobias Schandinat <FlorianSchandinat@gmx.de>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
 commit cf83f735a5571f4341ee6eab947a1f7d833cea6e
 Merge: e4b05b6 eae671f
 Author: Brad Spengler <spender@grsecurity.net>
