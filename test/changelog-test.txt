@@ -1,3 +1,20 @@
+commit 402ec3d24d66d38403dc543c84851f5e72d39e22
+Merge: 8e012dc f14661a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 19 18:06:59 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/namei.c
+
+commit f14661aaf202155c97f66626cea0269017bb7775
+Merge: eae671f 058b017
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 19 18:05:44 2012 -0400
+
+    Merge branch 'linux-3.2.y' into pax-test
+
 commit 8e012dcf7a50b7cde34c2cec93ecedd049123b75
 Author: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
 Date:   Fri Mar 16 17:08:39 2012 -0700
