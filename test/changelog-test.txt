@@ -1,3 +1,43 @@
+commit b00953b43c69238d181d21121ef1577c988d5f6b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 20 19:29:34 2012 -0400
+
+    zero real_root after releasing it
+
+commit 0b3ab73ce5d34a2c3206955cd65eddd6bdfd32a1
+Merge: b724f59 273f98e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 20 19:11:26 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 273f98e58cdac555d3b5dce5c1ca168349f95878
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 20 19:10:52 2012 -0400
+
+    Temporary workaround for (most) size_overflow plugin false-positives
+    Increase randomization for brk-managed heap to 21 bits
+    Update to pax-linux-3.2.12-test32.patch
+
+commit b724f59125304460c2af8bd4b02921993afbb5d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 20 18:58:53 2012 -0400
+
+    compile fix
+
+commit 329f1a9d0f137d0a973316c53bbec18a6eeecd4f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 20 18:52:23 2012 -0400
+
+    Require default and kernel role
+
+commit a7c5c4f55bdd61cfcd0fb1be7a67160429409878
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 20 18:47:28 2012 -0400
+
+    Allow policies without special roles
+    don't call free_variables in error path of copy_user_acl, we'll call it later (triggered by a policy without special roles)
+
 commit 402ec3d24d66d38403dc543c84851f5e72d39e22
 Merge: 8e012dc f14661a
 Author: Brad Spengler <spender@grsecurity.net>
