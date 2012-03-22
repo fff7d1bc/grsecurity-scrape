@@ -1,3 +1,22 @@
+commit 22f6432d0fe733619cfcb523782ed7d80c46d645
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 21 19:42:42 2012 -0400
+
+    compile fix
+
+commit 0cad49d6b8fbb32395da924c1665a1110a9a9eef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 21 19:34:56 2012 -0400
+
+    Resolve some very tricky hash table manipulations that resulted in an infinite loop in certain
+    uses of domains with particular hash collisions
+
+commit 47fc52e0a068a29d6cca2f809daf0679cba33c44
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 20 20:25:49 2012 -0400
+
+    zero kernel_role
+
 commit b00953b43c69238d181d21121ef1577c988d5f6b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Mar 20 19:29:34 2012 -0400
