@@ -1,3 +1,22 @@
+commit a00016a11e35e91aec8e2d9b6ec4c6fbb11d6d2b
+Merge: 0949bd4 fc53d63
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 22 19:03:44 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit fc53d6338964741b368070ec5c935bc579b8c2a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 22 19:02:45 2012 -0400
+
+    Update to pax-linux-3.2.12-test33.patch
+
+commit 0949bd46a6455b308f66ad7c993bfee62412db35
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 22 16:56:09 2012 -0400
+
+    Use current_umask() instead of current->fs->umask
+
 commit 22f6432d0fe733619cfcb523782ed7d80c46d645
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Mar 21 19:42:42 2012 -0400
