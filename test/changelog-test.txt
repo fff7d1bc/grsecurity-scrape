@@ -1,3 +1,70 @@
+commit 412185c4992a6b746d4afd039ba43ef234f67aad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 20:19:01 2012 -0400
+
+    compile fix
+
+commit c9ef1bf36c5145857ddec249fd3faac5507661cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 20:03:33 2012 -0400
+
+    Fix port of /proc restrictions
+
+commit 3eb9d8c8fef296ab41ac6db5e24f8472f2849ea9
+Merge: 0e19043 0570523
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 19:35:37 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0570523cdca02dd228082b0152dd14140aa9b4d4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 19:34:11 2012 -0400
+
+    Update to pax-linux-3.3-test3.patch
+    reduces overcommit amount from recently increased brk entropy
+
+commit 0e19043d13ef5ba8c833d075d49b5cfb1bdfec53
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 19:25:48 2012 -0400
+
+    Hold rcu_read_lock
+
+commit 9a90e1cffec9080574cef64611b1828690a6f3d8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 19:20:34 2012 -0400
+
+    compile fix
+
+commit 485755bfa7629914889409b5aa18d614fedaf873
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 18:34:44 2012 -0400
+
+    compile fix
+
+commit e796b6a7bd9f204ae918e9bef8b6aa7650735e77
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 18:30:36 2012 -0400
+
+    compile fix
+
+commit 75f929048fd30016197a1d3b265b46591b985e72
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 18:19:34 2012 -0400
+
+    compile fix
+
+commit f5d20702ca626d8ed7c7cdb3312f02dcf7eb0fe8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 18:16:51 2012 -0400
+
+    Initial patch of grsecurity 2.9 for Linux 3.3
+
+commit 65a4fc291c85027ea1be6b06dc99d3cfcd07a1d9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 24 15:31:31 2012 -0400
+
+    Import pax-linux-3.3-test2.patch
 commit a00016a11e35e91aec8e2d9b6ec4c6fbb11d6d2b
 Merge: 0949bd4 fc53d63
 Author: Brad Spengler <spender@grsecurity.net>
