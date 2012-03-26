@@ -1,3 +1,133 @@
+commit 7062ff9c0cada849bc7d984d6318d52be7647b44
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon Mar 19 16:19:53 2012 -0700
+
+    vfs: get rid of batshit-insane pointless dentry hash calculations
+    
+    For some odd historical reason, the final mixing round for the dentry
+    cache hash table lookup had an insane "xor with big constant" logic.  In
+    two places.
+    
+    The big constant that is being xor'ed is GOLDEN_RATIO_PRIME, which is a
+    fairly random-looking number that is designed to be *multiplied* with so
+    that the bits get spread out over a whole long-word.
+    
+    But xor'ing with it is insane.  It doesn't really even change the hash -
+    it really only shifts the hash around in the hash table.  To make
+    matters worse, the insane big constant is different on 32-bit and 64-bit
+    builds, even though the name hash bits we use are always 32-bit (and the
+    bits from the pointer we mix in effectively are too).
+    
+    It's all total voodoo programming, in other words.
+    
+    Now, some testing and analysis of the hash chains shows that the rest of
+    the hash function seems to be fairly good.  It does pick the right bits
+    of the parent dentry pointer, for example, and while it's generally a
+    bad idea to use an xor to mix down the upper bits (because if there is a
+    repeating pattern, the xor can cause "destructive interference"), it
+    seems to not have been a disaster.
+    
+    For example, replacing the hash with the normal "hash_long()" code (that
+    uses the GOLDEN_RATIO_PRIME constant correctly, btw) actually just makes
+    the hash worse.  The hand-picked hash knew which bits of the pointer had
+    the highest entropy, and hash_long() ends up mixing bits less optimally
+    at least in some trivial tests.
+    
+    So the hash function overall seems fine, it just has that really odd
+    "shift result around by a constant xor".
+    
+    So get rid of the silly xor, and replace the down-mixing of the bits
+    with an add instead of an xor that tends to not have the same kind of
+    destructive interference issues.  Some stats on the resulting hash
+    chains shows that they look statistically identical before and after,
+    but the code is simpler and no longer makes you go "WTF?".
+    
+    Also, the incoming hash really is just "unsigned int", not a long, and
+    there's no real point to worry about the high 26 bits of the dentry
+    pointer for the 64-bit case, because they are all going to be identical
+    anyway.
+    
+    So also change the hashing to be done in the more natural 'unsigned int'
+    that is the real size of the actual hashed data anyway.
+    
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 1933ee4cf1ce8f256e0441323d0fa1555016ca3c
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Fri Mar 23 15:02:40 2012 -0700
+
+    ptrace: don't send SIGTRAP on exec if SEIZED
+    
+    ptrace_event(PTRACE_EVENT_EXEC) sends SIGTRAP if PT_TRACE_EXEC is not
+    set.  This is because this SIGTRAP predates PTRACE_O_TRACEEXEC option,
+    we do not need/want this with PT_SEIZED which can set the options during
+    attach.
+    
+    Suggested-by: Pedro Alves <palves@redhat.com>
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Cc: Chris Evans <scarybeasts@gmail.com>
+    Cc: Indan Zupancic <indan@nul.nu>
+    Cc: Denys Vlasenko <vda.linux@googlemail.com>
+    Cc: Tejun Heo <tj@kernel.org>
+    Cc: Pedro Alves <palves@redhat.com>
+    Cc: Jan Kratochvil <jan.kratochvil@redhat.com>
+    Cc: Steven Rostedt <rostedt@goodmis.org>
+    Cc: Frederic Weisbecker <fweisbec@gmail.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 96b9985a386432ddefbca4f3ca3837fe72652e77
+Author: Dmitry Adamushko <dmitry.adamushko@gmail.com>
+Date:   Thu Mar 22 21:39:25 2012 +0100
+
+    x86-32: Fix endless loop when processing signals for kernel tasks
+    
+    The problem occurs on !CONFIG_VM86 kernels [1] when a kernel-mode task
+    returns from a system call with a pending signal.
+    
+    A real-life scenario is a child of 'khelper' returning from a failed
+    kernel_execve() in ____call_usermodehelper() [ kernel/kmod.c ].
+    kernel_execve() fails due to a pending SIGKILL, which is the result of
+    "kill -9 -1" (at least, busybox's init does it upon reboot).
+    
+    The loop is as follows:
+    
+    * syscall_exit_work:
+     - work_pending:            // start_of_the_loop
+     - work_notify_sig:
+       - do_notify_resume()
+         - do_signal()
+           - if (!user_mode(regs)) return;
+     - resume_userspace         // TIF_SIGPENDING is still set
+     - work_pending             // so we call work_pending => goto
+                                // start_of_the_loop
+    
+    More information can be found in another LKML thread:
+    http://www.serverphorums.com/read.php?12,457826
+    
+    [1] the problem was also seen on MIPS.
+    
+    Signed-off-by: Dmitry Adamushko <dmitry.adamushko@gmail.com>
+    Link: http://lkml.kernel.org/r/1332448765.2299.68.camel@dimm
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Roland McGrath <roland@hack.frob.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
+
+commit d2184c1098a46d3b1f96299f352d11f2e20da3b0
+Merge: 412185c efbb92a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 25 18:35:21 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit efbb92ad36e7e4f53482380f53a9cc38faca925d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 25 18:35:07 2012 -0400
+
+    Update to pax-linux-3.3-test4.patch
+
 commit 412185c4992a6b746d4afd039ba43ef234f67aad
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Mar 24 20:19:01 2012 -0400
