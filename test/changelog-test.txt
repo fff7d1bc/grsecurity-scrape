@@ -1,3 +1,17 @@
+commit 236c100307ff0416f0ef17efe7540a2ce0077cbf
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Sat Mar 24 10:52:50 2012 +0300
+
+    x86, tls: Off by one limit check
+    
+    These are used as offsets into an array of GDT_ENTRY_TLS_ENTRIES members
+    so GDT_ENTRY_TLS_ENTRIES is one past the end of the array.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Link: http://lkml.kernel.org/r/20120324075250.GA28258@elgon.mountain
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
+
 commit 7062ff9c0cada849bc7d984d6318d52be7647b44
 Author: Linus Torvalds <torvalds@linux-foundation.org>
 Date:   Mon Mar 19 16:19:53 2012 -0700
