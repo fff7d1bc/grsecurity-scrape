@@ -1,3 +1,20 @@
+commit 71e7dbb7e5586987130b85faec1b689557ae89ea
+Merge: 236c100 d333553
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 2 17:38:41 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d333553e2c2b46b81ddeaa6c06e66d885f853514
+Merge: efbb92a 07a4483
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 2 17:38:26 2012 -0400
+
+    Merge branch 'linux-3.3.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/net/bpf_jit_comp.c
+
 commit 236c100307ff0416f0ef17efe7540a2ce0077cbf
 Author: Dan Carpenter <dan.carpenter@oracle.com>
 Date:   Sat Mar 24 10:52:50 2012 +0300
