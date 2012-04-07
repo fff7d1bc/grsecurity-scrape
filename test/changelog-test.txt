@@ -1,3 +1,39 @@
+commit a18343183d8978e473d53569ed4d700ff798ad35
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 6 19:45:36 2012 -0400
+
+    fake start_brk value before mmap is processed
+
+commit daa20cc1ecd09f3745ee2895af1385e02be79822
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 6 18:56:24 2012 -0400
+
+    fix wraparound
+
+commit 5693e0379b65616a111084fc0db5e408ee716d54
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 6 18:14:20 2012 -0400
+
+    Fix RLIMIT_AS checking with brk randomization
+
+commit 3822d8ebbe141004d4b57c71cbc4ed2948753059
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 5 21:23:00 2012 -0400
+
+    set end_data before mmap of gap otherwise we'll be counting toward RLIMIT_AS
+
+commit 0f5c00e65adef2b874afcaf36bd15898f1b07d1e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 5 20:54:16 2012 -0400
+
+    Fix RLIMIT_AS checking with brk randomization
+
+commit e8719b11ed6e03b3c9c4ca769dcd9341af0ca411
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 5 19:53:46 2012 -0400
+
+    Fix RLIMIT_AS accounting with brk randomization
+
 commit 71e7dbb7e5586987130b85faec1b689557ae89ea
 Merge: 236c100 d333553
 Author: Brad Spengler <spender@grsecurity.net>
