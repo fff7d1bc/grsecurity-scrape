@@ -1,3 +1,119 @@
+commit 5c04558d606ca8cfe925fa0d1c7cdcc7ad15b199
+Merge: 29547b5 8bb406f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 16:01:46 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	mm/mmap.c
+    	security/Kconfig
+
+commit 29547b5c27a97d0e13bd59bc3869f270ec472d66
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:59:33 2012 -0400
+
+    Revert "Fix RLIMIT_AS accounting with brk randomization"
+    
+    This reverts commit e8719b11ed6e03b3c9c4ca769dcd9341af0ca411.
+
+commit 784a578e35994ada12d51ee064538c06f0ad527c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:59:14 2012 -0400
+
+    Revert "Fix RLIMIT_AS checking with brk randomization"
+    
+    This reverts commit 0f5c00e65adef2b874afcaf36bd15898f1b07d1e.
+
+commit 68018e31a67166e3459768a57bcb9827c42e4906
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:58:59 2012 -0400
+
+    Revert "set end_data before mmap of gap otherwise we'll be counting toward RLIMIT_AS"
+    
+    This reverts commit 3822d8ebbe141004d4b57c71cbc4ed2948753059.
+
+commit 22ed2b3ef411bfe753ddcb039f52a02336003f98
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:58:40 2012 -0400
+
+    Revert "Fix RLIMIT_AS checking with brk randomization"
+    
+    This reverts commit 5693e0379b65616a111084fc0db5e408ee716d54.
+
+commit dd0706106b0a4e80d65cb971262faedb2eff82cb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:58:12 2012 -0400
+
+    Revert "fix wraparound"
+    
+    This reverts commit daa20cc1ecd09f3745ee2895af1385e02be79822.
+
+commit 803884ee45cb70ea06558aa4e409fbcff93d3d71
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:56:40 2012 -0400
+
+    Revert "fake start_brk value before mmap is processed"
+    
+    This reverts commit a18343183d8978e473d53569ed4d700ff798ad35.
+
+commit 8bb406fb30151e48b05390fcbdf886c3a9f773f9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:55:34 2012 -0400
+
+    Update to pax-linux-3.3.1-test6.patch
+
+commit 8b57bb1090a9dbe75bee876917e2522d278f004b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 15:40:58 2012 -0400
+
+    Always allow use of AF_UNSPEC for already-connected sockets to disconnect
+
+commit 9f88f736253a3bffdaaefc2dfb97cba3761707aa
+Author: Eric Dumazet <eric.dumazet@gmail.com>
+Date:   Thu Apr 5 22:17:46 2012 +0000
+
+    netlink: fix races after skb queueing
+    
+    As soon as an skb is queued into socket receive_queue, another thread
+    can consume it, so we are not allowed to reference skb anymore, or risk
+    use after free.
+    
+    Signed-off-by: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit cdbca15d6401902654b96d3105113865c37941e4
+Author: Eric Dumazet <eric.dumazet@gmail.com>
+Date:   Fri Apr 6 10:49:10 2012 +0200
+
+    net: fix a race in sock_queue_err_skb()
+    
+    As soon as an skb is queued into socket error queue, another thread
+    can consume it, so we are not allowed to reference skb anymore, or risk
+    use after free.
+    
+    Signed-off-by: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 96360cf85c2108f01a4fbbcfe6f63b4893f6a0fc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 10:13:28 2012 -0400
+
+    always allow admin to follow ptrace'd execs
+    no need for task_lock
+
+commit 9b915f7c937489fc3625981b619006c496e4bdaf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 07:01:20 2012 -0400
+
+    Require CAP_SYS_ADMIN for /sys/kernel/uevent_helper
+
+commit ac1df8a3412ab214b392a7eaee2b96f3478c8469
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 8 06:58:58 2012 -0400
+
+    Require CAP_SYS_ADMIN for /proc/sysrq-trigger
+
 commit a18343183d8978e473d53569ed4d700ff798ad35
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Apr 6 19:45:36 2012 -0400
