@@ -1,3 +1,80 @@
+commit c7db64db701e32d76797a3e07bc5c43c4029bb4b
+Author: Jason Wessel <jason.wessel@windriver.com>
+Date:   Thu Apr 12 12:49:17 2012 -0700
+
+    panic: fix stack dump print on direct call to panic()
+    
+    Commit 6e6f0a1f0fa6 ("panic: don't print redundant backtraces on oops")
+    causes a regression where no stack trace will be printed at all for the
+    case where kernel code calls panic() directly while not processing an
+    oops, and of course there are 100's of instances of this type of call.
+    
+    The original commit executed the check (!oops_in_progress), but this will
+    always be false because just before the dump_stack() there is a call to
+    bust_spinlocks(1), which does the following:
+    
+      void __attribute__((weak)) bust_spinlocks(int yes)
+      {
+    	if (yes) {
+    		++oops_in_progress;
+    
+    The proper way to resolve the problem that original commit tried to
+    solve is to avoid printing a stack dump from panic() when the either of
+    the following conditions is true:
+    
+      1) TAINT_DIE has been set (this is done by oops_end())
+         This indicates and oops has already been printed.
+      2) oops_in_progress > 1
+         This guards against the rare case where panic() is invoked
+         a second time, or in between oops_begin() and oops_end()
+    
+    Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
+    Cc: Andi Kleen <ak@linux.intel.com>
+    Cc: <stable@vger.kernel.org>	[3.3+]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit fa5fabf348ab41988ef87d20d24e3203c2aa8d40
+Author: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+Date:   Thu Apr 12 12:49:12 2012 -0700
+
+    drivers/char/random.c: fix boot id uniqueness race
+    
+    /proc/sys/kernel/random/boot_id can be read concurrently by userspace
+    processes.  If two (or more) user-space processes concurrently read
+    boot_id when sysctl_bootid is not yet assigned, a race can occur making
+    boot_id differ between the reads.  Because the whole point of the boot id
+    is to be unique across a kernel execution, fix this by protecting this
+    operation with a spinlock.
+    
+    Given that this operation is not frequently used, hitting the spinlock
+    on each call should not be an issue.
+    
+    Signed-off-by: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+    Cc: "Theodore Ts'o" <tytso@mit.edu>
+    Cc: Matt Mackall <mpm@selenic.com>
+    Signed-off-by: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: Greg Kroah-Hartman <greg@kroah.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 9f055943f8c70a331e6066d154584b94b8a7e6ff
+Merge: 15291162 69e4937
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 13 16:10:29 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	kernel/sysctl.c
+
+commit 69e4937b96b2c03dbe975eb70991f89bbe448411
+Merge: 0c851ef ad07d7b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 13 16:09:07 2012 -0400
+
+    Merge branch 'linux-3.3.y' into pax-test
+
 commit 152911622e7f698d34ae653ea79060d3f518bcb7
 Merge: 5c04558 0c851ef
 Author: Brad Spengler <spender@grsecurity.net>
