@@ -1,3 +1,16 @@
+commit 6bb89c4bd981848dd5647a2f3c933937d8e49a61
+Merge: c7db64d e538e1d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 15 11:08:50 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e538e1de0e33950814137a835b0402a097939c3f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 15 11:08:26 2012 -0400
+
+    Update to pax-linux-3.3.2-test7.patch
+
 commit c7db64db701e32d76797a3e07bc5c43c4029bb4b
 Author: Jason Wessel <jason.wessel@windriver.com>
 Date:   Thu Apr 12 12:49:17 2012 -0700
