@@ -1,3 +1,118 @@
+commit ed57dbd68c344c1d0e6617247fb7e80e7db1d796
+Author: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+Date:   Fri Apr 13 03:35:13 2012 +0000
+
+    sparc64: Eliminate obsolete __handle_softirq() function
+    
+    The invocation of softirq is now handled by irq_exit(), so there is no
+    need for sparc64 to invoke it on the trap-return path.  In fact, doing so
+    is a bug because if the trap occurred in the idle loop, this invocation
+    can result in lockdep-RCU failures.  The problem is that RCU ignores idle
+    CPUs, and the sparc64 trap-return path to the softirq handlers fails to
+    tell RCU that the CPU must be considered non-idle while those handlers
+    are executing.  This means that RCU is ignoring any RCU read-side critical
+    sections in those handlers, which in turn means that RCU-protected data
+    can be yanked out from under those read-side critical sections.
+    
+    The shiny new lockdep-RCU ability to detect RCU read-side critical sections
+    that RCU is ignoring located this problem.
+    
+    The fix is straightforward: Make sparc64 stop manually invoking the
+    softirq handlers.
+    
+    Reported-by: Meelis Roos <mroos@linux.ee>
+    Suggested-by: David Miller <davem@davemloft.net>
+    Signed-off-by: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+    Tested-by: Meelis Roos <mroos@linux.ee>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit e094cb83872b493ec77323eef91eaf409f13df79
+Author: David S. Miller <davem@davemloft.net>
+Date:   Fri Apr 13 11:56:22 2012 -0700
+
+    sparc64: Fix bootup crash on sun4v.
+    
+    The DS driver registers as a subsys_initcall() but this can be too
+    early, in particular this risks registering before we've had a chance
+    to allocate and setup module_kset in kernel/params.c which is
+    performed also as a subsyts_initcall().
+    
+    Register DS using device_initcall() insteal.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    Cc: stable@vger.kernel.org
+
+commit 2fe8dca41a62e05f6c0a0bf4852f8a8d0b8967e0
+Author: Lubos Lunak <l.lunak@suse.cz>
+Date:   Wed Mar 21 14:08:24 2012 +0100
+
+    do not export kernel's NULL #define to userspace
+    
+    GCC's NULL is actually __null, which allows detecting some questionable
+    NULL usage and warn about it.  Moreover each platform/compiler should
+    have its own stddef.h anyway (which is different from linux/stddef.h).
+    
+    So there's no good reason to leak kernel's NULL to userspace and
+    override what the compiler provides.
+    
+    Signed-off-by: Luboš Luňák <l.lunak@suse.cz>
+    Acked-by: Arnd Bergmann <arnd@arndb.de>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 7dc1db81ece569ccad1227ef72ab58c4f160c5f9
+Author: Alex Williamson <alex.williamson@redhat.com>
+Date:   Wed Apr 11 09:51:49 2012 -0600
+
+    KVM: unmap pages from the iommu when slots are removed
+    
+    We've been adding new mappings, but not destroying old mappings.
+    This can lead to a page leak as pages are pinned using
+    get_user_pages, but only unpinned with put_page if they still
+    exist in the memslots list on vm shutdown.  A memslot that is
+    destroyed while an iommu domain is enabled for the guest will
+    therefore result in an elevated page reference count that is
+    never cleared.
+    
+    Additionally, without this fix, the iommu is only programmed
+    with the first translation for a gpa.  This can result in
+    peer-to-peer errors if a mapping is destroyed and replaced by a
+    new mapping at the same gpa as the iommu will still be pointing
+    to the original, pinned memory address.
+    
+    Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+commit b0e0913f11ccad2909d96833b21f3d1dd1dd187b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 19 20:27:57 2012 -0400
+
+    http://marc.info/?l=linux-kernel&m=133455712201581&w=2
+    
+    Currently we do not validate the vector length before calling
+    get_user_pages_fast(), host stack would be easily overflowed by
+    malicious guest driver who give us a descriptor with length greater
+    than MAX_SKB_FRAGS. Solve this problem by checking the free entries
+    before trying to pin user pages.
+    
+    Signed-off-by: Jason Wang <jasowang@redhat.com>
+
+commit a3632ca0baf60466c650053eb72e1b047540e4cc
+Author: Eric Paris <eparis@redhat.com>
+Date:   Tue Apr 17 16:26:54 2012 -0400
+
+    fcaps: clear the same personality flags as suid when fcaps are used
+    
+    If a process increases permissions using fcaps all of the dangerous
+    personality flags which are cleared for suid apps should also be cleared.
+    Thus programs given priviledge with fcaps will continue to have address space
+    randomization enabled even if the parent tried to disable it to make it
+    easier to attack.
+    
+    Signed-off-by: Eric Paris <eparis@redhat.com>
+    Reviewed-by: Serge Hallyn <serge.hallyn@canonical.com>
+    Signed-off-by: James Morris <james.l.morris@oracle.com>
+
 commit 6bb89c4bd981848dd5647a2f3c933937d8e49a61
 Merge: c7db64d e538e1d
 Author: Brad Spengler <spender@grsecurity.net>
