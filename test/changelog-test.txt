@@ -1,3 +1,27 @@
+commit 76b90550e7c2202e102e09f48b77def5302b1298
+Merge: ed57dbd e64c3b2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 22 20:52:35 2012 -0400
+
+    Upstream finally got around to fixing the ASLR infoleak I found and fixed
+    in grsecurity in 2009.  Three years with the fix in plain sight in the patch,
+    yet still it wasn't known or fixed until I explicitly mentioned it to Kees.
+    (this seems to be a recurring theme)
+    
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	kernel/futex.c
+    	kernel/futex_compat.c
+    	security/commoncap.c
+
+commit e64c3b2239335992182ff96235b81e2a87230b80
+Merge: e538e1d fa023d5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 22 20:46:57 2012 -0400
+
+    Merge branch 'linux-3.3.y' into pax-test
+
 commit ed57dbd68c344c1d0e6617247fb7e80e7db1d796
 Author: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
 Date:   Fri Apr 13 03:35:13 2012 +0000
