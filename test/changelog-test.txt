@@ -1,3 +1,19 @@
+commit daa5a9b75978fafef5f453d3efb91723ad084539
+Merge: 76b9055 955435e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 23 18:07:54 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit 955435e0efc1b188f632ca4d0918b133174a0fba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 23 17:53:48 2012 -0400
+
+    Update to pax-linux-3.3.3-test8.patch
+
 commit 76b90550e7c2202e102e09f48b77def5302b1298
 Merge: ed57dbd e64c3b2
 Author: Brad Spengler <spender@grsecurity.net>
