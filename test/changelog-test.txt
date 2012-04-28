@@ -1,3 +1,42 @@
+commit 8721cf24ffec2f9a120ad5a057b305c0e42c6f74
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Mon Apr 16 22:48:15 2012 +0200
+
+    i387: ptrace breaks the lazy-fpu-restore logic
+    
+    Starting from 7e16838d "i387: support lazy restore of FPU state"
+    we assume that fpu_owner_task doesn't need restore_fpu_checking()
+    on the context switch, its FPU state should match what we already
+    have in the FPU on this CPU.
+    
+    However, debugger can change the tracee's FPU state, in this case
+    we should reset fpu.last_cpu to ensure fpu_lazy_restore() can't
+    return true.
+    
+    Change init_fpu() to do this, it is called by user_regset->set()
+    methods.
+    
+    Reported-by: Jan Kratochvil <jan.kratochvil@redhat.com>
+    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Link: http://lkml.kernel.org/r/20120416204815.GB24884@redhat.com
+    Cc: <stable@vger.kernel.org> v3.3
+    Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+
+commit e21c05262f5cb25748625efe8c8955ec052772d8
+Merge: daa5a9b 09bdf6a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 27 17:52:51 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 09bdf6a25a5f726fa28e60d0594ecf58dd766696
+Merge: 955435e d0c4f31
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 27 17:52:43 2012 -0400
+
+    Merge branch 'linux-3.3.y' into pax-test
+
 commit daa5a9b75978fafef5f453d3efb91723ad084539
 Merge: 76b9055 955435e
 Author: Brad Spengler <spender@grsecurity.net>
