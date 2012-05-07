@@ -1,3 +1,50 @@
+commit a2446fc9e8ab4215b81285e8e38fb7691fede567
+Author: Jeff Mahoney <jeffm@suse.com>
+Date:   Wed Apr 25 14:32:09 2012 +0000
+
+    dl2k: Clean up rio_ioctl
+    
+    The dl2k driver's rio_ioctl call has a few issues:
+    - No permissions checking
+    - Implements SIOCGMIIREG and SIOCGMIIREG using the SIOCDEVPRIVATE numbers
+    - Has a few ioctls that may have been used for debugging at one point
+      but have no place in the kernel proper.
+    
+    This patch removes all but the MII ioctls, renumbers them to use the
+    standard ones, and adds the proper permission check for SIOCSMIIREG.
+    
+    We can also get rid of the dl2k-specific struct mii_data in favor of
+    the generic struct mii_ioctl_data.
+    
+    Since we have the phyid on hand, we can add the SIOCGMIIPHY ioctl too.
+    
+    Most of the MII code for the driver could probably be converted to use
+    the generic MII library but I don't have a device to test the results.
+    
+    Reported-by: Stephan Mueller <stephan.mueller@atsec.com>
+    Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 0387e294960d1a97aecf9a091fd04dc6ea60dc24
+Merge: 8721cf2 b472141
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 7 17:47:29 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b472141f82dcaaebb0915579b664deb13dd51a63
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 7 17:47:09 2012 -0400
+
+    Update to pax-linux-3.3.5-test10.patch
+
+commit 1d0532c4ddc0739cd7638044ffc05159992468b3
+Merge: 09bdf6a dda1cd5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 7 17:46:55 2012 -0400
+
+    Merge branch 'linux-3.3.y' into pax-test
+
 commit 8721cf24ffec2f9a120ad5a057b305c0e42c6f74
 Author: Oleg Nesterov <oleg@redhat.com>
 Date:   Mon Apr 16 22:48:15 2012 +0200
