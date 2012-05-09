@@ -1,3 +1,23 @@
+commit 1f1f22a1225b5083787871fa1b3825a3ad26c1dd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 9 17:22:32 2012 -0400
+
+    No need to perform descendent checks on anything but PTRACE_ATTACH/PTRACE_SEIZE
+    resolves issue with strace -f v4.7
+
+commit 93d733045b6ebd24173c9ddbf70232382f196ab7
+Merge: a2446fc a17565b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 9 17:13:44 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a17565bf6246281d34fd530b7f93b6dc3affe932
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 9 17:13:23 2012 -0400
+
+    Update to pax-linux-3.3.5-test11.patch
+
 commit a2446fc9e8ab4215b81285e8e38fb7691fede567
 Author: Jeff Mahoney <jeffm@suse.com>
 Date:   Wed Apr 25 14:32:09 2012 +0000
