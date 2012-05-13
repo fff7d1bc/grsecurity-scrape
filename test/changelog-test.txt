@@ -1,3 +1,44 @@
+commit 27cd051e9c71168dd4ba8048be2bcd962cb9c1bb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 12 23:24:22 2012 -0400
+
+    Make CONFIG_GRKERNSEC_SETXID depend on X86 for now, more architectures to
+    be added later
+    Speeds up implementation by using existing thread info flag check
+    Will also apply the new credentials faster than the previous method, either
+    upon the next syscall entry or exit
+    Resolves oops triggerable by root reported by Pavel Labushev
+
+commit 47565c239f57cef0f68934085945072768d8bfa3
+Merge: f170787 58b316c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 12 17:21:53 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 58b316c3d406413e6e007f313534cd54114c15e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 12 17:21:15 2012 -0400
+
+    Update to pax-linux-3.3.6-test12.patch
+
+commit f170787d59bfe8af56d3d12c6422ca6c9ee2c9a3
+Merge: 1f1f22a 37725adf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 12 15:54:19 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 37725adf42f6e157916e779acc37696810bc3213
+Merge: a17565b b67be2a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 12 15:54:06 2012 -0400
+
+    Merge branch 'linux-3.3.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/boot/compressed/relocs.c
+
 commit 1f1f22a1225b5083787871fa1b3825a3ad26c1dd
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed May 9 17:22:32 2012 -0400
