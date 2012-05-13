@@ -1,3 +1,28 @@
+commit c9edc7f133cb58a6f079390f1e31eac1d3122c86
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 13 15:42:34 2012 -0400
+
+    Add MIPS support to GRKERNSEC_SETXID, choose a thread info flag bit
+    for each of our supported architectures that can be properly expressed
+    within the instruction making use of an immediate value:
+    < 12 on sparc64
+    < 32 on mips
+    < 16 on powerpc
+    < 8 or expressable within 8 bits with a shift amount on arm
+    
+    (different values required for this kernel due to 3.3 feature additions)
+    
+    Conflicts:
+    
+    	arch/arm/include/asm/thread_info.h
+    	arch/sparc/include/asm/thread_info_64.h
+
+commit 941429c6316391a4104d5781bf96a4a88b8b270d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 13 14:21:06 2012 -0400
+
+    Add arm/ppc/sparc64 support to GRKERNSEC_SETXID
+
 commit 27cd051e9c71168dd4ba8048be2bcd962cb9c1bb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat May 12 23:24:22 2012 -0400
