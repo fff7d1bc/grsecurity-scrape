@@ -1,3 +1,203 @@
+commit ef9c2e2cad33a477bf0c8f1ccf8aafb4a213a3df
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 19 10:47:15 2012 -0400
+
+    init ebda range earlier in boot
+    
+    Conflicts:
+    
+    	arch/x86/mm/init.c
+
+commit 945355803ce381eacce23b3383aca5964a92d063
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 19 09:19:42 2012 -0400
+
+    [PATCH] mm: read_pmd_atomic: fix 32bit PAE pmd walk vs pmd_populate SMP race condition
+    
+    When holding the mmap_sem for reading, pmd_offset_map_lock should only
+    run on a pmd_t that has been read atomically from the pmdp
+    pointer, otherwise we may read only half of it leading to this crash.
+    
+    PID: 11679  TASK: f06e8000  CPU: 3   COMMAND: "do_race_2_panic"
+     #0 [f06a9dd8] crash_kexec at c049b5ec
+     #1 [f06a9e2c] oops_end at c083d1c2
+     #2 [f06a9e40] no_context at c0433ded
+     #3 [f06a9e64] bad_area_nosemaphore at c043401a
+     #4 [f06a9e6c] __do_page_fault at c0434493
+     #5 [f06a9eec] do_page_fault at c083eb45
+     #6 [f06a9f04] error_code (via page_fault) at c083c5d5
+        EAX: 01fb470c EBX: fff35000 ECX: 00000003 EDX: 00000100 EBP:
+        00000000
+        DS:  007b     ESI: 9e201000 ES:  007b     EDI: 01fb4700 GS:  00e0
+        CS:  0060     EIP: c083bc14 ERR: ffffffff EFLAGS: 00010246
+     #7 [f06a9f38] _spin_lock at c083bc14
+     #8 [f06a9f44] sys_mincore at c0507b7d
+     #9 [f06a9fb0] system_call at c083becd
+                             start           len
+        EAX: ffffffda  EBX: 9e200000  ECX: 00001000  EDX: 6228537f
+        DS:  007b      ESI: 00000000  ES:  007b      EDI: 003d0f00
+        SS:  007b      ESP: 62285354  EBP: 62285388  GS:  0033
+        CS:  0073      EIP: 00291416  ERR: 000000da  EFLAGS: 00000286
+    
+    This should be a longstanding bug affecting x86 32bit PAE without
+    THP. Only archs with 64bit large pmd_t and 32bit unsigned long should
+    be affected.
+    
+    With THP enabled the barrier() in
+    pmd_none_or_trans_huge_or_clear_bad() would partly hide the bug when
+    the pmd transition from none to stable, by forcing a re-read of the
+    *pmd in pmd_offset_map_lock, but when THP is enabled a new set of
+    problem arises by the fact could then transition freely in any of the
+    none, pmd_trans_huge or pmd_trans_stable states. So making the barrier
+    in pmd_none_or_trans_huge_or_clear_bad() unconditional isn't good idea
+    and it would be a flakey solution.
+    
+    This should be fully fixed by introducing a read_pmd_atomic that reads
+    the pmd in order with THP disabled, or by reading the pmd atomically
+    with cmpxchg8b with THP enabled.
+    
+    Luckily this new race condition only triggers in the places that must
+    already be covered by pmd_none_or_trans_huge_or_clear_bad() so the fix
+    is localized there but this bug is not related to THP.
+    
+    NOTE: this can trigger on x86 32bit systems with PAE enabled with more
+    than 4G of ram, otherwise the high part of the pmd will never risk to
+    be truncated because it would be zero at all times, in turn so hiding
+    the SMP race.
+    
+    This bug was discovered and fully debugged by Ulrich, quote:
+    
+    ----
+    [..]
+    pmd_none_or_trans_huge_or_clear_bad() loads the content of edx and
+    eax.
+    
+        496 static inline int pmd_none_or_trans_huge_or_clear_bad(pmd_t
+        *pmd)
+        497 {
+        498         /* depend on compiler for an atomic pmd read */
+        499         pmd_t pmdval = *pmd;
+    
+                                    // edi = pmd pointer
+    0xc0507a74 <sys_mincore+548>:   mov    0x8(%esp),%edi
+    ...
+                                    // edx = PTE page table high address
+    0xc0507a84 <sys_mincore+564>:   mov    0x4(%edi),%edx
+    ...
+                                    // eax = PTE page table low address
+    0xc0507a8e <sys_mincore+574>:   mov    (%edi),%eax
+    
+    [..]
+    
+    Please note that the PMD is not read atomically. These are two "mov"
+    instructions where the high order bits of the PMD entry are fetched
+    first. Hence, the above machine code is prone to the following race.
+    
+    -  The PMD entry {high|low} is 0x0000000000000000.
+       The "mov" at 0xc0507a84 loads 0x00000000 into edx.
+    
+    -  A page fault (on another CPU) sneaks in between the two "mov"
+       instructions and instantiates the PMD.
+    
+    -  The PMD entry {high|low} is now 0x00000003fda38067.
+       The "mov" at 0xc0507a8e loads 0xfda38067 into eax.
+    ----
+    
+    Reported-by: Ulrich Obergfell <uobergfe <at> redhat.com>
+    Signed-off-by: Andrea Arcangeli <aarcange <at> redhat.com>
+    ---
+     arch/x86/include/asm/pgtable-3level.h |   50 +++++++++++++++++++++++++++++++++
+     include/asm-generic/pgtable.h         |   22 +++++++++++++-
+     2 files changed, 70 insertions(+), 2 deletions(-)
+
+commit c372470ba53425b2e159282d81680c0c84f3750d
+Author: Tushar Dave <tushar.n.dave@intel.com>
+Date:   Thu May 17 01:04:50 2012 +0000
+
+    e1000: Prevent reset task killing itself.
+    
+    Killing reset task while adapter is resetting causes deadlock.
+    Only kill reset task if adapter is not resetting.
+    Ref bug #43132 on bugzilla.kernel.org
+    
+    CC: stable@vger.kernel.org
+    Signed-off-by: Tushar Dave <tushar.n.dave@intel.com>
+    Tested-by: Aaron Brown <aaron.f.brown@intel.com>
+    Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+commit 1ef7b1503902f0e58f843417b514ab79d52f85aa
+Author: Willy Tarreau <w@1wt.eu>
+Date:   Thu May 17 11:14:14 2012 +0000
+
+    tcp: do_tcp_sendpages() must try to push data out on oom conditions
+    
+    Since recent changes on TCP splicing (starting with commits 2f533844
+    "tcp: allow splice() to build full TSO packets" and 35f9c09f "tcp:
+    tcp_sendpages() should call tcp_push() once"), I started seeing
+    massive stalls when forwarding traffic between two sockets using
+    splice() when pipe buffers were larger than socket buffers.
+    
+    Latest changes (net: netdev_alloc_skb() use build_skb()) made the
+    problem even more apparent.
+    
+    The reason seems to be that if do_tcp_sendpages() fails on out of memory
+    condition without being able to send at least one byte, tcp_push() is not
+    called and the buffers cannot be flushed.
+    
+    After applying the attached patch, I cannot reproduce the stalls at all
+    and the data rate it perfectly stable and steady under any condition
+    which previously caused the problem to be permanent.
+    
+    The issue seems to have been there since before the kernel migrated to
+    git, which makes me think that the stalls I occasionally experienced
+    with tux during stress-tests years ago were probably related to the
+    same issue.
+    
+    This issue was first encountered on 3.0.31 and 3.2.17, so please backport
+    to -stable.
+    
+    Signed-off-by: Willy Tarreau <w@1wt.eu>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Cc: <stable@vger.kernel.org>
+
+commit f1ef0322da87da4de06f2c12d9615e5b62906d98
+Author: Sachin Prabhu <sprabhu@redhat.com>
+Date:   Tue Apr 17 14:35:39 2012 +0100
+
+    Avoid reading past buffer when calling GETACL
+    
+    Bug noticed in commit
+    bf118a342f10dafe44b14451a1392c3254629a1f
+    
+    When calling GETACL, if the size of the bitmap array, the length
+    attribute and the acl returned by the server is greater than the
+    allocated buffer(args.acl_len), we can Oops with a General Protection
+    fault at _copy_from_pages() when we attempt to read past the pages
+    allocated.
+    
+    This patch allocates an extra PAGE for the bitmap and checks to see that
+    the bitmap + attribute_length + ACLs don't exceed the buffer space
+    allocated to it.
+    
+    Signed-off-by: Sachin Prabhu <sprabhu@redhat.com>
+    Reported-by: Jian Li <jiali@redhat.com>
+    [Trond: Fixed a size_t vs unsigned int printk() warning]
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+
+commit 6405eafd58c9a79fdd2c383fcd15e1231f30e52d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 19 08:30:54 2012 -0400
+
+    Precompute _start/_end
+
+commit 86d09b7998377aa2a41dfa094f09e3e37681771b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 19 07:45:06 2012 -0400
+
+    Use new method of EBDA detection
+    Resolves issue from: https://bugs.gentoo.org/show_bug.cgi?id=416415
+
 commit ae5d8ccb14ea02206a73bcfcb6fd1584229c7816
 Author: Eric W. Biederman <ebiederm@xmission.com>
 Date:   Fri May 4 11:34:03 2012 +0000
