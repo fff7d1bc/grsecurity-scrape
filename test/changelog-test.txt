@@ -1,3 +1,22 @@
+commit a4a7228d86ca932cf81942d4837522b5526bed2a
+Merge: 3784195 2925242
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 27 18:51:01 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2925242a33429d56f5dc0e60a4f9b76913c9b5b4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 27 18:50:43 2012 -0400
+
+    Update to pax-linux-3.3.7-test16.patch
+
+ Makefile                           |   18 ++++++++++--------
+ arch/x86/include/asm/mmu_context.h |    8 ++++----
+ arch/x86/include/asm/pgtable.h     |    6 +++---
+ arch/x86/mm/pgtable.c              |    8 ++++++--
+ 4 files changed, 23 insertions(+), 17 deletions(-)
+
 commit 3784195d73223b2f93db2d8edd454483509c0808
 Author: Djalal Harouni <tixxdz@opendz.org>
 Date:   Sun May 20 13:55:30 2012 +0000
