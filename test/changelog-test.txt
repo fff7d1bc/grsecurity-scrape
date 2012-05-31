@@ -1,3 +1,184 @@
+commit bdb2657b5f23466678d88b64f00df46e37d1107e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 30 18:12:30 2012 -0400
+
+    fix compiler warning
+
+ arch/x86/mm/init.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 249efedff06a3b48865c4f627460e5f1bbf3c1ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 30 18:07:32 2012 -0400
+
+    compile fixes
+
+ arch/x86/mm/init.c |   13 +++++++------
+ kernel/sysctl.c    |    2 --
+ 2 files changed, 7 insertions(+), 8 deletions(-)
+
+commit b006170820ab4ab91b24c8fdfa8f14628ed1a680
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 30 17:51:27 2012 -0400
+
+    don't allow HWPOISON_INJECT with GRKERNSEC
+
+ mm/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 92c1af7799d8f51f635405c1234956fde04714c3
+Merge: 26abd4e 3ef56e1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 30 17:50:20 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3ef56e1fc9707eafd1ac07755bb104c24d2c5c2c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 30 17:49:55 2012 -0400
+
+    Update to pax-linux-3.3.7-test17.patch
+
+ include/linux/Kbuild        |    2 +-
+ tools/gcc/constify_plugin.c |   61 ++++++++++++++++++++++++++++++------------
+ 2 files changed, 44 insertions(+), 19 deletions(-)
+
+commit 26abd4ebc01051a3e25f508e2a988cc94406207f
+Author: Thomas Meyer <thomas@m3y3r.de>
+Date:   Tue May 29 15:07:27 2012 -0700
+
+    leds: Use kcalloc instead of kzalloc to allocate array
+    
+    The advantage of kcalloc is that will prevent integer overflows which
+    could result from the multiplication of number of elements and size and it
+    is also a bit nicer to read.
+    
+    The semantic patch that makes this change is available
+    in https://lkml.org/lkml/2011/11/25/107
+    
+    Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
+    Cc: Bryan Wu <bryan.wu@canonical.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/leds/leds-mc13783.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2f5a4f6c951cc166bec01139215190c5d5b61b6f
+Author: Thomas Meyer <thomas@m3y3r.de>
+Date:   Tue May 29 15:06:21 2012 -0700
+
+    mm: use kcalloc() instead of kzalloc() to allocate array
+    
+    The advantage of kcalloc is, that will prevent integer overflows which
+    could result from the multiplication of number of elements and size and
+    it is also a bit nicer to read.
+    
+    The semantic patch that makes this change is available in
+    https://lkml.org/lkml/2011/11/25/107
+    
+    Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/vmalloc.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 3ef3057716d9b10efe19fa6af4f7c08f9b5ecb03
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 30 17:29:12 2012 -0400
+
+    Introduce change similar to 7edc8b0ac16cbaed7cb4ea4c6b95ce98d2997e84
+
+ kernel/fork.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 62f73ae4c53fc45bce4853ec72630ea796e86cc4
+Author: Ryota Ozaki <ozaki.ryota@gmail.com>
+Date:   Tue May 29 15:06:20 2012 -0700
+
+    mm: fix off-by-one bug in print_nodes_state()
+    
+    /sys/devices/system/node/{online,possible} outputs a garbage byte
+    because print_nodes_state() returns content size + 1.  To fix the bug,
+    the patch changes the use of cpuset_sprintf_cpulist to follow the use at
+    other places, which is clearer and safer.
+    
+    This bug was introduced in v2.6.24 (commit bde631a51876: "mm: add node
+    states sysfs class attributeS").
+    
+    Signed-off-by: Ryota Ozaki <ozaki.ryota@gmail.com>
+    Cc: Lee Schermerhorn <Lee.Schermerhorn@hp.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/base/node.c |    8 +++-----
+ 1 files changed, 3 insertions(+), 5 deletions(-)
+
+commit 1deab9d59bce4173288caa3a5c8c71947e6a6c56
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 30 17:17:56 2012 -0400
+
+    Vanilla kernel makes kptr_restrict depend on CONFIG_PRINTK.
+    This is wrong.  Thanks to Dominic Chen for pointing out a compiler
+    error caused by grsec exposing kptr_restrict to !CONFIG_PRINTK
+
+ include/linux/printk.h |    3 ++-
+ kernel/sysctl.c        |    2 --
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+commit 3e1661fae02cb77cf612debf83684af648134476
+Author: Dave Hansen <dave@linux.vnet.ibm.com>
+Date:   Wed May 30 07:51:07 2012 -0700
+
+    mm: fix vma_resv_map() NULL pointer
+    
+    hugetlb_reserve_pages() can be used for either normal file-backed
+    hugetlbfs mappings, or MAP_HUGETLB.  In the MAP_HUGETLB, semi-anonymous
+    mode, there is not a VMA around.  The new call to resv_map_put() assumed
+    that there was, and resulted in a NULL pointer dereference:
+    
+      BUG: unable to handle kernel NULL pointer dereference at 0000000000000030
+      IP: vma_resv_map+0x9/0x30
+      PGD 141453067 PUD 1421e1067 PMD 0
+      Oops: 0000 [#1] PREEMPT SMP
+      ...
+      Pid: 14006, comm: trinity-child6 Not tainted 3.4.0+ #36
+      RIP: vma_resv_map+0x9/0x30
+      ...
+      Process trinity-child6 (pid: 14006, threadinfo ffff8801414e0000, task ffff8801414f26b0)
+      Call Trace:
+        resv_map_put+0xe/0x40
+        hugetlb_reserve_pages+0xa6/0x1d0
+        hugetlb_file_setup+0x102/0x2c0
+        newseg+0x115/0x360
+        ipcget+0x1ce/0x310
+        sys_shmget+0x5a/0x60
+        system_call_fastpath+0x16/0x1b
+    
+    This was reported by Dave Jones, but was reproducible with the
+    libhugetlbfs test cases, so shame on me for not running them in the
+    first place.
+    
+    With this, the oops is gone, and the output of libhugetlbfs's
+    run_tests.py is identical to plain 3.4 again.
+    
+    [ Marked for stable, since this was introduced by commit c50ac050811d
+      ("hugetlb: fix resv_map leak in error path") which was also marked for
+      stable ]
+    
+    Reported-by: Dave Jones <davej@redhat.com>
+    Cc: Mel Gorman <mel@csn.ul.ie>
+    Cc: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+    Cc: Christoph Lameter <cl@linux.com>
+    Cc: Andrea Arcangeli <aarcange@redhat.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: <stable@vger.kernel.org>        [2.6.32+]
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/hugetlb.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit a4a7228d86ca932cf81942d4837522b5526bed2a
 Merge: 3784195 2925242
 Author: Brad Spengler <spender@grsecurity.net>
