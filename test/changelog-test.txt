@@ -1,3 +1,22 @@
+commit b8570f0dd91f880cef7f0e0c9c66d779209e80c8
+Merge: bdb2657 8b179fb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 1 19:31:31 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8b179fbe60a7327def0853e9ac56ec934f424467
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 1 19:30:59 2012 -0400
+
+    Update to pax-linux-3.3.7-test18.patch
+
+ Makefile                         |   22 ++++++++++------------
+ include/linux/Kbuild             |    2 +-
+ scripts/Makefile.lib             |    6 +++---
+ tools/gcc/size_overflow_plugin.c |    2 +-
+ 4 files changed, 15 insertions(+), 17 deletions(-)
+
 commit bdb2657b5f23466678d88b64f00df46e37d1107e
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed May 30 18:12:30 2012 -0400
