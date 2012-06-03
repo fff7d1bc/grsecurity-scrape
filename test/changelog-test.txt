@@ -1,3 +1,12 @@
+commit c96f62ead78965e0642a9515822655de96f67be0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 3 09:01:18 2012 -0400
+
+    Fix compilation error reported by Huub Reuver
+
+ arch/x86/mm/init.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
 commit b8570f0dd91f880cef7f0e0c9c66d779209e80c8
 Merge: bdb2657 8b179fb
 Author: Brad Spengler <spender@grsecurity.net>
