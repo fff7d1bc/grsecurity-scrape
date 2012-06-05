@@ -1,3 +1,172 @@
+commit 5c987bab9f8398271b0f748d645ad8b03a84c2ff
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 21:21:57 2012 -0400
+
+    make check unsigned
+
+ drivers/media/radio/radio-cadet.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0a49d7d3e453299edbaed2e0c90a9aeee3258f73
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 21:12:54 2012 -0400
+
+    prevent gcc complaint about copy_to_user
+
+ drivers/hid/hid-wiimote-debug.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 160a09abe3dd4965820fa8df1a709c5d57a47f30
+Merge: ad0d1aa f616c5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 20:38:26 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f616c5e44abe23daa99c03a59e405f51d3a7b33b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 20:38:14 2012 -0400
+
+    Fix compilation
+
+ mm/mempolicy.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit ad0d1aa8ff2395e37b05482eb79a63f8e38680d9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 20:13:49 2012 -0400
+
+    shut gcc up
+
+ drivers/media/radio/radio-cadet.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ba83e63dce33e7327635fc8fae076a1df1c6e469
+Merge: cf63aa8 2e841a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 19:59:51 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2e841a6be998cdde00b8a7d3b093adaf2fa127b7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 19:59:17 2012 -0400
+
+    Fix x64 compilation
+
+ arch/x86/tools/relocs.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit cf63aa8d682d1f75ee7d4323cdf268d2564a5c8e
+Merge: fa97e85 6b097b1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 18:58:19 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6b097b1a800684e51fa4bb1ac33a35dfe27c83ef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 18:57:38 2012 -0400
+
+    reference correct autoconf.h
+
+ arch/x86/tools/relocs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit fa97e857f50aa354912b3d9be1e0fa0e3b326fba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 18:13:51 2012 -0400
+
+    Revert "ipc/mqueue: enforce hard limits"
+    
+    This reverts commit 02234cf7c659f0ba0e4771cacca28a3f350e96bd.
+
+ ipc/mqueue.c |    8 +++-----
+ 1 files changed, 3 insertions(+), 5 deletions(-)
+
+commit db6864d28eba16d3ace6cad759bf36222dbea9b9
+Author: Konrad Rzeszutek Wilk <konrad@darnok.org>
+Date:   Wed May 30 18:23:56 2012 -0400
+
+    x86, amd, xen: Avoid NULL pointer paravirt references
+    
+    Stub out MSR methods that aren't actually needed.  This fixes a crash
+    as Xen Dom0 on AMD Trinity systems.  A bigger patch should be added to
+    remove the paravirt machinery completely for the methods which
+    apparently have no users!
+    
+    Reported-by: Andre Przywara <andre.przywara@amd.com>
+    Link: http://lkml.kernel.org/r/20120530222356.GA28417@andromeda.dapyr.net
+    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
+    Cc: <stable@vger.kernel.org>
+
+ arch/x86/xen/enlighten.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit e2193f85a159e0562afefc1c8d2fe0d8d26bd5e5
+Author: Doug Ledford <dledford@redhat.com>
+Date:   Thu May 31 16:26:29 2012 -0700
+
+    ipc/mqueue: enforce hard limits
+    
+    In two places we don't enforce the hard limits for CAP_SYS_RESOURCE apps.
+    In preparation for making more reasonable hard limits, start enforcing
+    them even on CAP_SYS_RESOURCE.
+    
+    Signed-off-by: Doug Ledford <dledford@redhat.com>
+    Cc: Serge E. Hallyn <serue@us.ibm.com>
+    Cc: Amerigo Wang <amwang@redhat.com>
+    Cc: Joe Korty <joe.korty@ccur.com>
+    Cc: Jiri Slaby <jslaby@suse.cz>
+    Acked-by: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+    Cc: Manfred Spraul <manfred@colorfullife.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ ipc/mqueue.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+commit dc36e215d9e7d83e53b2f973074700195522537d
+Author: Haogang Chen <haogangchen@gmail.com>
+Date:   Mon May 28 14:21:55 2012 -0400
+
+    ext4: fix potential integer overflow in alloc_flex_gd()
+    
+    In alloc_flex_gd(), when flexbg_size is large, kmalloc size would
+    overflow and flex_gd->groups would point to a buffer smaller than
+    expected, causing OOB accesses when it is used.
+    
+    Note that in ext4_resize_fs(), flexbg_size is calculated using
+    sbi->s_log_groups_per_flex, which is read from the disk and only bounded
+    to [1, 31]. The patch returns NULL for too large flexbg_size.
+    
+    Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+    Signed-off-by: Haogang Chen <haogangchen@gmail.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Cc: stable@kernel.org
+
+ fs/ext4/resize.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 8cc7a8cd7124bd526270393c815819dcad02063c
+Merge: c96f62e 94a6c83
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 17:13:18 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 94a6c83547ee34415d4a7951f06e3542971bacf1
+Merge: 8b179fb 8457206
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 4 17:13:04 2012 -0400
+
+    Merge branch 'linux-3.3.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/tools/relocs.c
+    	fs/aio.c
+    	mm/mempolicy.c
+
 commit c96f62ead78965e0642a9515822655de96f67be0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 3 09:01:18 2012 -0400
