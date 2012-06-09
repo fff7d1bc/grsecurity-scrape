@@ -1,1993 +1,117 @@
-commit 5c987bab9f8398271b0f748d645ad8b03a84c2ff
+commit a906e5f96e8ed36a901ea1f16e88bec12971bd43
+Merge: 3701524b bf822e2
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 21:21:57 2012 -0400
-
-    make check unsigned
-
- drivers/media/radio/radio-cadet.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 0a49d7d3e453299edbaed2e0c90a9aeee3258f73
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 21:12:54 2012 -0400
-
-    prevent gcc complaint about copy_to_user
-
- drivers/hid/hid-wiimote-debug.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 160a09abe3dd4965820fa8df1a709c5d57a47f30
-Merge: ad0d1aa f616c5e
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 20:38:26 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit f616c5e44abe23daa99c03a59e405f51d3a7b33b
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 20:38:14 2012 -0400
-
-    Fix compilation
-
- mm/mempolicy.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-commit ad0d1aa8ff2395e37b05482eb79a63f8e38680d9
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 20:13:49 2012 -0400
-
-    shut gcc up
-
- drivers/media/radio/radio-cadet.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit ba83e63dce33e7327635fc8fae076a1df1c6e469
-Merge: cf63aa8 2e841a6
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 19:59:51 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 2e841a6be998cdde00b8a7d3b093adaf2fa127b7
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 19:59:17 2012 -0400
-
-    Fix x64 compilation
-
- arch/x86/tools/relocs.c |    7 ++++++-
- 1 files changed, 6 insertions(+), 1 deletions(-)
-
-commit cf63aa8d682d1f75ee7d4323cdf268d2564a5c8e
-Merge: fa97e85 6b097b1
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 18:58:19 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 6b097b1a800684e51fa4bb1ac33a35dfe27c83ef
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 18:57:38 2012 -0400
-
-    reference correct autoconf.h
-
- arch/x86/tools/relocs.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit fa97e857f50aa354912b3d9be1e0fa0e3b326fba
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 18:13:51 2012 -0400
-
-    Revert "ipc/mqueue: enforce hard limits"
-    
-    This reverts commit 02234cf7c659f0ba0e4771cacca28a3f350e96bd.
-
- ipc/mqueue.c |    8 +++-----
- 1 files changed, 3 insertions(+), 5 deletions(-)
-
-commit db6864d28eba16d3ace6cad759bf36222dbea9b9
-Author: Konrad Rzeszutek Wilk <konrad@darnok.org>
-Date:   Wed May 30 18:23:56 2012 -0400
-
-    x86, amd, xen: Avoid NULL pointer paravirt references
-    
-    Stub out MSR methods that aren't actually needed.  This fixes a crash
-    as Xen Dom0 on AMD Trinity systems.  A bigger patch should be added to
-    remove the paravirt machinery completely for the methods which
-    apparently have no users!
-    
-    Reported-by: Andre Przywara <andre.przywara@amd.com>
-    Link: http://lkml.kernel.org/r/20120530222356.GA28417@andromeda.dapyr.net
-    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
-    Cc: <stable@vger.kernel.org>
-
- arch/x86/xen/enlighten.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-commit e2193f85a159e0562afefc1c8d2fe0d8d26bd5e5
-Author: Doug Ledford <dledford@redhat.com>
-Date:   Thu May 31 16:26:29 2012 -0700
-
-    ipc/mqueue: enforce hard limits
-    
-    In two places we don't enforce the hard limits for CAP_SYS_RESOURCE apps.
-    In preparation for making more reasonable hard limits, start enforcing
-    them even on CAP_SYS_RESOURCE.
-    
-    Signed-off-by: Doug Ledford <dledford@redhat.com>
-    Cc: Serge E. Hallyn <serue@us.ibm.com>
-    Cc: Amerigo Wang <amwang@redhat.com>
-    Cc: Joe Korty <joe.korty@ccur.com>
-    Cc: Jiri Slaby <jslaby@suse.cz>
-    Acked-by: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
-    Cc: Manfred Spraul <manfred@colorfullife.com>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- ipc/mqueue.c |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
-
-commit dc36e215d9e7d83e53b2f973074700195522537d
-Author: Haogang Chen <haogangchen@gmail.com>
-Date:   Mon May 28 14:21:55 2012 -0400
-
-    ext4: fix potential integer overflow in alloc_flex_gd()
-    
-    In alloc_flex_gd(), when flexbg_size is large, kmalloc size would
-    overflow and flex_gd->groups would point to a buffer smaller than
-    expected, causing OOB accesses when it is used.
-    
-    Note that in ext4_resize_fs(), flexbg_size is calculated using
-    sbi->s_log_groups_per_flex, which is read from the disk and only bounded
-    to [1, 31]. The patch returns NULL for too large flexbg_size.
-    
-    Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-    Signed-off-by: Haogang Chen <haogangchen@gmail.com>
-    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
-    Cc: stable@kernel.org
-
- fs/ext4/resize.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit 8cc7a8cd7124bd526270393c815819dcad02063c
-Merge: c96f62e 94a6c83
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 17:13:18 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 94a6c83547ee34415d4a7951f06e3542971bacf1
-Merge: 8b179fb 8457206
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Jun 4 17:13:04 2012 -0400
-
-    Merge branch 'linux-3.3.y' into pax-test
-    
-    Conflicts:
-    	arch/x86/tools/relocs.c
-    	fs/aio.c
-    	mm/mempolicy.c
-
-commit c96f62ead78965e0642a9515822655de96f67be0
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Jun 3 09:01:18 2012 -0400
-
-    Fix compilation error reported by Huub Reuver
-
- arch/x86/mm/init.c |    5 ++---
- 1 files changed, 2 insertions(+), 3 deletions(-)
-
-commit b8570f0dd91f880cef7f0e0c9c66d779209e80c8
-Merge: bdb2657 8b179fb
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Jun 1 19:31:31 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 8b179fbe60a7327def0853e9ac56ec934f424467
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Jun 1 19:30:59 2012 -0400
-
-    Update to pax-linux-3.3.7-test18.patch
-
- Makefile                         |   22 ++++++++++------------
- include/linux/Kbuild             |    2 +-
- scripts/Makefile.lib             |    6 +++---
- tools/gcc/size_overflow_plugin.c |    2 +-
- 4 files changed, 15 insertions(+), 17 deletions(-)
-
-commit bdb2657b5f23466678d88b64f00df46e37d1107e
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 30 18:12:30 2012 -0400
-
-    fix compiler warning
-
- arch/x86/mm/init.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 249efedff06a3b48865c4f627460e5f1bbf3c1ae
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 30 18:07:32 2012 -0400
-
-    compile fixes
-
- arch/x86/mm/init.c |   13 +++++++------
- kernel/sysctl.c    |    2 --
- 2 files changed, 7 insertions(+), 8 deletions(-)
-
-commit b006170820ab4ab91b24c8fdfa8f14628ed1a680
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 30 17:51:27 2012 -0400
-
-    don't allow HWPOISON_INJECT with GRKERNSEC
-
- mm/Kconfig |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 92c1af7799d8f51f635405c1234956fde04714c3
-Merge: 26abd4e 3ef56e1
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 30 17:50:20 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 3ef56e1fc9707eafd1ac07755bb104c24d2c5c2c
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 30 17:49:55 2012 -0400
-
-    Update to pax-linux-3.3.7-test17.patch
-
- include/linux/Kbuild        |    2 +-
- tools/gcc/constify_plugin.c |   61 ++++++++++++++++++++++++++++++------------
- 2 files changed, 44 insertions(+), 19 deletions(-)
-
-commit 26abd4ebc01051a3e25f508e2a988cc94406207f
-Author: Thomas Meyer <thomas@m3y3r.de>
-Date:   Tue May 29 15:07:27 2012 -0700
-
-    leds: Use kcalloc instead of kzalloc to allocate array
-    
-    The advantage of kcalloc is that will prevent integer overflows which
-    could result from the multiplication of number of elements and size and it
-    is also a bit nicer to read.
-    
-    The semantic patch that makes this change is available
-    in https://lkml.org/lkml/2011/11/25/107
-    
-    Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
-    Cc: Bryan Wu <bryan.wu@canonical.com>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- drivers/leds/leds-mc13783.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 2f5a4f6c951cc166bec01139215190c5d5b61b6f
-Author: Thomas Meyer <thomas@m3y3r.de>
-Date:   Tue May 29 15:06:21 2012 -0700
-
-    mm: use kcalloc() instead of kzalloc() to allocate array
-    
-    The advantage of kcalloc is, that will prevent integer overflows which
-    could result from the multiplication of number of elements and size and
-    it is also a bit nicer to read.
-    
-    The semantic patch that makes this change is available in
-    https://lkml.org/lkml/2011/11/25/107
-    
-    Signed-off-by: Thomas Meyer <thomas@m3y3r.de>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- mm/vmalloc.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
-
-commit 3ef3057716d9b10efe19fa6af4f7c08f9b5ecb03
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 30 17:29:12 2012 -0400
-
-    Introduce change similar to 7edc8b0ac16cbaed7cb4ea4c6b95ce98d2997e84
-
- kernel/fork.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 62f73ae4c53fc45bce4853ec72630ea796e86cc4
-Author: Ryota Ozaki <ozaki.ryota@gmail.com>
-Date:   Tue May 29 15:06:20 2012 -0700
-
-    mm: fix off-by-one bug in print_nodes_state()
-    
-    /sys/devices/system/node/{online,possible} outputs a garbage byte
-    because print_nodes_state() returns content size + 1.  To fix the bug,
-    the patch changes the use of cpuset_sprintf_cpulist to follow the use at
-    other places, which is clearer and safer.
-    
-    This bug was introduced in v2.6.24 (commit bde631a51876: "mm: add node
-    states sysfs class attributeS").
-    
-    Signed-off-by: Ryota Ozaki <ozaki.ryota@gmail.com>
-    Cc: Lee Schermerhorn <Lee.Schermerhorn@hp.com>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- drivers/base/node.c |    8 +++-----
- 1 files changed, 3 insertions(+), 5 deletions(-)
-
-commit 1deab9d59bce4173288caa3a5c8c71947e6a6c56
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 30 17:17:56 2012 -0400
-
-    Vanilla kernel makes kptr_restrict depend on CONFIG_PRINTK.
-    This is wrong.  Thanks to Dominic Chen for pointing out a compiler
-    error caused by grsec exposing kptr_restrict to !CONFIG_PRINTK
-
- include/linux/printk.h |    3 ++-
- kernel/sysctl.c        |    2 --
- 2 files changed, 2 insertions(+), 3 deletions(-)
-
-commit 3e1661fae02cb77cf612debf83684af648134476
-Author: Dave Hansen <dave@linux.vnet.ibm.com>
-Date:   Wed May 30 07:51:07 2012 -0700
-
-    mm: fix vma_resv_map() NULL pointer
-    
-    hugetlb_reserve_pages() can be used for either normal file-backed
-    hugetlbfs mappings, or MAP_HUGETLB.  In the MAP_HUGETLB, semi-anonymous
-    mode, there is not a VMA around.  The new call to resv_map_put() assumed
-    that there was, and resulted in a NULL pointer dereference:
-    
-      BUG: unable to handle kernel NULL pointer dereference at 0000000000000030
-      IP: vma_resv_map+0x9/0x30
-      PGD 141453067 PUD 1421e1067 PMD 0
-      Oops: 0000 [#1] PREEMPT SMP
-      ...
-      Pid: 14006, comm: trinity-child6 Not tainted 3.4.0+ #36
-      RIP: vma_resv_map+0x9/0x30
-      ...
-      Process trinity-child6 (pid: 14006, threadinfo ffff8801414e0000, task ffff8801414f26b0)
-      Call Trace:
-        resv_map_put+0xe/0x40
-        hugetlb_reserve_pages+0xa6/0x1d0
-        hugetlb_file_setup+0x102/0x2c0
-        newseg+0x115/0x360
-        ipcget+0x1ce/0x310
-        sys_shmget+0x5a/0x60
-        system_call_fastpath+0x16/0x1b
-    
-    This was reported by Dave Jones, but was reproducible with the
-    libhugetlbfs test cases, so shame on me for not running them in the
-    first place.
-    
-    With this, the oops is gone, and the output of libhugetlbfs's
-    run_tests.py is identical to plain 3.4 again.
-    
-    [ Marked for stable, since this was introduced by commit c50ac050811d
-      ("hugetlb: fix resv_map leak in error path") which was also marked for
-      stable ]
-    
-    Reported-by: Dave Jones <davej@redhat.com>
-    Cc: Mel Gorman <mel@csn.ul.ie>
-    Cc: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
-    Cc: Christoph Lameter <cl@linux.com>
-    Cc: Andrea Arcangeli <aarcange@redhat.com>
-    Cc: Andrew Morton <akpm@linux-foundation.org>
-    Cc: <stable@vger.kernel.org>        [2.6.32+]
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- mm/hugetlb.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-commit a4a7228d86ca932cf81942d4837522b5526bed2a
-Merge: 3784195 2925242
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun May 27 18:51:01 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 2925242a33429d56f5dc0e60a4f9b76913c9b5b4
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun May 27 18:50:43 2012 -0400
-
-    Update to pax-linux-3.3.7-test16.patch
-
- Makefile                           |   18 ++++++++++--------
- arch/x86/include/asm/mmu_context.h |    8 ++++----
- arch/x86/include/asm/pgtable.h     |    6 +++---
- arch/x86/mm/pgtable.c              |    8 ++++++--
- 4 files changed, 23 insertions(+), 17 deletions(-)
-
-commit 3784195d73223b2f93db2d8edd454483509c0808
-Author: Djalal Harouni <tixxdz@opendz.org>
-Date:   Sun May 20 13:55:30 2012 +0000
-
-    drivers/net/stmmac: seq_file fix memory leak
-    
-    Use single_release() instead of seq_release() to free memory allocated
-    by single_open().
-    
-    Signed-off-by: Djalal Harouni <tixxdz@opendz.org>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- drivers/net/ethernet/stmicro/stmmac/stmmac_main.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
-
-commit 98131862203fd281c4cb8cbe01a8f20190f62cf7
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 26 11:51:18 2012 -0400
-
-    When called for anonymous (non-shared) mappings,
-    hugetlb_reserve_pages() does a resv_map_alloc().  It depends on
-    code in hugetlbfs's vm_ops->close() to release that allocation.
-    
-    However, in the mmap() failure path, we do a plain unmap_region()
-    without the remove_vma() which actually calls vm_ops->close().
-    
-    This is a decent fix.  This leak could get reintroduced if
-    new code (say, after hugetlb_reserve_pages() in
-    hugetlbfs_file_mmap()) decides to return an error.  But, I think
-    it would have to unroll the reservation anyway.
-    
-    This hasn't been extensively tested.  Pretty much compile and
-    boot tested along with Christoph's test case:
-    
-    	http://marc.info/?l=linux-mm&m=133728900729735
-    
-    Signed-off-by: Dave Hansen <dave@linux.vnet.ibm.com>
-    Acked-by: Mel Gorman <mel@csn.ul.ie>
-    ecked-by: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
-    Reported/tested-by: Christoph Lameter <cl@linux.com>
-
- mm/hugetlb.c |   28 ++++++++++++++++++++++------
- 1 files changed, 22 insertions(+), 6 deletions(-)
-
-commit 42526ac1fb37d444036f7ed781538f01979112b9
-Merge: ef9c2e2 fe4d20a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 26 11:31:58 2012 -0400
+Date:   Sat Jun 9 14:55:37 2012 -0400
 
     Merge branch 'pax-test' into grsec-test
     
     Conflicts:
-    	fs/nfs/nfs4xdr.c
+    	kernel/module.c
 
-commit fe4d20ae91718b4c267bc9b048552d6a0daba5f1
-Merge: 981e60c 4dc1c17
+commit bf822e20ef05d40ba37cdd95d78a2c94f42b7da8
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 26 11:30:35 2012 -0400
+Date:   Sat Jun 9 14:54:24 2012 -0400
 
-    Update to pax-linux-3.3.7-test15.patch
-    Merge branch 'linux-3.3.y' into pax-test
-    
-    Conflicts:
-    	kernel/compat.c
+    revert LTO
 
-commit 981e60cc448ce110e658c23c290cf96409ac558b
+ Makefile                            |   19 +---
+ arch/x86/Makefile                   |    5 -
+ arch/x86/crypto/Makefile            |   40 ++-----
+ arch/x86/ia32/Makefile              |    7 +-
+ arch/x86/include/asm/arch_hweight.h |    6 +-
+ arch/x86/include/asm/mutex_32.h     |   10 +-
+ arch/x86/include/asm/mutex_64.h     |   10 +-
+ arch/x86/include/asm/rwsem.h        |   30 ++----
+ arch/x86/include/asm/switch_to.h    |    6 +-
+ arch/x86/include/asm/syscall.h      |    3 +-
+ arch/x86/include/asm/thread_info.h  |    8 --
+ arch/x86/include/asm/unistd.h       |    4 -
+ arch/x86/include/asm/vdso.h         |   10 --
+ arch/x86/kernel/Makefile            |   25 +----
+ arch/x86/kernel/acpi/Makefile       |    8 +-
+ arch/x86/kernel/dumpstack_32.c      |    2 +-
+ arch/x86/kernel/dumpstack_64.c      |    2 +-
+ arch/x86/kernel/kprobes-common.h    |  102 +++++++++---------
+ arch/x86/kernel/kprobes.c           |   24 ++--
+ arch/x86/kernel/rtc.c               |    2 +-
+ arch/x86/kernel/tsc.c               |    2 +-
+ arch/x86/kernel/vmlinux.lds.S       |    2 +-
+ arch/x86/kvm/vmx.c                  |    9 +-
+ arch/x86/lib/Makefile               |    8 +-
+ arch/x86/net/Makefile               |    7 +-
+ arch/x86/platform/efi/Makefile      |    8 +-
+ arch/x86/power/Makefile             |    7 +-
+ arch/x86/vdso/Makefile              |   29 +-----
+ fs/exec.c                           |    6 +-
+ include/linux/export.h              |    2 +-
+ include/linux/ftrace.h              |    2 +-
+ include/linux/syscalls.h            |    4 +-
+ init/Kconfig                        |   17 ---
+ init/calibrate.c                    |    2 +-
+ kernel/module.c                     |    8 +-
+ kernel/mutex.c                      |    8 +-
+ lib/gen_crc32table.c                |    6 +-
+ scripts/Makefile.build              |    2 +-
+ scripts/Makefile.host               |   25 +----
+ scripts/mod/modpost.c               |    5 -
+ tools/gcc/Makefile                  |    6 +-
+ tools/gcc/lto_plugin.c              |  210 -----------------------------------
+ virt/kvm/kvm_main.c                 |    2 +-
+ 43 files changed, 138 insertions(+), 562 deletions(-)
+
+commit 3701524b1724055f47c00a4edbfe0f90e725ea5c
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 26 11:00:42 2012 -0400
+Date:   Sat Jun 9 14:18:35 2012 -0400
 
-    Update to pax-linux-3.3.6-test15.patch
+    remove new entry
 
- Makefile                                           |    4 +-
- arch/x86/crypto/aesni-intel_glue.c                 |    2 -
- arch/x86/include/asm/floppy.h                      |    1 -
- arch/x86/include/asm/kvm_host.h                    |    4 +-
- arch/x86/include/asm/syscalls.h                    |    2 +-
- arch/x86/include/asm/uaccess_32.h                  |   17 -
- arch/x86/include/asm/uaccess_64.h                  |   18 -
- arch/x86/kernel/cpu/mcheck/mce-inject.c            |    2 -
- arch/x86/kernel/cpu/mtrr/if.c                      |    2 -
- arch/x86/kernel/dumpstack_64.c                     |    3 +
- arch/x86/kernel/i387.c                             |   20 -
- arch/x86/kernel/ldt.c                              |    2 -
- arch/x86/kernel/microcode_intel.c                  |    1 -
- arch/x86/kernel/module.c                           |    1 -
- arch/x86/kernel/ptrace.c                           |    4 -
- arch/x86/kernel/setup_percpu.c                     |    4 -
- arch/x86/kernel/tls.h                              |    2 +-
- arch/x86/kernel/vm86_32.c                          |    3 -
- arch/x86/kvm/x86.c                                 |   21 -
- arch/x86/kvm/x86.h                                 |    4 +-
- arch/x86/platform/uv/tlb_uv.c                      |    4 -
- crypto/ablkcipher.c                                |    4 -
- crypto/aead.c                                      |    3 -
- crypto/blkcipher.c                                 |    3 -
- crypto/cipher.c                                    |    3 -
- drivers/acpi/battery.c                             |    3 -
- drivers/acpi/sbs.c                                 |    3 -
- drivers/infiniband/hw/ipath/ipath_fs.c             |    4 -
- drivers/infiniband/hw/qib/qib_fs.c                 |    4 -
- drivers/lguest/lguest_user.c                       |    1 -
- drivers/md/dm-raid1.c                              |    4 -
- drivers/md/dm-stripe.c                             |    1 -
- drivers/media/video/cpia2/cpia2_core.c             |    1 -
- drivers/media/video/cx18/cx18-alsa-pcm.c           |    2 -
- drivers/media/video/cx231xx/cx231xx-audio.c        |    2 -
- drivers/media/video/em28xx/em28xx-audio.c          |    2 -
- drivers/media/video/meye.c                         |    1 -
- drivers/media/video/saa7164/saa7164-encoder.c      |    2 -
- drivers/media/video/saa7164/saa7164-vbi.c          |    2 -
- drivers/media/video/videobuf-dma-contig.c          |    1 -
- drivers/media/video/videobuf-dma-sg.c              |    1 -
- drivers/media/video/videobuf-vmalloc.c             |    1 -
- drivers/mtd/ubi/debug.c                            |    2 -
- drivers/net/ethernet/chelsio/cxgb/sge.c            |    2 -
- drivers/net/ethernet/chelsio/cxgb3/sge.c           |    4 -
- drivers/net/ethernet/chelsio/cxgb4/sge.c           |    3 -
- drivers/net/ethernet/chelsio/cxgb4vf/sge.c         |    3 -
- drivers/net/wireless/ath/ath5k/debug.c             |    3 -
- drivers/net/wireless/ath/ath9k/debug.c             |    2 -
- drivers/net/wireless/ath/ath9k/htc_drv_debug.c     |    2 -
- drivers/oprofile/oprofile_files.c                  |    5 -
- drivers/oprofile/oprofilefs.c                      |    1 -
- drivers/platform/x86/asus_acpi.c                   |    2 -
- drivers/platform/x86/toshiba_acpi.c                |    2 -
- drivers/staging/rtl8192e/rtllib_module.c           |    2 -
- .../staging/rtl8192u/ieee80211/ieee80211_module.c  |    2 -
- fs/cifs/asn1.c                                     |    3 -
- fs/configfs/file.c                                 |    2 -
- fs/ncpfs/ncplib_kernel.h                           |    4 +-
- fs/sysfs/bin.c                                     |    2 -
- fs/ubifs/debug.c                                   |    3 -
- include/asm-generic/pgtable-nopud.h                |    1 +
- include/asm-generic/uaccess.h                      |   11 -
- include/linux/compiler-gcc4.h                      |    1 +
- include/linux/compiler.h                           |    1 +
- include/linux/crash_dump.h                         |    2 +-
- include/linux/kvm_host.h                           |   14 +-
- include/linux/moduleloader.h                       |    2 +-
- include/linux/oprofile.h                           |    2 +-
- include/linux/slab.h                               |    4 +-
- include/linux/slab_def.h                           |    2 -
- include/linux/slob_def.h                           |    2 -
- include/linux/slub_def.h                           |    6 +-
- include/linux/uaccess.h                            |    2 +-
- include/linux/vmalloc.h                            |   18 +-
- mm/vmalloc.c                                       |    4 +
- net/bridge/netfilter/ebt_ulog.c                    |    1 -
- net/ipv4/ah4.c                                     |    2 -
- net/ipv4/netfilter/arp_tables.c                    |   10 -
- net/ipv4/netfilter/ip_tables.c                     |   11 -
- net/ipv4/netfilter/ipt_ULOG.c                      |    1 -
- net/ipv4/netfilter/nf_nat_snmp_basic.c             |    4 -
- net/ipv6/ah6.c                                     |    2 -
- net/ipv6/netfilter/ip6_tables.c                    |   11 -
- scripts/Makefile.lib                               |    6 +-
- tools/gcc/size_overflow_hash1.h                    | 3047 --------------------
- tools/gcc/size_overflow_hash2.h                    |   35 -
- tools/gcc/size_overflow_plugin.c                   |  158 +-
- 88 files changed, 144 insertions(+), 3434 deletions(-)
-
-commit ef9c2e2cad33a477bf0c8f1ccf8aafb4a213a3df
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 19 10:47:15 2012 -0400
-
-    init ebda range earlier in boot
-    
-    Conflicts:
-    
-    	arch/x86/mm/init.c
-
- arch/x86/mm/init.c |   48 +++++++++++++++++++++++++++++-------------------
- 1 files changed, 29 insertions(+), 19 deletions(-)
-
-commit 945355803ce381eacce23b3383aca5964a92d063
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 19 09:19:42 2012 -0400
-
-    [PATCH] mm: read_pmd_atomic: fix 32bit PAE pmd walk vs pmd_populate SMP race condition
-    
-    When holding the mmap_sem for reading, pmd_offset_map_lock should only
-    run on a pmd_t that has been read atomically from the pmdp
-    pointer, otherwise we may read only half of it leading to this crash.
-    
-    PID: 11679  TASK: f06e8000  CPU: 3   COMMAND: "do_race_2_panic"
-     #0 [f06a9dd8] crash_kexec at c049b5ec
-     #1 [f06a9e2c] oops_end at c083d1c2
-     #2 [f06a9e40] no_context at c0433ded
-     #3 [f06a9e64] bad_area_nosemaphore at c043401a
-     #4 [f06a9e6c] __do_page_fault at c0434493
-     #5 [f06a9eec] do_page_fault at c083eb45
-     #6 [f06a9f04] error_code (via page_fault) at c083c5d5
-        EAX: 01fb470c EBX: fff35000 ECX: 00000003 EDX: 00000100 EBP:
-        00000000
-        DS:  007b     ESI: 9e201000 ES:  007b     EDI: 01fb4700 GS:  00e0
-        CS:  0060     EIP: c083bc14 ERR: ffffffff EFLAGS: 00010246
-     #7 [f06a9f38] _spin_lock at c083bc14
-     #8 [f06a9f44] sys_mincore at c0507b7d
-     #9 [f06a9fb0] system_call at c083becd
-                             start           len
-        EAX: ffffffda  EBX: 9e200000  ECX: 00001000  EDX: 6228537f
-        DS:  007b      ESI: 00000000  ES:  007b      EDI: 003d0f00
-        SS:  007b      ESP: 62285354  EBP: 62285388  GS:  0033
-        CS:  0073      EIP: 00291416  ERR: 000000da  EFLAGS: 00000286
-    
-    This should be a longstanding bug affecting x86 32bit PAE without
-    THP. Only archs with 64bit large pmd_t and 32bit unsigned long should
-    be affected.
-    
-    With THP enabled the barrier() in
-    pmd_none_or_trans_huge_or_clear_bad() would partly hide the bug when
-    the pmd transition from none to stable, by forcing a re-read of the
-    *pmd in pmd_offset_map_lock, but when THP is enabled a new set of
-    problem arises by the fact could then transition freely in any of the
-    none, pmd_trans_huge or pmd_trans_stable states. So making the barrier
-    in pmd_none_or_trans_huge_or_clear_bad() unconditional isn't good idea
-    and it would be a flakey solution.
-    
-    This should be fully fixed by introducing a read_pmd_atomic that reads
-    the pmd in order with THP disabled, or by reading the pmd atomically
-    with cmpxchg8b with THP enabled.
-    
-    Luckily this new race condition only triggers in the places that must
-    already be covered by pmd_none_or_trans_huge_or_clear_bad() so the fix
-    is localized there but this bug is not related to THP.
-    
-    NOTE: this can trigger on x86 32bit systems with PAE enabled with more
-    than 4G of ram, otherwise the high part of the pmd will never risk to
-    be truncated because it would be zero at all times, in turn so hiding
-    the SMP race.
-    
-    This bug was discovered and fully debugged by Ulrich, quote:
-    
-    ----
-    [..]
-    pmd_none_or_trans_huge_or_clear_bad() loads the content of edx and
-    eax.
-    
-        496 static inline int pmd_none_or_trans_huge_or_clear_bad(pmd_t
-        *pmd)
-        497 {
-        498         /* depend on compiler for an atomic pmd read */
-        499         pmd_t pmdval = *pmd;
-    
-                                    // edi = pmd pointer
-    0xc0507a74 <sys_mincore+548>:   mov    0x8(%esp),%edi
-    ...
-                                    // edx = PTE page table high address
-    0xc0507a84 <sys_mincore+564>:   mov    0x4(%edi),%edx
-    ...
-                                    // eax = PTE page table low address
-    0xc0507a8e <sys_mincore+574>:   mov    (%edi),%eax
-    
-    [..]
-    
-    Please note that the PMD is not read atomically. These are two "mov"
-    instructions where the high order bits of the PMD entry are fetched
-    first. Hence, the above machine code is prone to the following race.
-    
-    -  The PMD entry {high|low} is 0x0000000000000000.
-       The "mov" at 0xc0507a84 loads 0x00000000 into edx.
-    
-    -  A page fault (on another CPU) sneaks in between the two "mov"
-       instructions and instantiates the PMD.
-    
-    -  The PMD entry {high|low} is now 0x00000003fda38067.
-       The "mov" at 0xc0507a8e loads 0xfda38067 into eax.
-    ----
-    
-    Reported-by: Ulrich Obergfell <uobergfe <at> redhat.com>
-    Signed-off-by: Andrea Arcangeli <aarcange <at> redhat.com>
-    ---
-     arch/x86/include/asm/pgtable-3level.h |   50 +++++++++++++++++++++++++++++++++
-     include/asm-generic/pgtable.h         |   22 +++++++++++++-
-     2 files changed, 70 insertions(+), 2 deletions(-)
-
- arch/x86/include/asm/pgtable-3level.h |   50 +++++++++++++++++++++++++++++++++
- include/asm-generic/pgtable.h         |   22 +++++++++++++-
- 2 files changed, 70 insertions(+), 2 deletions(-)
-
-commit c372470ba53425b2e159282d81680c0c84f3750d
-Author: Tushar Dave <tushar.n.dave@intel.com>
-Date:   Thu May 17 01:04:50 2012 +0000
-
-    e1000: Prevent reset task killing itself.
-    
-    Killing reset task while adapter is resetting causes deadlock.
-    Only kill reset task if adapter is not resetting.
-    Ref bug #43132 on bugzilla.kernel.org
-    
-    CC: stable@vger.kernel.org
-    Signed-off-by: Tushar Dave <tushar.n.dave@intel.com>
-    Tested-by: Aaron Brown <aaron.f.brown@intel.com>
-    Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- drivers/net/ethernet/intel/e1000/e1000_main.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
-
-commit 1ef7b1503902f0e58f843417b514ab79d52f85aa
-Author: Willy Tarreau <w@1wt.eu>
-Date:   Thu May 17 11:14:14 2012 +0000
-
-    tcp: do_tcp_sendpages() must try to push data out on oom conditions
-    
-    Since recent changes on TCP splicing (starting with commits 2f533844
-    "tcp: allow splice() to build full TSO packets" and 35f9c09f "tcp:
-    tcp_sendpages() should call tcp_push() once"), I started seeing
-    massive stalls when forwarding traffic between two sockets using
-    splice() when pipe buffers were larger than socket buffers.
-    
-    Latest changes (net: netdev_alloc_skb() use build_skb()) made the
-    problem even more apparent.
-    
-    The reason seems to be that if do_tcp_sendpages() fails on out of memory
-    condition without being able to send at least one byte, tcp_push() is not
-    called and the buffers cannot be flushed.
-    
-    After applying the attached patch, I cannot reproduce the stalls at all
-    and the data rate it perfectly stable and steady under any condition
-    which previously caused the problem to be permanent.
-    
-    The issue seems to have been there since before the kernel migrated to
-    git, which makes me think that the stalls I occasionally experienced
-    with tux during stress-tests years ago were probably related to the
-    same issue.
-    
-    This issue was first encountered on 3.0.31 and 3.2.17, so please backport
-    to -stable.
-    
-    Signed-off-by: Willy Tarreau <w@1wt.eu>
-    Acked-by: Eric Dumazet <edumazet@google.com>
-    Cc: <stable@vger.kernel.org>
-
- net/ipv4/tcp.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
-
-commit f1ef0322da87da4de06f2c12d9615e5b62906d98
-Author: Sachin Prabhu <sprabhu@redhat.com>
-Date:   Tue Apr 17 14:35:39 2012 +0100
-
-    Avoid reading past buffer when calling GETACL
-    
-    Bug noticed in commit
-    bf118a342f10dafe44b14451a1392c3254629a1f
-    
-    When calling GETACL, if the size of the bitmap array, the length
-    attribute and the acl returned by the server is greater than the
-    allocated buffer(args.acl_len), we can Oops with a General Protection
-    fault at _copy_from_pages() when we attempt to read past the pages
-    allocated.
-    
-    This patch allocates an extra PAGE for the bitmap and checks to see that
-    the bitmap + attribute_length + ACLs don't exceed the buffer space
-    allocated to it.
-    
-    Signed-off-by: Sachin Prabhu <sprabhu@redhat.com>
-    Reported-by: Jian Li <jiali@redhat.com>
-    [Trond: Fixed a size_t vs unsigned int printk() warning]
-    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
-
- fs/nfs/nfs4proc.c |   16 ++++++++++------
- fs/nfs/nfs4xdr.c  |   18 +++++++++++-------
- 2 files changed, 21 insertions(+), 13 deletions(-)
-
-commit 6405eafd58c9a79fdd2c383fcd15e1231f30e52d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 19 08:30:54 2012 -0400
-
-    Precompute _start/_end
-
- arch/x86/mm/init.c |   25 ++++++++++++-------------
- 1 files changed, 12 insertions(+), 13 deletions(-)
-
-commit 86d09b7998377aa2a41dfa094f09e3e37681771b
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 19 07:45:06 2012 -0400
-
-    Use new method of EBDA detection
-    Resolves issue from: https://bugs.gentoo.org/show_bug.cgi?id=416415
-
- arch/x86/mm/init.c |   28 +++++++++++++++++++++++++++-
- 1 files changed, 27 insertions(+), 1 deletions(-)
-
-commit ae5d8ccb14ea02206a73bcfcb6fd1584229c7816
-Author: Eric W. Biederman <ebiederm@xmission.com>
-Date:   Fri May 4 11:34:03 2012 +0000
-
-    connector/userns: replace netlink uses of cap_raised() with capable()
-    
-    In 2009 Philip Reiser notied that a few users of netlink connector
-    interface needed a capability check and added the idiom
-    cap_raised(nsp->eff_cap, CAP_SYS_ADMIN) to a few of them, on the premise
-    that netlink was asynchronous.
-    
-    In 2011 Patrick McHardy noticed we were being silly because netlink is
-    synchronous and removed eff_cap from the netlink_skb_params and changed
-    the idiom to cap_raised(current_cap(), CAP_SYS_ADMIN).
-    
-    Looking at those spots with a fresh eye we should be calling
-    capable(CAP_SYS_ADMIN).  The only reason I can see for not calling capable
-    is that it once appeared we were not in the same task as the caller which
-    would have made calling capable() impossible.
-    
-    In the initial user_namespace the only difference between between
-    cap_raised(current_cap(), CAP_SYS_ADMIN) and capable(CAP_SYS_ADMIN) are a
-    few sanity checks and the fact that capable(CAP_SYS_ADMIN) sets
-    PF_SUPERPRIV if we use the capability.
-    
-    Since we are going to be using root privilege setting PF_SUPERPRIV seems
-    the right thing to do.
-    
-    The motivation for this that patch is that in a child user namespace
-    cap_raised(current_cap(),...) tests your capabilities with respect to that
-    child user namespace not capabilities in the initial user namespace and
-    thus will allow processes that should be unprivielged to use the kernel
-    services that are only protected with cap_raised(current_cap(),..).
-    
-    To fix possible user_namespace issues and to just clean up the code
-    replace cap_raised(current_cap(), CAP_SYS_ADMIN) with
-    capable(CAP_SYS_ADMIN).
-    
-    Signed-off-by: Eric W. Biederman <ebiederm@xmission.com>
-    Cc: Patrick McHardy <kaber@trash.net>
-    Cc: Philipp Reisner <philipp.reisner@linbit.com>
-    Acked-by: Serge E. Hallyn <serge.hallyn@canonical.com>
-    Acked-by: Andrew G. Morgan <morgan@kernel.org>
-    Cc: Vasiliy Kulikov <segoon@openwall.com>
-    Cc: David Howells <dhowells@redhat.com>
-    Reviewed-by: James Morris <james.l.morris@oracle.com>
-    Cc: David Miller <davem@davemloft.net>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- drivers/block/drbd/drbd_nl.c           |    2 +-
- drivers/md/dm-log-userspace-transfer.c |    2 +-
- drivers/video/uvesafb.c                |    2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
-
-commit 74650b6cb5756e6e78f90b31830ebe779c87e454
-Author: Dan Carpenter <dan.carpenter@oracle.com>
-Date:   Sun May 13 08:44:18 2012 +0000
-
-    openvswitch: checking wrong variable in queue_userspace_packet()
-    
-    "skb" is non-NULL here, for example we dereference it in skb_clone().
-    The intent was to test "nskb" which was just set.
-    
-    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-    Acked-by: Jesse Gross <jesse@nicira.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/openvswitch/datapath.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit c9edc7f133cb58a6f079390f1e31eac1d3122c86
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun May 13 15:42:34 2012 -0400
-
-    Add MIPS support to GRKERNSEC_SETXID, choose a thread info flag bit
-    for each of our supported architectures that can be properly expressed
-    within the instruction making use of an immediate value:
-    < 12 on sparc64
-    < 32 on mips
-    < 16 on powerpc
-    < 8 or expressable within 8 bits with a shift amount on arm
-    
-    (different values required for this kernel due to 3.3 feature additions)
-    
-    Conflicts:
-    
-    	arch/arm/include/asm/thread_info.h
-    	arch/sparc/include/asm/thread_info_64.h
-
- arch/arm/include/asm/thread_info.h      |    7 ++++++-
- arch/mips/include/asm/thread_info.h     |    9 +++++++--
- arch/mips/kernel/ptrace.c               |    9 +++++++++
- arch/mips/kernel/scall32-o32.S          |    2 +-
- arch/mips/kernel/scall64-64.S           |    2 +-
- arch/mips/kernel/scall64-n32.S          |    2 +-
- arch/mips/kernel/scall64-o32.S          |    2 +-
- arch/powerpc/include/asm/thread_info.h  |    5 +++--
- arch/sparc/include/asm/thread_info_64.h |    4 ++--
- arch/x86/include/asm/thread_info.h      |    3 ++-
- grsecurity/Kconfig                      |    4 ++--
- 11 files changed, 35 insertions(+), 14 deletions(-)
-
-commit 941429c6316391a4104d5781bf96a4a88b8b270d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun May 13 14:21:06 2012 -0400
-
-    Add arm/ppc/sparc64 support to GRKERNSEC_SETXID
-
- arch/arm/include/asm/thread_info.h      |    5 ++++-
- arch/arm/kernel/ptrace.c                |    9 +++++++++
- arch/powerpc/include/asm/thread_info.h  |    6 +++++-
- arch/powerpc/kernel/ptrace.c            |   14 ++++++++++++++
- arch/sparc/include/asm/thread_info_64.h |    7 +++++++
- arch/sparc/kernel/ptrace_64.c           |   14 ++++++++++++++
- arch/sparc/kernel/syscalls.S            |   10 +++++-----
- arch/x86/include/asm/thread_info.h      |    2 +-
- grsecurity/Kconfig                      |    4 ++--
- 9 files changed, 61 insertions(+), 10 deletions(-)
-
-commit 27cd051e9c71168dd4ba8048be2bcd962cb9c1bb
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 12 23:24:22 2012 -0400
-
-    Make CONFIG_GRKERNSEC_SETXID depend on X86 for now, more architectures to
-    be added later
-    Speeds up implementation by using existing thread info flag check
-    Will also apply the new credentials faster than the previous method, either
-    upon the next syscall entry or exit
-    Resolves oops triggerable by root reported by Pavel Labushev
-
- arch/x86/include/asm/thread_info.h |    8 +++++---
- arch/x86/kernel/ptrace.c           |   14 ++++++++++++++
- grsecurity/Kconfig                 |    3 ++-
- kernel/cred.c                      |   11 ++++++++++-
- kernel/sched/core.c                |   15 ---------------
- 5 files changed, 31 insertions(+), 20 deletions(-)
-
-commit 47565c239f57cef0f68934085945072768d8bfa3
-Merge: f170787 58b316c
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 12 17:21:53 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 58b316c3d406413e6e007f313534cd54114c15e3
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 12 17:21:15 2012 -0400
-
-    Update to pax-linux-3.3.6-test12.patch
-
- arch/x86/kernel/entry_32.S     |    2 +-
- arch/x86/lib/atomic64_cx8_32.S |    2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
-
-commit f170787d59bfe8af56d3d12c6422ca6c9ee2c9a3
-Merge: 1f1f22a 37725adf
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 12 15:54:19 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 37725adf42f6e157916e779acc37696810bc3213
-Merge: a17565b b67be2a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat May 12 15:54:06 2012 -0400
-
-    Merge branch 'linux-3.3.y' into pax-test
-    
-    Conflicts:
-    	arch/x86/boot/compressed/relocs.c
-
-commit 1f1f22a1225b5083787871fa1b3825a3ad26c1dd
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 9 17:22:32 2012 -0400
-
-    No need to perform descendent checks on anything but PTRACE_ATTACH/PTRACE_SEIZE
-    resolves issue with strace -f v4.7
-
- grsecurity/gracl.c |   25 +++++++++++++------------
- 1 files changed, 13 insertions(+), 12 deletions(-)
-
-commit 93d733045b6ebd24173c9ddbf70232382f196ab7
-Merge: a2446fc a17565b
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 9 17:13:44 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit a17565bf6246281d34fd530b7f93b6dc3affe932
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed May 9 17:13:23 2012 -0400
-
-    Update to pax-linux-3.3.5-test11.patch
-
- arch/x86/mm/hugetlbpage.c |    7 ++++++-
- arch/x86/mm/init_64.c     |    2 +-
- lib/ioremap.c             |    4 ++--
- mm/memory.c               |    8 ++++++--
- 4 files changed, 15 insertions(+), 6 deletions(-)
-
-commit a2446fc9e8ab4215b81285e8e38fb7691fede567
-Author: Jeff Mahoney <jeffm@suse.com>
-Date:   Wed Apr 25 14:32:09 2012 +0000
-
-    dl2k: Clean up rio_ioctl
-    
-    The dl2k driver's rio_ioctl call has a few issues:
-    - No permissions checking
-    - Implements SIOCGMIIREG and SIOCGMIIREG using the SIOCDEVPRIVATE numbers
-    - Has a few ioctls that may have been used for debugging at one point
-      but have no place in the kernel proper.
-    
-    This patch removes all but the MII ioctls, renumbers them to use the
-    standard ones, and adds the proper permission check for SIOCSMIIREG.
-    
-    We can also get rid of the dl2k-specific struct mii_data in favor of
-    the generic struct mii_ioctl_data.
-    
-    Since we have the phyid on hand, we can add the SIOCGMIIPHY ioctl too.
-    
-    Most of the MII code for the driver could probably be converted to use
-    the generic MII library but I don't have a device to test the results.
-    
-    Reported-by: Stephan Mueller <stephan.mueller@atsec.com>
-    Signed-off-by: Jeff Mahoney <jeffm@suse.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- drivers/net/ethernet/dlink/dl2k.c |   52 ++++++------------------------------
- drivers/net/ethernet/dlink/dl2k.h |    7 -----
- 2 files changed, 9 insertions(+), 50 deletions(-)
-
-commit 0387e294960d1a97aecf9a091fd04dc6ea60dc24
-Merge: 8721cf2 b472141
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon May 7 17:47:29 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit b472141f82dcaaebb0915579b664deb13dd51a63
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon May 7 17:47:09 2012 -0400
-
-    Update to pax-linux-3.3.5-test10.patch
-
- arch/alpha/include/asm/pgalloc.h      |    6 +++
- arch/arm/include/asm/pgalloc.h        |    6 +++
- arch/ia64/include/asm/pgalloc.h       |   12 ++++++
- arch/mips/include/asm/pgalloc.h       |    5 ++
- arch/parisc/include/asm/pgalloc.h     |    6 +++
- arch/powerpc/include/asm/pgalloc-64.h |    7 +++
- arch/sparc/include/asm/pgalloc_32.h   |    1 +
- arch/sparc/include/asm/pgalloc_64.h   |    1 +
- arch/um/include/asm/pgtable-3level.h  |    1 +
- arch/x86/include/asm/pgalloc.h        |   16 ++++++++
- arch/x86/include/asm/pgtable_64.h     |    2 +
- arch/x86/mm/init_64.c                 |    6 +-
- fs/binfmt_elf.c                       |    6 ++-
- include/linux/mm.h                    |   26 ++++++++++++
- mm/memory.c                           |   41 ++++++++++++++++++++
- mm/sparse-vmemmap.c                   |    4 +-
- mm/vmalloc.c                          |    4 +-
- tools/gcc/size_overflow_plugin.c      |   68 ++++++++++++++++++++++++++-------
- 18 files changed, 196 insertions(+), 22 deletions(-)
-
-commit 1d0532c4ddc0739cd7638044ffc05159992468b3
-Merge: 09bdf6a dda1cd5
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon May 7 17:46:55 2012 -0400
-
-    Merge branch 'linux-3.3.y' into pax-test
-
-commit 8721cf24ffec2f9a120ad5a057b305c0e42c6f74
-Author: Oleg Nesterov <oleg@redhat.com>
-Date:   Mon Apr 16 22:48:15 2012 +0200
-
-    i387: ptrace breaks the lazy-fpu-restore logic
-    
-    Starting from 7e16838d "i387: support lazy restore of FPU state"
-    we assume that fpu_owner_task doesn't need restore_fpu_checking()
-    on the context switch, its FPU state should match what we already
-    have in the FPU on this CPU.
-    
-    However, debugger can change the tracee's FPU state, in this case
-    we should reset fpu.last_cpu to ensure fpu_lazy_restore() can't
-    return true.
-    
-    Change init_fpu() to do this, it is called by user_regset->set()
-    methods.
-    
-    Reported-by: Jan Kratochvil <jan.kratochvil@redhat.com>
-    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
-    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
-    Link: http://lkml.kernel.org/r/20120416204815.GB24884@redhat.com
-    Cc: <stable@vger.kernel.org> v3.3
-    Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
-
- arch/x86/kernel/i387.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-commit e21c05262f5cb25748625efe8c8955ec052772d8
-Merge: daa5a9b 09bdf6a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Apr 27 17:52:51 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 09bdf6a25a5f726fa28e60d0594ecf58dd766696
-Merge: 955435e d0c4f31
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Apr 27 17:52:43 2012 -0400
-
-    Merge branch 'linux-3.3.y' into pax-test
-
-commit daa5a9b75978fafef5f453d3efb91723ad084539
-Merge: 76b9055 955435e
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 23 18:07:54 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	security/Kconfig
-
-commit 955435e0efc1b188f632ca4d0918b133174a0fba
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 23 17:53:48 2012 -0400
-
-    Update to pax-linux-3.3.3-test8.patch
-
- arch/x86/kvm/svm.c                   |    1 -
- drivers/gpu/drm/i915/intel_display.c |    8 +++++++-
- drivers/video/uvesafb.c              |    5 +++--
- security/Kconfig                     |    1 +
- tools/gcc/constify_plugin.c          |    2 +-
- 5 files changed, 12 insertions(+), 5 deletions(-)
-
-commit 76b90550e7c2202e102e09f48b77def5302b1298
-Merge: ed57dbd e64c3b2
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 22 20:52:35 2012 -0400
-
-    Upstream finally got around to fixing the ASLR infoleak I found and fixed
-    in grsecurity in 2009.  Three years with the fix in plain sight in the patch,
-    yet still it wasn't known or fixed until I explicitly mentioned it to Kees.
-    (this seems to be a recurring theme)
-    
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	kernel/futex.c
-    	kernel/futex_compat.c
-    	security/commoncap.c
-
-commit e64c3b2239335992182ff96235b81e2a87230b80
-Merge: e538e1d fa023d5
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 22 20:46:57 2012 -0400
-
-    Merge branch 'linux-3.3.y' into pax-test
-
-commit ed57dbd68c344c1d0e6617247fb7e80e7db1d796
-Author: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
-Date:   Fri Apr 13 03:35:13 2012 +0000
-
-    sparc64: Eliminate obsolete __handle_softirq() function
-    
-    The invocation of softirq is now handled by irq_exit(), so there is no
-    need for sparc64 to invoke it on the trap-return path.  In fact, doing so
-    is a bug because if the trap occurred in the idle loop, this invocation
-    can result in lockdep-RCU failures.  The problem is that RCU ignores idle
-    CPUs, and the sparc64 trap-return path to the softirq handlers fails to
-    tell RCU that the CPU must be considered non-idle while those handlers
-    are executing.  This means that RCU is ignoring any RCU read-side critical
-    sections in those handlers, which in turn means that RCU-protected data
-    can be yanked out from under those read-side critical sections.
-    
-    The shiny new lockdep-RCU ability to detect RCU read-side critical sections
-    that RCU is ignoring located this problem.
-    
-    The fix is straightforward: Make sparc64 stop manually invoking the
-    softirq handlers.
-    
-    Reported-by: Meelis Roos <mroos@linux.ee>
-    Suggested-by: David Miller <davem@davemloft.net>
-    Signed-off-by: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
-    Tested-by: Meelis Roos <mroos@linux.ee>
-    Cc: stable@vger.kernel.org
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- arch/sparc/kernel/rtrap_64.S |    7 -------
- 1 files changed, 0 insertions(+), 7 deletions(-)
-
-commit e094cb83872b493ec77323eef91eaf409f13df79
-Author: David S. Miller <davem@davemloft.net>
-Date:   Fri Apr 13 11:56:22 2012 -0700
-
-    sparc64: Fix bootup crash on sun4v.
-    
-    The DS driver registers as a subsys_initcall() but this can be too
-    early, in particular this risks registering before we've had a chance
-    to allocate and setup module_kset in kernel/params.c which is
-    performed also as a subsyts_initcall().
-    
-    Register DS using device_initcall() insteal.
-    
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-    Cc: stable@vger.kernel.org
-
- arch/sparc/kernel/ds.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 2fe8dca41a62e05f6c0a0bf4852f8a8d0b8967e0
-Author: Lubos Lunak <l.lunak@suse.cz>
-Date:   Wed Mar 21 14:08:24 2012 +0100
-
-    do not export kernel's NULL #define to userspace
-    
-    GCC's NULL is actually __null, which allows detecting some questionable
-    NULL usage and warn about it.  Moreover each platform/compiler should
-    have its own stddef.h anyway (which is different from linux/stddef.h).
-    
-    So there's no good reason to leak kernel's NULL to userspace and
-    override what the compiler provides.
-    
-    Signed-off-by: Luboš Luňák <l.lunak@suse.cz>
-    Acked-by: Arnd Bergmann <arnd@arndb.de>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- include/linux/stddef.h |    8 ++------
- 1 files changed, 2 insertions(+), 6 deletions(-)
-
-commit 7dc1db81ece569ccad1227ef72ab58c4f160c5f9
-Author: Alex Williamson <alex.williamson@redhat.com>
-Date:   Wed Apr 11 09:51:49 2012 -0600
-
-    KVM: unmap pages from the iommu when slots are removed
-    
-    We've been adding new mappings, but not destroying old mappings.
-    This can lead to a page leak as pages are pinned using
-    get_user_pages, but only unpinned with put_page if they still
-    exist in the memslots list on vm shutdown.  A memslot that is
-    destroyed while an iommu domain is enabled for the guest will
-    therefore result in an elevated page reference count that is
-    never cleared.
-    
-    Additionally, without this fix, the iommu is only programmed
-    with the first translation for a gpa.  This can result in
-    peer-to-peer errors if a mapping is destroyed and replaced by a
-    new mapping at the same gpa as the iommu will still be pointing
-    to the original, pinned memory address.
-    
-    Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
-    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
-
- include/linux/kvm_host.h |    6 ++++++
- virt/kvm/iommu.c         |    7 ++++++-
- virt/kvm/kvm_main.c      |    5 +++--
- 3 files changed, 15 insertions(+), 3 deletions(-)
-
-commit b0e0913f11ccad2909d96833b21f3d1dd1dd187b
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 19 20:27:57 2012 -0400
-
-    http://marc.info/?l=linux-kernel&m=133455712201581&w=2
-    
-    Currently we do not validate the vector length before calling
-    get_user_pages_fast(), host stack would be easily overflowed by
-    malicious guest driver who give us a descriptor with length greater
-    than MAX_SKB_FRAGS. Solve this problem by checking the free entries
-    before trying to pin user pages.
-    
-    Signed-off-by: Jason Wang <jasowang@redhat.com>
-
- drivers/net/macvtap.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit a3632ca0baf60466c650053eb72e1b047540e4cc
-Author: Eric Paris <eparis@redhat.com>
-Date:   Tue Apr 17 16:26:54 2012 -0400
-
-    fcaps: clear the same personality flags as suid when fcaps are used
-    
-    If a process increases permissions using fcaps all of the dangerous
-    personality flags which are cleared for suid apps should also be cleared.
-    Thus programs given priviledge with fcaps will continue to have address space
-    randomization enabled even if the parent tried to disable it to make it
-    easier to attack.
-    
-    Signed-off-by: Eric Paris <eparis@redhat.com>
-    Reviewed-by: Serge Hallyn <serge.hallyn@canonical.com>
-    Signed-off-by: James Morris <james.l.morris@oracle.com>
-
- security/commoncap.c |    5 +++++
+ net/core/dev.c |    5 +++++
  1 files changed, 5 insertions(+), 0 deletions(-)
 
-commit 6bb89c4bd981848dd5647a2f3c933937d8e49a61
-Merge: c7db64d e538e1d
+commit 9e8b3c2932d78a285f59698552e4dc947071a16a
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 15 11:08:50 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit e538e1de0e33950814137a835b0402a097939c3f
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 15 11:08:26 2012 -0400
-
-    Update to pax-linux-3.3.2-test7.patch
-
- arch/x86/include/asm/cmpxchg.h  |    4 ++--
- arch/x86/include/asm/kvm_host.h |    2 +-
- arch/x86/kvm/vmx.c              |    1 -
- include/asm-generic/pgtable.h   |    4 ++--
- kernel/panic.c                  |    2 +-
- 5 files changed, 6 insertions(+), 7 deletions(-)
-
-commit c7db64db701e32d76797a3e07bc5c43c4029bb4b
-Author: Jason Wessel <jason.wessel@windriver.com>
-Date:   Thu Apr 12 12:49:17 2012 -0700
-
-    panic: fix stack dump print on direct call to panic()
-    
-    Commit 6e6f0a1f0fa6 ("panic: don't print redundant backtraces on oops")
-    causes a regression where no stack trace will be printed at all for the
-    case where kernel code calls panic() directly while not processing an
-    oops, and of course there are 100's of instances of this type of call.
-    
-    The original commit executed the check (!oops_in_progress), but this will
-    always be false because just before the dump_stack() there is a call to
-    bust_spinlocks(1), which does the following:
-    
-      void __attribute__((weak)) bust_spinlocks(int yes)
-      {
-    	if (yes) {
-    		++oops_in_progress;
-    
-    The proper way to resolve the problem that original commit tried to
-    solve is to avoid printing a stack dump from panic() when the either of
-    the following conditions is true:
-    
-      1) TAINT_DIE has been set (this is done by oops_end())
-         This indicates and oops has already been printed.
-      2) oops_in_progress > 1
-         This guards against the rare case where panic() is invoked
-         a second time, or in between oops_begin() and oops_end()
-    
-    Signed-off-by: Jason Wessel <jason.wessel@windriver.com>
-    Cc: Andi Kleen <ak@linux.intel.com>
-    Cc: <stable@vger.kernel.org>	[3.3+]
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- kernel/panic.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit fa5fabf348ab41988ef87d20d24e3203c2aa8d40
-Author: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
-Date:   Thu Apr 12 12:49:12 2012 -0700
-
-    drivers/char/random.c: fix boot id uniqueness race
-    
-    /proc/sys/kernel/random/boot_id can be read concurrently by userspace
-    processes.  If two (or more) user-space processes concurrently read
-    boot_id when sysctl_bootid is not yet assigned, a race can occur making
-    boot_id differ between the reads.  Because the whole point of the boot id
-    is to be unique across a kernel execution, fix this by protecting this
-    operation with a spinlock.
-    
-    Given that this operation is not frequently used, hitting the spinlock
-    on each call should not be an issue.
-    
-    Signed-off-by: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
-    Cc: "Theodore Ts'o" <tytso@mit.edu>
-    Cc: Matt Mackall <mpm@selenic.com>
-    Signed-off-by: Eric Dumazet <eric.dumazet@gmail.com>
-    Cc: Greg Kroah-Hartman <greg@kroah.com>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- drivers/char/random.c |   11 ++++++++---
- 1 files changed, 8 insertions(+), 3 deletions(-)
-
-commit 9f055943f8c70a331e6066d154584b94b8a7e6ff
-Merge: 15291162 69e4937
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Apr 13 16:10:29 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	kernel/sysctl.c
-
-commit 69e4937b96b2c03dbe975eb70991f89bbe448411
-Merge: 0c851ef ad07d7b
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Apr 13 16:09:07 2012 -0400
-
-    Merge branch 'linux-3.3.y' into pax-test
-
-commit 152911622e7f698d34ae653ea79060d3f518bcb7
-Merge: 5c04558 0c851ef
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 9 17:02:01 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 0c851ef08806717abcb17f2e3f7156250a68e31a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 9 17:01:48 2012 -0400
-
-    Update to pax-linux-3.3.1-test7.patch
-
- arch/x86/kernel/kdebugfs.c |    2 ++
- arch/x86/mm/pgtable.c      |    4 ++++
- 2 files changed, 6 insertions(+), 0 deletions(-)
-
-commit 5c04558d606ca8cfe925fa0d1c7cdcc7ad15b199
-Merge: 29547b5 8bb406f
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 16:01:46 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	mm/mmap.c
-    	security/Kconfig
-
-commit 29547b5c27a97d0e13bd59bc3869f270ec472d66
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:59:33 2012 -0400
-
-    Revert "Fix RLIMIT_AS accounting with brk randomization"
-    
-    This reverts commit e8719b11ed6e03b3c9c4ca769dcd9341af0ca411.
-
- fs/binfmt_elf.c |    2 +-
- mm/mmap.c       |    2 --
- 2 files changed, 1 insertions(+), 3 deletions(-)
-
-commit 784a578e35994ada12d51ee064538c06f0ad527c
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:59:14 2012 -0400
-
-    Revert "Fix RLIMIT_AS checking with brk randomization"
-    
-    This reverts commit 0f5c00e65adef2b874afcaf36bd15898f1b07d1e.
-
- fs/binfmt_elf.c |    2 --
- mm/mmap.c       |    5 +----
- 2 files changed, 1 insertions(+), 6 deletions(-)
-
-commit 68018e31a67166e3459768a57bcb9827c42e4906
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:58:59 2012 -0400
-
-    Revert "set end_data before mmap of gap otherwise we'll be counting toward RLIMIT_AS"
-    
-    This reverts commit 3822d8ebbe141004d4b57c71cbc4ed2948753059.
-
- fs/binfmt_elf.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 22ed2b3ef411bfe753ddcb039f52a02336003f98
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:58:40 2012 -0400
-
-    Revert "Fix RLIMIT_AS checking with brk randomization"
-    
-    This reverts commit 5693e0379b65616a111084fc0db5e408ee716d54.
-
- fs/binfmt_elf.c |    2 ++
- mm/mmap.c       |    2 +-
- 2 files changed, 3 insertions(+), 1 deletions(-)
-
-commit dd0706106b0a4e80d65cb971262faedb2eff82cb
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:58:12 2012 -0400
-
-    Revert "fix wraparound"
-    
-    This reverts commit daa20cc1ecd09f3745ee2895af1385e02be79822.
-
- fs/binfmt_elf.c |    3 +--
- 1 files changed, 1 insertions(+), 2 deletions(-)
-
-commit 803884ee45cb70ea06558aa4e409fbcff93d3d71
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:56:40 2012 -0400
-
-    Revert "fake start_brk value before mmap is processed"
-    
-    This reverts commit a18343183d8978e473d53569ed4d700ff798ad35.
-
- fs/binfmt_elf.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-commit 8bb406fb30151e48b05390fcbdf886c3a9f773f9
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:55:34 2012 -0400
-
-    Update to pax-linux-3.3.1-test6.patch
-
- Documentation/dontdiff                             |    1 +
- Makefile                                           |    7 +-
- arch/x86/crypto/aesni-intel_glue.c                 |    2 +
- arch/x86/include/asm/floppy.h                      |    1 +
- arch/x86/include/asm/kvm_host.h                    |    6 +-
- arch/x86/include/asm/syscalls.h                    |    2 +-
- arch/x86/include/asm/uaccess_32.h                  |   31 +-
- arch/x86/include/asm/uaccess_64.h                  |   38 +-
- arch/x86/kernel/cpu/mcheck/mce-inject.c            |    2 +
- arch/x86/kernel/cpu/mtrr/if.c                      |    2 +
- arch/x86/kernel/i387.c                             |   20 +
- arch/x86/kernel/ldt.c                              |    2 +
- arch/x86/kernel/microcode_intel.c                  |    1 +
- arch/x86/kernel/module.c                           |    1 +
- arch/x86/kernel/ptrace.c                           |    4 +
- arch/x86/kernel/setup_percpu.c                     |    4 +
- arch/x86/kernel/tls.h                              |    2 +-
- arch/x86/kernel/vm86_32.c                          |    3 +
- arch/x86/kvm/svm.c                                 |    1 +
- arch/x86/kvm/vmx.c                                 |    1 +
- arch/x86/kvm/x86.c                                 |   21 +
- arch/x86/kvm/x86.h                                 |    4 +-
- arch/x86/lib/usercopy_32.c                         |    6 +
- arch/x86/mm/pgtable.c                              |   12 +-
- arch/x86/platform/uv/tlb_uv.c                      |    4 +
- crypto/ablkcipher.c                                |    4 +
- crypto/aead.c                                      |    3 +
- crypto/blkcipher.c                                 |    3 +
- crypto/cipher.c                                    |    3 +
- drivers/acpi/battery.c                             |    3 +
- drivers/acpi/sbs.c                                 |    3 +
- drivers/infiniband/hw/ipath/ipath_fs.c             |    4 +
- drivers/infiniband/hw/qib/qib_fs.c                 |    4 +
- drivers/lguest/lguest_user.c                       |    1 +
- drivers/md/dm-raid1.c                              |    4 +
- drivers/md/dm-stripe.c                             |    1 +
- drivers/media/video/cpia2/cpia2_core.c             |    1 +
- drivers/media/video/cx18/cx18-alsa-pcm.c           |    2 +
- drivers/media/video/cx231xx/cx231xx-audio.c        |    2 +
- drivers/media/video/em28xx/em28xx-audio.c          |    2 +
- drivers/media/video/meye.c                         |    1 +
- drivers/media/video/saa7164/saa7164-encoder.c      |    2 +
- drivers/media/video/saa7164/saa7164-vbi.c          |    2 +
- drivers/media/video/videobuf-dma-contig.c          |    1 +
- drivers/media/video/videobuf-dma-sg.c              |    1 +
- drivers/media/video/videobuf-vmalloc.c             |    1 +
- drivers/mtd/ubi/build.c                            |   16 +-
- drivers/mtd/ubi/debug.c                            |    2 +
- drivers/net/ethernet/chelsio/cxgb/sge.c            |    2 +
- drivers/net/ethernet/chelsio/cxgb3/sge.c           |    4 +
- drivers/net/ethernet/chelsio/cxgb4/sge.c           |    3 +
- drivers/net/ethernet/chelsio/cxgb4vf/sge.c         |    3 +
- drivers/net/wireless/ath/ath5k/debug.c             |    3 +
- drivers/net/wireless/ath/ath9k/debug.c             |    2 +
- drivers/net/wireless/ath/ath9k/htc_drv_debug.c     |    2 +
- drivers/oprofile/oprofile_files.c                  |    5 +
- drivers/oprofile/oprofilefs.c                      |    1 +
- drivers/platform/x86/asus_acpi.c                   |    2 +
- drivers/platform/x86/toshiba_acpi.c                |    2 +
- drivers/staging/rtl8192e/rtllib_module.c           |    2 +
- .../staging/rtl8192u/ieee80211/ieee80211_module.c  |    2 +
- drivers/usb/core/message.c                         |    4 +-
- fs/binfmt_elf.c                                    |    1 +
- fs/cifs/asn1.c                                     |    3 +
- fs/configfs/file.c                                 |    2 +
- fs/exec.c                                          |   10 +
- fs/ncpfs/ncplib_kernel.h                           |    4 +-
- fs/seq_file.c                                      |   12 +-
- fs/sysfs/bin.c                                     |    2 +
- fs/ubifs/debug.c                                   |    3 +
- include/asm-generic/int-l64.h                      |    2 -
- include/asm-generic/int-ll64.h                     |    2 -
- include/asm-generic/uaccess.h                      |   11 +
- include/linux/compiler-gcc4.h                      |    3 +
- include/linux/compiler.h                           |    3 +
- include/linux/crash_dump.h                         |    2 +-
- include/linux/kvm_host.h                           |   14 +-
- include/linux/mm_types.h                           |    4 +-
- include/linux/moduleloader.h                       |    4 +-
- include/linux/oprofile.h                           |    2 +-
- include/linux/slab.h                               |   63 +-
- include/linux/slab_def.h                           |    6 +-
- include/linux/slob_def.h                           |    5 +-
- include/linux/slub_def.h                           |   10 +-
- include/linux/uaccess.h                            |    2 +-
- include/linux/vmalloc.h                            |  123 +-
- mm/mmap.c                                          |    5 +
- mm/util.c                                          |    2 -
- mm/vmalloc.c                                       |    9 -
- net/bridge/netfilter/ebt_ulog.c                    |    1 +
- net/ipv4/ah4.c                                     |    2 +
- net/ipv4/netfilter/arp_tables.c                    |   10 +
- net/ipv4/netfilter/ip_tables.c                     |   11 +
- net/ipv4/netfilter/ipt_ULOG.c                      |    1 +
- net/ipv4/netfilter/nf_nat_snmp_basic.c             |    6 +-
- net/ipv6/ah6.c                                     |    2 +
- net/ipv6/netfilter/ip6_tables.c                    |   11 +
- scripts/mod/modpost.c                              |    2 +-
- scripts/tags.sh                                    |    2 +-
- security/Kconfig                                   |   15 +-
- tools/gcc/Makefile                                 |    3 +
- tools/gcc/kernexec_plugin.c                        |    2 +-
- tools/gcc/size_overflow_hash1.h                    | 3047 ++++++++++++++++++++
- tools/gcc/size_overflow_hash2.h                    |   35 +
- tools/gcc/size_overflow_plugin.c                   | 1110 +++++++
- 105 files changed, 4589 insertions(+), 261 deletions(-)
-
-commit 8b57bb1090a9dbe75bee876917e2522d278f004b
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 15:40:58 2012 -0400
-
-    Always allow use of AF_UNSPEC for already-connected sockets to disconnect
-
- grsecurity/gracl_ip.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-commit 9f88f736253a3bffdaaefc2dfb97cba3761707aa
-Author: Eric Dumazet <eric.dumazet@gmail.com>
-Date:   Thu Apr 5 22:17:46 2012 +0000
-
-    netlink: fix races after skb queueing
-    
-    As soon as an skb is queued into socket receive_queue, another thread
-    can consume it, so we are not allowed to reference skb anymore, or risk
-    use after free.
-    
-    Signed-off-by: Eric Dumazet <eric.dumazet@gmail.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/netlink/af_netlink.c |   24 +++++++++++++-----------
- 1 files changed, 13 insertions(+), 11 deletions(-)
-
-commit cdbca15d6401902654b96d3105113865c37941e4
-Author: Eric Dumazet <eric.dumazet@gmail.com>
-Date:   Fri Apr 6 10:49:10 2012 +0200
-
-    net: fix a race in sock_queue_err_skb()
-    
-    As soon as an skb is queued into socket error queue, another thread
-    can consume it, so we are not allowed to reference skb anymore, or risk
-    use after free.
-    
-    Signed-off-by: Eric Dumazet <eric.dumazet@gmail.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/core/skbuff.c |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
-
-commit 96360cf85c2108f01a4fbbcfe6f63b4893f6a0fc
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 10:13:28 2012 -0400
-
-    always allow admin to follow ptrace'd execs
-    no need for task_lock
-
- grsecurity/gracl.c |   19 ++++++++++++++++---
- 1 files changed, 16 insertions(+), 3 deletions(-)
-
-commit 9b915f7c937489fc3625981b619006c496e4bdaf
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 07:01:20 2012 -0400
-
-    Require CAP_SYS_ADMIN for /sys/kernel/uevent_helper
-
- kernel/ksysfs.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit ac1df8a3412ab214b392a7eaee2b96f3478c8469
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 8 06:58:58 2012 -0400
-
-    Require CAP_SYS_ADMIN for /proc/sysrq-trigger
-
- drivers/tty/sysrq.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit a18343183d8978e473d53569ed4d700ff798ad35
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Apr 6 19:45:36 2012 -0400
-
-    fake start_brk value before mmap is processed
-
- fs/binfmt_elf.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-commit daa20cc1ecd09f3745ee2895af1385e02be79822
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Apr 6 18:56:24 2012 -0400
-
-    fix wraparound
-
- fs/binfmt_elf.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-commit 5693e0379b65616a111084fc0db5e408ee716d54
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Apr 6 18:14:20 2012 -0400
-
-    Fix RLIMIT_AS checking with brk randomization
-
- fs/binfmt_elf.c |    2 --
- mm/mmap.c       |    2 +-
- 2 files changed, 1 insertions(+), 3 deletions(-)
-
-commit 3822d8ebbe141004d4b57c71cbc4ed2948753059
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 5 21:23:00 2012 -0400
-
-    set end_data before mmap of gap otherwise we'll be counting toward RLIMIT_AS
-
- fs/binfmt_elf.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 0f5c00e65adef2b874afcaf36bd15898f1b07d1e
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 5 20:54:16 2012 -0400
-
-    Fix RLIMIT_AS checking with brk randomization
-
- fs/binfmt_elf.c |    2 ++
- mm/mmap.c       |    5 ++++-
- 2 files changed, 6 insertions(+), 1 deletions(-)
-
-commit e8719b11ed6e03b3c9c4ca769dcd9341af0ca411
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 5 19:53:46 2012 -0400
-
-    Fix RLIMIT_AS accounting with brk randomization
-
- fs/binfmt_elf.c |    2 +-
- mm/mmap.c       |    2 ++
- 2 files changed, 3 insertions(+), 1 deletions(-)
-
-commit 71e7dbb7e5586987130b85faec1b689557ae89ea
-Merge: 236c100 d333553
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 2 17:38:41 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit d333553e2c2b46b81ddeaa6c06e66d885f853514
-Merge: efbb92a 07a4483
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 2 17:38:26 2012 -0400
-
-    Merge branch 'linux-3.3.y' into pax-test
-    
-    Conflicts:
-    	arch/x86/net/bpf_jit_comp.c
-
-commit 236c100307ff0416f0ef17efe7540a2ce0077cbf
-Author: Dan Carpenter <dan.carpenter@oracle.com>
-Date:   Sat Mar 24 10:52:50 2012 +0300
-
-    x86, tls: Off by one limit check
-    
-    These are used as offsets into an array of GDT_ENTRY_TLS_ENTRIES members
-    so GDT_ENTRY_TLS_ENTRIES is one past the end of the array.
-    
-    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-    Link: http://lkml.kernel.org/r/20120324075250.GA28258@elgon.mountain
-    Cc: <stable@vger.kernel.org>
-    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
-
- arch/x86/kernel/tls.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
-
-commit 7062ff9c0cada849bc7d984d6318d52be7647b44
-Author: Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Mon Mar 19 16:19:53 2012 -0700
-
-    vfs: get rid of batshit-insane pointless dentry hash calculations
-    
-    For some odd historical reason, the final mixing round for the dentry
-    cache hash table lookup had an insane "xor with big constant" logic.  In
-    two places.
-    
-    The big constant that is being xor'ed is GOLDEN_RATIO_PRIME, which is a
-    fairly random-looking number that is designed to be *multiplied* with so
-    that the bits get spread out over a whole long-word.
-    
-    But xor'ing with it is insane.  It doesn't really even change the hash -
-    it really only shifts the hash around in the hash table.  To make
-    matters worse, the insane big constant is different on 32-bit and 64-bit
-    builds, even though the name hash bits we use are always 32-bit (and the
-    bits from the pointer we mix in effectively are too).
-    
-    It's all total voodoo programming, in other words.
-    
-    Now, some testing and analysis of the hash chains shows that the rest of
-    the hash function seems to be fairly good.  It does pick the right bits
-    of the parent dentry pointer, for example, and while it's generally a
-    bad idea to use an xor to mix down the upper bits (because if there is a
-    repeating pattern, the xor can cause "destructive interference"), it
-    seems to not have been a disaster.
-    
-    For example, replacing the hash with the normal "hash_long()" code (that
-    uses the GOLDEN_RATIO_PRIME constant correctly, btw) actually just makes
-    the hash worse.  The hand-picked hash knew which bits of the pointer had
-    the highest entropy, and hash_long() ends up mixing bits less optimally
-    at least in some trivial tests.
-    
-    So the hash function overall seems fine, it just has that really odd
-    "shift result around by a constant xor".
-    
-    So get rid of the silly xor, and replace the down-mixing of the bits
-    with an add instead of an xor that tends to not have the same kind of
-    destructive interference issues.  Some stats on the resulting hash
-    chains shows that they look statistically identical before and after,
-    but the code is simpler and no longer makes you go "WTF?".
-    
-    Also, the incoming hash really is just "unsigned int", not a long, and
-    there's no real point to worry about the high 26 bits of the dentry
-    pointer for the 64-bit case, because they are all going to be identical
-    anyway.
-    
-    So also change the hashing to be done in the more natural 'unsigned int'
-    that is the real size of the actual hashed data anyway.
-    
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- fs/dcache.c |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
-
-commit 1933ee4cf1ce8f256e0441323d0fa1555016ca3c
-Author: Oleg Nesterov <oleg@redhat.com>
-Date:   Fri Mar 23 15:02:40 2012 -0700
-
-    ptrace: don't send SIGTRAP on exec if SEIZED
-    
-    ptrace_event(PTRACE_EVENT_EXEC) sends SIGTRAP if PT_TRACE_EXEC is not
-    set.  This is because this SIGTRAP predates PTRACE_O_TRACEEXEC option,
-    we do not need/want this with PT_SEIZED which can set the options during
-    attach.
-    
-    Suggested-by: Pedro Alves <palves@redhat.com>
-    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
-    Cc: Chris Evans <scarybeasts@gmail.com>
-    Cc: Indan Zupancic <indan@nul.nu>
-    Cc: Denys Vlasenko <vda.linux@googlemail.com>
-    Cc: Tejun Heo <tj@kernel.org>
-    Cc: Pedro Alves <palves@redhat.com>
-    Cc: Jan Kratochvil <jan.kratochvil@redhat.com>
-    Cc: Steven Rostedt <rostedt@goodmis.org>
-    Cc: Frederic Weisbecker <fweisbec@gmail.com>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- include/linux/ptrace.h |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
-
-commit 96b9985a386432ddefbca4f3ca3837fe72652e77
-Author: Dmitry Adamushko <dmitry.adamushko@gmail.com>
-Date:   Thu Mar 22 21:39:25 2012 +0100
-
-    x86-32: Fix endless loop when processing signals for kernel tasks
-    
-    The problem occurs on !CONFIG_VM86 kernels [1] when a kernel-mode task
-    returns from a system call with a pending signal.
-    
-    A real-life scenario is a child of 'khelper' returning from a failed
-    kernel_execve() in ____call_usermodehelper() [ kernel/kmod.c ].
-    kernel_execve() fails due to a pending SIGKILL, which is the result of
-    "kill -9 -1" (at least, busybox's init does it upon reboot).
-    
-    The loop is as follows:
-    
-    * syscall_exit_work:
-     - work_pending:            // start_of_the_loop
-     - work_notify_sig:
-       - do_notify_resume()
-         - do_signal()
-           - if (!user_mode(regs)) return;
-     - resume_userspace         // TIF_SIGPENDING is still set
-     - work_pending             // so we call work_pending => goto
-                                // start_of_the_loop
-    
-    More information can be found in another LKML thread:
-    http://www.serverphorums.com/read.php?12,457826
-    
-    [1] the problem was also seen on MIPS.
-    
-    Signed-off-by: Dmitry Adamushko <dmitry.adamushko@gmail.com>
-    Link: http://lkml.kernel.org/r/1332448765.2299.68.camel@dimm
-    Cc: Oleg Nesterov <oleg@redhat.com>
-    Cc: Roland McGrath <roland@hack.frob.com>
-    Cc: Andrew Morton <akpm@linux-foundation.org>
-    Cc: <stable@vger.kernel.org>
-    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
-
- arch/x86/kernel/entry_32.S |   17 ++++++++++-------
- 1 files changed, 10 insertions(+), 7 deletions(-)
-
-commit d2184c1098a46d3b1f96299f352d11f2e20da3b0
-Merge: 412185c efbb92a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Mar 25 18:35:21 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit efbb92ad36e7e4f53482380f53a9cc38faca925d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Mar 25 18:35:07 2012 -0400
-
-    Update to pax-linux-3.3-test4.patch
-
- fs/binfmt_elf.c         |    8 ++++----
- kernel/rcutiny_plugin.h |    2 +-
- 2 files changed, 5 insertions(+), 5 deletions(-)
-
-commit 412185c4992a6b746d4afd039ba43ef234f67aad
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 20:19:01 2012 -0400
+Date:   Sat Jun 9 13:52:37 2012 -0400
 
     compile fix
 
- fs/proc/base.c |   12 +++++++-----
- 1 files changed, 7 insertions(+), 5 deletions(-)
-
-commit c9ef1bf36c5145857ddec249fd3faac5507661cd
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 20:03:33 2012 -0400
-
-    Fix port of /proc restrictions
-
- fs/proc/base.c |    5 +++++
- 1 files changed, 5 insertions(+), 0 deletions(-)
-
-commit 3eb9d8c8fef296ab41ac6db5e24f8472f2849ea9
-Merge: 0e19043 0570523
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 19:35:37 2012 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 0570523cdca02dd228082b0152dd14140aa9b4d4
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 19:34:11 2012 -0400
-
-    Update to pax-linux-3.3-test3.patch
-    reduces overcommit amount from recently increased brk entropy
-
- arch/arm/include/asm/atomic.h |    5 +++++
- fs/binfmt_elf.c               |   27 ++++++++++++++++++++++-----
- fs/bio.c                      |    2 +-
- 3 files changed, 28 insertions(+), 6 deletions(-)
-
-commit 0e19043d13ef5ba8c833d075d49b5cfb1bdfec53
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 19:25:48 2012 -0400
-
-    Hold rcu_read_lock
-
- fs/proc/base.c |   22 +++++++++++++---------
- 1 files changed, 13 insertions(+), 9 deletions(-)
-
-commit 9a90e1cffec9080574cef64611b1828690a6f3d8
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 19:20:34 2012 -0400
-
-    compile fix
-
- grsecurity/gracl.c        |   25 ++++++++++++++++---------
- grsecurity/grsec_chroot.c |    4 ++--
- 2 files changed, 18 insertions(+), 11 deletions(-)
-
-commit 485755bfa7629914889409b5aa18d614fedaf873
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 18:34:44 2012 -0400
-
-    compile fix
-
- fs/proc/base.c            |    4 ++--
- grsecurity/grsec_chroot.c |    3 +--
- 2 files changed, 3 insertions(+), 4 deletions(-)
-
-commit e796b6a7bd9f204ae918e9bef8b6aa7650735e77
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 18:30:36 2012 -0400
-
-    compile fix
-
- fs/proc/base.c            |   10 ++--------
- grsecurity/grsec_chroot.c |    1 +
- grsecurity/grsec_exec.c   |    2 ++
- 3 files changed, 5 insertions(+), 8 deletions(-)
-
-commit 75f929048fd30016197a1d3b265b46591b985e72
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 18:19:34 2012 -0400
-
-    compile fix
-
- kernel/fork.c |    2 +-
+ fs/proc/proc_sysctl.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-commit f5d20702ca626d8ed7c7cdb3312f02dcf7eb0fe8
+commit 1ce6d92493cd75f5017706226474daa073527bbc
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 18:16:51 2012 -0400
+Date:   Sat Jun 9 13:47:46 2012 -0400
 
-    Initial patch of grsecurity 2.9 for Linux 3.3
+    Remove now unnecessary functions
 
- Makefile                                           |    8 +-
+ grsecurity/gracl.c |  187 ----------------------------------------------------
+ 1 files changed, 0 insertions(+), 187 deletions(-)
+
+commit 190aa4a11441d872d2107765f7a801c904bd3259
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 9 13:34:58 2012 -0400
+
+    Complete sysctl handling, update grsecurity version
+
+ fs/proc/proc_sysctl.c     |   17 +++++++++++++++--
+ grsecurity/gracl.c        |   10 ++++++++--
+ grsecurity/grsec_sysctl.c |    2 ++
+ include/linux/gracl.h     |    4 ++--
+ kernel/sysctl.c           |    7 -------
+ security/yama/Kconfig     |    2 +-
+ 6 files changed, 28 insertions(+), 14 deletions(-)
+
+commit ab6767c0b881d1fafbb793767d7388183de6b15c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 9 11:33:13 2012 -0400
+
+    Initial (broken) port to 3.4.1
+
+ Makefile                                           |   10 +-
  arch/alpha/include/asm/cache.h                     |    4 +-
  arch/arm/include/asm/cache.h                       |    2 +
+ arch/arm/include/asm/thread_info.h                 |   10 +-
+ arch/arm/kernel/ptrace.c                           |    9 +
  arch/arm/kernel/traps.c                            |    5 +
- arch/arm/mach-ux500/mbox-db5500.c                  |    2 +-
  arch/avr32/include/asm/cache.h                     |    4 +-
  arch/blackfin/include/asm/cache.h                  |    3 +-
  arch/cris/include/arch-v10/arch/cache.h            |    3 +-
@@ -2000,20 +124,31 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  arch/m68k/include/asm/cache.h                      |    4 +-
  arch/microblaze/include/asm/cache.h                |    3 +-
  arch/mips/include/asm/cache.h                      |    3 +-
+ arch/mips/include/asm/thread_info.h                |    9 +-
+ arch/mips/kernel/ptrace.c                          |    9 +
+ arch/mips/kernel/scall32-o32.S                     |    2 +-
+ arch/mips/kernel/scall64-64.S                      |    2 +-
+ arch/mips/kernel/scall64-n32.S                     |    2 +-
+ arch/mips/kernel/scall64-o32.S                     |    2 +-
  arch/mn10300/proc-mn103e010/include/proc/cache.h   |    4 +-
  arch/mn10300/proc-mn2ws0050/include/proc/cache.h   |    4 +-
  arch/openrisc/include/asm/cache.h                  |    4 +-
  arch/parisc/include/asm/cache.h                    |    5 +-
  arch/powerpc/include/asm/cache.h                   |    3 +-
+ arch/powerpc/include/asm/thread_info.h             |    9 +-
  arch/powerpc/kernel/process.c                      |   10 +-
+ arch/powerpc/kernel/ptrace.c                       |   14 +
  arch/powerpc/kernel/traps.c                        |    5 +
  arch/s390/include/asm/cache.h                      |    4 +-
  arch/score/include/asm/cache.h                     |    4 +-
  arch/sh/include/asm/cache.h                        |    3 +-
  arch/sparc/Makefile                                |    2 +-
  arch/sparc/include/asm/cache.h                     |    4 +-
+ arch/sparc/include/asm/thread_info_64.h            |    9 +-
  arch/sparc/kernel/process_32.c                     |    8 +-
  arch/sparc/kernel/process_64.c                     |    8 +-
+ arch/sparc/kernel/ptrace_64.c                      |   14 +
+ arch/sparc/kernel/syscalls.S                       |   10 +-
  arch/sparc/kernel/traps_32.c                       |    8 +-
  arch/sparc/kernel/traps_64.c                       |   28 +-
  arch/sparc/kernel/unaligned_64.c                   |    2 +-
@@ -2023,30 +158,39 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  arch/unicore32/include/asm/cache.h                 |    6 +-
  arch/x86/Kconfig                                   |    5 +-
  arch/x86/ia32/ia32_aout.c                          |    2 +
+ arch/x86/include/asm/pgtable-3level.h              |   50 +
+ arch/x86/include/asm/thread_info.h                 |   10 +-
  arch/x86/kernel/acpi/realmode/wakeup.S             |    4 +
  arch/x86/kernel/dumpstack.c                        |    8 +
  arch/x86/kernel/entry_32.S                         |    2 +-
  arch/x86/kernel/entry_64.S                         |    2 +-
  arch/x86/kernel/ioport.c                           |   13 +
+ arch/x86/kernel/ptrace.c                           |   14 +
  arch/x86/kernel/verify_cpu.S                       |    1 +
  arch/x86/kernel/vm86_32.c                          |   16 +
  arch/x86/mm/fault.c                                |   11 +-
- arch/x86/mm/init.c                                 |   15 +
+ arch/x86/mm/init.c                                 |   62 +-
+ arch/x86/xen/enlighten.c                           |    3 +
  arch/xtensa/variants/dc232b/include/variant/core.h |    2 +-
  arch/xtensa/variants/fsf/include/variant/core.h    |    3 +-
  arch/xtensa/variants/s6000/include/variant/core.h  |    3 +-
+ drivers/base/node.c                                |    8 +-
  drivers/block/cciss.c                              |    2 +
  drivers/char/Kconfig                               |    4 +-
- drivers/char/briq_panel.c                          |    8 +-
  drivers/char/genrtc.c                              |    1 +
  drivers/char/mem.c                                 |   17 +
  drivers/char/random.c                              |   12 +
  drivers/gpu/drm/drm_info.c                         |    4 +
+ drivers/hid/hid-wiimote-debug.c                    |    2 +-
+ drivers/leds/leds-mc13783.c                        |    2 +-
+ drivers/media/radio/radio-cadet.c                  |    2 +-
  drivers/message/fusion/mptbase.c                   |    5 +
+ drivers/net/ethernet/stmicro/stmmac/stmmac_main.c  |    4 +-
+ drivers/net/macvtap.c                              |    2 +
  drivers/pci/proc.c                                 |    9 +
  drivers/rtc/rtc-dev.c                              |    3 +
- drivers/tty/vt/keyboard.c                          |   10 +
- drivers/tty/vt/vt_ioctl.c                          |   12 +-
+ drivers/tty/sysrq.c                                |    2 +-
+ drivers/tty/vt/keyboard.c                          |   22 +-
  drivers/video/logo/logo_linux_clut224.ppm          | 2721 ++++++--------
  fs/attr.c                                          |    1 +
  fs/binfmt_aout.c                                   |    7 +
@@ -2060,40 +204,41 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  fs/ext2/balloc.c                                   |    2 +-
  fs/ext3/balloc.c                                   |    5 +-
  fs/ext4/balloc.c                                   |    4 +-
+ fs/ext4/resize.c                                   |    2 +
  fs/fcntl.c                                         |    6 +
  fs/file.c                                          |    2 +
  fs/filesystems.c                                   |    5 +
- fs/fs_struct.c                                     |   11 +-
+ fs/fs_struct.c                                     |   23 +-
  fs/hugetlbfs/inode.c                               |    2 +-
  fs/namei.c                                         |  226 +-
  fs/namespace.c                                     |   24 +
  fs/open.c                                          |   35 +
  fs/pipe.c                                          |    2 +-
  fs/proc/Kconfig                                    |   10 +-
- fs/proc/array.c                                    |   61 +-
- fs/proc/base.c                                     |  171 +-
+ fs/proc/array.c                                    |   67 +-
+ fs/proc/base.c                                     |  176 +-
  fs/proc/cmdline.c                                  |    4 +
  fs/proc/devices.c                                  |    4 +
  fs/proc/inode.c                                    |   17 +
  fs/proc/internal.h                                 |    3 +
  fs/proc/kcore.c                                    |    3 +
  fs/proc/proc_net.c                                 |   11 +
- fs/proc/proc_sysctl.c                              |   31 +-
+ fs/proc/proc_sysctl.c                              |   32 +-
  fs/proc/root.c                                     |    8 +
- fs/proc/task_mmu.c                                 |   67 +-
+ fs/proc/task_mmu.c                                 |   75 +-
  fs/readdir.c                                       |   19 +
  fs/select.c                                        |    2 +
  fs/seq_file.c                                      |    4 +
  fs/sysfs/dir.c                                     |   12 +
  fs/utimes.c                                        |    7 +
- fs/xattr.c                                         |   20 +-
- grsecurity/Kconfig                                 | 1078 +++++
+ fs/xattr.c                                         |   19 +-
+ grsecurity/Kconfig                                 | 1079 +++++
  grsecurity/Makefile                                |   38 +
- grsecurity/gracl.c                                 | 4172 ++++++++++++++++++++
+ grsecurity/gracl.c                                 | 4193 ++++++++++++++++++++
  grsecurity/gracl_alloc.c                           |  105 +
  grsecurity/gracl_cap.c                             |  110 +
  grsecurity/gracl_fs.c                              |  435 ++
- grsecurity/gracl_ip.c                              |  381 ++
+ grsecurity/gracl_ip.c                              |  384 ++
  grsecurity/gracl_learn.c                           |  207 +
  grsecurity/gracl_res.c                             |   68 +
  grsecurity/gracl_segv.c                            |  299 ++
@@ -2101,7 +246,7 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  grsecurity/grsec_chdir.c                           |   19 +
  grsecurity/grsec_chroot.c                          |  368 ++
  grsecurity/grsec_disabled.c                        |  437 ++
- grsecurity/grsec_exec.c                            |  172 +
+ grsecurity/grsec_exec.c                            |  174 +
  grsecurity/grsec_fifo.c                            |   24 +
  grsecurity/grsec_fork.c                            |   23 +
  grsecurity/grsec_init.c                            |  277 ++
@@ -2117,12 +262,13 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  grsecurity/grsec_time.c                            |   16 +
  grsecurity/grsec_tpe.c                             |   73 +
  grsecurity/grsum.c                                 |   61 +
+ include/asm-generic/pgtable.h                      |   22 +-
  include/linux/capability.h                         |    2 +
  include/linux/cred.h                               |    3 +
  include/linux/gracl.h                              |  319 ++
  include/linux/gralloc.h                            |    9 +
  include/linux/grdefs.h                             |  140 +
- include/linux/grinternal.h                         |  221 ++
+ include/linux/grinternal.h                         |  221 +
  include/linux/grmsg.h                              |  109 +
  include/linux/grsecurity.h                         |  232 ++
  include/linux/grsock.h                             |   19 +
@@ -2130,13 +276,13 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  include/linux/kmod.h                               |    2 +
  include/linux/netfilter/xt_gradm.h                 |    9 +
  include/linux/personality.h                        |    1 +
+ include/linux/printk.h                             |    3 +-
  include/linux/proc_fs.h                            |   12 +
  include/linux/sched.h                              |   54 +-
  include/linux/security.h                           |    1 +
  include/linux/seq_file.h                           |    3 +
  include/linux/shm.h                                |    4 +
  include/linux/sysctl.h                             |    2 +
- include/linux/tracehook.h                          |    9 +-
  include/linux/vermagic.h                           |    9 +-
  init/Kconfig                                       |    1 +
  init/main.c                                        |    4 +
@@ -2145,14 +291,14 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  kernel/capability.c                                |   32 +-
  kernel/compat.c                                    |    1 +
  kernel/configs.c                                   |   11 +
- kernel/cred.c                                      |   99 +-
+ kernel/cred.c                                      |  108 +-
  kernel/exit.c                                      |   25 +-
  kernel/fork.c                                      |   15 +-
- kernel/futex.c                                     |    5 +
- kernel/futex_compat.c                              |    8 +-
+ kernel/futex.c                                     |    1 +
  kernel/kallsyms.c                                  |    8 +
- kernel/kmod.c                                      |   64 +-
- kernel/module.c                                    |   80 +-
+ kernel/kmod.c                                      |   71 +-
+ kernel/ksysfs.c                                    |    2 +
+ kernel/module.c                                    |   83 +-
  kernel/panic.c                                     |    4 +-
  kernel/pid.c                                       |   19 +-
  kernel/posix-cpu-timers.c                          |    1 +
@@ -2160,11 +306,10 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  kernel/printk.c                                    |    5 +
  kernel/ptrace.c                                    |   20 +-
  kernel/resource.c                                  |   10 +
- kernel/sched/core.c                                |   21 +-
+ kernel/sched/core.c                                |    6 +-
  kernel/signal.c                                    |   37 +-
  kernel/sys.c                                       |   43 +-
- kernel/sysctl.c                                    |   51 +-
- kernel/sysctl_check.c                              |    1 +
+ kernel/sysctl.c                                    |   44 +-
  kernel/taskstats.c                                 |    6 +
  kernel/time.c                                      |    5 +
  kernel/time/timekeeping.c                          |    3 +
@@ -2174,19 +319,20 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  lib/is_single_threaded.c                           |    3 +
  lib/vsprintf.c                                     |   18 +-
  localversion-grsec                                 |    1 +
- mm/Kconfig                                         |    2 +-
+ mm/Kconfig                                         |    4 +-
  mm/filemap.c                                       |    1 +
+ mm/hugetlb.c                                       |   29 +-
  mm/kmemleak.c                                      |    2 +-
- mm/mempolicy.c                                     |   11 +-
- mm/migrate.c                                       |   11 +-
+ mm/mempolicy.c                                     |   12 +-
  mm/mlock.c                                         |    3 +
- mm/mmap.c                                          |   30 +-
+ mm/mmap.c                                          |   29 +-
  mm/mprotect.c                                      |    8 +
  mm/page_alloc.c                                    |    6 +
  mm/process_vm_access.c                             |    6 +
  mm/shmem.c                                         |    2 +-
  mm/slab.c                                          |    2 +-
  mm/slub.c                                          |   14 +-
+ mm/vmalloc.c                                       |    4 +-
  mm/vmstat.c                                        |   18 +-
  net/core/dev.c                                     |    4 +
  net/core/sock.c                                    |    2 +-
@@ -2195,7 +341,7 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  net/ipv4/inet_hashtables.c                         |    5 +
  net/ipv4/ip_sockglue.c                             |    3 +-
  net/ipv4/raw.c                                     |    8 +-
- net/ipv4/tcp_ipv4.c                                |   42 +-
+ net/ipv4/tcp_ipv4.c                                |   43 +-
  net/ipv4/tcp_minisocks.c                           |    8 +
  net/ipv4/tcp_timer.c                               |   11 +
  net/ipv4/udp.c                                     |   31 +-
@@ -2213,38 +359,40 @@ Date:   Sat Mar 24 18:16:51 2012 -0400
  net/sysctl_net.c                                   |    2 +-
  net/unix/af_unix.c                                 |   20 +
  scripts/Makefile.build                             |    2 +-
- security/Kconfig                                   |   87 +-
+ security/Kconfig                                   |   88 +-
  security/apparmor/lsm.c                            |    2 +-
- security/commoncap.c                               |    4 +
+ security/commoncap.c                               |    3 +
  security/min_addr.c                                |    2 +
  security/security.c                                |    2 -
  security/selinux/hooks.c                           |    2 -
  tools/gcc/Makefile                                 |    2 +-
- 237 files changed, 14385 insertions(+), 1923 deletions(-)
+ 260 files changed, 14663 insertions(+), 1971 deletions(-)
 
-commit 65a4fc291c85027ea1be6b06dc99d3cfcd07a1d9
+commit d7f1e0f44fc98afbc5391f27a7eab4e9ed36f9f8
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Mar 24 15:31:31 2012 -0400
+Date:   Wed Jun 6 17:51:31 2012 -0400
 
-    Import pax-linux-3.3-test2.patch
+    Initial import of pax-linux-3.4-test8-lto.patch, ported to 3.4.1
 
- Documentation/dontdiff                             |   29 +-
+ Documentation/dontdiff                             |   34 +-
  Documentation/kernel-parameters.txt                |    7 +
- Makefile                                           |   83 +++-
+ Makefile                                           |  105 +-
  arch/alpha/include/asm/atomic.h                    |   10 +
  arch/alpha/include/asm/elf.h                       |    7 +
+ arch/alpha/include/asm/pgalloc.h                   |    6 +
  arch/alpha/include/asm/pgtable.h                   |   11 +
  arch/alpha/kernel/module.c                         |    2 +-
  arch/alpha/kernel/osf_sys.c                        |   10 +-
- arch/alpha/mm/fault.c                              |  141 +++++-
- arch/arm/include/asm/atomic.h                      |  394 ++++++++++++-
+ arch/alpha/mm/fault.c                              |  141 +-
+ arch/arm/include/asm/atomic.h                      |  405 +-
  arch/arm/include/asm/cache.h                       |    2 +-
  arch/arm/include/asm/cacheflush.h                  |    2 +-
+ arch/arm/include/asm/cmpxchg.h                     |    2 +
  arch/arm/include/asm/elf.h                         |   13 +-
  arch/arm/include/asm/kmap_types.h                  |    1 +
  arch/arm/include/asm/outercache.h                  |    2 +-
  arch/arm/include/asm/page.h                        |    2 +-
- arch/arm/include/asm/system.h                      |    9 +
+ arch/arm/include/asm/pgalloc.h                     |    6 +
  arch/arm/include/asm/uaccess.h                     |   27 +-
  arch/arm/kernel/armksyms.c                         |    4 +-
  arch/arm/kernel/process.c                          |   10 +-
@@ -2255,7 +403,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/arm/lib/uaccess.S                             |   12 +-
  arch/arm/lib/uaccess_with_memcpy.c                 |    2 +-
  arch/arm/mach-omap2/board-n8x0.c                   |    2 +-
- arch/arm/mm/fault.c                                |   48 ++
+ arch/arm/mm/fault.c                                |   48 +
  arch/arm/mm/mmap.c                                 |   31 +-
  arch/arm/plat-samsung/include/plat/dma-ops.h       |    2 +-
  arch/arm/plat-samsung/include/plat/ehci.h          |    2 +-
@@ -2267,10 +415,11 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/frv/mm/elf-fdpic.c                            |    7 +-
  arch/ia64/include/asm/atomic.h                     |   10 +
  arch/ia64/include/asm/elf.h                        |    7 +
+ arch/ia64/include/asm/pgalloc.h                    |   12 +
  arch/ia64/include/asm/pgtable.h                    |   13 +-
  arch/ia64/include/asm/spinlock.h                   |    2 +-
  arch/ia64/include/asm/uaccess.h                    |    4 +-
- arch/ia64/kernel/module.c                          |   48 ++-
+ arch/ia64/kernel/module.c                          |   48 +-
  arch/ia64/kernel/sys_ia64.c                        |   13 +-
  arch/ia64/kernel/vmlinux.lds.S                     |    2 +-
  arch/ia64/mm/fault.c                               |   33 +-
@@ -2279,8 +428,9 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/m32r/lib/usercopy.c                           |    6 +
  arch/mips/include/asm/atomic.h                     |   14 +
  arch/mips/include/asm/elf.h                        |   11 +-
+ arch/mips/include/asm/exec.h                       |    2 +-
  arch/mips/include/asm/page.h                       |    2 +-
- arch/mips/include/asm/system.h                     |    2 +-
+ arch/mips/include/asm/pgalloc.h                    |    5 +
  arch/mips/kernel/binfmt_elfn32.c                   |    7 +
  arch/mips/kernel/binfmt_elfo32.c                   |    7 +
  arch/mips/kernel/process.c                         |   12 -
@@ -2288,48 +438,51 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/mips/mm/mmap.c                                |   41 +-
  arch/parisc/include/asm/atomic.h                   |   10 +
  arch/parisc/include/asm/elf.h                      |    7 +
+ arch/parisc/include/asm/pgalloc.h                  |    6 +
  arch/parisc/include/asm/pgtable.h                  |   11 +
- arch/parisc/kernel/module.c                        |   50 ++-
+ arch/parisc/kernel/module.c                        |   50 +-
  arch/parisc/kernel/sys_parisc.c                    |    6 +-
  arch/parisc/kernel/traps.c                         |    4 +-
- arch/parisc/mm/fault.c                             |  140 +++++-
+ arch/parisc/mm/fault.c                             |  140 +-
  arch/powerpc/include/asm/atomic.h                  |   10 +
  arch/powerpc/include/asm/elf.h                     |   18 +-
+ arch/powerpc/include/asm/exec.h                    |    2 +-
  arch/powerpc/include/asm/kmap_types.h              |    1 +
  arch/powerpc/include/asm/mman.h                    |    2 +-
  arch/powerpc/include/asm/page.h                    |    8 +-
  arch/powerpc/include/asm/page_64.h                 |    7 +-
+ arch/powerpc/include/asm/pgalloc-64.h              |    7 +
  arch/powerpc/include/asm/pgtable.h                 |    1 +
  arch/powerpc/include/asm/pte-hash32.h              |    1 +
  arch/powerpc/include/asm/reg.h                     |    1 +
- arch/powerpc/include/asm/system.h                  |    2 +-
- arch/powerpc/include/asm/uaccess.h                 |  142 +++--
+ arch/powerpc/include/asm/uaccess.h                 |  142 +-
  arch/powerpc/kernel/exceptions-64e.S               |    4 +-
  arch/powerpc/kernel/exceptions-64s.S               |    2 +-
- arch/powerpc/kernel/irq.c                          |   10 +-
  arch/powerpc/kernel/module_32.c                    |   13 +-
- arch/powerpc/kernel/process.c                      |   55 --
+ arch/powerpc/kernel/process.c                      |   55 -
  arch/powerpc/kernel/signal_32.c                    |    2 +-
  arch/powerpc/kernel/signal_64.c                    |    2 +-
  arch/powerpc/kernel/vdso.c                         |    5 +-
  arch/powerpc/lib/usercopy_64.c                     |   18 -
- arch/powerpc/mm/fault.c                            |   55 ++-
+ arch/powerpc/mm/fault.c                            |   54 +-
  arch/powerpc/mm/mmap_64.c                          |   12 +
  arch/powerpc/mm/slice.c                            |   23 +-
  arch/s390/include/asm/atomic.h                     |   10 +
  arch/s390/include/asm/elf.h                        |   13 +-
- arch/s390/include/asm/system.h                     |    2 +-
+ arch/s390/include/asm/exec.h                       |    2 +-
  arch/s390/include/asm/uaccess.h                    |   11 +
  arch/s390/kernel/module.c                          |   22 +-
- arch/s390/kernel/process.c                         |   36 --
+ arch/s390/kernel/process.c                         |   36 -
  arch/s390/mm/mmap.c                                |   24 +
- arch/score/include/asm/system.h                    |    2 +-
+ arch/score/include/asm/exec.h                      |    2 +-
  arch/score/kernel/process.c                        |    5 -
  arch/sh/mm/mmap.c                                  |   24 +-
- arch/sparc/include/asm/atomic_64.h                 |  106 +++-
+ arch/sparc/include/asm/atomic_64.h                 |  106 +-
  arch/sparc/include/asm/cache.h                     |    2 +-
  arch/sparc/include/asm/elf_32.h                    |    7 +
  arch/sparc/include/asm/elf_64.h                    |    7 +
+ arch/sparc/include/asm/pgalloc_32.h                |    1 +
+ arch/sparc/include/asm/pgalloc_64.h                |    1 +
  arch/sparc/include/asm/pgtable_32.h                |   17 +
  arch/sparc/include/asm/pgtsrmmu.h                  |    7 +
  arch/sparc/include/asm/spinlock_64.h               |   35 +-
@@ -2343,11 +496,11 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/sparc/kernel/sys_sparc_64.c                   |   52 +-
  arch/sparc/kernel/traps_64.c                       |   13 +-
  arch/sparc/lib/Makefile                            |    2 +-
- arch/sparc/lib/atomic_64.S                         |  148 +++++-
+ arch/sparc/lib/atomic_64.S                         |  148 +-
  arch/sparc/lib/ksyms.c                             |    6 +
  arch/sparc/mm/Makefile                             |    2 +-
- arch/sparc/mm/fault_32.c                           |  283 +++++++++
- arch/sparc/mm/fault_64.c                           |  477 +++++++++++++++
+ arch/sparc/mm/fault_32.c                           |  283 +
+ arch/sparc/mm/fault_64.c                           |  477 +
  arch/sparc/mm/hugetlbpage.c                        |   16 +-
  arch/sparc/mm/init_32.c                            |   15 +-
  arch/sparc/mm/srmmu.c                              |    7 +
@@ -2355,108 +508,119 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/um/Makefile                                   |    4 +
  arch/um/include/asm/kmap_types.h                   |    1 +
  arch/um/include/asm/page.h                         |    3 +
+ arch/um/include/asm/pgtable-3level.h               |    1 +
  arch/um/kernel/process.c                           |   16 -
  arch/x86/Kconfig                                   |    9 +-
  arch/x86/Kconfig.cpu                               |    6 +-
  arch/x86/Kconfig.debug                             |    4 +-
- arch/x86/Makefile                                  |   10 +
+ arch/x86/Makefile                                  |   15 +
  arch/x86/boot/Makefile                             |    3 +
  arch/x86/boot/bitops.h                             |    4 +-
  arch/x86/boot/boot.h                               |    4 +-
  arch/x86/boot/compressed/Makefile                  |    3 +
+ arch/x86/boot/compressed/eboot.c                   |    2 -
  arch/x86/boot/compressed/head_32.S                 |    7 +-
  arch/x86/boot/compressed/head_64.S                 |    4 +-
  arch/x86/boot/compressed/misc.c                    |    4 +-
- arch/x86/boot/compressed/relocs.c                  |   85 +++-
  arch/x86/boot/cpucheck.c                           |   28 +-
  arch/x86/boot/header.S                             |    2 +-
  arch/x86/boot/memory.c                             |    2 +-
  arch/x86/boot/video-vesa.c                         |    1 +
  arch/x86/boot/video.c                              |    2 +-
+ arch/x86/crypto/Makefile                           |   40 +-
  arch/x86/crypto/aes-x86_64-asm_64.S                |    4 +
  arch/x86/crypto/aesni-intel_asm.S                  |   31 +
  arch/x86/crypto/blowfish-x86_64-asm_64.S           |    8 +
+ arch/x86/crypto/camellia-x86_64-asm_64.S           |    8 +
  arch/x86/crypto/salsa20-x86_64-asm_64.S            |    5 +
  arch/x86/crypto/serpent-sse2-x86_64-asm_64.S       |    5 +
  arch/x86/crypto/sha1_ssse3_asm.S                   |    3 +
  arch/x86/crypto/twofish-x86_64-asm_64-3way.S       |    5 +
  arch/x86/crypto/twofish-x86_64-asm_64.S            |    3 +
+ arch/x86/ia32/Makefile                             |    7 +-
  arch/x86/ia32/ia32_signal.c                        |   20 +-
- arch/x86/ia32/ia32entry.S                          |  126 +++-
- arch/x86/ia32/sys_ia32.c                           |   18 +-
- arch/x86/include/asm/alternative-asm.h             |   39 ++
+ arch/x86/ia32/ia32entry.S                          |  126 +-
+ arch/x86/ia32/sys_ia32.c                           |   14 +-
+ arch/x86/include/asm/alternative-asm.h             |   39 +
  arch/x86/include/asm/alternative.h                 |    2 +-
  arch/x86/include/asm/apic.h                        |    2 +-
  arch/x86/include/asm/apm.h                         |    4 +-
- arch/x86/include/asm/atomic.h                      |  285 +++++++++-
- arch/x86/include/asm/atomic64_32.h                 |  100 +++
- arch/x86/include/asm/atomic64_64.h                 |  202 ++++++-
+ arch/x86/include/asm/arch_hweight.h                |    6 +-
+ arch/x86/include/asm/atomic.h                      |  285 +-
+ arch/x86/include/asm/atomic64_32.h                 |  100 +
+ arch/x86/include/asm/atomic64_64.h                 |  202 +-
  arch/x86/include/asm/bitops.h                      |    2 +-
  arch/x86/include/asm/boot.h                        |    7 +-
  arch/x86/include/asm/cache.h                       |    5 +-
  arch/x86/include/asm/cacheflush.h                  |    2 +-
  arch/x86/include/asm/checksum_32.h                 |   12 +-
- arch/x86/include/asm/cmpxchg.h                     |   35 ++
+ arch/x86/include/asm/cmpxchg.h                     |   35 +
  arch/x86/include/asm/cpufeature.h                  |    2 +-
- arch/x86/include/asm/desc.h                        |   65 ++-
+ arch/x86/include/asm/desc.h                        |   65 +-
  arch/x86/include/asm/desc_defs.h                   |    6 +
  arch/x86/include/asm/e820.h                        |    2 +-
- arch/x86/include/asm/elf.h                         |   27 +-
+ arch/x86/include/asm/elf.h                         |   31 +-
  arch/x86/include/asm/emergency-restart.h           |    2 +-
+ arch/x86/include/asm/fpu-internal.h                |   12 +-
  arch/x86/include/asm/futex.h                       |   14 +-
  arch/x86/include/asm/hw_irq.h                      |    4 +-
- arch/x86/include/asm/i387.h                        |   14 +-
  arch/x86/include/asm/io.h                          |   11 +
  arch/x86/include/asm/irqflags.h                    |    5 +
  arch/x86/include/asm/kprobes.h                     |    9 +-
  arch/x86/include/asm/kvm_host.h                    |    2 +-
- arch/x86/include/asm/local.h                       |   94 +++-
+ arch/x86/include/asm/local.h                       |   94 +-
  arch/x86/include/asm/mman.h                        |   10 +
  arch/x86/include/asm/mmu.h                         |   16 +-
- arch/x86/include/asm/mmu_context.h                 |   76 +++-
+ arch/x86/include/asm/mmu_context.h                 |   76 +-
  arch/x86/include/asm/module.h                      |   17 +-
+ arch/x86/include/asm/mutex_32.h                    |   10 +-
+ arch/x86/include/asm/mutex_64.h                    |   10 +-
  arch/x86/include/asm/page_64_types.h               |    2 +-
- arch/x86/include/asm/paravirt.h                    |   44 ++-
+ arch/x86/include/asm/paravirt.h                    |   44 +-
  arch/x86/include/asm/paravirt_types.h              |   19 +-
- arch/x86/include/asm/pgalloc.h                     |    7 +
+ arch/x86/include/asm/pgalloc.h                     |   23 +
  arch/x86/include/asm/pgtable-2level.h              |    2 +
  arch/x86/include/asm/pgtable-3level.h              |    4 +
- arch/x86/include/asm/pgtable.h                     |  110 ++++-
+ arch/x86/include/asm/pgtable.h                     |  110 +-
  arch/x86/include/asm/pgtable_32.h                  |   14 +-
  arch/x86/include/asm/pgtable_32_types.h            |   15 +-
- arch/x86/include/asm/pgtable_64.h                  |   17 +-
+ arch/x86/include/asm/pgtable_64.h                  |   19 +-
  arch/x86/include/asm/pgtable_64_types.h            |    5 +
  arch/x86/include/asm/pgtable_types.h               |   36 +-
- arch/x86/include/asm/processor.h                   |   35 +-
+ arch/x86/include/asm/processor.h                   |   39 +-
  arch/x86/include/asm/ptrace.h                      |   18 +-
  arch/x86/include/asm/reboot.h                      |   12 +-
- arch/x86/include/asm/rwsem.h                       |   60 ++-
- arch/x86/include/asm/segment.h                     |   22 +-
+ arch/x86/include/asm/rwsem.h                       |   90 +-
+ arch/x86/include/asm/segment.h                     |   24 +-
  arch/x86/include/asm/smp.h                         |   14 +-
  arch/x86/include/asm/spinlock.h                    |   36 +-
  arch/x86/include/asm/stackprotector.h              |    4 +-
  arch/x86/include/asm/stacktrace.h                  |   32 +-
+ arch/x86/include/asm/switch_to.h                   |   10 +-
  arch/x86/include/asm/sys_ia32.h                    |    2 +-
- arch/x86/include/asm/system.h                      |   10 +-
- arch/x86/include/asm/thread_info.h                 |   87 +--
- arch/x86/include/asm/uaccess.h                     |   93 +++-
- arch/x86/include/asm/uaccess_32.h                  |   95 +++-
- arch/x86/include/asm/uaccess_64.h                  |  272 +++++++---
- arch/x86/include/asm/vdso.h                        |    2 +-
+ arch/x86/include/asm/syscall.h                     |    3 +-
+ arch/x86/include/asm/thread_info.h                 |   95 +-
+ arch/x86/include/asm/uaccess.h                     |   93 +-
+ arch/x86/include/asm/uaccess_32.h                  |  109 +-
+ arch/x86/include/asm/uaccess_64.h                  |  278 +-
+ arch/x86/include/asm/unistd.h                      |    4 +
+ arch/x86/include/asm/vdso.h                        |   12 +-
  arch/x86/include/asm/x86_init.h                    |   26 +-
  arch/x86/include/asm/xsave.h                       |   12 +-
+ arch/x86/kernel/Makefile                           |   25 +-
+ arch/x86/kernel/acpi/Makefile                      |    8 +-
  arch/x86/kernel/acpi/realmode/Makefile             |    3 +
  arch/x86/kernel/acpi/sleep.c                       |    4 +
  arch/x86/kernel/acpi/wakeup_32.S                   |    6 +-
- arch/x86/kernel/alternative.c                      |   65 ++-
+ arch/x86/kernel/alternative.c                      |   65 +-
  arch/x86/kernel/apic/apic.c                        |    4 +-
- arch/x86/kernel/apic/io_apic.c                     |    8 +-
+ arch/x86/kernel/apic/io_apic.c                     |   12 +-
  arch/x86/kernel/apm_32.c                           |   19 +-
  arch/x86/kernel/asm-offsets.c                      |   20 +
  arch/x86/kernel/asm-offsets_64.c                   |    1 +
  arch/x86/kernel/cpu/Makefile                       |    4 -
  arch/x86/kernel/cpu/amd.c                          |    2 +-
- arch/x86/kernel/cpu/common.c                       |   77 +--
+ arch/x86/kernel/cpu/common.c                       |   77 +-
  arch/x86/kernel/cpu/intel.c                        |    2 +-
  arch/x86/kernel/cpu/mcheck/mce.c                   |   27 +-
  arch/x86/kernel/cpu/mcheck/p5.c                    |    3 +
@@ -2466,55 +630,61 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/x86/kernel/cpu/perf_event.c                   |    2 +-
  arch/x86/kernel/crash.c                            |    4 +-
  arch/x86/kernel/doublefault_32.c                   |    8 +-
- arch/x86/kernel/dumpstack.c                        |   29 +-
- arch/x86/kernel/dumpstack_32.c                     |   32 +-
- arch/x86/kernel/dumpstack_64.c                     |   58 ++-
+ arch/x86/kernel/dumpstack.c                        |   30 +-
+ arch/x86/kernel/dumpstack_32.c                     |   34 +-
+ arch/x86/kernel/dumpstack_64.c                     |   61 +-
  arch/x86/kernel/early_printk.c                     |    1 +
- arch/x86/kernel/entry_32.S                         |  378 ++++++++++--
- arch/x86/kernel/entry_64.S                         |  512 ++++++++++++++--
+ arch/x86/kernel/entry_32.S                         |  378 +-
+ arch/x86/kernel/entry_64.S                         |  512 +-
  arch/x86/kernel/ftrace.c                           |   14 +-
  arch/x86/kernel/head32.c                           |    4 +-
- arch/x86/kernel/head_32.S                          |  244 +++++++--
- arch/x86/kernel/head_64.S                          |  158 ++++--
+ arch/x86/kernel/head_32.S                          |  244 +-
+ arch/x86/kernel/head_64.S                          |  158 +-
  arch/x86/kernel/i386_ksyms_32.c                    |    8 +
+ arch/x86/kernel/i387.c                             |    2 +-
  arch/x86/kernel/i8259.c                            |    2 +-
  arch/x86/kernel/init_task.c                        |    7 +-
  arch/x86/kernel/ioport.c                           |    2 +-
  arch/x86/kernel/irq.c                              |   10 +-
- arch/x86/kernel/irq_32.c                           |   69 +--
+ arch/x86/kernel/irq_32.c                           |   66 +-
  arch/x86/kernel/irq_64.c                           |    2 +-
+ arch/x86/kernel/kdebugfs.c                         |    2 +
  arch/x86/kernel/kgdb.c                             |   10 +-
- arch/x86/kernel/kprobes.c                          |   34 +-
+ arch/x86/kernel/kprobes-common.h                   |  102 +-
+ arch/x86/kernel/kprobes-opt.c                      |    8 +-
+ arch/x86/kernel/kprobes.c                          |   44 +-
  arch/x86/kernel/ldt.c                              |   31 +-
  arch/x86/kernel/machine_kexec_32.c                 |    6 +-
  arch/x86/kernel/microcode_intel.c                  |    4 +-
- arch/x86/kernel/module.c                           |   76 +++-
+ arch/x86/kernel/module.c                           |   76 +-
  arch/x86/kernel/nmi.c                              |   11 +
  arch/x86/kernel/paravirt-spinlocks.c               |    2 +-
  arch/x86/kernel/paravirt.c                         |   43 +-
  arch/x86/kernel/pci-iommu_table.c                  |    2 +-
- arch/x86/kernel/process.c                          |   81 ++-
+ arch/x86/kernel/process.c                          |   83 +-
  arch/x86/kernel/process_32.c                       |   21 +-
- arch/x86/kernel/process_64.c                       |   18 +-
+ arch/x86/kernel/process_64.c                       |   16 +-
  arch/x86/kernel/ptrace.c                           |    8 +-
  arch/x86/kernel/pvclock.c                          |    8 +-
- arch/x86/kernel/reboot.c                           |   51 ++-
+ arch/x86/kernel/reboot.c                           |   51 +-
  arch/x86/kernel/relocate_kernel_64.S               |    4 +-
+ arch/x86/kernel/rtc.c                              |    2 +-
  arch/x86/kernel/setup.c                            |   14 +-
  arch/x86/kernel/setup_percpu.c                     |   27 +-
  arch/x86/kernel/signal.c                           |   21 +-
  arch/x86/kernel/smpboot.c                          |   15 +-
  arch/x86/kernel/step.c                             |   10 +-
- arch/x86/kernel/sys_i386_32.c                      |  231 +++++++-
- arch/x86/kernel/sys_x86_64.c                       |   52 +-
+ arch/x86/kernel/sys_i386_32.c                      |  231 +-
+ arch/x86/kernel/sys_x86_64.c                       |   50 +-
  arch/x86/kernel/tboot.c                            |   12 +-
  arch/x86/kernel/time.c                             |   10 +-
  arch/x86/kernel/tls.c                              |    5 +
  arch/x86/kernel/trampoline_32.S                    |    8 +-
  arch/x86/kernel/trampoline_64.S                    |    4 +-
- arch/x86/kernel/traps.c                            |   59 ++-
+ arch/x86/kernel/traps.c                            |   59 +-
+ arch/x86/kernel/tsc.c                              |    2 +-
  arch/x86/kernel/vm86_32.c                          |    6 +-
- arch/x86/kernel/vmlinux.lds.S                      |  147 ++++--
+ arch/x86/kernel/vmlinux.lds.S                      |  149 +-
  arch/x86/kernel/vsyscall_64.c                      |   14 +-
  arch/x86/kernel/x8664_ksyms_64.c                   |    2 -
  arch/x86/kernel/xsave.c                            |    6 +-
@@ -2523,42 +693,42 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/x86/kvm/lapic.c                               |    2 +-
  arch/x86/kvm/paging_tmpl.h                         |    2 +-
  arch/x86/kvm/svm.c                                 |    8 +
- arch/x86/kvm/vmx.c                                 |   35 +-
+ arch/x86/kvm/vmx.c                                 |   44 +-
  arch/x86/kvm/x86.c                                 |   10 +-
  arch/x86/lguest/boot.c                             |    3 +-
- arch/x86/lib/atomic64_32.c                         |   32 +
- arch/x86/lib/atomic64_386_32.S                     |  164 +++++
- arch/x86/lib/atomic64_cx8_32.S                     |  103 +++-
- arch/x86/lib/checksum_32.S                         |  100 +++-
+ arch/x86/lib/Makefile                              |    8 +-
+ arch/x86/lib/atomic64_386_32.S                     |  164 +
+ arch/x86/lib/atomic64_cx8_32.S                     |  103 +-
+ arch/x86/lib/checksum_32.S                         |  100 +-
  arch/x86/lib/clear_page_64.S                       |    5 +-
  arch/x86/lib/cmpxchg16b_emu.S                      |    2 +
- arch/x86/lib/copy_page_64.S                        |   12 +-
- arch/x86/lib/copy_user_64.S                        |   47 +--
+ arch/x86/lib/copy_page_64.S                        |   24 +-
+ arch/x86/lib/copy_user_64.S                        |   47 +-
  arch/x86/lib/copy_user_nocache_64.S                |   20 +-
  arch/x86/lib/csum-copy_64.S                        |    2 +
  arch/x86/lib/csum-wrappers_64.c                    |   16 +-
- arch/x86/lib/getuser.S                             |   68 ++-
+ arch/x86/lib/getuser.S                             |   68 +-
  arch/x86/lib/insn.c                                |    9 +-
  arch/x86/lib/iomap_copy_64.S                       |    2 +
  arch/x86/lib/memcpy_64.S                           |   18 +-
  arch/x86/lib/memmove_64.S                          |   34 +-
  arch/x86/lib/memset_64.S                           |    7 +-
- arch/x86/lib/mmx_32.c                              |  243 +++++---
+ arch/x86/lib/mmx_32.c                              |  243 +-
  arch/x86/lib/msr-reg.S                             |   18 +-
- arch/x86/lib/putuser.S                             |   87 +++-
- arch/x86/lib/rwlock.S                              |   42 ++
+ arch/x86/lib/putuser.S                             |   87 +-
+ arch/x86/lib/rwlock.S                              |   42 +
  arch/x86/lib/rwsem.S                               |    6 +-
  arch/x86/lib/thunk_64.S                            |    2 +
- arch/x86/lib/usercopy_32.c                         |  379 ++++++++-----
- arch/x86/lib/usercopy_64.c                         |   32 +-
+ arch/x86/lib/usercopy_32.c                         |  383 +-
+ arch/x86/lib/usercopy_64.c                         |   26 +-
  arch/x86/mm/extable.c                              |    2 +-
- arch/x86/mm/fault.c                                |  551 ++++++++++++++++-
+ arch/x86/mm/fault.c                                |  552 +-
  arch/x86/mm/gup.c                                  |    2 +-
  arch/x86/mm/highmem_32.c                           |    4 +
- arch/x86/mm/hugetlbpage.c                          |  113 ++--
- arch/x86/mm/init.c                                 |   91 +++-
- arch/x86/mm/init_32.c                              |  122 ++--
- arch/x86/mm/init_64.c                              |   40 +-
+ arch/x86/mm/hugetlbpage.c                          |   90 +-
+ arch/x86/mm/init.c                                 |   91 +-
+ arch/x86/mm/init_32.c                              |  122 +-
+ arch/x86/mm/init_64.c                              |   48 +-
  arch/x86/mm/iomap_32.c                             |    4 +
  arch/x86/mm/ioremap.c                              |   10 +-
  arch/x86/mm/kmemcheck/kmemcheck.c                  |    4 +-
@@ -2568,23 +738,27 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  arch/x86/mm/pageattr.c                             |   33 +-
  arch/x86/mm/pat.c                                  |   12 +-
  arch/x86/mm/pf_in.c                                |   10 +-
- arch/x86/mm/pgtable.c                              |  125 +++--
+ arch/x86/mm/pgtable.c                              |  137 +-
  arch/x86/mm/pgtable_32.c                           |    3 +
  arch/x86/mm/setup_nx.c                             |    7 +
  arch/x86/mm/tlb.c                                  |    4 +
- arch/x86/net/bpf_jit.S                             |   10 +
- arch/x86/net/bpf_jit_comp.c                        |   38 +-
+ arch/x86/net/Makefile                              |    7 +-
+ arch/x86/net/bpf_jit.S                             |   14 +
+ arch/x86/net/bpf_jit_comp.c                        |   37 +-
  arch/x86/oprofile/backtrace.c                      |    8 +-
  arch/x86/pci/mrst.c                                |    4 +-
- arch/x86/pci/pcbios.c                              |  146 ++++-
+ arch/x86/pci/pcbios.c                              |  146 +-
+ arch/x86/platform/efi/Makefile                     |    8 +-
  arch/x86/platform/efi/efi_32.c                     |   19 +
  arch/x86/platform/efi/efi_stub_32.S                |   48 +-
  arch/x86/platform/efi/efi_stub_64.S                |    8 +
  arch/x86/platform/mrst/mrst.c                      |    6 +-
+ arch/x86/power/Makefile                            |    7 +-
  arch/x86/power/cpu.c                               |    4 +-
- arch/x86/vdso/Makefile                             |    2 +-
+ arch/x86/tools/relocs.c                            |   85 +-
+ arch/x86/vdso/Makefile                             |   31 +-
  arch/x86/vdso/vdso32-setup.c                       |   23 +-
- arch/x86/vdso/vma.c                                |   30 +-
+ arch/x86/vdso/vma.c                                |   29 +-
  arch/x86/xen/enlighten.c                           |   35 +-
  arch/x86/xen/mmu.c                                 |    9 +
  arch/x86/xen/smp.c                                 |   16 +-
@@ -2637,33 +811,15 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/char/ipmi/ipmi_msghandler.c                |    8 +-
  drivers/char/ipmi/ipmi_si_intf.c                   |    8 +-
  drivers/char/mbcs.c                                |    2 +-
- drivers/char/mem.c                                 |   41 ++-
+ drivers/char/mem.c                                 |   41 +-
  drivers/char/nvram.c                               |    2 +-
  drivers/char/random.c                              |    4 +-
  drivers/char/sonypi.c                              |    9 +-
  drivers/char/tpm/tpm.c                             |    2 +-
  drivers/char/tpm/tpm_bios.c                        |   14 +-
  drivers/char/virtio_console.c                      |    4 +-
- drivers/edac/amd64_edac.c                          |    2 +-
- drivers/edac/amd76x_edac.c                         |    2 +-
- drivers/edac/e752x_edac.c                          |    2 +-
- drivers/edac/e7xxx_edac.c                          |    2 +-
  drivers/edac/edac_pci_sysfs.c                      |   20 +-
- drivers/edac/i3000_edac.c                          |    2 +-
- drivers/edac/i3200_edac.c                          |    2 +-
- drivers/edac/i5000_edac.c                          |    2 +-
- drivers/edac/i5100_edac.c                          |    2 +-
- drivers/edac/i5400_edac.c                          |    2 +-
- drivers/edac/i7300_edac.c                          |    2 +-
- drivers/edac/i7core_edac.c                         |    2 +-
- drivers/edac/i82443bxgx_edac.c                     |    2 +-
- drivers/edac/i82860_edac.c                         |    2 +-
- drivers/edac/i82875p_edac.c                        |    2 +-
- drivers/edac/i82975x_edac.c                        |    2 +-
  drivers/edac/mce_amd.h                             |    2 +-
- drivers/edac/r82600_edac.c                         |    2 +-
- drivers/edac/sb_edac.c                             |    2 +-
- drivers/edac/x38_edac.c                            |    2 +-
  drivers/firewire/core-card.c                       |    2 +-
  drivers/firewire/core-cdev.c                       |    3 +-
  drivers/firewire/core-transaction.c                |    1 +
@@ -2678,6 +834,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/gpu/drm/drm_ioc32.c                        |    4 +-
  drivers/gpu/drm/drm_ioctl.c                        |    2 +-
  drivers/gpu/drm/drm_lock.c                         |    4 +-
+ drivers/gpu/drm/drm_stub.c                         |    2 +-
  drivers/gpu/drm/i810/i810_dma.c                    |    8 +-
  drivers/gpu/drm/i810/i810_drv.h                    |    4 +-
  drivers/gpu/drm/i915/i915_debugfs.c                |    4 +-
@@ -2688,12 +845,14 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/gpu/drm/i915/intel_display.c               |   10 +-
  drivers/gpu/drm/mga/mga_drv.h                      |    4 +-
  drivers/gpu/drm/mga/mga_irq.c                      |    8 +-
- drivers/gpu/drm/nouveau/nouveau_bios.c             |    4 +-
+ drivers/gpu/drm/nouveau/nouveau_bios.c             |    2 +-
  drivers/gpu/drm/nouveau/nouveau_drv.h              |   12 +-
  drivers/gpu/drm/nouveau/nouveau_fence.c            |    4 +-
  drivers/gpu/drm/nouveau/nouveau_gem.c              |    2 +-
  drivers/gpu/drm/nouveau/nouveau_state.c            |    2 +-
  drivers/gpu/drm/nouveau/nv04_graph.c               |    2 +-
+ drivers/gpu/drm/nouveau/nv50_sor.c                 |    2 +-
+ drivers/gpu/drm/nouveau/nvd0_display.c             |    2 +-
  drivers/gpu/drm/r128/r128_cce.c                    |    2 +-
  drivers/gpu/drm/r128/r128_drv.h                    |    4 +-
  drivers/gpu/drm/r128/r128_irq.c                    |    4 +-
@@ -2779,9 +938,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/input/mousedev.c                           |    2 +-
  drivers/input/serio/serio.c                        |    4 +-
  drivers/isdn/capi/capi.c                           |   10 +-
- drivers/isdn/gigaset/common.c                      |    2 +-
- drivers/isdn/gigaset/gigaset.h                     |    3 +-
- drivers/isdn/gigaset/interface.c                   |   22 +-
  drivers/isdn/hardware/avm/b1.c                     |    4 +-
  drivers/isdn/hardware/eicon/divasync.h             |    2 +-
  drivers/isdn/hardware/eicon/xdi_adapter.h          |    2 +-
@@ -2790,13 +946,14 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/lguest/x86/core.c                          |   12 +-
  drivers/lguest/x86/switcher_32.S                   |   27 +-
  drivers/macintosh/macio_asic.c                     |    2 +-
+ drivers/md/bitmap.c                                |    2 +-
  drivers/md/dm-ioctl.c                              |    2 +-
  drivers/md/dm-raid1.c                              |   16 +-
  drivers/md/dm-stripe.c                             |   10 +-
  drivers/md/dm-table.c                              |    2 +-
  drivers/md/dm-thin-metadata.c                      |    4 +-
  drivers/md/dm.c                                    |   16 +-
- drivers/md/md.c                                    |   28 +-
+ drivers/md/md.c                                    |   26 +-
  drivers/md/md.h                                    |    6 +-
  drivers/md/persistent-data/dm-space-map-checker.c  |    2 +-
  drivers/md/persistent-data/dm-space-map-disk.c     |    2 +-
@@ -2828,16 +985,14 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/misc/lis3lv02d/lis3lv02d.h                 |    2 +-
  drivers/misc/sgi-gru/gruhandles.c                  |    4 +-
  drivers/misc/sgi-gru/gruprocfs.c                   |    8 +-
- drivers/misc/sgi-gru/grutables.h                   |  154 +++---
+ drivers/misc/sgi-gru/grutables.h                   |  154 +-
  drivers/misc/sgi-xp/xp.h                           |    2 +-
  drivers/misc/sgi-xp/xpc.h                          |    3 +-
  drivers/misc/sgi-xp/xpc_main.c                     |    2 +-
  drivers/mmc/host/sdhci-pci.c                       |    2 +-
  drivers/mtd/devices/doc2000.c                      |    2 +-
- drivers/mtd/devices/doc2001.c                      |    2 +-
  drivers/mtd/nand/denali.c                          |    1 +
  drivers/mtd/nftlmount.c                            |    1 +
- drivers/mtd/ubi/build.c                            |   16 +-
  drivers/net/ethernet/atheros/atlx/atl2.c           |    2 +-
  drivers/net/ethernet/broadcom/bnx2x/bnx2x_sp.h     |    2 +-
  drivers/net/ethernet/broadcom/tg3.h                |    1 +
@@ -2850,8 +1005,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/net/ethernet/faraday/ftgmac100.c           |    2 +
  drivers/net/ethernet/faraday/ftmac100.c            |    2 +
  drivers/net/ethernet/fealnx.c                      |    2 +-
- drivers/net/ethernet/intel/e1000e/80003es2lan.c    |    2 +-
- drivers/net/ethernet/intel/e1000e/82571.c          |    2 +-
  drivers/net/ethernet/intel/e1000e/hw.h             |    9 +-
  drivers/net/ethernet/intel/igb/e1000_hw.h          |   12 +-
  drivers/net/ethernet/intel/igbvf/vf.h              |    6 +-
@@ -2877,7 +1030,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/net/wireless/ath/ath9k/hw.h                |    6 +-
  .../net/wireless/brcm80211/brcmsmac/phy/phy_int.h  |    2 +-
  drivers/net/wireless/iwlegacy/3945-mac.c           |    4 +-
- drivers/net/wireless/iwlwifi/iwl-debug.h           |    4 +-
  drivers/net/wireless/mac80211_hwsim.c              |    8 +-
  drivers/net/wireless/mwifiex/main.h                |    2 +-
  drivers/net/wireless/rndis_wlan.c                  |    2 +-
@@ -2893,7 +1045,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/pci/hotplug/cpqphp_nvram.c                 |    4 +
  drivers/pci/pcie/aspm.c                            |    6 +-
  drivers/pci/probe.c                                |    2 +-
- drivers/platform/x86/thinkpad_acpi.c               |   70 ++-
+ drivers/platform/x86/thinkpad_acpi.c               |   70 +-
  drivers/pnp/pnpbios/bioscalls.c                    |   14 +-
  drivers/pnp/resource.c                             |    4 +-
  drivers/power/bq27x00_battery.c                    |    2 +-
@@ -2929,7 +1081,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/scsi/scsi_transport_iscsi.c                |    6 +-
  drivers/scsi/scsi_transport_srp.c                  |    6 +-
  drivers/scsi/sg.c                                  |    6 +-
- drivers/spi/spi-dw-pci.c                           |    2 +-
  drivers/spi/spi.c                                  |    2 +-
  drivers/staging/octeon/ethernet-rx.c               |   12 +-
  drivers/staging/octeon/ethernet.c                  |    8 +-
@@ -2945,9 +1096,8 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/staging/wlan-ng/hfa384x_usb.c              |    2 +-
  drivers/staging/zcache/tmem.c                      |    4 +-
  drivers/staging/zcache/tmem.h                      |    2 +
- drivers/target/iscsi/iscsi_target.c                |    2 +-
- drivers/target/target_core_tmr.c                   |    6 +-
- drivers/target/target_core_transport.c             |   16 +-
+ drivers/target/target_core_tmr.c                   |    2 +-
+ drivers/target/target_core_transport.c             |   10 +-
  drivers/tty/hvc/hvcs.c                             |   23 +-
  drivers/tty/ipwireless/tty.c                       |   29 +-
  drivers/tty/n_gsm.c                                |    2 +-
@@ -2960,7 +1110,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/usb/atm/cxacru.c                           |    2 +-
  drivers/usb/atm/usbatm.c                           |   24 +-
  drivers/usb/core/devices.c                         |    6 +-
- drivers/usb/core/message.c                         |    4 +-
  drivers/usb/early/ehci-dbgp.c                      |   16 +-
  drivers/usb/wusbcore/wa-hc.h                       |    4 +-
  drivers/usb/wusbcore/wa-xfer.c                     |    2 +-
@@ -2974,8 +1123,8 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  drivers/video/i810/i810_main.c                     |    2 +-
  drivers/video/jz4740_fb.c                          |    2 +-
  drivers/video/udlfb.c                              |   32 +-
- drivers/video/uvesafb.c                            |   36 ++-
- drivers/video/vesafb.c                             |   51 ++-
+ drivers/video/uvesafb.c                            |   39 +-
+ drivers/video/vesafb.c                             |   51 +-
  drivers/video/via/via_clock.h                      |    2 +-
  drivers/xen/xen-pciback/conf_space.h               |    6 +-
  fs/9p/vfs_inode.c                                  |    2 +-
@@ -2984,9 +1133,9 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  fs/autofs4/waitq.c                                 |    2 +-
  fs/befs/linuxvfs.c                                 |    2 +-
  fs/binfmt_aout.c                                   |   23 +-
- fs/binfmt_elf.c                                    |  609 ++++++++++++++++++-
+ fs/binfmt_elf.c                                    |  631 +-
  fs/binfmt_flat.c                                   |    6 +
- fs/bio.c                                           |    2 +-
+ fs/bio.c                                           |    4 +-
  fs/block_dev.c                                     |    2 +-
  fs/btrfs/check-integrity.c                         |    2 +-
  fs/btrfs/ctree.c                                   |    9 +-
@@ -2999,7 +1148,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  fs/cachefiles/proc.c                               |   12 +-
  fs/cachefiles/rdwr.c                               |    2 +-
  fs/ceph/dir.c                                      |    2 +-
- fs/cifs/cifs_debug.c                               |   86 ++--
+ fs/cifs/cifs_debug.c                               |   86 +-
  fs/cifs/cifsfs.c                                   |    8 +-
  fs/cifs/cifsglob.h                                 |   50 +-
  fs/cifs/link.c                                     |    2 +-
@@ -3013,18 +1162,18 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  fs/ecryptfs/inode.c                                |    6 +-
  fs/ecryptfs/miscdev.c                              |    2 +-
  fs/ecryptfs/read_write.c                           |    4 +-
- fs/exec.c                                          |  317 +++++++++--
+ fs/exec.c                                          |  327 +-
  fs/ext4/ext4.h                                     |   20 +-
  fs/ext4/mballoc.c                                  |   44 +-
  fs/fcntl.c                                         |    4 +-
  fs/fifo.c                                          |   22 +-
  fs/fs_struct.c                                     |   12 +-
  fs/fscache/cookie.c                                |   34 +-
- fs/fscache/internal.h                              |  182 +++---
+ fs/fscache/internal.h                              |  182 +-
  fs/fscache/object.c                                |   26 +-
  fs/fscache/operation.c                             |   28 +-
- fs/fscache/page.c                                  |  106 ++--
- fs/fscache/stats.c                                 |  330 +++++-----
+ fs/fscache/page.c                                  |  106 +-
+ fs/fscache/stats.c                                 |  330 +-
  fs/fuse/cuse.c                                     |   10 +-
  fs/fuse/dev.c                                      |    2 +-
  fs/fuse/dir.c                                      |    2 +-
@@ -3054,13 +1203,14 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  fs/proc/kcore.c                                    |   32 +-
  fs/proc/meminfo.c                                  |    2 +-
  fs/proc/nommu.c                                    |    2 +-
- fs/proc/task_mmu.c                                 |   39 +-
+ fs/proc/task_mmu.c                                 |   41 +-
  fs/proc/task_nommu.c                               |    4 +-
  fs/quota/netlink.c                                 |    4 +-
  fs/readdir.c                                       |    2 +-
  fs/reiserfs/do_balan.c                             |    2 +-
  fs/reiserfs/procfs.c                               |    2 +-
- fs/seq_file.c                                      |   14 +-
+ fs/reiserfs/reiserfs.h                             |    4 +-
+ fs/seq_file.c                                      |    2 +-
  fs/splice.c                                        |   36 +-
  fs/sysfs/file.c                                    |   10 +-
  fs/sysfs/symlink.c                                 |    2 +-
@@ -3071,16 +1221,14 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  fs/xfs/xfs_ioctl.c                                 |    2 +-
  fs/xfs/xfs_iops.c                                  |    2 +-
  include/acpi/acpi_bus.h                            |    2 +-
- include/asm-generic/atomic-long.h                  |  183 ++++++
+ include/asm-generic/atomic-long.h                  |  183 +
  include/asm-generic/atomic64.h                     |   12 +
  include/asm-generic/cache.h                        |    4 +-
  include/asm-generic/emergency-restart.h            |    2 +-
- include/asm-generic/int-l64.h                      |    2 +
- include/asm-generic/int-ll64.h                     |    2 +
  include/asm-generic/kmap_types.h                   |    3 +-
  include/asm-generic/local.h                        |    1 +
  include/asm-generic/pgtable-nopmd.h                |   18 +-
- include/asm-generic/pgtable-nopud.h                |   14 +-
+ include/asm-generic/pgtable-nopud.h                |   15 +-
  include/asm-generic/pgtable.h                      |    8 +
  include/asm-generic/vmlinux.lds.h                  |   10 +-
  include/drm/drmP.h                                 |    5 +-
@@ -3094,14 +1242,14 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  include/linux/byteorder/little_endian.h            |   24 +-
  include/linux/cache.h                              |    4 +
  include/linux/cleancache.h                         |    2 +-
- include/linux/compiler-gcc4.h                      |   11 +
- include/linux/compiler.h                           |   60 ++-
- include/linux/cpuset.h                             |    2 +-
+ include/linux/compiler-gcc4.h                      |   15 +
+ include/linux/compiler.h                           |   64 +-
  include/linux/crypto.h                             |    6 +-
  include/linux/decompress/mm.h                      |    2 +-
  include/linux/dma-mapping.h                        |    2 +-
  include/linux/efi.h                                |    2 +-
  include/linux/elf.h                                |   30 +
+ include/linux/export.h                             |    2 +-
  include/linux/filter.h                             |    4 +
  include/linux/firewire.h                           |    2 +-
  include/linux/fs.h                                 |    3 +-
@@ -3109,6 +1257,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  include/linux/fscache-cache.h                      |    4 +-
  include/linux/fsnotify.h                           |    2 +-
  include/linux/fsnotify_backend.h                   |    1 +
+ include/linux/ftrace.h                             |    2 +-
  include/linux/ftrace_event.h                       |    4 +-
  include/linux/genhd.h                              |    2 +-
  include/linux/hid.h                                |    2 +-
@@ -3127,19 +1276,19 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  include/linux/mca.h                                |    2 +-
  include/linux/memory.h                             |    2 +-
  include/linux/mfd/abx500.h                         |    1 +
- include/linux/mm.h                                 |   66 +--
- include/linux/mm_types.h                           |   20 +
+ include/linux/mfd/abx500/ux500_chargalg.h          |    2 +-
+ include/linux/mm.h                                 |   92 +-
+ include/linux/mm_types.h                           |   22 +-
  include/linux/mmu_notifier.h                       |    6 +-
  include/linux/mmzone.h                             |    2 +-
  include/linux/mod_devicetable.h                    |    4 +-
- include/linux/module.h                             |   54 ++-
- include/linux/moduleloader.h                       |   12 +
+ include/linux/module.h                             |   54 +-
+ include/linux/moduleloader.h                       |   14 +-
  include/linux/moduleparam.h                        |    4 +-
  include/linux/namei.h                              |    6 +-
  include/linux/netdevice.h                          |    3 +-
  include/linux/of_pdt.h                             |    2 +-
  include/linux/oprofile.h                           |    4 +-
- include/linux/padata.h                             |    2 +-
  include/linux/perf_event.h                         |    8 +-
  include/linux/pipe_fs_i.h                          |    6 +-
  include/linux/pm_runtime.h                         |    2 +-
@@ -3148,23 +1297,23 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  include/linux/proc_fs.h                            |    2 +-
  include/linux/random.h                             |    7 +-
  include/linux/reboot.h                             |   14 +-
- include/linux/reiserfs_fs.h                        |    2 +-
- include/linux/reiserfs_fs_sb.h                     |    2 +-
  include/linux/relay.h                              |    2 +-
  include/linux/rfkill.h                             |    1 +
  include/linux/rio.h                                |    2 +-
  include/linux/rmap.h                               |    4 +-
- include/linux/sched.h                              |   69 ++-
+ include/linux/sched.h                              |   69 +-
  include/linux/screen_info.h                        |    3 +-
  include/linux/seq_file.h                           |    1 +
  include/linux/skbuff.h                             |    8 +-
- include/linux/slab.h                               |   73 +++-
- include/linux/slab_def.h                           |    8 +-
- include/linux/slub_def.h                           |    4 +-
+ include/linux/slab.h                               |   23 +-
+ include/linux/slab_def.h                           |   12 +-
+ include/linux/slob_def.h                           |    3 +-
+ include/linux/slub_def.h                           |    8 +-
  include/linux/sonet.h                              |    2 +-
  include/linux/sunrpc/clnt.h                        |    8 +-
  include/linux/sunrpc/sched.h                       |    1 +
  include/linux/sunrpc/svc_rdma.h                    |   18 +-
+ include/linux/syscalls.h                           |    4 +-
  include/linux/sysctl.h                             |    6 +-
  include/linux/tty_ldisc.h                          |    2 +-
  include/linux/types.h                              |   16 +
@@ -3172,7 +1321,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  include/linux/unaligned/access_ok.h                |   12 +-
  include/linux/usb/renesas_usbhs.h                  |    4 +-
  include/linux/vermagic.h                           |   21 +-
- include/linux/vmalloc.h                            |  104 ++++
+ include/linux/vmalloc.h                            |   11 +-
  include/linux/vmstat.h                             |   20 +-
  include/linux/xattr.h                              |    5 +
  include/media/saa7146_vv.h                         |    2 +-
@@ -3206,17 +1355,18 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  include/sound/sb16_csp.h                           |    2 +-
  include/sound/soc.h                                |    4 +-
  include/sound/ymfpci.h                             |    2 +-
- include/target/target_core_base.h                  |    8 +-
+ include/target/target_core_base.h                  |    6 +-
  include/trace/events/irq.h                         |    4 +-
  include/video/udlfb.h                              |    8 +-
  include/video/uvesafb.h                            |    1 +
- init/Kconfig                                       |    2 +-
+ init/Kconfig                                       |   19 +-
+ init/calibrate.c                                   |    2 +-
  init/do_mounts.c                                   |   14 +-
  init/do_mounts.h                                   |    8 +-
  init/do_mounts_initrd.c                            |   28 +-
  init/do_mounts_md.c                                |    6 +-
  init/initramfs.c                                   |   40 +-
- init/main.c                                        |   56 ++-
+ init/main.c                                        |   56 +-
  ipc/msg.c                                          |   11 +-
  ipc/sem.c                                          |   11 +-
  ipc/shm.c                                          |   17 +-
@@ -3224,27 +1374,26 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  kernel/audit.c                                     |    8 +-
  kernel/auditsc.c                                   |    4 +-
  kernel/capability.c                                |    3 +
- kernel/compat.c                                    |   44 +-
+ kernel/compat.c                                    |   40 +-
  kernel/debug/debug_core.c                          |   16 +-
  kernel/debug/kdb/kdb_main.c                        |    4 +-
  kernel/events/core.c                               |   28 +-
  kernel/exit.c                                      |    4 +-
- kernel/fork.c                                      |  165 ++++--
+ kernel/fork.c                                      |  166 +-
  kernel/futex.c                                     |    9 +
  kernel/gcov/base.c                                 |    7 +-
  kernel/hrtimer.c                                   |    2 +-
  kernel/jump_label.c                                |    4 +
- kernel/kallsyms.c                                  |   39 ++-
+ kernel/kallsyms.c                                  |   39 +-
  kernel/kexec.c                                     |    3 +-
  kernel/kmod.c                                      |    2 +-
  kernel/kprobes.c                                   |    8 +-
  kernel/lockdep.c                                   |    7 +-
  kernel/lockdep_proc.c                              |    2 +-
- kernel/module.c                                    |  326 +++++++----
+ kernel/module.c                                    |  334 +-
  kernel/mutex-debug.c                               |   12 +-
  kernel/mutex-debug.h                               |    4 +-
- kernel/mutex.c                                     |    7 +-
- kernel/padata.c                                    |    8 +-
+ kernel/mutex.c                                     |   15 +-
  kernel/panic.c                                     |    3 +-
  kernel/pid.c                                       |    2 +-
  kernel/posix-cpu-timers.c                          |    4 +-
@@ -3254,10 +1403,11 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  kernel/profile.c                                   |   14 +-
  kernel/ptrace.c                                    |    6 +-
  kernel/rcutiny.c                                   |    4 +-
+ kernel/rcutiny_plugin.h                            |    2 +-
  kernel/rcutorture.c                                |   56 +-
- kernel/rcutree.c                                   |   32 +-
+ kernel/rcutree.c                                   |   50 +-
  kernel/rcutree.h                                   |    2 +-
- kernel/rcutree_plugin.h                            |   16 +-
+ kernel/rcutree_plugin.h                            |    2 +-
  kernel/rcutree_trace.c                             |    4 +-
  kernel/rtmutex-tester.c                            |   24 +-
  kernel/sched/auto_group.c                          |    4 +-
@@ -3266,7 +1416,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  kernel/smp.c                                       |    8 +-
  kernel/softirq.c                                   |   14 +-
  kernel/sys.c                                       |   12 +-
- kernel/sysctl.c                                    |   37 ++-
+ kernel/sysctl.c                                    |   37 +-
  kernel/sysctl_binary.c                             |   14 +-
  kernel/time/alarmtimer.c                           |    2 +-
  kernel/time/tick-broadcast.c                       |    2 +-
@@ -3287,7 +1437,9 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  lib/devres.c                                       |    4 +-
  lib/dma-debug.c                                    |    2 +-
  lib/extable.c                                      |    3 +
+ lib/gen_crc32table.c                               |    6 +-
  lib/inflate.c                                      |    2 +-
+ lib/ioremap.c                                      |    4 +-
  lib/radix-tree.c                                   |    2 +-
  lib/vsprintf.c                                     |   12 +-
  mm/Kconfig                                         |    6 +-
@@ -3295,30 +1447,31 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  mm/fremap.c                                        |    5 +
  mm/highmem.c                                       |    7 +-
  mm/huge_memory.c                                   |    2 +-
- mm/hugetlb.c                                       |   54 ++
+ mm/hugetlb.c                                       |   54 +
  mm/internal.h                                      |    1 +
  mm/maccess.c                                       |    4 +-
- mm/madvise.c                                       |   41 ++
+ mm/madvise.c                                       |   41 +
  mm/memory-failure.c                                |   18 +-
- mm/memory.c                                        |  358 +++++++++--
+ mm/memory.c                                        |  407 +-
  mm/mempolicy.c                                     |   25 +
  mm/mlock.c                                         |   20 +-
- mm/mmap.c                                          |  632 +++++++++++++++++---
- mm/mprotect.c                                      |  137 +++++-
- mm/mremap.c                                        |   45 ++-
+ mm/mmap.c                                          |  638 +-
+ mm/mprotect.c                                      |  138 +-
+ mm/mremap.c                                        |   45 +-
  mm/nommu.c                                         |   11 +-
  mm/page_alloc.c                                    |   14 +-
  mm/percpu.c                                        |    2 +-
  mm/process_vm_access.c                             |   14 +-
- mm/rmap.c                                          |   41 ++-
+ mm/rmap.c                                          |   38 +-
  mm/shmem.c                                         |    5 +-
- mm/slab.c                                          |   81 ++-
- mm/slob.c                                          |  180 +++++-
- mm/slub.c                                          |   69 ++-
+ mm/slab.c                                          |   81 +-
+ mm/slob.c                                          |  180 +-
+ mm/slub.c                                          |   69 +-
+ mm/sparse-vmemmap.c                                |    4 +-
  mm/swap.c                                          |    3 +
  mm/swapfile.c                                      |   12 +-
- mm/util.c                                          |    8 +
- mm/vmalloc.c                                       |   92 +++-
+ mm/util.c                                          |    6 +
+ mm/vmalloc.c                                       |   91 +-
  mm/vmstat.c                                        |    6 +-
  net/8021q/vlan.c                                   |    3 +-
  net/9p/trans_fd.c                                  |    2 +-
@@ -3335,7 +1488,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  net/bluetooth/hci_conn.c                           |    2 +-
  net/bluetooth/l2cap_core.c                         |   12 +-
  net/bridge/netfilter/ebtables.c                    |    2 +-
- net/caif/caif_socket.c                             |   43 +-
  net/caif/cfctrl.c                                  |   11 +-
  net/can/gw.c                                       |    2 +-
  net/compat.c                                       |   32 +-
@@ -3353,7 +1505,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  net/ipv4/ip_fragment.c                             |    2 +-
  net/ipv4/ip_sockglue.c                             |    2 +-
  net/ipv4/ipconfig.c                                |    6 +-
- net/ipv4/netfilter/nf_nat_snmp_basic.c             |    2 +-
  net/ipv4/ping.c                                    |    2 +-
  net/ipv4/raw.c                                     |   14 +-
  net/ipv4/route.c                                   |    6 +-
@@ -3410,7 +1561,6 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  net/sctp/socket.c                                  |    2 +-
  net/socket.c                                       |   34 +-
  net/sunrpc/sched.c                                 |    4 +-
- net/sunrpc/svcsock.c                               |    2 +-
  net/sunrpc/xprtrdma/svc_rdma.c                     |   38 +-
  net/sunrpc/xprtrdma/svc_rdma_recvfrom.c            |    6 +-
  net/sunrpc/xprtrdma/svc_rdma_sendto.c              |    2 +-
@@ -3423,15 +1573,15 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  net/xfrm/xfrm_policy.c                             |   16 +-
  scripts/Makefile.build                             |    4 +-
  scripts/Makefile.clean                             |    3 +-
- scripts/Makefile.host                              |    2 +
+ scripts/Makefile.host                              |   27 +-
  scripts/basic/fixdep.c                             |   12 +-
  scripts/gcc-plugin.sh                              |    2 +
  scripts/mod/file2alias.c                           |   14 +-
- scripts/mod/modpost.c                              |   25 +-
+ scripts/mod/modpost.c                              |   30 +-
  scripts/mod/modpost.h                              |    6 +-
  scripts/mod/sumversion.c                           |    2 +-
  scripts/pnmtologo.c                                |    6 +-
- security/Kconfig                                   |  618 +++++++++++++++++++-
+ security/Kconfig                                   |  632 +-
  security/integrity/ima/ima.h                       |    4 +-
  security/integrity/ima/ima_api.c                   |    2 +-
  security/integrity/ima/ima_fs.c                    |    4 +-
@@ -3439,7 +1589,7 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  security/keys/compat.c                             |    2 +-
  security/keys/keyctl.c                             |    8 +-
  security/keys/keyring.c                            |    6 +-
- security/security.c                                |    8 +-
+ security/security.c                                |    9 +-
  security/selinux/hooks.c                           |    2 +-
  security/selinux/include/xfrm.h                    |    2 +-
  security/smack/smack_lsm.c                         |    2 +-
@@ -3464,17 +1614,20 @@ Date:   Sat Mar 24 15:31:31 2012 -0400
  sound/pci/ymfpci/ymfpci_main.c                     |   12 +-
  sound/soc/soc-pcm.c                                |    2 +-
  sound/usb/card.h                                   |    3 +-
- tools/gcc/Makefile                                 |   23 +
- tools/gcc/checker_plugin.c                         |  171 ++++++
- tools/gcc/colorize_plugin.c                        |  147 +++++
- tools/gcc/constify_plugin.c                        |  303 ++++++++++
- tools/gcc/kallocstat_plugin.c                      |  167 +++++
- tools/gcc/kernexec_plugin.c                        |  427 +++++++++++++
- tools/gcc/stackleak_plugin.c                       |  313 ++++++++++
+ tools/gcc/Makefile                                 |   30 +
+ tools/gcc/checker_plugin.c                         |  171 +
+ tools/gcc/colorize_plugin.c                        |  147 +
+ tools/gcc/constify_plugin.c                        |  328 +
+ tools/gcc/kallocstat_plugin.c                      |  167 +
+ tools/gcc/kernexec_plugin.c                        |  427 +
+ tools/gcc/lto_plugin.c                             |  210 +
+ tools/gcc/size_overflow_hash.h                     |13146 ++++++++++++++++++++
+ tools/gcc/size_overflow_plugin.c                   | 1188 ++
+ tools/gcc/stackleak_plugin.c                       |  313 +
  tools/perf/util/include/asm/alternative-asm.h      |    3 +
  usr/gen_init_cpio.c                                |    7 +-
- virt/kvm/kvm_main.c                                |   20 +-
- 1246 files changed, 18805 insertions(+), 5986 deletions(-)
+ virt/kvm/kvm_main.c                                |   22 +-
+ 1253 files changed, 33706 insertions(+), 6050 deletions(-)
 commit a00016a11e35e91aec8e2d9b6ec4c6fbb11d6d2b
 Merge: 0949bd4 fc53d63
 Author: Brad Spengler <spender@grsecurity.net>
