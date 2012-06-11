@@ -1,3 +1,53 @@
+commit ce03676ffe1185a3406a76d39b3d71356bc16a39
+Merge: 98a4b83 48738bf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 11 17:49:22 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 48738bfe9809defb696d82b85d75641eb9d14824
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 11 17:49:05 2012 -0400
+
+    Update to pax-linux-3.4.2-test8.patch
+
+ mm/mempolicy.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0568c5f972e295c7c83c4c48805c13957d799169
+Merge: bf822e2 1f5547c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 11 17:47:45 2012 -0400
+
+    Merge branch 'linux-3.4.y' into pax-test
+    
+    Conflicts:
+    	kernel/fork.c
+
+commit 98a4b834b1d034c1f37ef979635da588dc1c8475
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 11 17:23:28 2012 -0400
+
+    make filename const
+
+ include/trace/events/fs.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 42c6cfb1fbbb4b04e541bae0d8360892cf03d3d1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 9 15:58:21 2012 -0400
+
+    Add (a correct) Ubuntu ureadahead patch
+    
+    Conflicts:
+    
+    	fs/open.c
+
+ fs/exec.c                 |    4 +++
+ fs/open.c                 |    3 ++
+ include/trace/events/fs.h |   53 +++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 60 insertions(+), 0 deletions(-)
+
 commit a906e5f96e8ed36a901ea1f16e88bec12971bd43
 Merge: 3701524b bf822e2
 Author: Brad Spengler <spender@grsecurity.net>
