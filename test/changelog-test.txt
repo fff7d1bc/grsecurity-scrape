@@ -1,3 +1,24 @@
+commit 4544a66bac90e337d31c7a2d96653abfc14e3fc4
+Merge: ce03676 49f6484
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 12 21:38:35 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 49f6484ac317388cc8e705f06f10567110ef6468
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 12 21:38:09 2012 -0400
+
+    Update to pax-linux-3.4.2-test10.patch
+
+ Documentation/dontdiff                      |    1 +
+ arch/arm/include/asm/atomic.h               |   24 +-
+ arch/arm/plat-orion/include/plat/addr-map.h |    2 +-
+ fs/exec.c                                   |    7 +-
+ tools/gcc/size_overflow_hash.h              |19893 ++++++++++++++++-----------
+ tools/gcc/size_overflow_plugin.c            |  191 +-
+ 6 files changed, 12153 insertions(+), 7965 deletions(-)
+
 commit ce03676ffe1185a3406a76d39b3d71356bc16a39
 Merge: 98a4b83 48738bf
 Author: Brad Spengler <spender@grsecurity.net>
