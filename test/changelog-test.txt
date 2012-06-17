@@ -1,3 +1,33 @@
+commit e40b896abcc8e0c5e373fd8cd7ba4bb924ac9097
+Merge: 3a471d9 1b59177
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 17 18:17:18 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1b59177de797491f1a6a2a5830ed965091039a08
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 17 18:17:01 2012 -0400
+
+    Update to pax-linux-3.4.2-test13.patch
+
+ tools/gcc/size_overflow_plugin.c |   79 ++++++++++++++------------------------
+ 1 files changed, 29 insertions(+), 50 deletions(-)
+
+commit 3a471d988191ea83a0c9614ae4529efdf71b551f
+Merge: ec7bcbb ce3962c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 17 17:08:34 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ce3962cc142cf806da83a9df56219c5e31da7b41
+Merge: 36b71bc a694d36
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 17 17:08:26 2012 -0400
+
+    Merge branch 'linux-3.4.y' into pax-test
+
 commit ec7bcbb3c44f65b7a0202861133ee624757150d0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jun 16 08:30:43 2012 -0400
