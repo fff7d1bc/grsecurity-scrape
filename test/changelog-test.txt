@@ -1,3 +1,34 @@
+commit f641a7e5f15df0827343698a120a9e7b3d27441f
+Merge: e40b896 60f9a98
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 18 20:09:29 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 60f9a988efec39eabb69231ef5846cdf92020c5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 18 20:09:15 2012 -0400
+
+    Update to pax-linux-3.4.3-test14.patch
+
+ drivers/net/wireless/rt2x00/rt2x00.h      |    2 +-
+ drivers/net/wireless/rt2x00/rt2x00queue.c |    4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 2322a1a95b17f3299244c567a9442b10516ba20d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 18 20:07:33 2012 -0400
+
+    Update to pax-linux-3.4.2-test14.patch
+
+ arch/parisc/include/asm/uaccess.h |    4 ++--
+ arch/s390/include/asm/uaccess.h   |    4 ++--
+ arch/tile/include/asm/uaccess.h   |    4 ++--
+ arch/x86/include/asm/uaccess_32.h |    8 ++++----
+ arch/x86/include/asm/uaccess_64.h |    8 ++++----
+ tools/gcc/size_overflow_plugin.c  |    2 +-
+ 6 files changed, 15 insertions(+), 15 deletions(-)
+
 commit e40b896abcc8e0c5e373fd8cd7ba4bb924ac9097
 Merge: 3a471d9 1b59177
 Author: Brad Spengler <spender@grsecurity.net>
