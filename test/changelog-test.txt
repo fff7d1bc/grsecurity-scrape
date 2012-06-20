@@ -1,3 +1,28 @@
+commit d2fe6469f4abb9fedc3e12105537327eee1fcabb
+Merge: a37a708 dc69f03
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 20 18:02:07 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit dc69f038525a50ec51afb148043f8f157fe5deae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 20 18:01:53 2012 -0400
+
+    Update to pax-linux-3.4.3-test16.patch
+
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a37a7084ebf08e082bfd1c3f742f0193ec95f584
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 20 17:55:07 2012 -0400
+
+    revert sort change
+
+ tools/gcc/generate_size_overflow_hash.sh |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit f8be9961ae75583b60ecdba9ddde0f3ef8c97d31
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 19 21:56:18 2012 -0400
