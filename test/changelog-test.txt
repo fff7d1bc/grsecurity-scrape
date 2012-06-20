@@ -1,3 +1,51 @@
+commit f8be9961ae75583b60ecdba9ddde0f3ef8c97d31
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 19 21:56:18 2012 -0400
+
+    change sort of overflow table
+
+ tools/gcc/generate_size_overflow_hash.sh |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ae562ecce55559db31cc15060b343f65dd5e1a70
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 19 20:51:41 2012 -0400
+
+    Add grsecurity allocators to size_overflow plugin
+
+ tools/gcc/size_overflow_hash.data |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 2212fe760ef45b7ca3b3ee6e4de4404cb0c05ad7
+Merge: f641a7e d17adff
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 19 20:07:30 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d17adff014544488ad37ea7458242911e4da3658
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 19 20:07:09 2012 -0400
+
+    Add new files from pax-linux-3.4.3-test15.patch
+
+ tools/gcc/generate_size_overflow_hash.sh |   94 ++
+ tools/gcc/size_overflow_hash.data        | 2483 ++++++++++++++++++++++++++++++
+ 2 files changed, 2577 insertions(+), 0 deletions(-)
+
+commit 98cc0feb455ba32fb2d543e9310c41c023c5b6bc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 19 20:06:36 2012 -0400
+
+    Update to pax-linux-3.4.3-test15.patch
+
+ Documentation/dontdiff           |    1 +
+ arch/x86/tools/relocs.c          |    4 +-
+ tools/gcc/Makefile               |   10 +
+ tools/gcc/size_overflow_hash.h   |17290 --------------------------------------
+ tools/gcc/size_overflow_plugin.c |   15 +-
+ 5 files changed, 20 insertions(+), 17300 deletions(-)
+
 commit f641a7e5f15df0827343698a120a9e7b3d27441f
 Merge: e40b896 60f9a98
 Author: Brad Spengler <spender@grsecurity.net>
