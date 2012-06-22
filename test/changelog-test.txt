@@ -1,3 +1,20 @@
+commit 5e156f5344ec5d68a236a170debe117988fd8cf4
+Merge: d2fe646 2fa1656
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 22 18:40:59 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2fa1656a750d794e8ee009e629b82a58f35b8287
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 22 18:40:42 2012 -0400
+
+    Update to pax-linux-3.4.3-test17.patch
+
+ scripts/gcc-plugin.sh            |    6 +++---
+ tools/gcc/size_overflow_plugin.c |    2 ++
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
 commit d2fe6469f4abb9fedc3e12105537327eee1fcabb
 Merge: a37a708 dc69f03
 Author: Brad Spengler <spender@grsecurity.net>
