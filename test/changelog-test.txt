@@ -1,3 +1,17 @@
+commit beb73d410e9456bca0a668d98d9ef2064f7a5b67
+Merge: 5e156f5 bcf98a5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 23 10:29:50 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit bcf98a545e8383659122e74dffaa13b61b60ab70
+Merge: 2fa1656 ff74ae5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 23 10:28:41 2012 -0400
+
+    Merge branch 'linux-3.4.y' into pax-test
+
 commit 5e156f5344ec5d68a236a170debe117988fd8cf4
 Merge: d2fe646 2fa1656
 Author: Brad Spengler <spender@grsecurity.net>
