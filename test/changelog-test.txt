@@ -1,3 +1,15 @@
+commit 47b9c09fe205559fb7a7a1ec7be4d56f0999928c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 25 17:10:14 2012 -0400
+
+    Introduce new configuration system
+    make the strict copy checks depend on !PAX_SIZE_OVERFLOW
+
+ arch/x86/Kconfig.debug |    2 +-
+ grsecurity/Kconfig     |  252 +++++++++---------------------------------------
+ security/Kconfig       |  215 ++++++++++++++++++++++++++++++++++++++++-
+ 3 files changed, 257 insertions(+), 212 deletions(-)
+
 commit beb73d410e9456bca0a668d98d9ef2064f7a5b67
 Merge: 5e156f5 bcf98a5
 Author: Brad Spengler <spender@grsecurity.net>
