@@ -1,3 +1,50 @@
+commit 2f0d56b1c24a188e0f29aaf9f20547cc7c211749
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 2 18:36:51 2012 -0400
+
+    Introduce kernel-enforced SymlinksIfOwnerMatch feature
+    (Highly desirable feature for webhosting companies)
+
+ fs/namei.c                 |   14 +++++++++++++-
+ grsecurity/Kconfig         |   27 ++++++++++++++++++++++++++-
+ grsecurity/grsec_init.c    |    6 ++++++
+ grsecurity/grsec_link.c    |   16 ++++++++++++++++
+ grsecurity/grsec_sysctl.c  |   16 ++++++++++++++++
+ include/linux/grinternal.h |    2 ++
+ include/linux/grmsg.h      |    1 +
+ include/linux/grsecurity.h |    1 +
+ security/Kconfig           |   11 +++++++++++
+ 9 files changed, 92 insertions(+), 2 deletions(-)
+
+commit 0f9c29f46e114c46ce8dcafe8aa301c4d7deaa05
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 1 19:58:41 2012 -0400
+
+    Add missing read lock in recent filldir code
+
+ grsecurity/gracl.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 2e9351f4eaadf070e1e0cf5523bf7eea2c24b066
+Merge: 47b9c09 ca21de7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 1 20:03:27 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ca21de7d1018997346eb06667126291bbf5582d1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 1 19:50:14 2012 -0400
+
+    Update to pax-linux-3.4.4-test18.patch
+    
+    moved some ifdef's around to fix compiler warnings in the ELF loader hunks,
+    thanks to Thiébaud Weksteen for raising the problem and providing the initial
+    patch.
+
+ fs/binfmt_elf.c |  164 +++++++++++++++++++++++++++----------------------------
+ 1 files changed, 81 insertions(+), 83 deletions(-)
+
 commit 47b9c09fe205559fb7a7a1ec7be4d56f0999928c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jun 25 17:10:14 2012 -0400
