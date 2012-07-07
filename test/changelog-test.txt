@@ -1,3 +1,12 @@
+commit 52c32ad32bc64e861526c959c4d3aae2dac0d7ac
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 7 15:24:59 2012 -0400
+
+    Fix compilation failure when !GRKERNSEC
+
+ security/Kconfig |   38 +++++++++++++++++++-------------------
+ 1 files changed, 19 insertions(+), 19 deletions(-)
+
 commit 2f0d56b1c24a188e0f29aaf9f20547cc7c211749
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jul 2 18:36:51 2012 -0400
