@@ -1,3 +1,36 @@
+commit 16bebf10a5bd1f56669ceeadd8276fb2fd555935
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 7 20:30:28 2012 -0400
+
+    Backport security fix:
+    http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=commitdiff;h=9ab4233dd08036fe34a89c7dc6f47a8bf2eb29eb
+    
+    author	Andy Lutomirski <luto@amacapital.net>
+    Thu, 5 Jul 2012 23:00:11 +0000 (16:00 -0700)
+    committer	Linus Torvalds <torvalds@linux-foundation.org>
+    Fri, 6 Jul 2012 17:34:38 +0000 (10:34 -0700)
+    Otherwise the code races with munmap (causing a use-after-free
+    of the vma) or with close (causing a use-after-free of the struct
+    file).
+    
+    The bug was introduced by commit 90ed52ebe481 ("[PATCH] holepunch: fix
+    mmap_sem i_mutex deadlock")
+    
+    Cc: Hugh Dickins <hugh@veritas.com>
+    Cc: Miklos Szeredi <mszeredi@suse.cz>
+    Cc: Badari Pulavarty <pbadari@us.ibm.com>
+    Cc: Nick Piggin <npiggin@suse.de>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	mm/madvise.c
+
+ mm/madvise.c |   19 ++++++++++++++-----
+ 1 files changed, 14 insertions(+), 5 deletions(-)
+
 commit 52c32ad32bc64e861526c959c4d3aae2dac0d7ac
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jul 7 15:24:59 2012 -0400
