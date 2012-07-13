@@ -1,3 +1,48 @@
+commit b2f27d37c5c3c9608af4e945f3b54d18236dda64
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 12 21:53:37 2012 -0400
+
+    Force STOP_MACHINE on if grsecurity is enabled
+
+ init/Kconfig     |    2 +-
+ security/Kconfig |    1 +
+ 2 files changed, 2 insertions(+), 1 deletions(-)
+
+commit d89c6fd34b17e760c1f3218994aa7fab14cafbfe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 12 21:14:51 2012 -0400
+
+    Fix possible race on RBAC disable by ensuring all other
+    CPUs are forced out of the kernel -- this is preferable to
+    other locking methods that would impact performance of common paths
+    for what should be a very infrequent operation that doesn't
+    need to be fast
+    Thanks to Mark Moseley for reporting and testing
+
+ grsecurity/gracl.c |   33 +++++++++++++++++----------------
+ 1 files changed, 17 insertions(+), 16 deletions(-)
+
+commit 05eed9f83c245d4d223b24d93215fa590180b949
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 12 20:46:54 2012 -0400
+
+    Fix RBAC enable / special role exit race with fork
+    Thanks to Mark Moseley for reporting and testing
+    
+    race looked like:
+    >   cpu 1                               cpu 2
+    >   fork begins
+    >   fork calls dup_task_struct
+    >                                       RBAC sets ->acl on all procs in tasklist
+    >   fork completes, adds to tasklist
+    >                                       RBAC sets enabled flag
+    >   process exists with RBAC enabled
+    >   and NULL ->acl
+
+ grsecurity/gracl.c |   11 +++++------
+ kernel/fork.c      |    5 +++--
+ 2 files changed, 8 insertions(+), 8 deletions(-)
+
 commit 16bebf10a5bd1f56669ceeadd8276fb2fd555935
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jul 7 20:30:28 2012 -0400
