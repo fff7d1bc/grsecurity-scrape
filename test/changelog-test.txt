@@ -1,3 +1,134 @@
+commit 49f436025fd5aa8447a86d013b30e7f8ad952c1b
+Author: Jeff Moyer <jmoyer@redhat.com>
+Date:   Thu Jul 12 09:43:14 2012 -0400
+
+    block: fix infinite loop in __getblk_slow
+    
+    Commit 080399aaaf35 ("block: don't mark buffers beyond end of disk as
+    mapped") exposed a bug in __getblk_slow that causes mount to hang as it
+    loops infinitely waiting for a buffer that lies beyond the end of the
+    disk to become uptodate.
+    
+    The problem was initially reported by Torsten Hilbrich here:
+    
+        https://lkml.org/lkml/2012/6/18/54
+    
+    and also reported independently here:
+    
+        http://www.sysresccd.org/forums/viewtopic.php?f=13&t=4511
+    
+    and then Richard W.M.  Jones and Marcos Mello noted a few separate
+    bugzillas also associated with the same issue.  This patch has been
+    confirmed to fix:
+    
+        https://bugzilla.redhat.com/show_bug.cgi?id=835019
+    
+    The main problem is here, in __getblk_slow:
+    
+            for (;;) {
+                    struct buffer_head * bh;
+                    int ret;
+    
+                    bh = __find_get_block(bdev, block, size);
+                    if (bh)
+                            return bh;
+    
+                    ret = grow_buffers(bdev, block, size);
+                    if (ret < 0)
+                            return NULL;
+                    if (ret == 0)
+                            free_more_memory();
+            }
+    
+    __find_get_block does not find the block, since it will not be marked as
+    mapped, and so grow_buffers is called to fill in the buffers for the
+    associated page.  I believe the for (;;) loop is there primarily to
+    retry in the case of memory pressure keeping grow_buffers from
+    succeeding.  However, we also continue to loop for other cases, like the
+    block lying beond the end of the disk.  So, the fix I came up with is to
+    only loop when grow_buffers fails due to memory allocation issues
+    (return value of 0).
+    
+    The attached patch was tested by myself, Torsten, and Rich, and was
+    found to resolve the problem in call cases.
+    
+    Signed-off-by: Jeff Moyer <jmoyer@redhat.com>
+    Reported-and-Tested-by: Torsten Hilbrich <torsten.hilbrich@secunet.com>
+    Tested-by: Richard W.M. Jones <rjones@redhat.com>
+    Reviewed-by: Josh Boyer <jwboyer@redhat.com>
+    Cc: Stable <stable@vger.kernel.org>  # 3.0+
+    [ Jens is on vacation, taking this directly  - Linus ]
+    --
+    Stable Notes: this patch requires backport to 3.0, 3.2 and 3.3.
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/buffer.c |   22 +++++++++++++---------
+ 1 files changed, 13 insertions(+), 9 deletions(-)
+
+commit 1f10668cc85a886c753dc3f15def0ff2f6c03322
+Author: Dave Jones <davej@redhat.com>
+Date:   Fri Jul 13 13:35:36 2012 -0400
+
+    Remove easily user-triggerable BUG from generic_setlease
+    
+    This can be trivially triggered from userspace by passing in something unexpected.
+    
+        kernel BUG at fs/locks.c:1468!
+        invalid opcode: 0000 [#1] SMP
+        RIP: 0010:generic_setlease+0xc2/0x100
+        Call Trace:
+          __vfs_setlease+0x35/0x40
+          fcntl_setlease+0x76/0x150
+          sys_fcntl+0x1c6/0x810
+          system_call_fastpath+0x1a/0x1f
+    
+    Signed-off-by: Dave Jones <davej@redhat.com>
+    Cc: stable@kernel.org # 3.2+
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/locks.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 18b4f8fc8fd9815d418ebb7a9ec44bbe6fe905e1
+Author: Salman Qazi <sqazi@google.com>
+Date:   Mon Jun 25 18:18:15 2012 -0700
+
+    sched: Fix fork() error path to not crash
+    
+    In dup_task_struct(), if arch_dup_task_struct() fails, the clean up
+    code fails to clean up correctly.  That's because the clean up
+    code depends on unininitalized ti->task pointer.  We fix this
+    by making sure that the task and thread_info know about each other
+    before we attempt to take the error path.
+    
+    Signed-off-by: Salman Qazi <sqazi@google.com>
+    Signed-off-by: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Link: http://lkml.kernel.org/r/20120626011815.11323.5533.stgit@dungbeetle.mtv.corp.google.com
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ kernel/fork.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit a4fc0f03818fe1ed37ea4af365bd42bf8489c460
+Merge: b2f27d3 432259e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 16 17:12:21 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/include/asm/pgtable-3level.h
+    	drivers/net/macvtap.c
+    	include/asm-generic/pgtable.h
+    	mm/madvise.c
+
+commit 432259e6e74a2018b051b92b94ed503f14f89f00
+Merge: ca21de7 763c71b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 16 17:08:36 2012 -0400
+
+    Merge branch 'linux-3.4.y' into pax-test
+
 commit b2f27d37c5c3c9608af4e945f3b54d18236dda64
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jul 12 21:53:37 2012 -0400
