@@ -1,3 +1,13 @@
+commit 73c146e6d7aacfd0507622b9a58c9c47cf4ff30e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 17 16:21:01 2012 -0400
+
+    Fix mangled backport introduced during recent merge of upstream backports for mm/madvise.c
+    Thanks to Kamil Kaczkowski for the report
+
+ mm/madvise.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
 commit 49f436025fd5aa8447a86d013b30e7f8ad952c1b
 Author: Jeff Moyer <jmoyer@redhat.com>
 Date:   Thu Jul 12 09:43:14 2012 -0400
