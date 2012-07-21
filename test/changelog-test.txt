@@ -1,3 +1,102 @@
+commit 10bc6c214a60792e6e01b719c9204985e545c79d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 21 14:36:42 2012 -0400
+
+    print zeroes for our NULLs instead of (nil)
+
+ lib/vsprintf.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+commit 93d5cf5e877843a6b38de9bae2dddc03fadfbbd4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 21 14:18:33 2012 -0400
+
+    Add %pP format string for kernel pointers that are approved to be copied to userland,
+    like with /proc/kallsyms as we make the entire file appear empty for non-root users
+
+ kernel/kallsyms.c |   11 +++++++++++
+ lib/vsprintf.c    |    8 +++++++-
+ 2 files changed, 18 insertions(+), 1 deletions(-)
+
+commit 3e8a9f37454662132ba533dcda9082bccaae83d6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 21 13:53:20 2012 -0400
+
+    HIDESYM advance:
+    Use new generic usercopy slabs as markings for buffers intended to be copied into userland
+    Change seq_file buffer allocation to use usercopy slabs
+    Check for usercopy slab markings in handling of %p in *printf
+    If pointer to be printed is a pointer to kernelspace, and we're printing into a buffer
+    to be copied to userland, NULL it
+
+ fs/seq_file.c        |   16 ++++++++++++++++
+ include/linux/slab.h |    1 +
+ lib/vsprintf.c       |    8 ++++++++
+ mm/slab.c            |   28 ++++++++++++++++++++++++++++
+ mm/slob.c            |    5 +++++
+ mm/slub.c            |   27 +++++++++++++++++++++++++++
+ 6 files changed, 85 insertions(+), 0 deletions(-)
+
+commit d9f7bf7f312079ac946e6534439ce48e71c0a7fc
+Merge: b48e7c9 42fa242
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 21 12:43:34 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 42fa242b6a04d8163e0a03ac75555ad3e286b7f9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 21 12:43:14 2012 -0400
+
+    Add new files from PaX, including latent entropy plugin
+
+ tools/gcc/.gitignore              |    1 +
+ tools/gcc/latent_entropy_plugin.c |  291 +++++++++++++++++++++++++++++++++++++
+ 2 files changed, 292 insertions(+), 0 deletions(-)
+
+commit b48e7c9f468c25dfd1b31378998e81847b3f2451
+Merge: 0fde9f6 de9b577
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 21 12:41:23 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/Kconfig.debug
+
+commit de9b57773e9d4dd465c0e1f7c17c6dd8efa9a4ad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 21 12:38:07 2012 -0400
+
+    Update to pax-linux-3.4.4-test19.patch (with fixed usercopy kmem cache allocation,
+    to be included in next 3.4.6 PaX patch)
+
+ Documentation/dontdiff               |    3 +-
+ Makefile                             |   10 +++-
+ arch/x86/Kconfig.debug               |    2 +-
+ arch/x86/include/asm/atomic.h        |   39 ++++++++++++++----
+ drivers/char/random.c                |   11 +++++
+ drivers/gpu/drm/i915/intel_display.c |    3 +-
+ fs/binfmt_elf.c                      |   72 ++++++++--------------------------
+ fs/bio.c                             |    2 +-
+ include/asm-generic/atomic-long.h    |    4 ++
+ include/asm-generic/atomic.h         |    2 +-
+ include/linux/gfp.h                  |   11 +++++-
+ include/linux/random.h               |    4 ++
+ include/linux/slab_def.h             |   19 +++++++++
+ init/main.c                          |   16 +++++++-
+ mm/slab.c                            |   19 ++++++++-
+ mm/slub.c                            |   27 +++++++++++++
+ scripts/mod/modpost.c                |   10 ++--
+ security/Kconfig                     |   37 +++++++++++-------
+ tools/gcc/Makefile                   |    6 ++-
+ tools/gcc/colorize_plugin.c          |    2 +-
+ tools/gcc/constify_plugin.c          |    2 +-
+ tools/gcc/kallocstat_plugin.c        |    2 +-
+ tools/gcc/kernexec_plugin.c          |    6 +-
+ tools/gcc/stackleak_plugin.c         |    4 +-
+ 24 files changed, 208 insertions(+), 105 deletions(-)
+
 commit 0fde9f63da76747b91368fe0e87ae7083069e608
 Author: Julian Anastasov <ja@ssi.bg>
 Date:   Sat Jul 7 20:30:11 2012 +0300
