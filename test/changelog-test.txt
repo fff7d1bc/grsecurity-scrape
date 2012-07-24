@@ -1,3 +1,89 @@
+commit 5d4fd8660a7bbdc2afeb611e596f3056e66dc75e
+Merge: d8299a1 a535e9f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 23 20:52:26 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a535e9fd22c26f61cbe55b3a9e95e50d0c57b8f6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 23 20:51:39 2012 -0400
+
+    Update to pax-linux-3.4.6-test22.patch:
+    
+    - fix up the last changes as pointed out by spender
+
+ fs/exec.c |   15 ++++++---------
+ mm/slob.c |   11 +----------
+ 2 files changed, 7 insertions(+), 19 deletions(-)
+
+commit d8299a159394ba3a6082e97c3e4cfe13502b10cb
+Merge: 0f185df 7174965
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 23 20:02:26 2012 -0400
+
+    Use new CONFIG_PAX_USERCOPY_SLABS
+    
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	include/linux/slab.h
+    	mm/slab.c
+    	mm/slob.c
+    	mm/slub.c
+    	security/Kconfig
+
+commit 7174965f91fbc8922abcf4da01cced2a6158639e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 23 19:49:59 2012 -0400
+
+    Update to pax-linux-3.4.6-test21.patch, introduces CONFIG_PAX_USERCOPY_SLABS, so HIDESYM
+    can make use of USERCOPY cache markings without requiring that USERCOPY be enabled
+
+ drivers/char/mem.c       |    4 +-
+ fs/exec.c                |   29 +++++++++++++++++++++-
+ include/linux/gfp.h      |    2 +-
+ include/linux/sched.h    |    6 +----
+ include/linux/slab.h     |    5 ++-
+ include/linux/slab_def.h |    6 ++--
+ mm/slab.c                |   56 ++++++++++++++++++++++++-------------------
+ mm/slob.c                |   54 +++++++++++++++++++++---------------------
+ mm/slub.c                |   58 +++++++++++++++++++++++++--------------------
+ security/Kconfig         |    4 +++
+ 10 files changed, 131 insertions(+), 93 deletions(-)
+
+commit 0f185df763ce1c5674b69c4b63a5735d16941cb3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 23 18:59:53 2012 -0400
+
+    Fix up range checks on environ_read, reported at:
+    http://permalink.gmane.org/gmane.linux.kernel.hardened.devel/472
+
+ fs/proc/base.c |   13 +++++++------
+ 1 files changed, 7 insertions(+), 6 deletions(-)
+
+commit d5dc3e6e59ef6d5935dbeb4ba41628f22ab07a4a
+Author: J. Bruce Fields <bfields@fieldses.org>
+Date:   Mon Jul 23 15:17:17 2012 -0400
+
+    locks: fix checking of fcntl_setlease argument
+    
+    The only checks of the long argument passed to fcntl(fd,F_SETLEASE,.)
+    are done after converting the long to an int.  Thus some illegal values
+    may be let through and cause problems in later code.
+    
+    [ They actually *don't* cause problems in mainline, as of Dave Jones's
+      commit 8d657eb3b438 "Remove easily user-triggerable BUG from
+      generic_setlease", but we should fix this anyway.  And this patch will
+      be necessary to fix real bugs on earlier kernels. ]
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/locks.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
 commit 10bc6c214a60792e6e01b719c9204985e545c79d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jul 21 14:36:42 2012 -0400
