@@ -1,3 +1,100 @@
+commit bcd180c4f5093462b587f920a56a9632dc5550d8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 24 20:34:13 2012 -0400
+
+    use min_t instead of min
+
+ fs/proc/base.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3ecf176228e1036f01cfafbc4f41d2a4579fcd9a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 24 20:31:08 2012 -0400
+
+    Move procpidmem task checks to __mem_open
+
+ fs/proc/base.c |   13 +++++++++++--
+ 1 files changed, 11 insertions(+), 2 deletions(-)
+
+commit 8850936950ed223f7abe5fdbe2d5d960213d368d
+Author: Cong Wang <xiyou.wangcong@gmail.com>
+Date:   Thu May 31 16:26:18 2012 -0700
+
+    proc: use mm_access() instead of ptrace_may_access()
+    
+    mm_access() handles this much better, and avoids some race conditions.
+    
+    Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Alexey Dobriyan <adobriyan@gmail.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/proc/base.c |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
+commit 1e4e4836668796ec756c91bdb7c8c8f63c5f9118
+Author: Cong Wang <xiyou.wangcong@gmail.com>
+Date:   Thu May 31 16:26:17 2012 -0700
+
+    proc: remove mm_for_maps()
+    
+    mm_for_maps() is a simple wrapper for mm_access(), and the name is
+    misleading, so just remove it and use mm_access() directly.
+    
+    Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Alexey Dobriyan <adobriyan@gmail.com>
+    Acked-by: Hugh Dickins <hughd@google.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/proc/base.c       |    7 +------
+ fs/proc/internal.h   |    2 --
+ fs/proc/task_mmu.c   |    4 ++--
+ fs/proc/task_nommu.c |    2 +-
+ 4 files changed, 4 insertions(+), 11 deletions(-)
+
+commit d796a7d7dde60eaaeaf85a1f02f8b7c855edcfe7
+Author: Cong Wang <xiyou.wangcong@gmail.com>
+Date:   Thu May 31 16:26:17 2012 -0700
+
+    (don't introduce a vuln through use of the poorly-named FMODE_UNSIGNED_OFFSET, as
+    fixed in:
+    proc-do-not-allow-negative-offsets-on-proc-pid-environ.patch
+    )
+    
+    proc: clean up /proc/<pid>/environ handling
+    
+    Similar to e268337dfe26 ("proc: clean up and fix /proc/<pid>/mem
+    handling"), move the check of permission to open(), this will simplify
+    read() code.
+    
+    [akpm@linux-foundation.org: checkpatch fixes]
+    Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Alexey Dobriyan <adobriyan@gmail.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	fs/proc/base.c
+
+ fs/proc/base.c |   55 +++++++++++++++++++++++++++++++------------------------
+ 1 files changed, 31 insertions(+), 24 deletions(-)
+
+commit d1aad32c82bb85e159bc1da68eaabb55b7b18ca2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 23 21:33:46 2012 -0400
+
+    simplify seq_file enhancement based on new config option
+
+ fs/seq_file.c |   16 ----------------
+ 1 files changed, 0 insertions(+), 16 deletions(-)
+
 commit 5d4fd8660a7bbdc2afeb611e596f3056e66dc75e
 Merge: d8299a1 a535e9f
 Author: Brad Spengler <spender@grsecurity.net>
