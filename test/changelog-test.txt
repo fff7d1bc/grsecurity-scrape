@@ -1,3 +1,36 @@
+commit 9d59cbe15a157e7b8879fd4da7a119958ec5f852
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 09:49:32 2012 -0400
+
+    Turn on the latent entropy plugin by default
+
+ security/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit fddf633b5ec9124f1064eafe2df535db053cd654
+Merge: bcd180c 1e515a1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 09:44:08 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1e515a1c82e95a3de7622d6c206afcdca4703a2a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 09:43:42 2012 -0400
+
+    Update to pax-linux-3.4.6-test24.patch
+    - fixed a recent REFCOUNT change that broke !X86
+    - made the latent entropy plugin sort of LTO compatible
+
+ Makefile                          |    4 +-
+ include/asm-generic/atomic-long.h |    2 +
+ include/linux/compiler-gcc4.h     |    4 +
+ include/linux/compiler.h          |    4 +
+ include/linux/init.h              |   14 +++-
+ tools/gcc/Makefile                |    4 +-
+ tools/gcc/latent_entropy_plugin.c |  122 +++++++++++++++++++------------------
+ 7 files changed, 87 insertions(+), 67 deletions(-)
+
 commit bcd180c4f5093462b587f920a56a9632dc5550d8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jul 24 20:34:13 2012 -0400
