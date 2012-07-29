@@ -1,3 +1,55 @@
+commit bd30958b7abc09e95c1d67ddd17f1b086d427af7
+Merge: 460597d 8b7b7ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 19:42:53 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8b7b7ec6fafff79cae670a6f9e608e8684bc9c82
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 19:41:58 2012 -0400
+
+    Initialize mlock error code to 0, fixes erroneous -EINVAL reported with lvm on the forums
+
+ mm/mlock.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 460597d5ee22037285144e161ed3968b6781044f
+Merge: 0fe724f dc30ebb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 19:24:51 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit dc30ebbd8eaf44e9e77a900fc3c85dc2ff80c19a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 19:24:13 2012 -0400
+
+    Update to pax-linux-3.4.6-test25.patch:
+    - added emulation for new sparc plt stubs
+
+ arch/sparc/mm/fault_32.c |   25 +++++++++++++++++--------
+ arch/sparc/mm/fault_64.c |   25 +++++++++++++++++--------
+ 2 files changed, 34 insertions(+), 16 deletions(-)
+
+commit 0fe724fe4fa3cce344b5679c2dca884d36cc62c1
+Merge: 9d59cbe 20753e1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 18:21:21 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 20753e1794bd43bd988bd82ac88d4aec7c048790
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 28 18:18:09 2012 -0400
+
+    Backport changes from pax-linux-3.4.6-test25.patch:
+    - added emulation for a new sparc plt stub
+
+ arch/sparc/mm/fault_32.c |   14 ++++++++++----
+ arch/sparc/mm/fault_64.c |   14 ++++++++++----
+ 2 files changed, 20 insertions(+), 8 deletions(-)
+
 commit 9d59cbe15a157e7b8879fd4da7a119958ec5f852
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jul 28 09:49:32 2012 -0400
