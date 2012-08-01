@@ -1,3 +1,451 @@
+commit 3e9359dd2faf3d09db21dc5a1161d050ffc8a75a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 31 17:59:16 2012 -0400
+
+    Report discovered infoleaks
+
+ lib/vsprintf.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit dd0c2c1bad8075bfda0e7b4e4972b9b0c6b75c97
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 31 17:37:56 2012 -0400
+
+    Don't apply new HIDESYM checks against other kinds of pointers
+
+ lib/vsprintf.c |   20 ++++++++------------
+ 1 files changed, 8 insertions(+), 12 deletions(-)
+
+commit bebe691434cc7d52eea8c71535f050ba0d25858f
+Author: Alan Cox <alan@linux.intel.com>
+Date:   Mon Jul 30 14:43:24 2012 -0700
+
+    drivers/misc/lkdtm.c: fix missing allocation failure check
+    
+    Addresses https://bugzilla.kernel.org/show_bug.cgi?id=44691
+    
+    Reported-by: <rucsoftsec@gmail.com>
+    Signed-off-by: Alan Cox <alan@linux.intel.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/misc/lkdtm.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 94df51794b2589fc71fe1d6a1488437cbb64747c
+Author: Dan Rosenberg <drosenberg@vsecurity.com>
+Date:   Mon Jul 30 14:40:26 2012 -0700
+
+    lib/vsprintf.c: kptr_restrict: fix pK-error in SysRq show-all-timers(Q)
+    
+    When using ALT+SysRq+Q all the pointers are replaced with "pK-error" like
+    this:
+    
+    	[23153.208033]   .base:               pK-error
+    
+    with echo h > /proc/sysrq-trigger it works:
+    
+    	[23107.776363]   .base:       ffff88023e60d540
+    
+    The intent behind this behavior was to return "pK-error" in cases where
+    the %pK format specifier was used in interrupt context, because the
+    CAP_SYSLOG check wouldn't be meaningful.  Clearly this should only apply
+    when kptr_restrict is actually enabled though.
+    
+    Reported-by: Stevie Trujillo <stevie.trujillo@gmail.com>
+    Signed-off-by: Dan Rosenberg <dan.j.rosenberg@gmail.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ lib/vsprintf.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit ddffdddd815a927b53bff2e79c2ff66185b3423a
+Author: Alan Cox <alan@linux.intel.com>
+Date:   Mon Jul 30 14:40:06 2012 -0700
+
+    drivers/misc/ti-st/st_core.c: missing NULL check
+    
+    Addresses https://bugzilla.kernel.org/show_bug.cgi?44431
+    
+    Reported-by: <rucsoftsec@gmail.com>
+    Signed-off-by: Alan Cox <alan@linux.intel.com>
+    Cc: Pavan Savoy <pavan_savoy@ti.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/misc/ti-st/st_core.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 916891d56d211caa39fb610b4b7f4f75d3193bd2
+Author: Vikram Mulukutla <markivx@codeaurora.org>
+Date:   Mon Jul 30 14:39:58 2012 -0700
+
+    panic: fix a possible deadlock in panic()
+    
+    panic_lock is meant to ensure that panic processing takes place only on
+    one cpu; if any of the other cpus encounter a panic, they will spin
+    waiting to be shut down.
+    
+    However, this causes a regression in this scenario:
+    
+    1. Cpu 0 encounters a panic and acquires the panic_lock
+       and proceeds with the panic processing.
+    2. There is an interrupt on cpu 0 that also encounters
+       an error condition and invokes panic.
+    3. This second invocation fails to acquire the panic_lock
+       and enters the infinite while loop in panic_smp_self_stop.
+    
+    Thus all panic processing is stopped, and the cpu is stuck for eternity
+    in the while(1) inside panic_smp_self_stop.
+    
+    To address this, disable local interrupts with local_irq_disable before
+    acquiring the panic_lock.  This will prevent interrupt handlers from
+    executing during the panic processing, thus avoiding this particular
+    problem.
+    
+    Signed-off-by: Vikram Mulukutla <markivx@codeaurora.org>
+    Reviewed-by: Stephen Boyd <sboyd@codeaurora.org>
+    Cc: Michael Holzheu <holzheu@linux.vnet.ibm.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/panic.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 20fb82945a21be1dd2807bf3c2dee6cec8ccfb64
+Author: Kees Cook <keescook@chromium.org>
+Date:   Mon Jul 30 14:39:18 2012 -0700
+
+    coredump: warn about unsafe suid_dumpable / core_pattern combo
+    
+    When suid_dumpable=2, detect unsafe core_pattern settings and warn when
+    they are seen.
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Suggested-by: Andrew Morton <akpm@linux-foundation.org>
+    Cc: Alexander Viro <viro@zeniv.linux.org.uk>
+    Cc: Alan Cox <alan@linux.intel.com>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Doug Ledford <dledford@redhat.com>
+    Cc: Serge Hallyn <serge.hallyn@canonical.com>
+    Cc: James Morris <james.l.morris@oracle.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/exec.c             |   10 +++++-----
+ include/linux/sched.h |    5 +++++
+ kernel/sysctl.c       |   37 +++++++++++++++++++++++++++++++++++--
+ 3 files changed, 45 insertions(+), 7 deletions(-)
+
+commit 6e9f4353a326e732dd6b15382d9925af7682c0be
+Author: Kees Cook <keescook@chromium.org>
+Date:   Mon Jul 30 14:39:15 2012 -0700
+
+    fs: make dumpable=2 require fully qualified path
+    
+    When the suid_dumpable sysctl is set to "2", and there is no core dump
+    pipe defined in the core_pattern sysctl, a local user can cause core files
+    to be written to root-writable directories, potentially with
+    user-controlled content.
+    
+    This means an admin can unknowningly reintroduce a variation of
+    CVE-2006-2451, allowing local users to gain root privileges.
+    
+      $ cat /proc/sys/fs/suid_dumpable
+      2
+      $ cat /proc/sys/kernel/core_pattern
+      core
+      $ ulimit -c unlimited
+      $ cd /
+      $ ls -l core
+      ls: cannot access core: No such file or directory
+      $ touch core
+      touch: cannot touch `core': Permission denied
+      $ OHAI="evil-string-here" ping localhost >/dev/null 2>&1 &
+      $ pid=$!
+      $ sleep 1
+      $ kill -SEGV $pid
+      $ ls -l core
+      -rw------- 1 root kees 458752 Jun 21 11:35 core
+      $ sudo strings core | grep evil
+      OHAI=evil-string-here
+    
+    While cron has been fixed to abort reading a file when there is any
+    parse error, there are still other sensitive directories that will read
+    any file present and skip unparsable lines.
+    
+    Instead of introducing a suid_dumpable=3 mode and breaking all users of
+    mode 2, this only disables the unsafe portion of mode 2 (writing to disk
+    via relative path).  Most users of mode 2 (e.g.  Chrome OS) already use
+    a core dump pipe handler, so this change will not break them.  For the
+    situations where a pipe handler is not defined but mode 2 is still
+    active, crash dumps will only be written to fully qualified paths.  If a
+    relative path is defined (e.g.  the default "core" pattern), dump
+    attempts will trigger a printk yelling about the lack of a fully
+    qualified path.
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: Alexander Viro <viro@zeniv.linux.org.uk>
+    Cc: Alan Cox <alan@linux.intel.com>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Doug Ledford <dledford@redhat.com>
+    Cc: Serge Hallyn <serge.hallyn@canonical.com>
+    Cc: James Morris <james.l.morris@oracle.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	fs/exec.c
+
+ Documentation/sysctl/fs.txt |   18 ++++++++++++------
+ fs/exec.c                   |   17 ++++++++++++++---
+ 2 files changed, 26 insertions(+), 9 deletions(-)
+
+commit d77deb36b1258aa3002bdbd5ac8f288398a007a1
+Merge: 78f60f9 85b1bc5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 30 20:46:15 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 85b1bc5f768351997f6800b41be82324916a8247
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 30 20:45:35 2012 -0400
+
+    Update to pax-linux-3.4.7-test27.patch:
+    - fixed two bugs reported by Maxim Kammerer in https://bugs.gentoo.org/show_bug.
+    cgi?id=428576
+      - i386 percpu data has to be relocated even for !KERNEXEC, a regression after
+    2.6.32
+      - work around some ld 'smartness' that merges empty sections with symbols, fix
+    es relocatable !MODULES i386 builds
+
+ arch/x86/kernel/vmlinux.lds.S |    5 +++--
+ arch/x86/tools/relocs.c       |    4 ++--
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+commit 78f60f9d4c674c3f590501838cfdd43fca209f9e
+Author: Weiping Pan <wpan@redhat.com>
+Date:   Mon Jul 23 10:37:48 2012 +0800
+
+    rds: set correct msg_namelen
+    
+    Jay Fenlason (fenlason@redhat.com) found a bug,
+    that recvfrom() on an RDS socket can return the contents of random kernel
+    memory to userspace if it was called with a address length larger than
+    sizeof(struct sockaddr_in).
+    rds_recvmsg() also fails to set the addr_len paramater properly before
+    returning, but that's just a bug.
+    There are also a number of cases wher recvfrom() can return an entirely bogus
+    address. Anything in rds_recvmsg() that returns a non-negative value but does
+    not go through the "sin = (struct sockaddr_in *)msg->msg_name;" code path
+    at the end of the while(1) loop will return up to 128 bytes of kernel memory
+    to userspace.
+    
+    And I write two test programs to reproduce this bug, you will see that in
+    rds_server, fromAddr will be overwritten and the following sock_fd will be
+    destroyed.
+    Yes, it is the programmer's fault to set msg_namelen incorrectly, but it is
+    better to make the kernel copy the real length of address to user space in
+    such case.
+    
+    How to run the test programs ?
+    I test them on 32bit x86 system, 3.5.0-rc7.
+    
+    1 compile
+    gcc -o rds_client rds_client.c
+    gcc -o rds_server rds_server.c
+    
+    2 run ./rds_server on one console
+    
+    3 run ./rds_client on another console
+    
+    4 you will see something like:
+    server is waiting to receive data...
+    old socket fd=3
+    server received data from client:data from client
+    msg.msg_namelen=32
+    new socket fd=-1067277685
+    sendmsg()
+    : Bad file descriptor
+    
+    /***************** rds_client.c ********************/
+    
+    int main(void)
+    {
+    	int sock_fd;
+    	struct sockaddr_in serverAddr;
+    	struct sockaddr_in toAddr;
+    	char recvBuffer[128] = "data from client";
+    	struct msghdr msg;
+    	struct iovec iov;
+    
+    	sock_fd = socket(AF_RDS, SOCK_SEQPACKET, 0);
+    	if (sock_fd < 0) {
+    		perror("create socket error\n");
+    		exit(1);
+    	}
+    
+    	memset(&serverAddr, 0, sizeof(serverAddr));
+    	serverAddr.sin_family = AF_INET;
+    	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    	serverAddr.sin_port = htons(4001);
+    
+    	if (bind(sock_fd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+    		perror("bind() error\n");
+    		close(sock_fd);
+    		exit(1);
+    	}
+    
+    	memset(&toAddr, 0, sizeof(toAddr));
+    	toAddr.sin_family = AF_INET;
+    	toAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    	toAddr.sin_port = htons(4000);
+    	msg.msg_name = &toAddr;
+    	msg.msg_namelen = sizeof(toAddr);
+    	msg.msg_iov = &iov;
+    	msg.msg_iovlen = 1;
+    	msg.msg_iov->iov_base = recvBuffer;
+    	msg.msg_iov->iov_len = strlen(recvBuffer) + 1;
+    	msg.msg_control = 0;
+    	msg.msg_controllen = 0;
+    	msg.msg_flags = 0;
+    
+    	if (sendmsg(sock_fd, &msg, 0) == -1) {
+    		perror("sendto() error\n");
+    		close(sock_fd);
+    		exit(1);
+    	}
+    
+    	printf("client send data:%s\n", recvBuffer);
+    
+    	memset(recvBuffer, '\0', 128);
+    
+    	msg.msg_name = &toAddr;
+    	msg.msg_namelen = sizeof(toAddr);
+    	msg.msg_iov = &iov;
+    	msg.msg_iovlen = 1;
+    	msg.msg_iov->iov_base = recvBuffer;
+    	msg.msg_iov->iov_len = 128;
+    	msg.msg_control = 0;
+    	msg.msg_controllen = 0;
+    	msg.msg_flags = 0;
+    	if (recvmsg(sock_fd, &msg, 0) == -1) {
+    		perror("recvmsg() error\n");
+    		close(sock_fd);
+    		exit(1);
+    	}
+    
+    	printf("receive data from server:%s\n", recvBuffer);
+    
+    	close(sock_fd);
+    
+    	return 0;
+    }
+    
+    /***************** rds_server.c ********************/
+    
+    int main(void)
+    {
+    	struct sockaddr_in fromAddr;
+    	int sock_fd;
+    	struct sockaddr_in serverAddr;
+    	unsigned int addrLen;
+    	char recvBuffer[128];
+    	struct msghdr msg;
+    	struct iovec iov;
+    
+    	sock_fd = socket(AF_RDS, SOCK_SEQPACKET, 0);
+    	if(sock_fd < 0) {
+    		perror("create socket error\n");
+    		exit(0);
+    	}
+    
+    	memset(&serverAddr, 0, sizeof(serverAddr));
+    	serverAddr.sin_family = AF_INET;
+    	serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    	serverAddr.sin_port = htons(4000);
+    	if (bind(sock_fd, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
+    		perror("bind error\n");
+    		close(sock_fd);
+    		exit(1);
+    	}
+    
+    	printf("server is waiting to receive data...\n");
+    	msg.msg_name = &fromAddr;
+    
+    	/*
+    	 * I add 16 to sizeof(fromAddr), ie 32,
+    	 * and pay attention to the definition of fromAddr,
+    	 * recvmsg() will overwrite sock_fd,
+    	 * since kernel will copy 32 bytes to userspace.
+    	 *
+    	 * If you just use sizeof(fromAddr), it works fine.
+    	 * */
+    	msg.msg_namelen = sizeof(fromAddr) + 16;
+    	/* msg.msg_namelen = sizeof(fromAddr); */
+    	msg.msg_iov = &iov;
+    	msg.msg_iovlen = 1;
+    	msg.msg_iov->iov_base = recvBuffer;
+    	msg.msg_iov->iov_len = 128;
+    	msg.msg_control = 0;
+    	msg.msg_controllen = 0;
+    	msg.msg_flags = 0;
+    
+    	while (1) {
+    		printf("old socket fd=%d\n", sock_fd);
+    		if (recvmsg(sock_fd, &msg, 0) == -1) {
+    			perror("recvmsg() error\n");
+    			close(sock_fd);
+    			exit(1);
+    		}
+    		printf("server received data from client:%s\n", recvBuffer);
+    		printf("msg.msg_namelen=%d\n", msg.msg_namelen);
+    		printf("new socket fd=%d\n", sock_fd);
+    		strcat(recvBuffer, "--data from server");
+    		if (sendmsg(sock_fd, &msg, 0) == -1) {
+    			perror("sendmsg()\n");
+    			close(sock_fd);
+    			exit(1);
+    		}
+    	}
+    
+    	close(sock_fd);
+    	return 0;
+    }
+    
+    Signed-off-by: Weiping Pan <wpan@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/recv.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 2f50161056506a73a7a86338f68c201190e9a701
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 30 16:59:06 2012 -0400
+
+    Make GRKERNSEC enable PROC_FS
+
+ security/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 11bb6bbf80e6e537770652708fa2b03042dc5482
+Merge: bd30958 02fdd3d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 29 18:59:28 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 02fdd3d5e374d033c89081655533af281490e09d
+Merge: 8b7b7ec 0d0eef5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 29 18:59:19 2012 -0400
+
+    Merge branch 'linux-3.4.y' into pax-test
+
 commit bd30958b7abc09e95c1d67ddd17f1b086d427af7
 Merge: 460597d 8b7b7ec
 Author: Brad Spengler <spender@grsecurity.net>
