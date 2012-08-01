@@ -1,3 +1,12 @@
+commit b7513723b4eb4ae67ec029b85cf0ead7f15b2b89
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 1 17:11:37 2012 -0400
+
+    Replace infoleaking slab name with an atomic counter
+
+ net/netfilter/nf_conntrack_core.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
 commit 3e9359dd2faf3d09db21dc5a1161d050ffc8a75a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jul 31 17:59:16 2012 -0400
