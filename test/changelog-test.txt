@@ -1,3 +1,12 @@
+commit 26dc1210cd307e46b138533d7f0621143018fed2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 2 15:17:24 2012 -0400
+
+    Use the unchecked function for the unchecked atomic_t
+
+ net/netfilter/nf_conntrack_core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit b7513723b4eb4ae67ec029b85cf0ead7f15b2b89
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Aug 1 17:11:37 2012 -0400
