@@ -1,3 +1,20 @@
+commit 54aa978cf03ea3587fcd7f49bc5f4e19b197ee8e
+Merge: 9c5f2b7 731e994
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 6 17:11:14 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 731e9949660a647446bd8bf83e1ccdd42607f93f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 6 17:10:57 2012 -0400
+
+    Update to pax-linux-3.5-test9.patch:
+    - fixed another i386/KERNEXEC and EFI boot problem reported by Maxim Kammerer, https://bugs.gentoo.org/show_bug.cgi?id=430122
+
+ arch/x86/platform/efi/efi_stub_32.S |   22 +++++++++++++++++++---
+ 1 files changed, 19 insertions(+), 3 deletions(-)
+
 commit 9c5f2b7a68a04f037216f0ab275ad934c011e97a
 Merge: 1d436a3 43a77f3
 Author: Brad Spengler <spender@grsecurity.net>
