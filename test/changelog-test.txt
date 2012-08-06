@@ -1,3 +1,12 @@
+commit 27c2b79326deff4a88da313e1844d597dd2e4ded
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 6 18:31:53 2012 -0400
+
+    Fix compilation error reported by x14sg1
+
+ grsecurity/gracl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 54aa978cf03ea3587fcd7f49bc5f4e19b197ee8e
 Merge: 9c5f2b7 731e994
 Author: Brad Spengler <spender@grsecurity.net>
