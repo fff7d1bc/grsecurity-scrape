@@ -1,3 +1,23 @@
+commit 321018006f36b48821bcdf9f2bff78dec8a6942e
+Merge: 27c2b79 1a6bbeb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 6 20:12:56 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1a6bbeb7f50e220329018d2395a0691397085fc4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 6 20:12:19 2012 -0400
+
+    Update to pax-linux-3.5-test10.patch:
+    - fixed mm.pax_flags configuration dependency
+    - fixed i386/KERNEXEC/SMP boot problem reported at http://forums.grsecurity.net/viewtopic.php?f=3&t=3008
+
+ arch/x86/kernel/head_32.S |    2 +-
+ arch/x86/realmode/init.c  |    2 +-
+ include/linux/mm_types.h  |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
 commit 27c2b79326deff4a88da313e1844d597dd2e4ded
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Aug 6 18:31:53 2012 -0400
