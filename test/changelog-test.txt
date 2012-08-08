@@ -1,3 +1,20 @@
+commit d9091d5d94206be07a8686fb572e475e9948e623
+Merge: 3210180 67069af
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 7 19:16:22 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 67069af25f762008f15c192cfc88917cecacd103
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 7 19:15:59 2012 -0400
+
+    Update to pax-linux-3.5-test11.patch:
+    - fixed KERNEXEC/FTRACE incompatibility problem reported in http://forums.grsecurity.net/viewtopic.php?f=3&t=3009
+
+ kernel/trace/ftrace.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
 commit 321018006f36b48821bcdf9f2bff78dec8a6942e
 Merge: 27c2b79 1a6bbeb
 Author: Brad Spengler <spender@grsecurity.net>
