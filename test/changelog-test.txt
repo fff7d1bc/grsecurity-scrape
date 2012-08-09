@@ -1,3 +1,25 @@
+commit b8a6ff5efddaa433b9a224dfc041542d85c6dc89
+Merge: d9091d5 943f521
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 8 19:33:58 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 943f5216463964f1866e25febed25b1d5da18ed4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 8 19:33:37 2012 -0400
+
+    Update to pax-linux-3.5-test12.patch:
+    - fixed a non-constifyable ops structure, reported by Michael Tremer
+    - fixed building init/ with gcc plugins
+
+ Makefile                        |    6 +++---
+ arch/arm/mach-kirkwood/common.c |    2 +-
+ include/linux/clk-provider.h    |    1 +
+ init/Makefile                   |    3 +++
+ scripts/link-vmlinux.sh         |    2 +-
+ 5 files changed, 9 insertions(+), 5 deletions(-)
+
 commit d9091d5d94206be07a8686fb572e475e9948e623
 Merge: 3210180 67069af
 Author: Brad Spengler <spender@grsecurity.net>
