@@ -1,3 +1,88 @@
+commit b46a296d687aca3fdc8198e44d34f78f2e7a9696
+Merge: 62ed0fc 5c2f756
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 11 20:20:05 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5c2f7569712681fdbba6da740b6d8db190ff4a50
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 11 20:19:33 2012 -0400
+
+    Update to pax-linux-3.5.1-test15.patch:
+    - fixed REFCOUNT on arm
+
+ arch/arm/include/asm/atomic.h |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 62ed0fc81bf3fef945a18b364cddc6787ebfb678
+Merge: bc0dd5c 7b9d6a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 11 18:43:38 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7b9d6a613d5e175e92cf9abc55f895f37ba17014
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 11 18:43:18 2012 -0400
+
+    Update to pax-linux-3.5.1-test14.patch:
+    - size overflow plugin update from Emese that fixes a false positive
+    - a USERCOPY false positive fix reported by Christian Lamparter
+
+ net/packet/af_packet.c           |    4 +++-
+ tools/gcc/size_overflow_plugin.c |   36 +++++++++++++++++++-----------------
+ 2 files changed, 22 insertions(+), 18 deletions(-)
+
+commit bc0dd5c69e10dc8fd686d3b27d6073da2ee3d993
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 11 18:34:48 2012 -0400
+
+    Fix improper log/error about already-created file as the result of a creat()
+    on a dangling symlink as part of the recent symlinkown feature
+    Found via expanded regression tests
+
+ fs/namei.c |   40 +++++++++++++++++++++++++++-------------
+ 1 files changed, 27 insertions(+), 13 deletions(-)
+
+commit e964a32deb67e150d316134dd24afca10f8a412d
+Merge: b57d685 450bc33
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 11 11:40:42 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	tools/gcc/size_overflow_hash.data
+
+commit 450bc339843e075a899c87c48e04289ae897fcde
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 11 11:37:47 2012 -0400
+
+    Update to pax-linux-3.5.1-test13.patch:
+    - new size overflow plugin from Emese that hopefully fixes most of the false positives and also adds more instrumentation (e.g., type casts)
+
+ arch/x86/kernel/kdebugfs.c        |    4 +-
+ arch/x86/lib/usercopy_32.c        |   12 +-
+ include/linux/slab.h              |    1 -
+ include/linux/slob_def.h          |    3 +-
+ include/linux/slub_def.h          |    6 +-
+ mm/vmalloc.c                      |    6 +-
+ tools/gcc/size_overflow_hash.data |  627 ++++++++++++++++++++++++++++++++--
+ tools/gcc/size_overflow_plugin.c  |  692 ++++++++++++++++++++++++++++---------
+ 8 files changed, 1129 insertions(+), 222 deletions(-)
+
+commit b57d685812109a3436bb4808600eaaec34e873f0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 10 18:59:04 2012 -0400
+
+    Check target against NULL for recent symlinkown feature or we'll oops
+    on trying to check the ownership of a non-existent symlink target
+    Thanks to CloudLinux for reporting
+
+ grsecurity/grsec_link.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 68f26986136626b3c734e8a5668a7d402309f9df
 Merge: b8a6ff5 8098942
 Author: Brad Spengler <spender@grsecurity.net>
