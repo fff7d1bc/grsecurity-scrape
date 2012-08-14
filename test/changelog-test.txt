@@ -1,3 +1,24 @@
+commit 4f8c682966b5cff6b88f6f9a3ddc894b5848e958
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 13 19:41:57 2012 -0400
+
+    Add new is_privileged_binary function, make RBAC linking restrictions
+    and option-based linking restrictions use it
+    Clean up our sgid mode checking
+    Don't add is_root_privileged_binary here since I don't use it and
+    it would need rethinking for user namespaces
+    
+    Conflicts:
+    
+    	grsecurity/grsec_link.c
+
+ grsecurity/gracl.c         |    6 +++---
+ grsecurity/gracl_fs.c      |    8 +++++---
+ grsecurity/grsec_link.c    |    3 +--
+ include/linux/capability.h |    2 ++
+ security/commoncap.c       |   26 ++++++++++++++++++++++++++
+ 5 files changed, 37 insertions(+), 8 deletions(-)
+
 commit b46a296d687aca3fdc8198e44d34f78f2e7a9696
 Merge: 62ed0fc 5c2f756
 Author: Brad Spengler <spender@grsecurity.net>
