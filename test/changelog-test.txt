@@ -1,3 +1,38 @@
+commit f0bdc015a8a4ce8bbb9ae10033666d620ad9a6ea
+Merge: 4f8c682 d48d3e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 15 18:01:03 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d48d3e28653f195d9d9d5fb8b51d33978ba095ed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 15 18:00:06 2012 -0400
+
+    Update to pax-linux-3.5.1-test16.patch:
+    - updated report_size_overflow to the new version expected by the plugin
+    - fixed size overflow attr placement on alloc_vmap_area
+
+ fs/exec.c    |    4 ++--
+ mm/vmalloc.c |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 2fea92c473f31e27a26ee4ee72574b9e0ccabe91
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 15 17:59:44 2012 -0400
+
+    Port PaX to 3.5.2
+
+ drivers/char/random.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit e8382f23d72dbe35b11324c220e8a057d9cffec4
+Merge: 5c2f756 684012d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 15 17:58:23 2012 -0400
+
+    Merge branch 'linux-3.5.y' into pax-test
+
 commit 4f8c682966b5cff6b88f6f9a3ddc894b5848e958
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Aug 13 19:41:57 2012 -0400
