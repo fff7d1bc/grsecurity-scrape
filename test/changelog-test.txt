@@ -1,3 +1,20 @@
+commit 21d383a05578695ff092a7344b3147c98288d069
+Merge: f0bdc01 f025be3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 15 19:48:56 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f025be3919456ba318df3ec63729fa6f43a97f80
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 15 19:48:33 2012 -0400
+
+    Update to pax-linux-3.5.2-test18.patch:
+    - updated size overflow plugin from Emese
+
+ tools/gcc/size_overflow_plugin.c |   37 +++++++++++++++++++++++++++++--------
+ 1 files changed, 29 insertions(+), 8 deletions(-)
+
 commit f0bdc015a8a4ce8bbb9ae10033666d620ad9a6ea
 Merge: 4f8c682 d48d3e2
 Author: Brad Spengler <spender@grsecurity.net>
