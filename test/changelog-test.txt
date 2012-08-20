@@ -1,3 +1,21 @@
+commit d09a41de4b2787646e96f5e5604e3522f2fcd47f
+Merge: 21d383a ba7ca5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 20 15:19:31 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ba7ca5eb3d3021be3138e86d68687cf832f19ba1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 20 15:19:16 2012 -0400
+
+    Update to pax-linux-3.5.2-test19.patch:
+    - updated size overflow plugin from Emese, should fix http://forums.grsecurity.net/viewtopic.php?f=3&t=3037
+
+ tools/gcc/generate_size_overflow_hash.sh |    4 +-
+ tools/gcc/size_overflow_plugin.c         |  407 ++++++++++++++++--------------
+ 2 files changed, 222 insertions(+), 189 deletions(-)
+
 commit 21d383a05578695ff092a7344b3147c98288d069
 Merge: f0bdc01 f025be3
 Author: Brad Spengler <spender@grsecurity.net>
