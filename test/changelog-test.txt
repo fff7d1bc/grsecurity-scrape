@@ -1,3 +1,434 @@
+commit 3de4b7e82e0b6bb5717ac3d1424907ad0a13ac5c
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:44 2012 +0000
+
+    Upstream commit: e862f1a9b7df4e8196ebec45ac62295138aa3fc2
+    
+    atm: fix info leak in getsockopt(SO_ATMPVC)
+    
+    The ATM code fails to initialize the two padding bytes of struct
+    sockaddr_atmpvc inserted for alignment. Add an explicit memset(0)
+    before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/atm/common.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit f917a2a24148662843d5b15dc40d58529c0fdb83
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:45 2012 +0000
+
+    Upstream commit: 3c0c5cfdcd4d69ffc4b9c0907cec99039f30a50a
+    
+    atm: fix info leak via getsockname()
+    
+    The ATM code fails to initialize the two padding bytes of struct
+    sockaddr_atmpvc inserted for alignment. Add an explicit memset(0)
+    before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/atm/pvc.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 36fb6f26e842617c164636a2173a44ab541e95e4
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:46 2012 +0000
+
+    Upstream commit: e15ca9a0ef9a86f0477530b0f44a725d67f889ee
+    
+    Bluetooth: HCI - Fix info leak in getsockopt(HCI_FILTER)
+    
+    The HCI code fails to initialize the two padding bytes of struct
+    hci_ufilter before copying it to userland -- that for leaking two
+    bytes kernel stack. Add an explicit memset(0) before filling the
+    structure to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Marcel Holtmann <marcel@holtmann.org>
+    Cc: Gustavo Padovan <gustavo@padovan.org>
+    Cc: Johan Hedberg <johan.hedberg@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bluetooth/hci_sock.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 6b052a37f41b6e8bee79c7ed76a8b8b7b0ba46e0
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:47 2012 +0000
+
+    Upstream commit: 3f68ba07b1da811bf383b4b701b129bfcb2e4988
+    
+    Bluetooth: HCI - Fix info leak via getsockname()
+    
+    The HCI code fails to initialize the hci_channel member of struct
+    sockaddr_hci and that for leaks two bytes kernel stack via the
+    getsockname() syscall. Initialize hci_channel with 0 to avoid the
+    info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Marcel Holtmann <marcel@holtmann.org>
+    Cc: Gustavo Padovan <gustavo@padovan.org>
+    Cc: Johan Hedberg <johan.hedberg@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bluetooth/hci_sock.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 050598701d0b2e459a8d5afaca4f5f20fcb11f20
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:48 2012 +0000
+
+    Upstream commit: 9ad2de43f1aee7e7274a4e0d41465489299e344b
+    
+    Bluetooth: RFCOMM - Fix info leak in getsockopt(BT_SECURITY)
+    
+    The RFCOMM code fails to initialize the key_size member of struct
+    bt_security before copying it to userland -- that for leaking one
+    byte kernel stack. Initialize key_size with 0 to avoid the info
+    leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Marcel Holtmann <marcel@holtmann.org>
+    Cc: Gustavo Padovan <gustavo@padovan.org>
+    Cc: Johan Hedberg <johan.hedberg@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bluetooth/rfcomm/sock.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 8bdc51d5a33c9caffe3e2f07edde46675b0e09f7
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:49 2012 +0000
+
+    Upstream commit: f9432c5ec8b1e9a09b9b0e5569e3c73db8de432a
+    
+    Bluetooth: RFCOMM - Fix info leak in ioctl(RFCOMMGETDEVLIST)
+    
+    The RFCOMM code fails to initialize the two padding bytes of struct
+    rfcomm_dev_list_req inserted for alignment before copying it to
+    userland. Additionally there are two padding bytes in each instance of
+    struct rfcomm_dev_info. The ioctl() that for disclosures two bytes plus
+    dev_num times two bytes uninitialized kernel heap memory.
+    
+    Allocate the memory using kzalloc() to fix this issue.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Marcel Holtmann <marcel@holtmann.org>
+    Cc: Gustavo Padovan <gustavo@padovan.org>
+    Cc: Johan Hedberg <johan.hedberg@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bluetooth/rfcomm/tty.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 912125dd04f4647241fa09e275cfe4a855483761
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:50 2012 +0000
+
+    Upstream commit: 9344a972961d1a6d2c04d9008b13617bcb6ec2ef
+    
+    Bluetooth: RFCOMM - Fix info leak via getsockname()
+    
+    The RFCOMM code fails to initialize the trailing padding byte of struct
+    sockaddr_rc added for alignment. It that for leaks one byte kernel stack
+    via the getsockname() syscall. Add an explicit memset(0) before filling
+    the structure to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Marcel Holtmann <marcel@holtmann.org>
+    Cc: Gustavo Padovan <gustavo@padovan.org>
+    Cc: Johan Hedberg <johan.hedberg@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bluetooth/rfcomm/sock.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit fd7df80276a997284bc598ed7038b75c83b274db
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:51 2012 +0000
+
+    Upstream commit: 792039c73cf176c8e39a6e8beef2c94ff46522ed
+    
+    Bluetooth: L2CAP - Fix info leak via getsockname()
+    
+    The L2CAP code fails to initialize the l2_bdaddr_type member of struct
+    sockaddr_l2 and the padding byte added for alignment. It that for leaks
+    two bytes kernel stack via the getsockname() syscall. Add an explicit
+    memset(0) before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Marcel Holtmann <marcel@holtmann.org>
+    Cc: Gustavo Padovan <gustavo@padovan.org>
+    Cc: Johan Hedberg <johan.hedberg@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bluetooth/l2cap_sock.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 1986db2d815e5cf113c557960ee626bc6e8b3d08
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:52 2012 +0000
+
+    Upstream commit: 04d4fbca1017c11381e7d82acea21dd741e748bc
+    
+    l2tp: fix info leak via getsockname()
+    
+    The L2TP code for IPv6 fails to initialize the l2tp_unused member of
+    struct sockaddr_l2tpip6 and that for leaks two bytes kernel stack via
+    the getsockname() syscall. Initialize l2tp_unused with 0 to avoid the
+    info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: James Chapman <jchapman@katalix.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/l2tp/l2tp_ip6.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 4e782a046b56d17e7698497a65103cc43d74204e
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:53 2012 +0000
+
+    Upstream commit: 3592aaeb80290bda0f2cf0b5456c97bfc638b192
+    
+    llc: fix info leak via getsockname()
+    
+    The LLC code wrongly returns 0, i.e. "success", when the socket is
+    zapped. Together with the uninitialized uaddrlen pointer argument from
+    sys_getsockname this leads to an arbitrary memory leak of up to 128
+    bytes kernel stack via the getsockname() syscall.
+    
+    Return an error instead when the socket is zapped to prevent the info
+    leak. Also remove the unnecessary memset(0). We don't directly write to
+    the memory pointed by uaddr but memcpy() a local structure at the end of
+    the function that is properly initialized.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Arnaldo Carvalho de Melo <acme@ghostprotocols.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/llc/af_llc.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 0d3b7e2c0ca480c7f816184489fd47057bfbf0a6
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:54 2012 +0000
+
+    Upstream commit: 276bdb82dedb290511467a5a4fdbe9f0b52dce6f
+    
+    dccp: check ccid before dereferencing
+    
+    ccid_hc_rx_getsockopt() and ccid_hc_tx_getsockopt() might be called with
+    a NULL ccid pointer leading to a NULL pointer dereference. This could
+    lead to a privilege escalation if the attacker is able to map page 0 and
+    prepare it with a fake ccid_ops pointer.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Gerrit Renker <gerrit@erg.abdn.ac.uk>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/dccp/ccid.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 0b8610451dbdbda48950df299e7eb2d8b15f9a7a
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:55 2012 +0000
+
+    Upstream commit: 7b07f8eb75aa3097cdfd4f6eac3da49db787381d
+    
+    dccp: fix info leak via getsockopt(DCCP_SOCKOPT_CCID_TX_INFO)
+    
+    The CCID3 code fails to initialize the trailing padding bytes of struct
+    tfrc_tx_info added for alignment on 64 bit architectures. It that for
+    potentially leaks four bytes kernel stack via the getsockopt() syscall.
+    Add an explicit memset(0) before filling the structure to avoid the
+    info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Gerrit Renker <gerrit@erg.abdn.ac.uk>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/dccp/ccids/ccid3.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 5dbb131f00084c239edbe17dd3a414f9fe508a3e
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:56 2012 +0000
+
+    Upstream commit: 2d8a041b7bfe1097af21441cb77d6af95f4f4680
+    
+    ipvs: fix info leak in getsockopt(IP_VS_SO_GET_TIMEOUT)
+    
+    If at least one of CONFIG_IP_VS_PROTO_TCP or CONFIG_IP_VS_PROTO_UDP is
+    not set, __ip_vs_get_timeouts() does not fully initialize the structure
+    that gets copied to userland and that for leaks up to 12 bytes of kernel
+    stack. Add an explicit memset(0) before passing the structure to
+    __ip_vs_get_timeouts() to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Wensong Zhang <wensong@linux-vs.org>
+    Cc: Simon Horman <horms@verge.net.au>
+    Cc: Julian Anastasov <ja@ssi.bg>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/netfilter/ipvs/ip_vs_ctl.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9671080b113737dcf7efe73fb941977d2bb1cad1
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Wed Aug 15 11:31:57 2012 +0000
+
+    Upstream commit: 43da5f2e0d0c69ded3d51907d9552310a6b545e8
+    Mr Minipli!
+    
+    net: fix info leak in compat dev_ifconf()
+    
+    The implementation of dev_ifconf() for the compat ioctl interface uses
+    an intermediate ifc structure allocated in userland for the duration of
+    the syscall. Though, it fails to initialize the padding bytes inserted
+    for alignment and that for leaks four bytes of kernel stack. Add an
+    explicit memset(0) before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/socket.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 76d7cca5bedc883de04f85da7d2a6dc2050c8487
+Author: Jesper Juhl <jj@chaosbits.net>
+Date:   Fri Aug 17 10:33:12 2012 +0000
+
+    Upstream commit: d92c7f8aabae913de16eb855b19cd2002c341896
+    
+    caif: Do not dereference NULL in chnl_recv_cb()
+    
+    In net/caif/chnl_net.c::chnl_recv_cb() we call skb_header_pointer()
+    which may return NULL, but we do not check for a NULL pointer before
+    dereferencing it.
+    This patch adds such a NULL check and properly free's allocated memory
+    and return an error (-EINVAL) on failure - much better than crashing..
+    
+    Signed-off-by: Jesper Juhl <jj@chaosbits.net>
+    Acked-by: Sjur Brændeland <sjur.brandeland@stericsson.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/caif/chnl_net.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 1e571fcf6841fcad6ae948a1a20b990cf639f1dd
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Fri Aug 17 08:54:52 2012 -0400
+
+    Upstream commit: 89a4e48f8479f8145eca9698f39fe188c982212f
+    
+    ext4: fix kernel BUG on large-scale rm -rf commands
+    
+    Commit 968dee7722: "ext4: fix hole punch failure when depth is greater
+    than 0" introduced a regression in v3.5.1/v3.6-rc1 which caused kernel
+    crashes when users ran run "rm -rf" on large directory hierarchy on
+    ext4 filesystems on RAID devices:
+    
+        BUG: unable to handle kernel NULL pointer dereference at 0000000000000028
+    
+        Process rm (pid: 18229, threadinfo ffff8801276bc000, task ffff880123631710)
+        Call Trace:
+         [<ffffffff81236483>] ? __ext4_handle_dirty_metadata+0x83/0x110
+         [<ffffffff812353d3>] ext4_ext_truncate+0x193/0x1d0
+         [<ffffffff8120a8cf>] ? ext4_mark_inode_dirty+0x7f/0x1f0
+         [<ffffffff81207e05>] ext4_truncate+0xf5/0x100
+         [<ffffffff8120cd51>] ext4_evict_inode+0x461/0x490
+         [<ffffffff811a1312>] evict+0xa2/0x1a0
+         [<ffffffff811a1513>] iput+0x103/0x1f0
+         [<ffffffff81196d84>] do_unlinkat+0x154/0x1c0
+         [<ffffffff8118cc3a>] ? sys_newfstatat+0x2a/0x40
+         [<ffffffff81197b0b>] sys_unlinkat+0x1b/0x50
+         [<ffffffff816135e9>] system_call_fastpath+0x16/0x1b
+        Code: 8b 4d 20 0f b7 41 02 48 8d 04 40 48 8d 04 81 49 89 45 18 0f b7 49 02 48 83 c1 01 49 89 4d 00 e9 ae f8 ff ff 0f 1f 00 49 8b 45 28 <48> 8b 40 28 49 89 45 20 e9 85 f8 ff ff 0f 1f 80 00 00 00
+    
+        RIP  [<ffffffff81233164>] ext4_ext_remove_space+0xa34/0xdf0
+    
+    This could be reproduced as follows:
+    
+    The problem in commit 968dee7722 was that caused the variable 'i' to
+    be left uninitialized if the truncate required more space than was
+    available in the journal.  This resulted in the function
+    ext4_ext_truncate_extend_restart() returning -EAGAIN, which caused
+    ext4_ext_remove_space() to restart the truncate operation after
+    starting a new jbd2 handle.
+    
+    Reported-by: Maciej Żenczykowski <maze@google.com>
+    Reported-by: Marti Raudsepp <marti@juffo.org>
+    Tested-by: Fengguang Wu <fengguang.wu@intel.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Cc: stable@vger.kernel.org
+
+ fs/ext4/extents.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit f7507e20fcce118a90e2dfb2cee3e4fd50bdc5d3
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Tue Aug 21 06:21:17 2012 +0000
+
+    Upstream commit: e0e3cea46d31d23dc40df0a49a7a2c04fe8edfea
+    
+    af_netlink: force credentials passing [CVE-2012-3520]
+    
+    Pablo Neira Ayuso discovered that avahi and
+    potentially NetworkManager accept spoofed Netlink messages because of a
+    kernel bug.  The kernel passes all-zero SCM_CREDENTIALS ancillary data
+    to the receiver if the sender did not provide such data, instead of not
+    including any such data at all or including the correct data from the
+    peer (as it is the case with AF_UNIX).
+    
+    This bug was introduced in commit 16e572626961
+    (af_unix: dont send SCM_CREDENTIALS by default)
+    
+    This patch forces passing credentials for netlink, as
+    before the regression.
+    
+    Another fix would be to not add SCM_CREDENTIALS in
+    netlink messages if not provided by the sender, but it
+    might break some programs.
+    
+    With help from Florian Weimer & Petr Matousek
+    
+    This issue is designated as CVE-2012-3520
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Petr Matousek <pmatouse@redhat.com>
+    Cc: Florian Weimer <fweimer@redhat.com>
+    Cc: Pablo Neira Ayuso <pablo@netfilter.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/scm.h        |    4 +++-
+ net/netlink/af_netlink.c |    2 +-
+ net/unix/af_unix.c       |    4 ++--
+ 3 files changed, 6 insertions(+), 4 deletions(-)
+
+commit f8a6c7d24b4437219f390acfc61e054141be0ab8
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Mon Aug 20 15:28:00 2012 +0100
+
+    Upstream commit: 0e665d5d1125f9f4ccff56a75e814f10f88861a2
+    
+    vfs: missed source of ->f_pos races
+    
+    compat_sys_{read,write}v() need the same "pass a copy of file->f_pos" thing
+    as sys_{read,write}{,v}().
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/compat.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
 commit d09a41de4b2787646e96f5e5604e3522f2fcd47f
 Merge: 21d383a ba7ca5e
 Author: Brad Spengler <spender@grsecurity.net>
