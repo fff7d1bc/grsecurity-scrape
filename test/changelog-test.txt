@@ -1,3 +1,48 @@
+commit 60bc6c973053969a41824f48254300af048b0ff6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 23 20:45:24 2012 -0400
+
+    Fix a netlink/xfrm infoleak (requires CAP_NET_ADMIN)
+    It's infoleak city in this code!  Thanks to minipli for pointing me
+    to the file
+
+ net/xfrm/xfrm_user.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit e849d188ce31ce47c92089bef052487194d08b30
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Thu Jul 12 08:46:54 2012 +0200
+
+    Upstream commit: 0143fc5e9f6f5aad4764801015bc8d4b4a278200
+    
+    isofs: avoid info leak on export
+    
+    For type 1 the parent_offset member in struct isofs_fid gets copied
+    uninitialized to userland. Fix this by initializing it to 0.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/isofs/export.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit b7f9700d66fdc6795dd39f930c1567ca638a2c9e
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Thu Jul 12 08:46:55 2012 +0200
+
+    Upstream commit: 0143fc5e9f6f5aad4764801015bc8d4b4a278200
+    
+    udf: avoid info leak on export
+    
+    For type 0x51 the udf.parent_partref member in struct fid gets copied
+    uninitialized to userland. Fix this by initializing it to 0.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/namei.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 3de4b7e82e0b6bb5717ac3d1424907ad0a13ac5c
 Author: Mathias Krause <minipli@googlemail.com>
 Date:   Wed Aug 15 11:31:44 2012 +0000
