@@ -1,3 +1,26 @@
+commit 73c2459bdd160f4e2e316155eee2fa8fe664eb5a
+Merge: 60bc6c9 f6c57fd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 24 19:43:21 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f6c57fdccf81662cb556fc5d838843bbcb1f8f21
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 24 19:41:32 2012 -0400
+
+    Update to pax-linux-3.5.2-test20.patch:
+    - fixed interaction between RANDKSTACK and STACKLEAK, reported by Mathias Krause
+    - clarified config help language for options that rely on a gcc plugin
+
+ arch/x86/ia32/ia32entry.S  |   33 ++++++++++++++++++++++++---------
+ arch/x86/kernel/entry_32.S |   18 +++++++++++++++++-
+ arch/x86/kernel/entry_64.S |   15 ++++++++++-----
+ include/linux/init.h       |    4 ++--
+ lib/extable.c              |    1 -
+ security/Kconfig           |   28 ++++++++++++++++++++--------
+ 6 files changed, 73 insertions(+), 26 deletions(-)
+
 commit 60bc6c973053969a41824f48254300af048b0ff6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Aug 23 20:45:24 2012 -0400
