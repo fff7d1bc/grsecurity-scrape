@@ -1,3 +1,125 @@
+commit ddd8d7fea640cee4e63c8c1c6cbed86f0a50e793
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Fri Aug 17 22:42:36 2012 -0400
+
+    Upstream commit: 98022748f6c7bce85b9f123fd4d1a621219dd8d9
+    
+    eventpoll: use-after-possible-free in epoll_create1()
+    
+    As soon as we'd installed the file into descriptor table, it can
+    get closed by another thread.  Freeing ep in process...
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/eventpoll.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 22442e61ecae4cff6d25bc797ba46e6ea9057aba
+Author: Jiri Kosina <jkosina@suse.cz>
+Date:   Mon Aug 13 03:18:28 2012 +0000
+
+    Upstream commit: 7256a5d2da56f2ea8ad49e8dbe9e2984f0899b42
+    
+    powerpc: Fix personality handling in ppc64_personality()
+    
+    Directly comparing current->personality against PER_LINUX32 doesn't work
+    in cases when any of the personality flags stored in the top three bytes
+    are used.
+    
+    Directly forcefully setting personality to PER_LINUX32 or PER_LINUX
+    discards any flags stored in the top three bytes
+    
+    Use personality() macro to compare only PER_MASK bytes and make sure that
+    we are setting only the bits that should be set, instead of overwriting
+    the whole value.
+    
+    Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+    Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+
+ arch/powerpc/kernel/syscalls.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit fc35620268302c0a217e27c5928c3b82ff3420e6
+Author: Tomas Racek <tracek@redhat.com>
+Date:   Tue Aug 14 10:35:04 2012 +0200
+
+    Upstream commit: a672e1be30d5bc848cd0067c55ed29b2015b7c17
+    
+    xfs: check for possible overflow in xfs_ioc_trim
+    
+    If range.start or range.minlen is bigger than filesystem size, return
+    invalid value error. This fixes possible overflow in BTOBB macro when
+    passed value was nearly ULLONG_MAX.
+    
+    Signed-off-by: Tomas Racek <tracek@redhat.com>
+    Reviewed-by: Dave Chinner <dchinner@redhat.com>
+    Signed-off-by: Ben Myers <bpm@sgi.com>
+
+ fs/xfs/xfs_discard.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 2b7fe9e49ac32b85c6fdcd16f8e1ee3a9786a219
+Author: Dave Chinner <dchinner@redhat.com>
+Date:   Tue Jul 31 14:55:51 2012 +1000
+
+    Upstream commit: 0b9e3f6d84ce619f697bb622d9165cccaa93d67c
+    
+    xfs: fix uninitialised variable in xfs_rtbuf_get()
+    
+    Results in this assert failure in generic/090:
+    
+    XFS: Assertion failed: *nmap >= 1, file: fs/xfs/xfs_bmap.c, line: 4363
+    .....
+    Call Trace:
+     [<ffffffff814680db>] xfs_bmapi_read+0x6b/0x370
+     [<ffffffff814b64b2>] xfs_rtbuf_get+0x42/0x130
+     [<ffffffff814b6f09>] xfs_rtget_summary+0x89/0x120
+     [<ffffffff814b7bfe>] xfs_rtallocate_extent_size+0xce/0x340
+     [<ffffffff814b89f0>] xfs_rtallocate_extent+0x240/0x290
+     [<ffffffff81462c1a>] xfs_bmap_rtalloc+0x1ba/0x340
+     [<ffffffff81463a65>] xfs_bmap_alloc+0x35/0x40
+     [<ffffffff8146f111>] xfs_bmapi_allocate+0xf1/0x350
+     [<ffffffff8146f9de>] xfs_bmapi_write+0x66e/0xa60
+     [<ffffffff8144538a>] xfs_iomap_write_direct+0x22a/0x3f0
+     [<ffffffff8143707b>] __xfs_get_blocks+0x38b/0x5d0
+     [<ffffffff814372d4>] xfs_get_blocks_direct+0x14/0x20
+     [<ffffffff811b0081>] do_blockdev_direct_IO+0xf71/0x1eb0
+     [<ffffffff811b1015>] __blockdev_direct_IO+0x55/0x60
+     [<ffffffff814355ca>] xfs_vm_direct_IO+0x11a/0x1e0
+     [<ffffffff8112d617>] generic_file_direct_write+0xd7/0x1b0
+     [<ffffffff8143e16c>] xfs_file_dio_aio_write+0x13c/0x320
+     [<ffffffff8143e6f2>] xfs_file_aio_write+0x1c2/0x1d0
+     [<ffffffff81174a07>] do_sync_write+0xa7/0xe0
+     [<ffffffff81175288>] vfs_write+0xa8/0x160
+     [<ffffffff81175702>] sys_pwrite64+0x92/0xb0
+     [<ffffffff81b68f69>] system_call_fastpath+0x16/0x1b
+    
+    Signed-off-by: Dave Chinner <dchinner@redhat.com>
+    Signed-off-by: Ben Myers <bpm@sgi.com>
+
+ fs/xfs/xfs_rtalloc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3480fd05afbabe3bdec797fab66705c94605c764
+Merge: 73c2459 a79a5ab
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 27 18:49:54 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a79a5ab1496b25c9bfbd0e8d401eb56e4200bb11
+Merge: f6c57fd 1b4f4e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 27 18:49:31 2012 -0400
+
+    Update to pax-linux-3.5.3-test21.patch:
+    - removed unused debugging code
+    
+    Merge branch 'linux-3.5.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kvm/vmx.c
+
 commit 73c2459bdd160f4e2e316155eee2fa8fe664eb5a
 Merge: 60bc6c9 f6c57fd
 Author: Brad Spengler <spender@grsecurity.net>
