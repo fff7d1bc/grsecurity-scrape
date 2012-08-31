@@ -1,3 +1,12 @@
+commit 7568a2b0aef72ac8005a4d1589b86b51ce0452c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 30 20:12:03 2012 -0400
+
+    Fix an infoleak discovered by my recent HIDESYM improvement and reported by Niki Guldbrand
+
+ fs/autofs4/waitq.c |    9 +++++++++
+ 1 files changed, 9 insertions(+), 0 deletions(-)
+
 commit ddd8d7fea640cee4e63c8c1c6cbed86f0a50e793
 Author: Al Viro <viro@zeniv.linux.org.uk>
 Date:   Fri Aug 17 22:42:36 2012 -0400
