@@ -1,3 +1,249 @@
+commit dc6c0256966f8e20eb8b1609833c53939e09e521
+Merge: 4c72219 3a47b99
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 6 19:05:54 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	tools/gcc/size_overflow_hash.data
+
+commit 3a47b991aa6cf7bd3e6152e630aa8f07fb899238
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 6 18:58:16 2012 -0400
+
+    Update to pax-linux-3.5.3-test22.patch:
+    - updated size oveflow hashtable from Emese
+    - hopefully fixed problem reported by jorgus in http://forums.grsecurity.net/viewtopic.php?f=3&t=3044
+    - fixed arm compilation reported by Larry H. from subreption.com
+
+ arch/x86/realmode/init.c           |    2 +-
+ include/asm-generic/4level-fixup.h |    2 +
+ mm/slab.c                          |    3 +
+ mm/slob.c                          |    5 ++
+ mm/slub.c                          |    3 +
+ tools/gcc/size_overflow_hash.data  |  134 ++++++++++++++++++++++++++++++++---
+ 6 files changed, 136 insertions(+), 13 deletions(-)
+
+commit 4c722195c006b7cbad3482a84c20dd0a0831b2fe
+Author: Dave Jones <davej@redhat.com>
+Date:   Thu Sep 6 12:01:00 2012 -0400
+
+    Upstream commit: 80de7c3138ee9fd86a98696fd2cf7ad89b995d0a
+    
+    Remove user-triggerable BUG from mpol_to_str
+    
+    Trivially triggerable, found by trinity:
+    
+      kernel BUG at mm/mempolicy.c:2546!
+      Process trinity-child2 (pid: 23988, threadinfo ffff88010197e000, task ffff88007821a670)
+      Call Trace:
+        show_numa_map+0xd5/0x450
+        show_pid_numa_map+0x13/0x20
+        traverse+0xf2/0x230
+        seq_read+0x34b/0x3e0
+        vfs_read+0xac/0x180
+        sys_pread64+0xa2/0xc0
+        system_call_fastpath+0x1a/0x1f
+      RIP: mpol_to_str+0x156/0x360
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Dave Jones <davej@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mempolicy.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b6e35b973c4078cf773b3a950ec7edb01af3494f
+Author: Pablo Neira Ayuso <pablo@netfilter.org>
+Date:   Thu Aug 23 02:09:11 2012 +0000
+
+    Upstream commit: 20e1db19db5d6b9e4e83021595eab0dc8f107bef
+    
+    netlink: fix possible spoofing from non-root processes
+    
+    Non-root user-space processes can send Netlink messages to other
+    processes that are well-known for being subscribed to Netlink
+    asynchronous notifications. This allows ilegitimate non-root
+    process to send forged messages to Netlink subscribers.
+    
+    The userspace process usually verifies the legitimate origin in
+    two ways:
+    
+    a) Socket credentials. If UID != 0, then the message comes from
+       some ilegitimate process and the message needs to be dropped.
+    
+    b) Netlink portID. In general, portID == 0 means that the origin
+       of the messages comes from the kernel. Thus, discarding any
+       message not coming from the kernel.
+    
+    However, ctnetlink sets the portID in event messages that has
+    been triggered by some user-space process, eg. conntrack utility.
+    So other processes subscribed to ctnetlink events, eg. conntrackd,
+    know that the event was triggered by some user-space action.
+    
+    Neither of the two ways to discard ilegitimate messages coming
+    from non-root processes can help for ctnetlink.
+    
+    This patch adds capability validation in case that dst_pid is set
+    in netlink_sendmsg(). This approach is aggressive since existing
+    applications using any Netlink bus to deliver messages between
+    two user-space processes will break. Note that the exception is
+    NETLINK_USERSOCK, since it is reserved for netlink-to-netlink
+    userspace communication.
+    
+    Still, if anyone wants that his Netlink bus allows netlink-to-netlink
+    userspace, then they can set NL_NONROOT_SEND. However, by default,
+    I don't think it makes sense to allow to use NETLINK_ROUTE to
+    communicate two processes that are sending no matter what information
+    that is not related to link/neighbouring/routing. They should be using
+    NETLINK_USERSOCK instead for that.
+    
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/netlink/af_netlink.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit f0fb9320af633271f6035838eda239334c5aa2fb
+Author: Mikulas Patocka <mpatocka@redhat.com>
+Date:   Sat Sep 1 12:34:07 2012 -0400
+
+    Upstream commit: ed6fe9d614fc1bca95eb8c0ccd0e92db00ef9d5d
+    
+    Fix order of arguments to compat_put_time[spec|val]
+    
+    Commit 644595f89620 ("compat: Handle COMPAT_USE_64BIT_TIME in
+    net/socket.c") introduced a bug where the helper functions to take
+    either a 64-bit or compat time[spec|val] got the arguments in the wrong
+    order, passing the kernel stack pointer off as a user pointer (and vice
+    versa).
+    
+    Because of the user address range check, that in turn then causes an
+    EFAULT due to the user pointer range checking failing for the kernel
+    address.  Incorrectly resuling in a failed system call for 32-bit
+    processes with a 64-bit kernel.
+    
+    On odder architectures like HP-PA (with separate user/kernel address
+    spaces), it can be used read kernel memory.
+    
+    Signed-off-by: Mikulas Patocka <mpatocka@redhat.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ net/socket.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 3490af053e058c6a2db57fa1f4a9827dd88e278b
+Author: Paul Cercueil <paul@crapouillou.net>
+Date:   Tue Jul 24 03:00:24 2012 +0200
+
+    Upstream commit: e432964a3c5ce517fd93101ae3875172ee958b65
+    
+    fbcon: prevent possible buffer overflow.
+    
+    Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+    Signed-off-by: Florian Tobias Schandinat <FlorianSchandinat@gmx.de>
+
+ drivers/video/console/fbcon.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d9ffe4249e18c4b41d5d75c6288f6d4d99533f54
+Author: Julia Lawall <Julia.Lawall@lip6.fr>
+Date:   Wed Aug 29 06:49:15 2012 +0000
+
+    Upstream commit: 599901c3e4204e9d9c5a24df5402cd91617a2a26
+    
+    net/xfrm/xfrm_state.c: fix error return code
+    
+    Initialize return variable before exiting on an error path.
+    
+    A simplified version of the semantic match that finds this problem is as
+    follows: (http://coccinelle.lip6.fr/)
+    
+    // <smpl>
+    (
+    if@p1 (\(ret < 0\|ret != 0\))
+     { ... return ret; }
+    |
+    ret@p1 = 0
+    )
+    ... when != ret = e1
+        when != &ret
+    *if(...)
+    {
+      ... when != ret = e2
+          when forall
+     return ret;
+    }
+    
+    // </smpl>
+    
+    Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/xfrm/xfrm_state.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 314a749dc87cec5f5e17992c7eaf93af39b8e6d4
+Author: Julia Lawall <Julia.Lawall@lip6.fr>
+Date:   Wed Aug 29 06:49:12 2012 +0000
+
+    Upstream commit: 48f125ce1cc3ff275f9587b5bf56bf0f90766c7d
+    
+    net: ipv6: fix error return code
+    
+    Initialize return variable before exiting on an error path.
+    
+    The initial initialization of the return variable is also dropped, because
+    that value is never used.
+    
+    A simplified version of the semantic match that finds this problem is as
+    follows: (http://coccinelle.lip6.fr/)
+    
+    // <smpl>
+    (
+    if@p1 (\(ret < 0\|ret != 0\))
+     { ... return ret; }
+    |
+    ret@p1 = 0
+    )
+    ... when != ret = e1
+        when != &ret
+    *if(...)
+    {
+      ... when != ret = e2
+          when forall
+     return ret;
+    }
+    
+    // </smpl>
+    
+    Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/esp6.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 5e0cc68ded0b5cb86221a6ca261cabc766570d75
+Author: Heiko Carstens <heiko.carstens@de.ibm.com>
+Date:   Tue Aug 28 10:02:08 2012 +0200
+
+    Upstream commit: 768fd0737f4533635ea351566dff98fd4912b0d8
+    
+    s390/32: Don't clobber personality flags on exec
+    
+    In native 32 bit mode the personality flags were not correctly inherited.
+    This is the s390 version of 59e4c3a2 "powerpc/32: Don't clobber personality
+    flags on exec".
+    
+    Reported-by: Mike Frysinger <vapier@gentoo.org>
+    Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+    Signed-off-by: Martin Schwidefsky <schwidefsky@de.ibm.com>
+
+ arch/s390/include/asm/elf.h |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit 7568a2b0aef72ac8005a4d1589b86b51ce0452c0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Aug 30 20:12:03 2012 -0400
