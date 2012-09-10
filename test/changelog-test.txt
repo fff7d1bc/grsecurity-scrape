@@ -1,3 +1,29 @@
+commit 580cf49071dcfd4f766facb4aac2d1b33afc0225
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 10 17:59:47 2012 -0400
+
+    Check directory of symlink target on create
+
+ fs/namei.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 3337a765b242d2ac0e3337a78738210e76b5d7b4
+Merge: dc6c025 7a57323
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 7 18:19:08 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7a573236d74b7ed73a80c343fe23bc3956d3f75e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 7 18:18:36 2012 -0400
+
+    Update to pax-linux-3.5.3-test23.patch:
+    - fixed interference between i386/KERNEXEC and the new __ex_table mechanism for modules
+
+ arch/x86/mm/extable.c |   11 +++++++++--
+ 1 files changed, 9 insertions(+), 2 deletions(-)
+
 commit dc6c0256966f8e20eb8b1609833c53939e09e521
 Merge: 4c72219 3a47b99
 Author: Brad Spengler <spender@grsecurity.net>
