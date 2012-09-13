@@ -1,3 +1,39 @@
+commit 60b63e89918f5099220722e008f47716ae1fcdff
+Merge: 580cf49 c40733c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Sep 11 17:52:55 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c40733c5515d8299e980b035c5d44c084ed5835a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Sep 11 17:52:23 2012 -0400
+
+    - updated size_overflow plugin from Emese, should fix the false positives due to TCP sequence numbers leaking into size parameters
+    - fixed sparc32 compilation
+
+ arch/sparc/include/asm/pgtable_32.h      |    4 +-
+ arch/sparc/mm/fault_32.c                 |    2 +-
+ arch/x86/include/asm/cpufeature.h        |    3 +-
+ arch/x86/include/asm/processor-flags.h   |    1 +
+ arch/x86/include/asm/reboot.h            |    2 +-
+ arch/x86/include/asm/uaccess_64.h        |    4 +-
+ arch/x86/kernel/reboot.c                 |   14 +-
+ include/linux/compiler-gcc4.h            |    1 +
+ include/linux/compiler.h                 |    4 +
+ include/linux/dmaengine.h                |    4 +-
+ include/linux/skbuff.h                   |    4 +-
+ include/net/netdma.h                     |    2 +-
+ include/net/sock.h                       |    2 +-
+ include/net/tcp.h                        |    8 +-
+ init/main.c                              |    4 +-
+ net/ipv4/tcp_input.c                     |    2 +-
+ scripts/Makefile.build                   |    2 +-
+ tools/gcc/generate_size_overflow_hash.sh |   10 +-
+ tools/gcc/size_overflow_hash.data        | 6335 +++++++++++++++---------------
+ tools/gcc/size_overflow_plugin.c         |  341 ++-
+ 20 files changed, 3448 insertions(+), 3301 deletions(-)
+
 commit 580cf49071dcfd4f766facb4aac2d1b33afc0225
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Sep 10 17:59:47 2012 -0400
