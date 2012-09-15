@@ -1,3 +1,37 @@
+commit 50230d75059742168443d5760efecc6e28d2089b
+Merge: 89f1315 7c3917f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Sep 15 11:45:20 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7c3917f7ebba78804f83a8b360612796c2a802bd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Sep 15 11:44:58 2012 -0400
+
+    Update to pax-linux-3.5.3-test25.patch:
+    - fixed USERCOPY/SLOB false positive bug
+
+ mm/slob.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit 89f13150242cdc032486018e9904bce90b0577d2
+Merge: 60b63e8 dd63e7e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 14 19:38:57 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit dd63e7e80af65d431b727804c867fcae00c8bb37
+Merge: c40733c d61ed46
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 14 19:38:43 2012 -0400
+
+    Merge branch 'linux-3.5.y' into pax-test
+    
+    Conflicts:
+    	kernel/fork.c
+
 commit 60b63e89918f5099220722e008f47716ae1fcdff
 Merge: 580cf49 c40733c
 Author: Brad Spengler <spender@grsecurity.net>
