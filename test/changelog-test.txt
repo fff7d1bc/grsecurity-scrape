@@ -1,3 +1,196 @@
+commit 0607b9a24f751a6906408e90e0770438802b1cf5
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Mon Aug 20 14:59:25 2012 +0100
+
+    Upstream commit: a6fa941d94b411bbd2b6421ffbde6db3c93e65ab
+    
+    perf_event: Switch to internal refcount, fix race with close()
+    
+    Don't mess with file refcounts (or keep a reference to file, for
+    that matter) in perf_event.  Use explicit refcount of its own
+    instead.  Deal with the race between the final reference to event
+    going away and new children getting created for it by use of
+    atomic_long_inc_not_zero() in inherit_event(); just have the
+    latter free what it had allocated and return NULL, that works
+    out just fine (children of siblings of something doomed are
+    created as singletons, same as if the child of leader had been
+    created and immediately killed).
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: stable@kernel.org
+    Signed-off-by: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Link: http://lkml.kernel.org/r/20120820135925.GG23464@ZenIV.linux.org.uk
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ include/linux/perf_event.h |    2 +-
+ kernel/events/core.c       |   62 +++++++++++++++++++++++--------------------
+ 2 files changed, 34 insertions(+), 30 deletions(-)
+
+commit e614cf817a59f97982053df1d47fb70ac3cdb53c
+Author: Tyler Hicks <tyhicks@canonical.com>
+Date:   Thu Sep 13 12:00:56 2012 -0700
+
+    Upstream commit: 8335eafc2859e1a26282bef7c3d19f3d68868b8a
+    
+    eCryptfs: Copy up attributes of the lower target inode after rename
+    
+    After calling into the lower filesystem to do a rename, the lower target
+    inode's attributes were not copied up to the eCryptfs target inode. This
+    resulted in the eCryptfs target inode staying around, rather than being
+    evicted, because i_nlink was not updated for the eCryptfs inode. This
+    also meant that eCryptfs didn't do the final iput() on the lower target
+    inode so it stayed around, as well. This would result in a failure to
+    free up space occupied by the target file in the rename() operation.
+    Both target inodes would eventually be evicted when the eCryptfs
+    filesystem was unmounted.
+    
+    This patch calls fsstack_copy_attr_all() after the lower filesystem
+    does its ->rename() so that important inode attributes, such as i_nlink,
+    are updated at the eCryptfs layer. ecryptfs_evict_inode() is now called
+    and eCryptfs can drop its final reference on the lower inode.
+    
+    http://launchpad.net/bugs/561129
+    
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Tested-by: Colin Ian King <colin.king@canonical.com>
+    Cc: <stable@vger.kernel.org> [2.6.39+]
+
+ fs/ecryptfs/inode.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 75bbf2f3b5cd131f9c145b39d934ba2b806fbda1
+Author: Bjørn Mork <bjorn@mork.no>
+Date:   Sun Sep 2 15:41:34 2012 +0200
+
+    Upstream commit: 60e233a56609fd963c59e99bd75c663d63fa91b6
+    
+    kobject: fix oops with "input0: bad kobj_uevent_env content in show_uevent()"
+    
+    Fengguang Wu <fengguang.wu@intel.com> writes:
+    
+    > After the __devinit* removal series, I can still get kernel panic in
+    > show_uevent(). So there are more sources of bug..
+    >
+    > Debug patch:
+    >
+    > @@ -343,8 +343,11 @@ static ssize_t show_uevent(struct device
+    >                 goto out;
+    >
+    >         /* copy keys to file */
+    > -       for (i = 0; i < env->envp_idx; i++)
+    > +       dev_err(dev, "uevent %d env[%d]: %s/.../%s\n", env->buflen, env->envp_idx, top_kobj->name, dev->kobj.name);
+    > +       for (i = 0; i < env->envp_idx; i++) {
+    > +               printk(KERN_ERR "uevent %d env[%d]: %s\n", (int)count, i, env->envp[i]);
+    >                 count += sprintf(&buf[count], "%s\n", env->envp[i]);
+    > +       }
+    >
+    > Oops message, the env[] is again not properly initilized:
+    >
+    > [   44.068623] input input0: uevent 61 env[805306368]: input0/.../input0
+    > [   44.069552] uevent 0 env[0]: (null)
+    
+    This is a completely different CONFIG_HOTPLUG problem, only
+    demonstrating another reason why CONFIG_HOTPLUG should go away.  I had a
+    hard time trying to disable it anyway ;-)
+    
+    The problem this time is lots of code assuming that a call to
+    add_uevent_var() will guarantee that env->buflen > 0.  This is not true
+    if CONFIG_HOTPLUG is unset.  So things like this end up overwriting
+    env->envp_idx because the array index is -1:
+    
+    	if (add_uevent_var(env, "MODALIAS="))
+    		return -ENOMEM;
+            len = input_print_modalias(&env->buf[env->buflen - 1],
+    				   sizeof(env->buf) - env->buflen,
+    				   dev, 0);
+    
+    Don't know what the best action is, given that there seem to be a *lot*
+    of this around the kernel.  This patch "fixes" the problem for me, but I
+    don't know if it can be considered an appropriate fix.
+    
+    [ It is the correct fix for now, for 3.7 forcing CONFIG_HOTPLUG to
+    always be on is the longterm fix, but it's too late for 3.6 and older
+    kernels to resolve this that way - gregkh ]
+    
+    Reported-by: Fengguang Wu <fengguang.wu@intel.com>
+    Signed-off-by: Bjørn Mork <bjorn@mork.no>
+    Tested-by: Fengguang Wu <fengguang.wu@intel.com>
+    Cc: stable <stable@vger.kernel.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ include/linux/kobject.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit fe4e4c656b2c3097098ad7c8ad90859d458faf22
+Author: Dmitry Kasatkin <dmitry.kasatkin@intel.com>
+Date:   Wed Sep 12 13:26:55 2012 +0300
+
+    Upstream commit: bc01637a80f5b670bd70a0279d3f93fa8de1c96d
+    
+    digsig: add hash size comparision on signature verification
+    
+    When pkcs_1_v1_5_decode_emsa() returns without error and hash sizes do
+    not match, hash comparision is not done and digsig_verify_rsa() returns
+    no error.  This is a bug and this patch fixes it.
+    
+    The bug was introduced in v3.3 by commit b35e286a640f ("lib/digsig:
+    pkcs_1_v1_5_decode_emsa cleanup").
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Dmitry Kasatkin <dmitry.kasatkin@intel.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ lib/digsig.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit fc26fdc8fe8af96690a5b8853ae4682555be0fee
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 17 18:11:25 2012 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>, netdev@vger.kernel.org,
+            linux-kernel@vger.kernel.org,
+            Mathias Krause <minipli@googlemail.com>, stable@vger.kernel.org
+    Subject: [PATCH] xfrm_user: return error pointer instead of NULL
+    Date: Thu, 13 Sep 2012 23:41:26 +0200
+    
+    When dump_one_state() returns an error, e.g. because of a too small
+    buffer to dump the whole xfrm state, xfrm_state_netlink() returns NULL
+    instead of an error pointer. But its callers expect an error pointer
+    and therefore continue to operate on a NULL skbuff.
+    
+    This could lead to a privilege escalation (execution of user code in
+    kernel context) if the attacker has CAP_NET_ADMIN and is able to map
+    address 0.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/xfrm/xfrm_user.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 2e122504c56b6eb91df6e9f6955e230e957f9be5
+Merge: 50230d7 53abe2f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 17 17:58:12 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 53abe2fa40ec073e27710414862e1b7ea7297450
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 17 17:57:52 2012 -0400
+
+    Update to pax-linux-3.5.4-test27.patch:
+    - fixed longstanding problem with the per-cpu pgd and kvm
+
+ arch/x86/include/asm/apic.h            |    2 +-
+ arch/x86/kernel/apic/probe_64.c        |    2 +-
+ arch/x86/kernel/cpu/perf_event_intel.c |    6 +++---
+ arch/x86/kvm/vmx.c                     |    7 +++++++
+ mm/memory.c                            |    5 ++---
+ 5 files changed, 14 insertions(+), 8 deletions(-)
+
 commit 50230d75059742168443d5760efecc6e28d2089b
 Merge: 89f1315 7c3917f
 Author: Brad Spengler <spender@grsecurity.net>
