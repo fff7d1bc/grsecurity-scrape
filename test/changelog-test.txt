@@ -1,3 +1,292 @@
+commit e2bf00becb04bc4e97d4b5721ca9e5748f575c1e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 20:59:53 2012 -0400
+
+    Use %pK for this version of the kernel to guard against any possible future upstream stupidity
+    regarding /proc/vmallocinfo
+
+ mm/vmalloc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 87677bacefc5ffc1c24e1af974162f459341aeee
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 20:57:26 2012 -0400
+
+    allow kernel pointers to be printed in /proc/vmallocinfo, a 0600 entry
+
+ mm/vmalloc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a5c310a4edac5026bd6ab2ae09fe844cd40b7299
+Author: Francesco Ruggeri <fruggeri@aristanetworks.com>
+Date:   Thu Sep 13 15:03:37 2012 -0700
+
+    Upstream commit: 6bf6104573482570f7103d3e5ddf9574db43a363
+    
+    fs/proc: fix potential unregister_sysctl_table hang
+    
+    The unregister_sysctl_table() function hangs if all references to its
+    ctl_table_header structure are not dropped.
+    
+    This can happen sometimes because of a leak in proc_sys_lookup():
+    proc_sys_lookup() gets a reference to the table via lookup_entry(), but
+    it does not release it when a subsequent call to sysctl_follow_link()
+    fails.
+    
+    This patch fixes this leak by making sure the reference is always
+    dropped on return.
+    
+    See also commit 076c3eed2c31 ("sysctl: Rewrite proc_sys_lookup
+    introducing find_entry and lookup_entry") which reorganized this code in
+    3.4.
+    
+    Tested in Linux 3.4.4.
+    
+    Signed-off-by: Francesco Ruggeri <fruggeri@aristanetworks.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/proc/proc_sysctl.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+commit 86a7ff0ecda1317fcef4b30a62624a33c86a462a
+Author: Andrew Vagin <avagin@openvz.org>
+Date:   Mon Sep 17 14:09:12 2012 -0700
+
+    Upstream commit: 579035dc5ddd6d48fd8529e7358b03d911ab9d8a
+    
+    pid-namespace: limit value of ns_last_pid to (0, max_pid)
+    
+    The kernel doesn't check the pid for negative values, so if you try to
+    write -2 to /proc/sys/kernel/ns_last_pid, you will get a kernel panic.
+    
+    The crash happens because the next pid is -1, and alloc_pidmap() will
+    try to access to a nonexistent pidmap.
+    
+      map = &pid_ns->pidmap[pid/BITS_PER_PAGE];
+    
+    Signed-off-by: Andrew Vagin <avagin@openvz.org>
+    Acked-by: Cyrill Gorcunov <gorcunov@openvz.org>
+    Acked-by: Oleg Nesterov <oleg@redhat.com>
+    Cc: Eric W. Biederman <ebiederm@xmission.com>
+    Cc: Pavel Emelyanov <xemul@parallels.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/pid_namespace.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit ee2f12ebeb91d4e207b8284819888a7387cf2dfd
+Author: Miklos Szeredi <mszeredi@suse.cz>
+Date:   Mon Sep 17 22:31:38 2012 +0200
+
+    Upstream commit: b161dfa6937ae46d50adce8a7c6b12233e96e7bd
+    
+    vfs: dcache: use DCACHE_DENTRY_KILLED instead of DCACHE_DISCONNECTED in d_kill()
+    
+    IBM reported a soft lockup after applying the fix for the rename_lock
+    deadlock.  Commit c83ce989cb5f ("VFS: Fix the nfs sillyrename regression
+    in kernel 2.6.38") was found to be the culprit.
+    
+    The nfs sillyrename fix used DCACHE_DISCONNECTED to indicate that the
+    dentry was killed.  This flag can be set on non-killed dentries too,
+    which results in infinite retries when trying to traverse the dentry
+    tree.
+    
+    This patch introduces a separate flag: DCACHE_DENTRY_KILLED, which is
+    only set in d_kill() and makes try_to_ascend() test only this flag.
+    
+    IBM reported successful test results with this patch.
+    
+    Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+    Cc: Trond Myklebust <Trond.Myklebust@netapp.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/dcache.c            |    4 ++--
+ include/linux/dcache.h |    2 ++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+commit fdbf9ec36bbc713db31cf7bec139fa7de4609c3f
+Merge: 76f58d8 f111fcb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:54:24 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f111fcb8413833dea8a76603661a8a43ef3ee25b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:53:45 2012 -0400
+
+    Update to pax-linux-3.5.4-test28.patch:
+    - fixed several copy_*_user_overflow induced warnings
+    - fixed fallout of struct apic constification in xen
+    - fixed kvm guest memory instantiation problem, https://bugs.gentoo.org/show_bug.cgi?id=425714
+
+ arch/x86/kernel/tls.c                         |    2 +-
+ arch/x86/xen/enlighten.c                      |   26 ++++++++++++------------
+ drivers/net/tun.c                             |    5 +++-
+ drivers/net/wireless/iwlwifi/iwl-debugfs.c    |   26 ++++++++++++------------
+ drivers/net/wireless/iwlwifi/iwl-trans-pcie.c |    4 +-
+ net/bluetooth/hci_sock.c                      |    2 +-
+ net/bluetooth/l2cap_sock.c                    |   12 ++++++----
+ net/bluetooth/rfcomm/sock.c                   |    4 +-
+ net/bridge/netfilter/ebtables.c               |    4 +-
+ net/compat.c                                  |    2 +-
+ net/core/sock.c                               |   12 +++++-----
+ net/ipv4/netfilter/arp_tables.c               |   12 +++++-----
+ net/ipv4/netfilter/ip_tables.c                |   12 +++++-----
+ net/ipv6/netfilter/ip6_tables.c               |   12 +++++-----
+ net/sctp/socket.c                             |    4 ++-
+ security/Kconfig                              |    3 --
+ virt/kvm/kvm_main.c                           |    2 +-
+ 17 files changed, 74 insertions(+), 70 deletions(-)
+
+commit 76f58d8cf81aae8bb61bc88a60b4d924dbb46839
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:46:35 2012 -0400
+
+    Fix 3.x uname emulation infoleak
+
+ kernel/sys.c |   14 +++++++-------
+ 1 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 89130ef65f830fe76fca80535a6cc88ce46c768e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:09:39 2012 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>, netdev@vger.kernel.org,
+            linux-kernel@vger.kernel.org,
+            Mathias Krause <minipli@googlemail.com>
+    Subject: [PATCH 6/6] xfrm_user: don't copy esn replay window twice for new
+            states
+    Date: Wed, 19 Sep 2012 23:33:43 +0200
+    
+    The ESN replay window was already fully initialized in
+    xfrm_alloc_replay_state_esn(). No need to copy it again.
+    
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/xfrm/xfrm_user.c |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+commit 9fc405c556c38071e87219cdbeecb66cd3565bfe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:08:11 2012 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>, netdev@vger.kernel.org,
+            linux-kernel@vger.kernel.org,
+            Mathias Krause <minipli@googlemail.com>,
+            Martin Willi <martin@revosec.ch>
+    Subject: [PATCH 5/6] xfrm_user: ensure user supplied esn replay window is valid
+    Date: Wed, 19 Sep 2012 23:33:42 +0200
+    
+    The current code fails to ensure that the netlink message actually
+    contains as many bytes as the header indicates. If a user creates a new
+    state or updates an existing one but does not supply the bytes for the
+    whole ESN replay window, the kernel copies random heap bytes into the
+    replay bitmap, the ones happen to follow the XFRMA_REPLAY_ESN_VAL
+    netlink attribute. This leads to following issues:
+    
+    1. The replay window has random bits set confusing the replay handling
+       code later on.
+    
+    2. A malicious user could use this flaw to leak up to ~3.5kB of heap
+       memory when she has access to the XFRM netlink interface (requires
+       CAP_NET_ADMIN).
+    
+    Known users of the ESN replay window are strongSwan and Steffen's
+    iproute2 patch (<http://patchwork.ozlabs.org/patch/85962/>). The latter
+    uses the interface with a bitmap supplied while the former does not.
+    strongSwan is therefore prone to run into issue 1.
+    
+    To fix both issues without breaking existing userland allow using the
+    XFRMA_REPLAY_ESN_VAL netlink attribute with either an empty bitmap or a
+    fully specified one. For the former case we initialize the in-kernel
+    bitmap with zero, for the latter we copy the user supplied bitmap.
+    
+    For state updates the full bitmap must be supplied.
+    
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    Cc: Martin Willi <martin@revosec.ch>
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/xfrm/xfrm_user.c |   27 +++++++++++++++++++++------
+ 1 files changed, 21 insertions(+), 6 deletions(-)
+
+commit 618042e3432b0b7dc6d43062a603d977d4ebe4c4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:05:27 2012 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>, netdev@vger.kernel.org,
+            linux-kernel@vger.kernel.org,
+            Mathias Krause <minipli@googlemail.com>
+    Subject: [PATCH 3/6] xfrm_user: fix info leak in copy_to_user_policy()
+    Date: Wed, 19 Sep 2012 23:33:40 +0200
+    
+    The memory reserved to dump the xfrm policy includes multiple padding
+    bytes added by the compiler for alignment (padding bytes in struct
+    xfrm_selector and struct xfrm_userpolicy_info). Add an explicit
+    memset(0) before filling the buffer to avoid the heap info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/xfrm/xfrm_user.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 07ef47af3ba715e1c83e34cb0baa27246b901bb0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:04:08 2012 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>, netdev@vger.kernel.org,
+            linux-kernel@vger.kernel.org,
+            Mathias Krause <minipli@googlemail.com>
+    Subject: [PATCH 2/6] xfrm_user: fix info leak in copy_to_user_state()
+    Date: Wed, 19 Sep 2012 23:33:39 +0200
+    
+    The memory reserved to dump the xfrm state includes the padding bytes of
+    struct xfrm_usersa_info added by the compiler for alignment (7 for
+    amd64, 3 for i386). Add an explicit memset(0) before filling the buffer
+    to avoid the info leak.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/xfrm/xfrm_user.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit f23db15fd3ecdf7544cb4494e64076af76b49a0f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 19 18:00:26 2012 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>, netdev@vger.kernel.org,
+            linux-kernel@vger.kernel.org,
+            Mathias Krause <minipli@googlemail.com>
+    Subject: [PATCH 1/6] xfrm_user: fix info leak in copy_to_user_auth()
+    Date: Wed, 19 Sep 2012 23:33:38 +0200
+    
+    copy_to_user_auth() fails to initialize the remainder of alg_name and
+    therefore discloses up to 54 bytes of heap memory via netlink to
+    userland.
+    
+    Use strncpy() instead of strcpy() to fill the trailing bytes of alg_name
+    with null bytes.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/xfrm/xfrm_user.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 0607b9a24f751a6906408e90e0770438802b1cf5
 Author: Al Viro <viro@ZenIV.linux.org.uk>
 Date:   Mon Aug 20 14:59:25 2012 +0100
