@@ -17,6 +17,8 @@
 
 baseurl='http://grsecurity.net'
 
+curl_args='--ipv4 -s'
+
 basename="${0##*/}"
 scriptpath="$(readlink -f $0)"
 workdir="${scriptpath%/${basename}}"
@@ -37,13 +39,15 @@ while read line; do
 		gradm_files+=( "${line##*/}" )
 	fi
 
-done < <(curl "${baseurl}/test.php" -s | awk -v RS='"' '!(--p){print}/href=$/{p=1}' )
+done < <(curl ${curl_args} "${baseurl}/test.php" | awk -v RS='"' '!(--p){print}/href=$/{p=1}' )
 
 # grsecurity patches.
 for item in "${grsecurity_files[@]}"; do
 	if ! [ -f "test/${item}" ]; then
 		printf 'Downloading %s ...\n' "${item}"
-		curl -s "${baseurl}/test/${item}" > "${workdir}/test/${item}"
+		curl ${curl_args} "${baseurl}/test/${item}" > "${workdir}/test/${item}"
+		printf 'Downloading %s ...\n' "${item}.sig"
+		curl ${curl_args} "${baseurl}/test/${item}.sig" > "${workdir}/test/${item}.sig"
 		new_grsecurity_patches+=( "${item}" )
 	fi
 done; unset item
@@ -53,7 +57,7 @@ date="$(date '+%d-%m-%Y %H:%M')"
 # If array have at least one element.
 if [ "${#new_grsecurity_patches[@]}" -gt '0' ]; then
 	printf 'Downloading changelog-test.txt ...\n'
-	curl -s "${baseurl}/changelog-test.txt" > "${workdir}/test/changelog-test.txt"
+	curl ${curl_args} "${baseurl}/changelog-test.txt" > "${workdir}/test/changelog-test.txt"
 	git add "${workdir}/test/" && git commit "${workdir}/test/" -m \
 		"$(printf 'grsec-scrape autocommit. %s new patch(es).\n\n' "${#new_grsecurity_patches[@]}"; printf 'New patch: %s\n' "${new_grsecurity_patches[@]}" )"
 	git push
