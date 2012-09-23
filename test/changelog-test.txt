@@ -1,3 +1,90 @@
+commit 7059490bf0c1bbf8e59fa7dfdd2c44349347485a
+Merge: 880bfab 9fdd60a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 23 10:32:18 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	kernel/sys.c
+
+commit 9fdd60a4eb55b926bd38604ddfcfe367236eacc5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 23 10:30:23 2012 -0400
+
+    Update to pax-linux-3.5.4-test29.patch:
+    - made the constify plugin more robust based on results from the gcc test suite
+    - fixed softmode/EMUTRAMP regression (executables produced by the patched binutils would not run)
+    - fixed kernel stack disclosure in sys_newuname affecting linux 3.x
+
+ fs/binfmt_elf.c             |    2 +-
+ kernel/sys.c                |    9 ++++++---
+ tools/gcc/constify_plugin.c |    5 ++++-
+ 3 files changed, 11 insertions(+), 5 deletions(-)
+
+commit 880bfab07fac1bfba04ebae312a5ff0b311c18d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 21 18:05:24 2012 -0400
+
+    The current code fails to ensure that the netlink message actually
+    contains as many bytes as the header indicates. If a user creates a new
+    state or updates an existing one but does not supply the bytes for the
+    whole ESN replay window, the kernel copies random heap bytes into the
+    replay bitmap, the ones happen to follow the XFRMA_REPLAY_ESN_VAL
+    netlink attribute. This leads to following issues:
+    
+    1. The replay window has random bits set confusing the replay handling
+       code later on.
+    
+    2. A malicious user could use this flaw to leak up to ~3.5kB of heap
+       memory when she has access to the XFRM netlink interface (requires
+       CAP_NET_ADMIN).
+    
+    Known users of the ESN replay window are strongSwan and Steffen's
+    iproute2 patch (<http://patchwork.ozlabs.org/patch/85962/>). The latter
+    uses the interface with a bitmap supplied while the former does not.
+    strongSwan is therefore prone to run into issue 1.
+    
+    To fix both issues without breaking existing userland allow using the
+    XFRMA_REPLAY_ESN_VAL netlink attribute with either an empty bitmap or a
+    fully specified one. For the former case we initialize the in-kernel
+    bitmap with zero, for the latter we copy the user supplied bitmap. For
+    state updates the full bitmap must be supplied.
+    
+    To prevent overflows in the bitmap length calculation the maximum size
+    of bmp_len is limited to 128 by this patch -- resulting in a maximum
+    replay window of 4096 packets. This should be sufficient for all real
+    life scenarios (RFC 4303 recommends a default replay window size of 64).
+    
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    Cc: Martin Willi <martin@revosec.ch>
+    Cc: Ben Hutchings <bhutchings@solarflare.com>
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    ---
+    v3:
+    - revert size_t change to xfrm_replay_state_esn_len() (requested by Steffen)
+    - switch to int types for lengths (suggested by Ben)
+    - implement 4096 packets limit for bmp_len to avoid overflows in
+      xfrm_replay_state_esn_len()
+    v2:
+    - compare against klen in xfrm_alloc_replay_state_esn (suggested by Ben)
+    - make xfrm_replay_state_esn_len() return size_t
+
+ include/linux/xfrm.h |    2 ++
+ net/xfrm/xfrm_user.c |   31 +++++++++++++++++++++++++------
+ 2 files changed, 27 insertions(+), 6 deletions(-)
+
+commit 46d3ff0c515b207c223ad33525b54fc1e8ebd2ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 21 18:03:24 2012 -0400
+
+    Revert "From: Mathias Krause <minipli@googlemail.com>"
+    
+    This reverts commit 9fc405c556c38071e87219cdbeecb66cd3565bfe.
+
+ net/xfrm/xfrm_user.c |   27 ++++++---------------------
+ 1 files changed, 6 insertions(+), 21 deletions(-)
+
 commit e2bf00becb04bc4e97d4b5721ca9e5748f575c1e
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Sep 19 20:59:53 2012 -0400
