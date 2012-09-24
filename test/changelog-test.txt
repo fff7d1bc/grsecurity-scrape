@@ -1,3 +1,12 @@
+commit 9f3fb7e142d7981f259997aa59d4bd96bb796e50
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 24 17:34:01 2012 -0400
+
+    No need to hold sighand lock since we now have the pinned ->signal
+
+ fs/proc/array.c |   10 +---------
+ 1 files changed, 1 insertions(+), 9 deletions(-)
+
 commit 7059490bf0c1bbf8e59fa7dfdd2c44349347485a
 Merge: 880bfab 9fdd60a
 Author: Brad Spengler <spender@grsecurity.net>
