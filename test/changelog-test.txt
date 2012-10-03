@@ -1,3 +1,315 @@
+commit e307e062fb1c01ccf6f7988131eb7ad65e2f05a3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 2 20:04:07 2012 -0400
+
+    ACCESS_ONCE -> ACCESS_ONCE_RW (until PaX backports this)
+
+ kernel/workqueue.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8c073d5c2469eb26aa2b7839479c70a7332c4414
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Sat Sep 8 12:57:30 2012 -0700
+
+    Upstream commit: 9c603e53d380459fb62fec7cd085acb0b74ac18f
+    
+    mtdchar: fix offset overflow detection
+    
+    Sasha Levin has been running trinity in a KVM tools guest, and was able
+    to trigger the BUG_ON() at arch/x86/mm/pat.c:279 (verifying the range of
+    the memory type).  The call trace showed that it was mtdchar_mmap() that
+    created an invalid remap_pfn_range().
+    
+    The problem is that mtdchar_mmap() does various really odd and subtle
+    things with the vma page offset etc, and uses the wrong types (and the
+    wrong overflow) detection for it.
+    
+    For example, the page offset may well be 32-bit on a 32-bit
+    architecture, but after shifting it up by PAGE_SHIFT, we need to use a
+    potentially 64-bit resource_size_t to correctly hold the full value.
+    
+    Also, we need to check that the vma length plus offset doesn't overflow
+    before we check that it is smaller than the length of the mtdmap region.
+    
+    This fixes things up and tries to make the code a bit easier to read.
+    
+    Reported-and-tested-by: Sasha Levin <levinsasha928@gmail.com>
+    Acked-by: Suresh Siddha <suresh.b.siddha@intel.com>
+    Acked-by: Artem Bityutskiy <dedekind1@gmail.com>
+    Cc: David Woodhouse <dwmw2@infradead.org>
+    Cc: linux-mtd@lists.infradead.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/mtd/mtdchar.c |   48 ++++++++++++++++++++++++++++++++++++++++++------
+ 1 files changed, 42 insertions(+), 6 deletions(-)
+
+commit 1a7ba622fc1d87f09cea60444713b20a91438e29
+Author: Miklos Szeredi <miklos@szeredi.hu>
+Date:   Mon Sep 17 22:23:30 2012 +0200
+
+    Upstream commit: 8110e16d42d587997bcaee0c864179e6d93603fe
+    
+    vfs: dcache: fix deadlock in tree traversal
+    
+    IBM reported a deadlock in select_parent().  This was found to be caused
+    by taking rename_lock when already locked when restarting the tree
+    traversal.
+    
+    There are two cases when the traversal needs to be restarted:
+    
+     1) concurrent d_move(); this can only happen when not already locked,
+        since taking rename_lock protects against concurrent d_move().
+    
+     2) racing with final d_put() on child just at the moment of ascending
+        to parent; rename_lock doesn't protect against this rare race, so it
+        can happen when already locked.
+    
+    Because of case 2, we need to be able to handle restarting the traversal
+    when rename_lock is already held.  This patch fixes all three callers of
+    try_to_ascend().
+    
+    IBM reported that the deadlock is gone with this patch.
+    
+    [ I rewrote the patch to be smaller and just do the "goto again" if the
+      lock was already held, but credit goes to Miklos for the real work.
+       - Linus ]
+    
+    Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+    Cc: Al Viro <viro@ZenIV.linux.org.uk>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/dcache.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 42d418a142dd6296d0fb7fa1709453f6725eb71c
+Merge: 891e0ce 70fc209
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 2 18:13:48 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 70fc20961bfacad80dcc2ab274fa9b691b413dd9
+Merge: 4a5d198 6a84d55
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 2 18:12:51 2012 -0400
+
+    Update to pax-linux-3.5.5-test31.patch:
+    - updated size_overflow plugin from Emese (better handling of cloned functions)
+    
+    Merge branch 'linux-3.5.y' into pax-test
+    
+    Conflicts:
+    	drivers/scsi/lpfc/Makefile
+    	fs/nfs/inode.c
+
+commit 891e0ceddf5942d809a45989d714d8410bce01a3
+Author: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Date:   Fri Aug 17 10:22:37 2012 -0400
+
+    Upstream commit: 8d54db795dfb1049d45dc34f0dddbc5347ec5642
+    
+    xen/boot: Disable NUMA for PV guests.
+    
+    The hypervisor is in charge of allocating the proper "NUMA" memory
+    and dealing with the CPU scheduler to keep them bound to the proper
+    NUMA node. The PV guests (and PVHVM) have no inkling of where they
+    run and do not need to know that right now. In the future we will
+    need to inject NUMA configuration data (if a guest spans two or more
+    NUMA nodes) so that the kernel can make the right choices. But those
+    patches are not yet present.
+    
+    In the meantime, disable the NUMA capability in the PV guest, which
+    also fixes a bootup issue. Andre says:
+    
+    "we see Dom0 crashes due to the kernel detecting the NUMA topology not
+    by ACPI, but directly from the northbridge (CONFIG_AMD_NUMA).
+    
+    This will detect the actual NUMA config of the physical machine, but
+    will crash about the mismatch with Dom0's virtual memory. Variation of
+    the theme: Dom0 sees what it's not supposed to see.
+    
+    This happens with the said config option enabled and on a machine where
+    this scanning is still enabled (K8 and Fam10h, not Bulldozer class)
+    
+    We have this dump then:
+    NUMA: Warning: node ids are out of bound, from=-1 to=-1 distance=10
+    Scanning NUMA topology in Northbridge 24
+    Number of physical nodes 4
+    Node 0 MemBase 0000000000000000 Limit 0000000040000000
+    Node 1 MemBase 0000000040000000 Limit 0000000138000000
+    Node 2 MemBase 0000000138000000 Limit 00000001f8000000
+    Node 3 MemBase 00000001f8000000 Limit 0000000238000000
+    Initmem setup node 0 0000000000000000-0000000040000000
+      NODE_DATA [000000003ffd9000 - 000000003fffffff]
+    Initmem setup node 1 0000000040000000-0000000138000000
+      NODE_DATA [0000000137fd9000 - 0000000137ffffff]
+    Initmem setup node 2 0000000138000000-00000001f8000000
+      NODE_DATA [00000001f095e000 - 00000001f0984fff]
+    Initmem setup node 3 00000001f8000000-0000000238000000
+    Cannot find 159744 bytes in node 3
+    BUG: unable to handle kernel NULL pointer dereference at (null)
+    IP: [<ffffffff81d220e6>] __alloc_bootmem_node+0x43/0x96
+    Pid: 0, comm: swapper Not tainted 3.3.6 #1 AMD Dinar/Dinar
+    RIP: e030:[<ffffffff81d220e6>]  [<ffffffff81d220e6>] __alloc_bootmem_node+0x43/0x96
+    .. snip..
+      [<ffffffff81d23024>] sparse_early_usemaps_alloc_node+0x64/0x178
+      [<ffffffff81d23348>] sparse_init+0xe4/0x25a
+      [<ffffffff81d16840>] paging_init+0x13/0x22
+      [<ffffffff81d07fbb>] setup_arch+0x9c6/0xa9b
+      [<ffffffff81683954>] ? printk+0x3c/0x3e
+      [<ffffffff81d01a38>] start_kernel+0xe5/0x468
+      [<ffffffff81d012cf>] x86_64_start_reservations+0xba/0xc1
+      [<ffffffff81007153>] ? xen_setup_runstate_info+0x2c/0x36
+      [<ffffffff81d050ee>] xen_start_kernel+0x565/0x56c
+    "
+    
+    so we just disable NUMA scanning by setting numa_off=1.
+    
+    CC: stable@vger.kernel.org
+    Reported-and-Tested-by: Andre Przywara <andre.przywara@amd.com>
+    Acked-by: Andre Przywara <andre.przywara@amd.com>
+    Signed-off-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+
+ arch/x86/xen/setup.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 9de6dc56fa1c8ef987724506b28c17c57c734646
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Mon Sep 24 07:00:11 2012 +0000
+
+    Upstream commit: 3e10986d1d698140747fcfc2761ec9cb64c1d582
+    
+    net: guard tcp_set_keepalive() to tcp sockets
+    
+    Its possible to use RAW sockets to get a crash in
+    tcp_set_keepalive() / sk_reset_timer()
+    
+    Fix is to make sure socket is a SOCK_STREAM one.
+    
+    Reported-by: Dave Jones <davej@redhat.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/sock.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 3344a8ed9052c5ccc2301975738222af1776d042
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Mon Sep 24 18:29:01 2012 +0000
+
+    Upstream commit: 7f8436a1269eaaf2d0b1054a325eddf4e14cb80d
+    
+    l2tp: fix return value check
+    
+    In case of error, the function genlmsg_put() returns NULL pointer
+    not ERR_PTR(). The IS_ERR() test in the return value check should
+    be replaced with NULL test.
+    
+    dpatch engine is used to auto generate this patch.
+    (https://github.com/weiyj/dpatch)
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/l2tp/l2tp_netlink.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 19ee89b8b79cf5cbb45ac13e4bb26ea7b5265a40
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Mon Sep 24 18:29:35 2012 +0000
+
+    Upstream commit: a326e6dd315ee38c280b7ecf8a0d777952e384cd
+    
+    team: fix return value check
+    
+    In case of error, the function genlmsg_put() returns NULL pointer
+    not ERR_PTR(). The IS_ERR() test in the return value check should
+    be replaced with NULL test.
+    
+    dpatch engine is used to auto generate this patch.
+    (https://github.com/weiyj/dpatch)
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Acked-by: Jiri Pirko <jiri@resnulli.us>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/team/team.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+commit f4552f53b4f4fd5d1bace855a8b9d7b0a38f3ebe
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Wed Sep 26 19:51:58 2012 +0000
+
+    Upstream commit: beb5ac20b3f90ffabac1eecd3c00205255df0728
+    
+    netdev: pasemi: fix return value check in pasemi_mac_phy_init()
+    
+    In case of error, the function of_phy_connect() returns NULL
+    pointer not ERR_PTR(). The IS_ERR() test in the return value
+    check should be replaced with NULL test.
+    
+    dpatch engine is used to auto generate this patch.
+    (https://github.com/weiyj/dpatch)
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/pasemi/pasemi_mac.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 9efe1618c70f709110a75235672baf5e6fa90837
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Thu Sep 27 19:04:21 2012 +0000
+
+    Upstream commit: df555b665367f9de6c04826acc482096f17c243d
+    
+    netdev: octeon: fix return value check in octeon_mgmt_init_phy()
+    
+    In case of error, the function of_phy_connect() returns NULL
+    pointer not ERR_PTR(). The IS_ERR() test in the return value
+    check should be replaced with NULL test.
+    
+    dpatch engine is used to auto generate this patch.
+    (https://github.com/weiyj/dpatch)
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/octeon/octeon_mgmt.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit 17028ad3cde09effe54ab1c2806a04d130605435
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 28 17:19:08 2012 -0400
+
+    Disable remote firewire DMA, consistent with change to 2.6.32 patch years ago
+
+ lib/Kconfig.debug |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 37344c0909f4f3396e517e1a29444909db10e598
+Merge: 9f3fb7e 4a5d198
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 26 17:44:41 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 4a5d1982c8cccc30e043391d748ba0cb61be8b35
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 26 17:43:57 2012 -0400
+
+    Update to pax-linux-3.5.4-test30.patch:
+    - fixed more struct apic constification fallout in lguest
+    - cleaned up CONSTIFY_PLUGIN use
+
+ arch/um/Makefile                  |    2 +-
+ arch/x86/boot/Makefile            |    2 +-
+ arch/x86/boot/compressed/Makefile |    2 +-
+ arch/x86/lguest/boot.c            |   12 ++++++------
+ arch/x86/realmode/rm/Makefile     |    2 +-
+ 5 files changed, 10 insertions(+), 10 deletions(-)
+
 commit 9f3fb7e142d7981f259997aa59d4bd96bb796e50
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Sep 24 17:34:01 2012 -0400
@@ -611,7 +923,7 @@ Date:   Fri Sep 14 19:38:43 2012 -0400
     	kernel/fork.c
 
 commit 60b63e89918f5099220722e008f47716ae1fcdff
-Merge: 580cf49 c40733c
+Merge: 580cf490 c40733c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Sep 11 17:52:55 2012 -0400
 
