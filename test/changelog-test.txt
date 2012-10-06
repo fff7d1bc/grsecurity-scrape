@@ -1,3 +1,40 @@
+commit 61aece262f1d31bc138ab6e34d6fa20a7181d6ad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 6 16:32:23 2012 -0400
+
+    Allow GRKERNSEC_PROC_GID to be chosen at boot time via grsec_proc_gid= on the kernel commandline.
+
+ Documentation/kernel-parameters.txt |    3 +++
+ fs/proc/base.c                      |   10 +++++-----
+ fs/proc/inode.c                     |    2 +-
+ fs/proc/proc_net.c                  |    2 +-
+ grsecurity/Kconfig                  |    9 +++++----
+ grsecurity/gracl.c                  |    2 +-
+ include/linux/grsecurity.h          |    5 +++++
+ init/main.c                         |    9 +++++++++
+ security/Kconfig                    |    3 ++-
+ 9 files changed, 32 insertions(+), 13 deletions(-)
+
+commit ff881d5dec94ab08144c81313d6f0443665ca217
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 6 16:06:57 2012 -0400
+
+    Set type for GRKERNSEC_TPE_GID in Kconfig
+
+ grsecurity/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 1fc9e0678893dce0e93f11022ae57b29e9ddd141
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 6 16:02:00 2012 -0400
+
+    Improve automatic configuration of TPE, make option labels involved
+    more descriptive (and change in the event of TPE inversion)
+
+ grsecurity/Kconfig |   10 +++++++---
+ security/Kconfig   |   22 ++++++++++++++++------
+ 2 files changed, 23 insertions(+), 9 deletions(-)
+
 commit e307e062fb1c01ccf6f7988131eb7ad65e2f05a3
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Oct 2 20:04:07 2012 -0400
