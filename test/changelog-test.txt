@@ -1,3 +1,29 @@
+commit f64b9aff6b7feebeaa92bf01b09a947753d2af46
+Merge: 8a48b15 a834038
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 7 17:16:30 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a8340385fbd0e1fe55973efc59d0d4c14267893f
+Merge: 70fc209 73b6448
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 7 17:15:15 2012 -0400
+
+    Merge branch 'linux-3.5.y' into pax-test
+    
+    Conflicts:
+    	drivers/staging/speakup/speakup_soft.c
+
+commit 8a48b1531aa6bfb808780870437e275f4497973b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 7 17:01:36 2012 -0400
+
+    Add missing #include to proc_net.c, reported by neoice
+
+ fs/proc/proc_net.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 409dfbd52e786e737eb2340a5a6d14c16b971496
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Oct 7 08:25:55 2012 -0400
