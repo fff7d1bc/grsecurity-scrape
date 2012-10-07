@@ -1,3 +1,12 @@
+commit 409dfbd52e786e737eb2340a5a6d14c16b971496
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 7 08:25:55 2012 -0400
+
+    Fixes to recent grsec_proc_gid from Mathias Krause
+
+ init/main.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit 61aece262f1d31bc138ab6e34d6fa20a7181d6ad
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Oct 6 16:32:23 2012 -0400
