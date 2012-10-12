@@ -1,3 +1,18 @@
+commit 131b910659bbb94c99b68da085d9f0bee4e23606
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 11 17:57:57 2012 -0400
+
+    Don't treat pivot_root as a chroot, fixes some issues with RHEL6 initrd
+    causing tty1 console problems due to denied capability usage.  Both the
+    chroot capability restrictions and separate chroot feature prevent pivot_root
+    from being used inside a chroot already.
+    
+    modify replace_root_path instead of chroot_fs_refs as in older kernels
+
+ fs/fs_struct.c |    6 +++++-
+ kernel/fork.c  |    8 +++++++-
+ 2 files changed, 12 insertions(+), 2 deletions(-)
+
 commit 66932ca6fd11c6db3a85aedffb790870f5c263a0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Oct 10 19:39:19 2012 -0400
