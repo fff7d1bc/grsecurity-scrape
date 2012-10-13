@@ -1,3 +1,26 @@
+commit 3596a0026d52ea78e4035aa7d430c5c420dcdbe2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 12 18:34:31 2012 -0400
+
+    Defensive measure against kcmp getting introduced as an unconditional syscall
+    Currently it requires CHECKPOINT_RESTORE, which is incompatible with grsecurity (and so is forced off)
+
+ kernel/kcmp.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit b46ea404630d71cd53b2ab3b35281eeb922c6bdc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 12 18:13:12 2012 -0400
+
+    Additional fixes for harmless stack traces reported by HIDESYM as seq_files
+    are handled generically
+
+ kernel/cgroup.c           |    2 +-
+ kernel/kprobes.c          |    4 ++--
+ kernel/lockdep_proc.c     |   10 +++++-----
+ kernel/time/timer_stats.c |    2 +-
+ 4 files changed, 9 insertions(+), 9 deletions(-)
+
 commit 131b910659bbb94c99b68da085d9f0bee4e23606
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Oct 11 17:57:57 2012 -0400
