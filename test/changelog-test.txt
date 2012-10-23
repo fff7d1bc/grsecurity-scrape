@@ -1,3 +1,44 @@
+commit 3dca6f9820c14a103d723193e3c49e3189247c48
+Merge: bbbff7c 3e91a68
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 23 14:43:50 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3e91a687386b151f89b8adf04c0b1ef9d75b797d
+Merge: b43390a 9f2a940
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 23 14:43:39 2012 -0400
+
+    Merge branch 'linux-3.6.y' into pax-test
+
+commit bbbff7c25c9c35ed70016e0a7408c616bcc60027
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 23 14:40:19 2012 -0400
+
+    Fix policy recreation on objects in nested subjects, reported by slashbeast
+
+ grsecurity/gracl.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 9d3df364380f5a19aeb5f5577a322d638ae490e7
+Merge: 3596a00 b43390a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 15 17:38:33 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b43390a6ccfb0905fad13f3905d5e6ee9189f679
+Merge: f2ac9ce cb4115a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 15 17:38:23 2012 -0400
+
+    Merge branch 'linux-3.6.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/i915/intel_display.c
+    	mm/mempolicy.c
+
 commit 3596a0026d52ea78e4035aa7d430c5c420dcdbe2
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Oct 12 18:34:31 2012 -0400
