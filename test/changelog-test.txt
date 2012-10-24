@@ -1,3 +1,15 @@
+commit 81b5fec701a76b89854eab55328b1191fc0dca0b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 23 19:29:11 2012 -0400
+
+    Add second half of fix for slashbeast's problem with policy recreation
+    in nested subjects: the list of nested subjects was being cleared for each
+    role, not allowing for the processing of nested subjects on
+    create/delete/rename.  Added a comment explaining the reason for the change.
+
+ grsecurity/gracl.c |   16 ++++++++++++----
+ 1 files changed, 12 insertions(+), 4 deletions(-)
+
 commit 3dca6f9820c14a103d723193e3c49e3189247c48
 Merge: bbbff7c 3e91a68
 Author: Brad Spengler <spender@grsecurity.net>
