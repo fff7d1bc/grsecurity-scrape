@@ -1,3 +1,23 @@
+commit cc125118817212fa82b1c5b68e8a319d76641032
+Merge: 81b5fec 5ee0aaa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 28 14:56:59 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/sparc/kernel/syscalls.S
+
+commit 5ee0aaa7ada506ab43e0520781ce4c5e6ba5e213
+Merge: 3e91a68 c32b33d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 28 14:52:01 2012 -0400
+
+    Merge branch 'linux-3.6.y' into pax-test
+    
+    Conflicts:
+    	kernel/sys.c
+
 commit 81b5fec701a76b89854eab55328b1191fc0dca0b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Oct 23 19:29:11 2012 -0400
