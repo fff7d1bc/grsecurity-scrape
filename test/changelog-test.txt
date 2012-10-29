@@ -1,3 +1,37 @@
+commit e4933af02b593c0eddb9d552e10bec900b4f6af9
+Merge: 38f074c 2b764e8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 29 13:50:35 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2b764e8cde3faed13f75f9009c8085e6245ea489
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 29 13:50:12 2012 -0400
+
+    - got rid of useless parameter in load_elf_interp
+
+ fs/binfmt_elf.c |    8 +-------
+ 1 files changed, 1 insertions(+), 7 deletions(-)
+
+commit 38f074c2d4292410f103f4d8ae0d7273468c5d27
+Merge: cc12511 6c647a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 29 13:46:05 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6c647a6b08e7e0bcf0d778b85250fd63ca9364a2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 29 13:45:43 2012 -0400
+
+    Update to pax-linux-3.6.4-test4.patch:
+    - changed the limit of KERNEXEC's alternative code segment, thanks to 'rbrk ss' for asking about it :)
+
+ arch/x86/kernel/head_32.S |   28 +++++++++++++++-------------
+ arch/x86/mm/init.c        |    1 +
+ 2 files changed, 16 insertions(+), 13 deletions(-)
+
 commit cc125118817212fa82b1c5b68e8a319d76641032
 Merge: 81b5fec 5ee0aaa
 Author: Brad Spengler <spender@grsecurity.net>
