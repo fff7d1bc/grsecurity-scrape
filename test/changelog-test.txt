@@ -1,3 +1,23 @@
+commit 71f3e58c50772c845660844d855b34032afa05bb
+Merge: e4933af b166cfb2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 31 21:05:40 2012 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b166cfb2f10b3777ad3f34dd35cd134f8fd407e1
+Merge: 2b764e8 d724b88
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 31 21:05:07 2012 -0400
+
+    Update to pax-linux-3.6.5-test4.patch
+    
+    Merge branch 'linux-3.6.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/mm/init.c
+    	usr/gen_init_cpio.c
+
 commit e4933af02b593c0eddb9d552e10bec900b4f6af9
 Merge: 38f074c 2b764e8
 Author: Brad Spengler <spender@grsecurity.net>
