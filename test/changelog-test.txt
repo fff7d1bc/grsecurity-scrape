@@ -1,3 +1,418 @@
+commit 471088bb8be897bfc8ed907df6a46fc498e94c35
+Author: Eric Sandeen <sandeen@redhat.com>
+Date:   Sun Oct 28 22:24:57 2012 -0400
+
+    Upstream commit: ffb5387e85d528fb6d0d924abfa3fbf0fc484071
+    
+    ext4: fix unjournaled inode bitmap modification
+    
+    commit 119c0d4460b001e44b41dcf73dc6ee794b98bd31 changed
+    ext4_new_inode() such that the inode bitmap was being modified
+    outside a transaction, which could lead to corruption, and was
+    discovered when journal_checksum found a bad checksum in the
+    journal during log replay.
+    
+    Nix ran into this when using the journal_async_commit mount
+    option, which enables journal checksumming.  The ensuing
+    journal replay failures due to the bad checksums led to
+    filesystem corruption reported as the now infamous
+    "Apparent serious progressive ext4 data corruption bug"
+    
+    [ Changed by tytso to only call ext4_journal_get_write_access() only
+      when we're fairly certain that we're going to allocate the inode. ]
+    
+    I've tested this by mounting with journal_checksum and
+    running fsstress then dropping power; I've also tested by
+    hacking DM to create snapshots w/o first quiescing, which
+    allows me to test journal replay repeatedly w/o actually
+    power-cycling the box.  Without the patch I hit a journal
+    checksum error every time.  With this fix it survives
+    many iterations.
+    
+    Reported-by: Nix <nix@esperi.org.uk>
+    Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Cc: stable@vger.kernel.org
+
+ fs/ext4/ialloc.c |   19 +++++++++----------
+ 1 files changed, 9 insertions(+), 10 deletions(-)
+
+commit aaa7c354903b7c1e30b128e7aeecef2bce62b7cc
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Oct 2 01:47:46 2012 +0000
+
+    Upstream commit: 786fdf0bbf1c3a1b402bb2da946b93e0b36a8f32
+    
+    bnx2x: use strlcpy() to copy a string
+    
+    DRV_MODULE_VERSION is smaller than the ->version buffer so the memcpy()
+    copies 1 byte past the end of the string.  It's not super harmful, but
+    it makes the static checkers complain.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+commit e2538e414efef31b0567b70c566e73bb8395aa9c
+Author: Dave Jones <davej@redhat.com>
+Date:   Thu Oct 4 09:51:11 2012 +0000
+
+    Upstream commit: 32418cfe495c95013be2e805c087db89dcefac6d
+    
+    Remove noisy printks from llcp_sock_connect
+    
+    Validation of userspace input shouldn't trigger dmesg spamming.
+    
+    Signed-off-by: Dave Jones <davej@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/nfc/llcp/sock.c |    8 ++------
+ 1 files changed, 2 insertions(+), 6 deletions(-)
+
+commit 171fed88aee3d5141771bb5187ef718aa714f8b4
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Mon Oct 8 08:42:58 2012 +0800
+
+    Upstream commit: 9c371f997353385dfa2f7a8004ce13397e071a25
+    
+    ath5k: fix potential NULL pointer dereference in ath5k_beacon_update()
+    
+    The dereference should be moved below the NULL test.
+    
+    dpatch engine is used to auto generate this patch.
+    (https://github.com/weiyj/dpatch)
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+ drivers/net/wireless/ath/ath5k/base.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 8055e07166779349c07f08392574261be6b0f2c0
+Author: Peter Senna Tschudin <peter.senna@gmail.com>
+Date:   Sun Oct 28 06:12:00 2012 +0000
+
+    Upstream commit: 57c10b61c84bfed68b1b317d6f507a392724b9c4
+    
+    drivers/net/ethernet/nxp/lpc_eth.c: Call mdiobus_unregister before mdiobus_free
+    
+    Based on commit b27393aecf66199f5ddad37c302d3e0cfadbe6c0
+    
+    Calling mdiobus_free without calling mdiobus_unregister causes
+    BUG_ON(). This patch fixes the issue.
+    
+    The semantic patch that found this issue(http://coccinelle.lip6.fr/):
+    // <smpl>
+    @@
+    expression E;
+    @@
+      ... when != mdiobus_unregister(E);
+    
+    + mdiobus_unregister(E);
+      mdiobus_free(E);
+    // </smpl>
+    
+    Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
+    Tested-by: Roland Stigge <stigge@antcom.de>
+    Tested-by: Alexandre Pereira da Silva <aletes.xgr@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/nxp/lpc_eth.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 26eafd338fd7433d721cb8d9f97b70186d4d4194
+Author: Peter Senna Tschudin <peter.senna@gmail.com>
+Date:   Sun Oct 28 06:12:01 2012 +0000
+
+    Upstream commit: aa731872f7d33dcb8b54dad0cfb82d4e4d195d7e
+    
+    drivers/net/phy/mdio-bitbang.c: Call mdiobus_unregister before mdiobus_free
+    
+    Based on commit b27393aecf66199f5ddad37c302d3e0cfadbe6c0
+    
+    Calling mdiobus_free without calling mdiobus_unregister causes
+    BUG_ON(). This patch fixes the issue.
+    
+    The semantic patch that found this issue(http://coccinelle.lip6.fr/):
+    // <smpl>
+    @@
+    expression E;
+    @@
+      ... when != mdiobus_unregister(E);
+    
+    + mdiobus_unregister(E);
+      mdiobus_free(E);
+    // </smpl>
+    
+    Signed-off-by: Peter Senna Tschudin <peter.senna@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/phy/mdio-bitbang.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit bd7d15c381e17024a31d7625a6bdbe9c3c9a9313
+Author: Tom Parkin <tparkin@katalix.com>
+Date:   Mon Oct 29 23:41:48 2012 +0000
+
+    Upstream commit: 789336360e0a2aeb9750c16ab704a02cbe035e9e
+    
+    l2tp: fix oops in l2tp_eth_create() error path
+    
+    When creating an L2TPv3 Ethernet session, if register_netdev() should fail for
+    any reason (for example, automatic naming for "l2tpeth%d" interfaces hits the
+    32k-interface limit), the netdev is freed in the error path.  However, the
+    l2tp_eth_sess structure's dev pointer is left uncleared, and this results in
+    l2tp_eth_delete() then attempting to unregister the same netdev later in the
+    session teardown.  This results in an oops.
+    
+    To avoid this, clear the session dev pointer in the error path.
+    
+    Signed-off-by: Tom Parkin <tparkin@katalix.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/l2tp/l2tp_eth.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 5de065fd7224573255635251719d14eb7c5c272e
+Author: Pavel Emelyanov <xemul@parallels.com>
+Date:   Mon Oct 29 05:05:33 2012 +0000
+
+    Upstream commit: c454e6111d1ef4268fe98e87087216e51c2718c3
+    
+    tcp-repair: Handle zero-length data put in rcv queue
+    
+    When sending data into a tcp socket in repair state we should check
+    for the amount of data being 0 explicitly. Otherwise we'll have an skb
+    with seq == end_seq in rcv queue, but tcp doesn't expect this to happen
+    (in particular a warn_on in tcp_recvmsg shoots).
+    
+    Signed-off-by: Pavel Emelyanov <xemul@parallels.com>
+    Reported-by: Giorgos Mavrikas <gmavrikas@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_input.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 0cacede4650dbb8f1c7b4e90f47139ce92cc3ba6
+Author: Antonio Quartulli <ordex@autistici.org>
+Date:   Fri Oct 26 18:54:25 2012 +0200
+
+    Upstream commit: badecb001a310408d3473b1fc2ed5aefd0bc92a9
+    
+    mac80211: fix SSID copy on IBSS JOIN
+    
+    The 'ssid' field of the cfg80211_ibss_params is a u8 pointer and
+    its length is likely to be less than IEEE80211_MAX_SSID_LEN most
+    of the time.
+    
+    This patch fixes the ssid copy in ieee80211_ibss_join() by using
+    the SSID length to prevent it from reading beyond the string.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Antonio Quartulli <ordex@autistici.org>
+    [rewrapped commit message, small rewording]
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+ net/mac80211/ibss.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 23f467926a8d6404a12717c3f31ff6dffaac8a34
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Fri Oct 26 00:36:40 2012 +0200
+
+    Upstream commit: 9b395bc3be1cebf0144a127c7e67d56dbdac0930
+    
+    mac80211: verify that skb data is present
+    
+    A number of places in the mesh code don't check that
+    the frame data is present and in the skb header when
+    trying to access. Add those checks and the necessary
+    pskb_may_pull() calls. This prevents accessing data
+    that doesn't actually exist.
+    
+    To do this, export ieee80211_get_mesh_hdrlen() to be
+    able to use it in mac80211.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+ include/net/cfg80211.h |    9 +++++++++
+ net/mac80211/rx.c      |   32 +++++++++++++++++++++++++++++++-
+ net/wireless/util.c    |    3 ++-
+ 3 files changed, 42 insertions(+), 2 deletions(-)
+
+commit 001f96c407ad65c7a7ab05addb9d60f38bae6dfb
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Fri Oct 26 00:33:36 2012 +0200
+
+    Upstream commit: 4a4f1a5808c8bb0b72a4f6e5904c53fb8c9cd966
+    
+    mac80211: check management frame header length
+    
+    Due to pskb_may_pull() checking the skb length, all
+    non-management frames are checked on input whether
+    their 802.11 header is fully present. Also add that
+    check for management frames and remove a check that
+    is now duplicate. This prevents accessing skb data
+    beyond the frame end.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+ net/mac80211/rx.c |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+commit 7188f0abc63c059a7619063d6ef4cd448d366dc0
+Author: nikolay@redhat.com <nikolay@redhat.com>
+Date:   Wed Oct 31 04:42:51 2012 +0000
+
+    Upstream commit: eb6e98a1b25fb0f347fece9814257a9e1cb537c8
+    
+    bonding: fix off-by-one error
+    
+    Fix off-by-one error because IFNAMSIZ == 16 and when this
+    code gets executed we stick a NULL byte where we should not.
+    
+    How to reproduce:
+     with CONFIG_CC_STACKPROTECTOR=y (otherwise it may pass by silently)
+     modprobe bonding; echo 1 > /sys/class/net/bond0/bonding/mode;
+     echo "AAAAAAAAAAAAAAAA" > /sys/class/net/bond0/bonding/primary;
+    
+    Signed-off-by: Nikolay Aleksandrov <nikolay@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/bonding/bond_sysfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit e60a691ae5023afde261f816ea76163a98568faa
+Author: nikolay@redhat.com <nikolay@redhat.com>
+Date:   Wed Oct 31 06:03:52 2012 +0000
+
+    Upstream commit: c84e1590d149cfc885062e938944941f33e69f38
+    
+    bonding: fix second off-by-one error
+    
+    Fix off-by-one error because IFNAMSIZ == 16 and when this
+    code gets executed we stick a NULL byte where we should not.
+    
+    How to reproduce:
+     with CONFIG_CC_STACKPROTECTOR=y (otherwise it may pass by silently)
+     modprobe bonding; echo 1 > /sys/class/net/bond0/bonding/mode;
+     echo "AAAAAAAAAAAAAAAA" > /sys/class/net/bond0/bonding/active_slave;
+    
+    Signed-off-by: Nikolay Aleksandrov <nikolay@redhat.com>
+    
+    Note: Sorry for the second patch but I missed this one while checking
+          the file. You can squash them into one patch.
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/bonding/bond_sysfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit dd11415765cc62403da1ef88c72e1c380ce36fa4
+Author: Jesper Dangaard Brouer <brouer@redhat.com>
+Date:   Wed Oct 31 02:45:32 2012 +0000
+
+    Upstream commit: 8f363b77ee4fbf7c3bbcf5ec2c5ca482d396d664
+    
+    net: fix divide by zero in tcp algorithm illinois
+    
+    Reading TCP stats when using TCP Illinois congestion control algorithm
+    can cause a divide by zero kernel oops.
+    
+    The division by zero occur in tcp_illinois_info() at:
+     do_div(t, ca->cnt_rtt);
+    where ca->cnt_rtt can become zero (when rtt_reset is called)
+    
+    Steps to Reproduce:
+     1. Register tcp_illinois:
+         # sysctl -w net.ipv4.tcp_congestion_control=illinois
+     2. Monitor internal TCP information via command "ss -i"
+         # watch -d ss -i
+     3. Establish new TCP conn to machine
+    
+    Either it fails at the initial conn, or else it needs to wait
+    for a loss or a reset.
+    
+    This is only related to reading stats.  The function avg_delay() also
+    performs the same divide, but is guarded with a (ca->cnt_rtt > 0) at its
+    calling point in update_params().  Thus, simply fix tcp_illinois_info().
+    
+    Function tcp_illinois_info() / get_info() is called without
+    socket lock.  Thus, eliminate any race condition on ca->cnt_rtt
+    by using a local stack variable.  Simply reuse info.tcpv_rttcnt,
+    as its already set to ca->cnt_rtt.
+    Function avg_delay() is not affected by this race condition, as
+    its called with the socket lock.
+    
+    Cc: Petr Matousek <pmatouse@redhat.com>
+    Signed-off-by: Jesper Dangaard Brouer <brouer@redhat.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Acked-by: Stephen Hemminger <shemminger@vyatta.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_illinois.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+commit f55d19ff304ecc659db1718901fba7f74fa43bf3
+Author: Roland Dreier <roland@purestorage.com>
+Date:   Wed Oct 31 09:16:45 2012 -0700
+
+    Upstream commit: 3e03989b5868acf69a391a424dc71fcd6cc48167
+    
+    target: Avoid integer overflow in se_dev_align_max_sectors()
+    
+    The expression (max_sectors * block_size) might overflow a u32
+    (indeed, since iblock sets max_hw_sectors to UINT_MAX, it is
+    guaranteed to overflow and end up with a much-too-small result in many
+    common cases).  Fix this by doing an equivalent calculation that
+    doesn't require multiplication.
+    
+    While we're touching this code, avoid splitting a printk format across
+    two lines and use pr_info(...) instead of printk(KERN_INFO ...).
+    
+    Signed-off-by: Roland Dreier <roland@purestorage.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
+
+ drivers/target/target_core_device.c |   18 +++++++++---------
+ 1 files changed, 9 insertions(+), 9 deletions(-)
+
+commit 43b67af6f226f4f398ef962d7b0741012ac94a8b
+Author: Jan Beulich <JBeulich@suse.com>
+Date:   Wed Oct 17 13:14:09 2012 -0400
+
+    Upstream commit: 1bcaba51eba549748917f7d6eb41900ff9ee3d5f
+    
+    xen/xenbus: fix overflow check in xenbus_file_write()
+    
+    Acked-by: Ian Campbell <ian.campbell@citrix.com>
+    Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Jan Beulich <jbeulich@suse.com>
+    [v1: Rebased on upstream]
+    Signed-off-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+
+ drivers/xen/xenbus/xenbus_dev_frontend.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit aacace71eb87fd64b9bb296c130e7708577a10fd
+Author: David Zafman <david.zafman@inktank.com>
+Date:   Thu Oct 18 14:01:43 2012 -0700
+
+    ceph: fix dentry reference leak in encode_fh()
+    
+    Call to d_find_alias() needs a corresponding dput()
+    
+    This fixes http://tracker.newdream.net/issues/3271
+    
+    Signed-off-by: David Zafman <david.zafman@inktank.com>
+    Reviewed-by: Sage Weil <sage@inktank.com>
+
+ fs/ceph/export.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
 commit 71f3e58c50772c845660844d855b34032afa05bb
 Merge: e4933af b166cfb2
 Author: Brad Spengler <spender@grsecurity.net>
