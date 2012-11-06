@@ -1,3 +1,40 @@
+commit debf9a3f46ac7e8aa4bf77684b7d0ae6c8809a00
+Merge: 0eae58f 5432546
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 5 19:57:01 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5432546f746ba93c24937f48d9ccac0d318f1702
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 5 19:55:51 2012 -0500
+
+    Update to pax-linux-3.6.6-test6.patch:
+    - fixed arm compilation issues reported by Michael Tremer
+    - fixed unintended change/typo in variable name
+
+ arch/arm/mach-omap2/omap_hwmod.c   |    4 ++--
+ drivers/staging/omapdrm/omap_drv.c |    1 -
+ fs/namei.c                         |    2 +-
+ lib/strncpy_from_user.c            |    2 +-
+ lib/strnlen_user.c                 |    2 +-
+ net/batman-adv/bat_iv_ogm.c        |    2 +-
+ 6 files changed, 6 insertions(+), 7 deletions(-)
+
+commit 0eae58fec4b81ecb45112d0f16335767d7606c8b
+Merge: 471088b ebbbb38
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 5 19:40:39 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ebbbb381f83c56b88a99c01a1b152b7e42dadee8
+Merge: b166cfb2 3820288
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 5 19:38:50 2012 -0500
+
+    Merge branch 'linux-3.6.y' into pax-test
+
 commit 471088bb8be897bfc8ed907df6a46fc498e94c35
 Author: Eric Sandeen <sandeen@redhat.com>
 Date:   Sun Oct 28 22:24:57 2012 -0400
