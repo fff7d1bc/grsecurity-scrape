@@ -1,3 +1,40 @@
+commit b302b77cd633b131995a71dcfc83484e4cbb43ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 12 22:10:20 2012 -0500
+
+    remove whitespace in gradm_mt_init/exit
+
+ net/netfilter/xt_gradm.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit aa57afe300a11f3d08fc84bd8cf55dcadf6f2a07
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 12 22:08:50 2012 -0500
+
+    change strlen("conststring") to sizeof("conststring") - 1 as suggested by pipacs
+
+ kernel/module.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit c8293882f63da20e744c6221ccdd77e5eeb40d97
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 12 21:33:37 2012 -0500
+
+    Fix an issue with nested subjects reported by Mark Moseley
+    
+    If a nested subject exists for which there are more than one objects
+    that can match it (a directory nested subject can make this possible)
+    then since the recent patch that fixed policy recreation for nested
+    subjects, a cycle can be introduced in the nested subject list for a role,
+    causing infinite loops under a lock on policy recreation events or
+    RBAC disabling/reloading.
+    
+    Only add the nested subject to the list if it was the first time we've
+    seen it, to eliminate duplicates and inadvertent cycles.
+
+ grsecurity/gracl.c |   29 ++++++++++++++++++++---------
+ 1 files changed, 20 insertions(+), 9 deletions(-)
+
 commit 7f3b3412c657701bae966d7c8f21c2cb0b3ac432
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Nov 7 19:29:37 2012 -0500
