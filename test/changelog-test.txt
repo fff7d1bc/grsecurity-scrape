@@ -1,3 +1,28 @@
+commit 329725563e9c11b439f791a660f3bb5bb51ab8b5
+Merge: 7e808b3 1996700
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 18 11:03:33 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1996700ce27f6a36bbf73d4d1fc7af14dee9afca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 18 11:02:15 2012 -0500
+
+    Update to pax-linux-3.6.7-test8.patch (with drm_fops.c fixed previously):
+    - updated size_overflow plugin from Emese, fixes another false positive reported by Szymon Juraszczyk
+    - compiler crash fix from Emese for compiling with the size_overflow plugin for 32 bit archs
+    - user.pax.flags checks became more strict to prevent duplicate flags
+    - some cleanups here and there
+
+ arch/x86/kernel/entry_64.S       |    7 --
+ fs/binfmt_elf.c                  |    6 +-
+ lib/list_debug.c                 |   24 +++--
+ mm/shmem.c                       |   14 +++
+ mm/vmalloc.c                     |   19 ++--
+ tools/gcc/size_overflow_plugin.c |  184 +++++++++++++++++--------------------
+ 6 files changed, 127 insertions(+), 127 deletions(-)
+
 commit 7e808b33318c3df2e81725832cf21026f804d52c
 Author: Andrew Price <anprice@redhat.com>
 Date:   Fri Oct 12 16:45:09 2012 +0100
