@@ -1,3 +1,317 @@
+commit 7e808b33318c3df2e81725832cf21026f804d52c
+Author: Andrew Price <anprice@redhat.com>
+Date:   Fri Oct 12 16:45:09 2012 +0100
+
+    Upstream commit: cd0ed19fb614cb1315c0a510ec6c163d8324fd82
+    
+    GFS2: Fix possible null pointer deref in gfs2_rs_alloc
+    
+    Despite the return value from kmem_cache_zalloc() being checked, the
+    error wasn't being returned until after a possible null pointer
+    dereference. This patch returns the error immediately, allowing the
+    removal of the error variable.
+    
+    Signed-off-by: Andrew Price <anprice@redhat.com>
+    Signed-off-by: Steven Whitehouse <swhiteho@redhat.com>
+
+ fs/gfs2/rgrp.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+commit 1951d55ca60ca17e5572a6c7529859a676a445a9
+Author: Andrew Price <anprice@redhat.com>
+Date:   Fri Oct 12 16:45:08 2012 +0100
+
+    Upstream commit: aaaf68c5629108f6078ab458d34a661143ea6857
+    
+    GFS2: Fix an unchecked error from gfs2_rs_alloc
+    
+    Check the return value of gfs2_rs_alloc(ip) and avoid a possible null
+    pointer dereference.
+    
+    Signed-off-by: Andrew Price <anprice@redhat.com>
+    Signed-off-by: Steven Whitehouse <swhiteho@redhat.com>
+
+ fs/gfs2/quota.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit ec376c2283cc3295afb32279ad8716fdd282804d
+Author: Rusty Russell <rusty@rustcorp.com.au>
+Date:   Thu Oct 25 10:49:25 2012 +1030
+
+    Upstream commit: 59ef28b1f14899b10d6b2682c7057ca00a9a3f47
+    
+    module: fix out-by-one error in kallsyms
+    
+    Masaki found and patched a kallsyms issue: the last symbol in a
+    module's symtab wasn't transferred.  This is because we manually copy
+    the zero'th entry (which is always empty) then copy the rest in a loop
+    starting at 1, though from src[0].  His fix was minimal, I prefer to
+    rewrite the loops in more standard form.
+    
+    There are two loops: one to get the size, and one to copy.  Make these
+    identical: always count entry 0 and any defined symbol in an allocated
+    non-init section.
+    
+    This bug exists since the following commit was introduced.
+       module: reduce symbol table for loaded modules (v2)
+       commit: 4a4962263f07d14660849ec134ee42b63e95ea9a
+    
+    LKML: http://lkml.org/lkml/2012/10/24/27
+    Reported-by: Masaki Kimura <masaki.kimura.kz@hitachi.com>
+    Cc: stable@kernel.org
+
+ kernel/module.c |   27 ++++++++++++++++-----------
+ 1 files changed, 16 insertions(+), 11 deletions(-)
+
+commit c23de90c5a444df286ffd3766038cc5531794561
+Author: Takamori Yamaguchi <takamori.yamaguchi@jp.sony.com>
+Date:   Thu Nov 8 15:53:39 2012 -0800
+
+    Upstream commit: b0a8cc58e6b9aaae3045752059e5e6260c0b94bc
+    
+    mm: bugfix: set current->reclaim_state to NULL while returning from kswapd()
+    
+    In kswapd(), set current->reclaim_state to NULL before returning, as
+    current->reclaim_state holds reference to variable on kswapd()'s stack.
+    
+    In rare cases, while returning from kswapd() during memory offlining,
+    __free_slab() and freepages() can access the dangling pointer of
+    current->reclaim_state.
+    
+    Signed-off-by: Takamori Yamaguchi <takamori.yamaguchi@jp.sony.com>
+    Signed-off-by: Aaditya Kumar <aaditya.kumar@ap.sony.com>
+    Acked-by: David Rientjes <rientjes@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/vmscan.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 665efb4252f602739b3a29295a67ddb1f60b04b7
+Author: Eric Paris <eparis@redhat.com>
+Date:   Thu Nov 8 15:53:37 2012 -0800
+
+    Upstream commit: 848561d368751a1c0f679b9f045a02944506a801
+    
+    fanotify: fix missing break
+    
+    Anders Blomdell noted in 2010 that Fanotify lost events and provided a
+    test case.  Eric Paris confirmed it was a bug and posted a fix to the
+    list
+    
+      https://groups.google.com/forum/?fromgroups=#!topic/linux.kernel/RrJfTfyW2BE
+    
+    but never applied it.  Repeated attempts over time to actually get him
+    to apply it have never had a reply from anyone who has raised it
+    
+    So apply it anyway
+    
+    Signed-off-by: Alan Cox <alan@linux.intel.com>
+    Reported-by: Anders Blomdell <anders.blomdell@control.lth.se>
+    Cc: Eric Paris <eparis@redhat.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/notify/fanotify/fanotify.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 883aa77371baca4a6422b88b97792695cb651785
+Author: Cornelia Huck <cornelia.huck@de.ibm.com>
+Date:   Fri Nov 9 14:54:12 2012 +1030
+
+    Upstream commit: 237242bddc99041e15a4ca51b8439657cadaff17
+    
+    virtio: Don't access index after unregister.
+    
+    Virtio wants to release used indices after the corresponding
+    virtio device has been unregistered. However, virtio does not
+    hold an extra reference, giving up its last reference with
+    device_unregister(), making accessing dev->index afterwards
+    invalid.
+    
+    I actually saw problems when testing my (not-yet-merged)
+    virtio-ccw code:
+    
+    - device_add virtio-net,id=xxx
+    -> creates device virtio<n> with n>0
+    
+    - device_del xxx
+    -> deletes virtio<n>, but calls ida_simple_remove with an
+       index of 0
+    
+    - device_add virtio-net,id=xxx
+    -> tries to add virtio0, which is still in use...
+    
+    So let's save the index we want to release before calling
+    device_unregister().
+    
+    Signed-off-by: Cornelia Huck <cornelia.huck@de.ibm.com>
+    Acked-by: Sjur Brændeland <sjur.brandeland@stericsson.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
+
+ drivers/virtio/virtio.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 1b9a7671fa99ae1153e9913786505aed22f74b2c
+Author: Petr Matousek <pmatouse@redhat.com>
+Date:   Tue Nov 6 19:24:07 2012 +0100
+
+    Upstream commit: 6d1068b3a98519247d8ba4ec85cd40ac136dbdf9
+    
+    KVM: x86: invalid opcode oops on SET_SREGS with OSXSAVE bit set (CVE-2012-4461)
+    
+    On hosts without the XSAVE support unprivileged local user can trigger
+    oops similar to the one below by setting X86_CR4_OSXSAVE bit in guest
+    cr4 register using KVM_SET_SREGS ioctl and later issuing KVM_RUN
+    ioctl.
+    
+    invalid opcode: 0000 [#2] SMP
+    Modules linked in: tun ip6table_filter ip6_tables ebtable_nat ebtables
+    ...
+    Pid: 24935, comm: zoog_kvm_monito Tainted: G      D      3.2.0-3-686-pae
+    EIP: 0060:[<f8b9550c>] EFLAGS: 00210246 CPU: 0
+    EIP is at kvm_arch_vcpu_ioctl_run+0x92a/0xd13 [kvm]
+    EAX: 00000001 EBX: 000f387e ECX: 00000000 EDX: 00000000
+    ESI: 00000000 EDI: 00000000 EBP: ef5a0060 ESP: d7c63e70
+     DS: 007b ES: 007b FS: 00d8 GS: 00e0 SS: 0068
+    Process zoog_kvm_monito (pid: 24935, ti=d7c62000 task=ed84a0c0
+    task.ti=d7c62000)
+    Stack:
+     00000001 f70a1200 f8b940a9 ef5a0060 00000000 00200202 f8769009 00000000
+     ef5a0060 000f387e eda5c020 8722f9c8 00015bae 00000000 ed84a0c0 ed84a0c0
+     c12bf02d 0000ae80 ef7f8740 fffffffb f359b740 ef5a0060 f8b85dc1 0000ae80
+    Call Trace:
+     [<f8b940a9>] ? kvm_arch_vcpu_ioctl_set_sregs+0x2fe/0x308 [kvm]
+    ...
+     [<c12bfb44>] ? syscall_call+0x7/0xb
+    Code: 89 e8 e8 14 ee ff ff ba 00 00 04 00 89 e8 e8 98 48 ff ff 85 c0 74
+    1e 83 7d 48 00 75 18 8b 85 08 07 00 00 31 c9 8b 95 0c 07 00 00 <0f> 01
+    d1 c7 45 48 01 00 00 00 c7 45 1c 01 00 00 00 0f ae f0 89
+    EIP: [<f8b9550c>] kvm_arch_vcpu_ioctl_run+0x92a/0xd13 [kvm] SS:ESP
+    0068:d7c63e70
+    
+    QEMU first retrieves the supported features via KVM_GET_SUPPORTED_CPUID
+    and then sets them later. So guest's X86_FEATURE_XSAVE should be masked
+    out on hosts without X86_FEATURE_XSAVE, making kvm_set_cr4 with
+    X86_CR4_OSXSAVE fail. Userspaces that allow specifying guest cpuid with
+    X86_FEATURE_XSAVE even on hosts that do not support it, might be
+    susceptible to this attack from inside the guest as well.
+    
+    Allow setting X86_CR4_OSXSAVE bit only if host has XSAVE support.
+    
+    Signed-off-by: Petr Matousek <pmatouse@redhat.com>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+ arch/x86/kvm/cpuid.h |    3 +++
+ arch/x86/kvm/x86.c   |    3 +++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 425688e1a361cab816887cf4721953341ac4f467
+Author: Andreas Larsson <andreas@gaisler.com>
+Date:   Tue Oct 30 00:09:46 2012 +0000
+
+    Upstream commit: 20424d85f8a07090fd32c6fad343f91b63c730b0
+    
+    sparc32, leon: Check for existent irq_map entry in leon_handle_ext_irq
+    
+    If an irq is being unlinked concurrently with leon_handle_ext_irq,
+    irq_map[eirq] might be null in leon_handle_ext_irq. Make sure that
+    this is not dereferenced.
+    
+    Signed-off-by: Andreas Larsson <andreas@gaisler.com>
+    Acked-by: Sam Ravnborg <sam@ravnborg.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/kernel/leon_kernel.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 277e56f6332719b653ae5643acda499d464a1f77
+Author: Jussi Kivilinna <jussi.kivilinna@mbnet.fi>
+Date:   Sun Oct 21 20:42:28 2012 +0300
+
+    Upstream commit: 9efade1b3e981f5064f9db9ca971b4dc7557ae42
+    
+    crypto: cryptd - disable softirqs in cryptd_queue_worker to prevent data corruption
+    
+    cryptd_queue_worker attempts to prevent simultaneous accesses to crypto
+    workqueue by cryptd_enqueue_request using preempt_disable/preempt_enable.
+    However cryptd_enqueue_request might be called from softirq context,
+    so add local_bh_disable/local_bh_enable to prevent data corruption and
+    panics.
+    
+    Bug report at http://marc.info/?l=linux-crypto-vger&m=134858649616319&w=2
+    
+    v2:
+     - Disable software interrupts instead of hardware interrupts
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Gurucharan Shetty <gurucharan.shetty@gmail.com>
+    Signed-off-by: Jussi Kivilinna <jussi.kivilinna@mbnet.fi>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ crypto/cryptd.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit dd8d8e551f1c2f8649ad95f8b6203d4064f71087
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Wed Nov 14 11:49:53 2012 +0000
+
+    Upstream commit: 70a6f46d7b0ec03653b9ab3f8063a9717a4a53ef
+    
+    pstore: Fix NULL pointer dereference in console writes
+    
+    Passing a NULL id causes a NULL pointer deference in writers such as
+    erst_writer and efi_pstore_write because they expect to update this id.
+    Pass a dummy id instead.
+    
+    This avoids a cascade of oopses caused when the initial
+    pstore_console_write passes a null which in turn causes writes to the
+    console causing further oopses in subsequent pstore_console_write calls.
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Anton Vorontsov <anton.vorontsov@linaro.org>
+
+ fs/pstore/platform.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 9cbe07aa8a2828c00203ae99bfc5f9c8908a5e4f
+Merge: bef6278 fb90966
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 17 19:12:53 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit fb909665ed11737e64496e9b413df880c056a486
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 17 19:12:41 2012 -0500
+
+    Fix up other open_count users
+
+ drivers/gpu/drm/drm_fops.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit bef6278297c255f086c1efa5274f70cae85d3c06
+Merge: b302b77 ab64ed1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 17 18:40:53 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ab64ed1a94eef54d244869f1fe1be3c437e2fd8e
+Merge: 5432546 9f3dc4b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 17 18:40:44 2012 -0500
+
+    Merge branch 'linux-3.6.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/drm_fops.c
+
 commit b302b77cd633b131995a71dcfc83484e4cbb43ec
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Nov 12 22:10:20 2012 -0500
