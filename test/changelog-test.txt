@@ -1,3 +1,54 @@
+commit ab698b6a7290ccc01e331f6009009591d9792a3f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 20 17:30:58 2012 -0500
+
+    remove unneeded extern grsec_exec_file_lock
+
+ kernel/exit.c |    4 ----
+ 1 files changed, 0 insertions(+), 4 deletions(-)
+
+commit 7f9c4c32f430cb90463912f2a077ba76c6326c1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 20 17:27:16 2012 -0500
+
+    Resolve increasing /proc/sys/fs/file-nr reported by 'rha' on the forums
+    current->exec_file leaked its reference counter in some cases
+
+ fs/fs_struct.c              |    4 ++++
+ grsecurity/gracl.c          |   16 ++++++++++++++++
+ grsecurity/grsec_disabled.c |    5 +++++
+ include/linux/grsecurity.h  |    1 +
+ kernel/exit.c               |    9 ---------
+ 5 files changed, 26 insertions(+), 9 deletions(-)
+
+commit d3c437027bd67bfbf4bc3b6c47c3f6a5aab879f8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 18 22:57:42 2012 -0500
+
+    Add additional verification of jitted jumps
+
+ arch/x86/net/bpf_jit_comp.c |   38 +++++++++++++++++++++++++++++++++++---
+ 1 files changed, 35 insertions(+), 3 deletions(-)
+
+commit 8f0eeed3f4ae63cdee8371aa85cfe1b034d7cbdc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 18 17:20:30 2012 -0500
+
+    Add RBAC functions to size_overflow hash
+
+ tools/gcc/size_overflow_hash.data        |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit bb344899f3c47b99d4e2612945cc9c52d4667753
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 18 15:19:29 2012 -0500
+
+    Add initial code for BPF JIT hardening
+
+ arch/x86/net/bpf_jit_comp.c |   84 +++++++++++++++++++++++++++++++++++++++---
+ grsecurity/Kconfig          |   17 +++++++++
+ 2 files changed, 95 insertions(+), 6 deletions(-)
+
 commit 329725563e9c11b439f791a660f3bb5bb51ab8b5
 Merge: 7e808b3 1996700
 Author: Brad Spengler <spender@grsecurity.net>
