@@ -1,3 +1,129 @@
+commit cf845f0ce324ee26d37976d5ad549166dd10300a
+Merge: dc60513c a2940d6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 25 18:39:31 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a2940d6c75f53a1941f18013089f8e0a99b7bbd2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 25 18:39:02 2012 -0500
+
+    Update to pax-linux-3.6.7-test10.patch:
+    - fixed the kernexec plugin to handle a new gcc 4.7 pattern, previously (simple) return insns weren't instrumented
+    - changed the latent entropy to not instrument hotplug related init functions that stick around after boot
+
+ fs/exec.c                   |    2 +-
+ include/linux/init.h        |   30 ++++++++++++++++++++++++------
+ tools/gcc/kernexec_plugin.c |    7 ++++++-
+ 3 files changed, 31 insertions(+), 8 deletions(-)
+
+commit dc60513c6d777f1df44f0f081cd035303d1b0b22
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Wed Nov 21 19:27:23 2012 +0000
+
+    Upstream commit: 441a179dafc0f99fc8b3a8268eef66958621082e
+    (real nice enterprise-quality code there, Lou)
+    
+    [PARISC] fix user-triggerable panic on parisc
+    
+    int sys32_rt_sigprocmask(int how, compat_sigset_t __user *set, compat_sigset_t __user *oset,
+                                        unsigned int sigsetsize)
+    {
+            sigset_t old_set, new_set;
+            int ret;
+    
+            if (set && get_sigset32(set, &new_set, sigsetsize))
+    
+    ...
+    static int
+    get_sigset32(compat_sigset_t __user *up, sigset_t *set, size_t sz)
+    {
+            compat_sigset_t s;
+            int r;
+    
+            if (sz != sizeof *set) panic("put_sigset32()");
+    
+    In other words, rt_sigprocmask(69, (void *)69, 69) done by 32bit process
+    will promptly panic the box.
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: James Bottomley <JBottomley@Parallels.com>
+
+ arch/parisc/kernel/signal32.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 99d59da6bfa1d99a9808393a6db0dc3cd98ffdbd
+Author: Will Deacon <will.deacon@arm.com>
+Date:   Fri Nov 16 14:15:00 2012 -0800
+
+    Upstream commit: 498c2280212327858e521e9d21345d4cc2637f54
+    
+    mm: highmem: don't treat PKMAP_ADDR(LAST_PKMAP) as a highmem address
+    
+    kmap_to_page returns the corresponding struct page for a virtual address
+    of an arbitrary mapping.  This works by checking whether the address
+    falls in the pkmap region and using the pkmap page tables instead of the
+    linear mapping if appropriate.
+    
+    Unfortunately, the bounds checking means that PKMAP_ADDR(LAST_PKMAP) is
+    incorrectly treated as a highmem address and we can end up walking off
+    the end of pkmap_page_table and subsequently passing junk to pte_page.
+    
+    This patch fixes the bound check to stay within the pkmap tables.
+    
+    Signed-off-by: Will Deacon <will.deacon@arm.com>
+    Cc: Mel Gorman <mgorman@suse.de>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/highmem.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d7c6ed54a2c564161c96374b828bf4006189e1a8
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Fri Nov 9 15:20:17 2012 +0100
+
+    Upstream commit: 29282fde80d44e587f8c152b10049a56e61659f0
+    
+    KVM: x86: Fix invalid secondary exec controls in vmx_cpuid_update()
+    
+    The commit [ad756a16: KVM: VMX: Implement PCID/INVPCID for guests with
+    EPT] introduced the unconditional access to SECONDARY_VM_EXEC_CONTROL,
+    and this triggers kernel warnings like below on old CPUs:
+    
+        vmwrite error: reg 401e value a0568000 (err 12)
+        Pid: 13649, comm: qemu-kvm Not tainted 3.7.0-rc4-test2+ #154
+        Call Trace:
+         [<ffffffffa0558d86>] vmwrite_error+0x27/0x29 [kvm_intel]
+         [<ffffffffa054e8cb>] vmcs_writel+0x1b/0x20 [kvm_intel]
+         [<ffffffffa054f114>] vmx_cpuid_update+0x74/0x170 [kvm_intel]
+         [<ffffffffa03629b6>] kvm_vcpu_ioctl_set_cpuid2+0x76/0x90 [kvm]
+         [<ffffffffa0341c67>] kvm_arch_vcpu_ioctl+0xc37/0xed0 [kvm]
+         [<ffffffff81143f7c>] ? __vunmap+0x9c/0x110
+         [<ffffffffa0551489>] ? vmx_vcpu_load+0x39/0x1a0 [kvm_intel]
+         [<ffffffffa0340ee2>] ? kvm_arch_vcpu_load+0x52/0x1a0 [kvm]
+         [<ffffffffa032dcd4>] ? vcpu_load+0x74/0xd0 [kvm]
+         [<ffffffffa032deb0>] kvm_vcpu_ioctl+0x110/0x5e0 [kvm]
+         [<ffffffffa032e93d>] ? kvm_dev_ioctl+0x4d/0x4a0 [kvm]
+         [<ffffffff8117dc6f>] do_vfs_ioctl+0x8f/0x530
+         [<ffffffff81139d76>] ? remove_vma+0x56/0x60
+         [<ffffffff8113b708>] ? do_munmap+0x328/0x400
+         [<ffffffff81187c8c>] ? fget_light+0x4c/0x100
+         [<ffffffff8117e1a1>] sys_ioctl+0x91/0xb0
+         [<ffffffff815a942d>] system_call_fastpath+0x1a/0x1f
+    
+    This patch adds a check for the availability of secondary exec
+    control to avoid these warnings.
+    
+    Cc: <stable@vger.kernel.org> [v3.6+]
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+ arch/x86/kvm/vmx.c |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
+
 commit ab698b6a7290ccc01e331f6009009591d9792a3f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Nov 20 17:30:58 2012 -0500
