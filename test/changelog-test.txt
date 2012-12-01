@@ -1,3 +1,259 @@
+commit 691abc38ea3366555ff0e1d9860e04d06606f40b
+Author: Tommi Rantala <tt.rantala@gmail.com>
+Date:   Mon Nov 26 04:16:44 2012 +0000
+
+    Upstream commit: c3b2c2581988d304127c2aa218430b5fca88ce56
+    
+    irda: irttp: fix memory leak in irttp_open_tsap() error path
+    
+    Cleanup the memory we allocated earlier in irttp_open_tsap() when we hit
+    this error path. The leak goes back to at least 1da177e4
+    ("Linux-2.6.12-rc2").
+    
+    Discovered with Trinity (the syscall fuzzer).
+    
+    Signed-off-by: Tommi Rantala <tt.rantala@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/irda/irttp.c
+
+ net/irda/irttp.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 282251dfabea4d808b1c388c7dfea17553268e13
+Author: Tommi Rantala <tt.rantala@gmail.com>
+Date:   Tue Nov 27 04:01:46 2012 +0000
+
+    Upstream commit: be364c8c0f17a3dd42707b5a090b318028538eb9
+    
+    sctp: fix memory leak in sctp_datamsg_from_user() when copy from user space fails
+    
+    Trinity (the syscall fuzzer) discovered a memory leak in SCTP,
+    reproducible e.g. with the sendto() syscall by passing invalid
+    user space pointer in the second argument:
+    
+     #include <string.h>
+     #include <arpa/inet.h>
+     #include <sys/socket.h>
+    
+     int main(void)
+     {
+             int fd;
+             struct sockaddr_in sa;
+    
+             fd = socket(AF_INET, SOCK_STREAM, 132 /*IPPROTO_SCTP*/);
+             if (fd < 0)
+                     return 1;
+    
+             memset(&sa, 0, sizeof(sa));
+             sa.sin_family = AF_INET;
+             sa.sin_addr.s_addr = inet_addr("127.0.0.1");
+             sa.sin_port = htons(11111);
+    
+             sendto(fd, NULL, 1, 0, (struct sockaddr *)&sa, sizeof(sa));
+    
+             return 0;
+     }
+    
+    As far as I can tell, the leak has been around since ~2003.
+    
+    Signed-off-by: Tommi Rantala <tt.rantala@gmail.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/chunk.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit 405f1832c0b8f2e230876de475115501e96a4c83
+Author: Oliver Hartkopp <socketcan@hartkopp.net>
+Date:   Mon Nov 26 22:24:23 2012 +0100
+
+    Upstream commit: 81b401100c01d2357031e874689f89bd788d13cd
+    
+    can: bcm: initialize ifindex for timeouts without previous frame reception
+    
+    Set in the rx_ifindex to pass the correct interface index in the case of a
+    message timeout detection. Usually the rx_ifindex value is set at receive
+    time. But when no CAN frame has been received the RX_TIMEOUT notification
+    did not contain a valid value.
+    
+    Cc: linux-stable <stable@vger.kernel.org>
+    Reported-by: Andre Naujoks <nautsch2@googlemail.com>
+    Signed-off-by: Oliver Hartkopp <socketcan@hartkopp.net>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+
+ net/can/bcm.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 8d6050378b80143d25f06f88c62ab3c06c51b47a
+Author: Neal Cardwell <ncardwell@google.com>
+Date:   Sat Nov 24 18:54:37 2012 +0000
+
+    Upstream commit: e1a676424c290b1c8d757e3860170ac7ecd89af4
+    
+    ipv4: avoid passing NULL to inet_putpeer() in icmpv4_xrlim_allow()
+    
+    inet_getpeer_v4() can return NULL under OOM conditions, and while
+    inet_peer_xrlim_allow() is OK with a NULL peer, inet_putpeer() will
+    crash.
+    
+    This code path now uses the same idiom as the others from:
+    1d861aa4b3fb08822055345f480850205ffe6170 ("inet: Minimize use of
+    cached route inetpeer.").
+    
+    Signed-off-by: Neal Cardwell <ncardwell@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/icmp.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 81c8abeabceb717ec83a312b7e88af212f14df47
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Sun Nov 25 09:44:29 2012 +0000
+
+    Upstream commit: b49d3c1e1c948d76d64790abe9acffa9fa747d19
+    
+    net: ipmr: limit MRT_TABLE identifiers
+    
+    Name of pimreg devices are built from following format :
+    
+    char name[IFNAMSIZ]; // IFNAMSIZ == 16
+    
+    sprintf(name, "pimreg%u", mrt->id);
+    
+    We must therefore limit mrt->id to 9 decimal digits
+    or risk a buffer overflow and a crash.
+    
+    Restrict table identifiers in [0 ... 999999999] interval.
+    
+    Reported-by: Chen Gang <gang.chen@asianux.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ipmr.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 37ca12aa2d69e78f22fc9623a5bb9b0f4c629521
+Author: Schoch Christian <e0326715@student.tuwien.ac.at>
+Date:   Wed Nov 28 05:18:29 2012 +0000
+
+    Upstream commit: 92d64c261e77cb2a6117887617e2a629fea6b67c
+    
+    sctp: Error in calculation of RTTvar
+    
+    The calculation of RTTVAR involves the subtraction of two unsigned
+    numbers which
+    may causes rollover and results in very high values of RTTVAR when RTT > SRTT.
+    With this patch it is possible to set RTOmin = 1 to get the minimum of RTO at
+    4 times the clock granularity.
+    
+    Change Notes:
+    
+    v2)
+            *Replaced abs() by abs64() and long by __s64, changed patch
+    description.
+    
+    Signed-off-by: Christian Schoch <e0326715@student.tuwien.ac.at>
+    CC: Vlad Yasevich <vyasevich@gmail.com>
+    CC: Sridhar Samudrala <sri@us.ibm.com>
+    CC: Neil Horman <nhorman@tuxdriver.com>
+    CC: linux-sctp@vger.kernel.org
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/sctp/transport.c
+
+ net/sctp/transport.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 346fab1ca75ae346cf029aec618a62daf75a44d1
+Author: Amir Vadai <amirv@mellanox.com>
+Date:   Wed Nov 28 13:43:15 2012 +0200
+
+    Upstream commit: 29bb8f4a8d94d017700d09ee643483b0708cbd7b
+    
+    net/mlx4_en: Can set maxrate only for TC0
+    
+    Had a typo in memcpy.
+    
+    Signed-off-by: Amir Vadai <amirv@mellanox.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/mellanox/mlx4/en_dcb_nl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ae7879eec9c6f028ac9a4f0000209de24b68f92b
+Author: Michael S. Tsirkin <mst@redhat.com>
+Date:   Mon Nov 26 05:57:27 2012 +0000
+
+    Upstream commit: bd97120fc3d1a11f3124c7c9ba1d91f51829eb85
+    
+    vhost: fix length for cross region descriptor
+    
+    If a single descriptor crosses a region, the
+    second chunk length should be decremented
+    by size translated so far, instead it includes
+    the full descriptor length.
+    
+    Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+    Acked-by: Jason Wang <jasowang@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/vhost/vhost.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit db4ba3741af012ccc9a570a475c8ae1a3e789b16
+Author: Florian Westphal <fw@strlen.de>
+Date:   Thu Nov 22 01:32:45 2012 +0000
+
+    Upstream commit: 4a6dd664eba59488c9e56b51a594396d7706eb08
+    
+    netfilter: ipset: fix netiface set name overflow
+    
+    attribute is copied to IFNAMSIZ-size stack variable,
+    but IFNAMSIZ is smaller than IPSET_MAXNAMELEN.
+    
+    Fortunately nfnetlink needs CAP_NET_ADMIN.
+    
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Acked-by: Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/ipset/ip_set_hash_netiface.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7c2822b8c441bba90e3d6730b70e39e40fe1e8d3
+Merge: 5c45ca1 af55f74
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 1 11:05:28 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit af55f74ce8305ab4201d50be4ca377642182f113
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 1 11:04:51 2012 -0500
+
+    Updated to pax-linux-3.6.8-test12.patch:
+    - simplified/synchronized some UDEREF/amd64 logic based on the 3.7 forward port
+
+ arch/x86/include/asm/fpu-internal.h |   18 +++-----
+ arch/x86/include/asm/futex.h        |    2 +-
+ arch/x86/include/asm/uaccess_64.h   |   79 +++++------------------------------
+ arch/x86/include/asm/xsave.h        |   20 ++++-----
+ arch/x86/kernel/dumpstack_32.c      |    2 +-
+ arch/x86/kernel/dumpstack_64.c      |    2 +-
+ arch/x86/kernel/entry_64.S          |    2 +-
+ arch/x86/kernel/process_32.c        |    2 +-
+ arch/x86/kernel/xsave.c             |    5 +-
+ arch/x86/lib/csum-wrappers_64.c     |   16 +------
+ arch/x86/lib/usercopy_64.c          |   21 +--------
+ 11 files changed, 37 insertions(+), 132 deletions(-)
+
 commit 5c45ca1eb1f3e8a5706f7c983b4dac85c3e73864
 Author: Darren Hart <dvhart@linux.intel.com>
 Date:   Mon Nov 26 16:29:56 2012 -0800
