@@ -1,3 +1,365 @@
+commit a6b3a601da36642b4b910960471732c89107943c
+Merge: 3eb4fcc 953608d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 3 17:57:35 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 953608da9f48d8f9e9b6e0f263a79913b5665723
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 3 17:56:35 2012 -0500
+
+    Update to pax-linux-3.6.9-test13.patch
+
+ arch/x86/kernel/ptrace.c |    9 ++++-----
+ 1 files changed, 4 insertions(+), 5 deletions(-)
+
+commit 3eb4fcc91e4dd645223b6eecfb0d221c8ed933c4
+Author: Jianguo Wu <wujianguo@huawei.com>
+Date:   Thu Nov 29 13:54:21 2012 -0800
+
+    Upstream commit: ae64ffcac35de0db628ba9631edf8ff34c5cd7ac
+    
+    mm/vmemmap: fix wrong use of virt_to_page
+    
+    I enable CONFIG_DEBUG_VIRTUAL and CONFIG_SPARSEMEM_VMEMMAP, when doing
+    memory hotremove, there is a kernel BUG at arch/x86/mm/physaddr.c:20.
+    
+    It is caused by free_section_usemap()->virt_to_page(), virt_to_page() is
+    only used for kernel direct mapping address, but sparse-vmemmap uses
+    vmemmap address, so it is going wrong here.
+    
+      ------------[ cut here ]------------
+      kernel BUG at arch/x86/mm/physaddr.c:20!
+      invalid opcode: 0000 [#1] SMP
+      Modules linked in: acpihp_drv acpihp_slot edd cpufreq_conservative cpufreq_userspace cpufreq_powersave acpi_cpufreq mperf fuse vfat fat loop dm_mod coretemp kvm crc32c_intel ipv6 ixgbe igb iTCO_wdt i7core_edac edac_core pcspkr iTCO_vendor_support ioatdma microcode joydev sr_mod i2c_i801 dca lpc_ich mfd_core mdio tpm_tis i2c_core hid_generic tpm cdrom sg tpm_bios rtc_cmos button ext3 jbd mbcache usbhid hid uhci_hcd ehci_hcd usbcore usb_common sd_mod crc_t10dif processor thermal_sys hwmon scsi_dh_alua scsi_dh_hp_sw scsi_dh_rdac scsi_dh_emc scsi_dh ata_generic ata_piix libata megaraid_sas scsi_mod
+      CPU 39
+      Pid: 6454, comm: sh Not tainted 3.7.0-rc1-acpihp-final+ #45 QCI QSSC-S4R/QSSC-S4R
+      RIP: 0010:[<ffffffff8103c908>]  [<ffffffff8103c908>] __phys_addr+0x88/0x90
+      RSP: 0018:ffff8804440d7c08  EFLAGS: 00010006
+      RAX: 0000000000000006 RBX: ffffea0012000000 RCX: 000000000000002c
+      ...
+    
+    Signed-off-by: Jianguo Wu <wujianguo@huawei.com>
+    Signed-off-by: Jiang Liu <jiang.liu@huawei.com>
+    Reviewd-by: Wen Congyang <wency@cn.fujitsu.com>
+    Acked-by: Johannes Weiner <hannes@cmpxchg.org>
+    Reviewed-by: Yasuaki Ishimatsu <isimatu.yasuaki@jp.fujitsu.com>
+    Reviewed-by: Michal Hocko <mhocko@suse.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/sparse.c |   10 ++++------
+ 1 files changed, 4 insertions(+), 6 deletions(-)
+
+commit 12cb4d8533f05aa44c1142ac821432853c357e4a
+Author: Johannes Weiner <hannes@cmpxchg.org>
+Date:   Thu Nov 29 13:54:23 2012 -0800
+
+    Upstream commit: 60cefed485a02bd99b6299dad70666fe49245da7
+    
+    mm: vmscan: fix endless loop in kswapd balancing
+    
+    Kswapd does not in all places have the same criteria for a balanced
+    zone.  Zones are only being reclaimed when their high watermark is
+    breached, but compaction checks loop over the zonelist again when the
+    zone does not meet the low watermark plus two times the size of the
+    allocation.  This gets kswapd stuck in an endless loop over a small
+    zone, like the DMA zone, where the high watermark is smaller than the
+    compaction requirement.
+    
+    Add a function, zone_balanced(), that checks the watermark, and, for
+    higher order allocations, if compaction has enough free memory.  Then
+    use it uniformly to check for balanced zones.
+    
+    This makes sure that when the compaction watermark is not met, at least
+    reclaim happens and progress is made - or the zone is declared
+    unreclaimable at some point and skipped entirely.
+    
+    Signed-off-by: Johannes Weiner <hannes@cmpxchg.org>
+    Reported-by: George Spelvin <linux@horizon.com>
+    Reported-by: Johannes Hirte <johannes.hirte@fem.tu-ilmenau.de>
+    Reported-by: Tomas Racek <tracek@redhat.com>
+    Tested-by: Johannes Hirte <johannes.hirte@fem.tu-ilmenau.de>
+    Reviewed-by: Rik van Riel <riel@redhat.com>
+    Cc: Mel Gorman <mel@csn.ul.ie>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/vmscan.c |   27 ++++++++++++++++++---------
+ 1 files changed, 18 insertions(+), 9 deletions(-)
+
+commit a5f5ff13b3b628bbf18a4d1d54fa70204f038798
+Author: Naoya Horiguchi <n-horiguchi@ah.jp.nec.com>
+Date:   Thu Nov 29 13:54:34 2012 -0800
+
+    Upstream commit: 783657a7dc20e5c0efbc9a09a9dd38e238a723da
+    
+    mm: soft offline: split thp at the beginning of soft_offline_page()
+    
+    When we try to soft-offline a thp tail page, put_page() is called on the
+    tail page unthinkingly and VM_BUG_ON is triggered in put_compound_page().
+    
+    This patch splits thp before going into the main body of soft-offlining.
+    
+    Signed-off-by: Naoya Horiguchi <n-horiguchi@ah.jp.nec.com>
+    Cc: Andi Kleen <andi@firstfloor.org>
+    Cc: Tony Luck <tony.luck@intel.com>
+    Cc: Andi Kleen <andi.kleen@intel.com>
+    Cc: Wu Fengguang <fengguang.wu@intel.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/memory-failure.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 794a8540fab8a49449c309bcdb0de05348b6ef44
+Author: Mike Galbraith <mgalbraith@suse.de>
+Date:   Wed Nov 28 07:17:18 2012 +0100
+
+    Upstream commit: 412d32e6c98527078779e5b515823b2810e40324
+    
+    workqueue: exit rescuer_thread() as TASK_RUNNING
+    
+    A rescue thread exiting TASK_INTERRUPTIBLE can lead to a task scheduling
+    off, never to be seen again.  In the case where this occurred, an exiting
+    thread hit reiserfs homebrew conditional resched while holding a mutex,
+    bringing the box to its knees.
+    
+    PID: 18105  TASK: ffff8807fd412180  CPU: 5   COMMAND: "kdmflush"
+     #0 [ffff8808157e7670] schedule at ffffffff8143f489
+     #1 [ffff8808157e77b8] reiserfs_get_block at ffffffffa038ab2d [reiserfs]
+     #2 [ffff8808157e79a8] __block_write_begin at ffffffff8117fb14
+     #3 [ffff8808157e7a98] reiserfs_write_begin at ffffffffa0388695 [reiserfs]
+     #4 [ffff8808157e7ad8] generic_perform_write at ffffffff810ee9e2
+     #5 [ffff8808157e7b58] generic_file_buffered_write at ffffffff810eeb41
+     #6 [ffff8808157e7ba8] __generic_file_aio_write at ffffffff810f1a3a
+     #7 [ffff8808157e7c58] generic_file_aio_write at ffffffff810f1c88
+     #8 [ffff8808157e7cc8] do_sync_write at ffffffff8114f850
+     #9 [ffff8808157e7dd8] do_acct_process at ffffffff810a268f
+        [exception RIP: kernel_thread_helper]
+        RIP: ffffffff8144a5c0  RSP: ffff8808157e7f58  RFLAGS: 00000202
+        RAX: 0000000000000000  RBX: 0000000000000000  RCX: 0000000000000000
+        RDX: 0000000000000000  RSI: ffffffff8107af60  RDI: ffff8803ee491d18
+        RBP: 0000000000000000   R8: 0000000000000000   R9: 0000000000000000
+        R10: 0000000000000000  R11: 0000000000000000  R12: 0000000000000000
+        R13: 0000000000000000  R14: 0000000000000000  R15: 0000000000000000
+        ORIG_RAX: ffffffffffffffff  CS: 0010  SS: 0018
+    
+    Signed-off-by: Mike Galbraith <mgalbraith@suse.de>
+    Signed-off-by: Tejun Heo <tj@kernel.org>
+    Cc: stable@vger.kernel.org
+
+ kernel/workqueue.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 52281661de26bc3c84c25e64302632201e0e8f26
+Author: H. Peter Anvin <hpa@linux.intel.com>
+Date:   Wed Nov 21 14:41:21 2012 -0800
+
+    Upstream commit: cb7cb2864e758a1b040040bc55e404c677c911cb
+    
+    x86, kvm: Remove incorrect redundant assembly constraint
+    
+    In __emulate_1op_rax_rdx, we use "+a" and "+d" which are input/output
+    constraints, and *then* use "a" and "d" as input constraints.  This is
+    incorrect, but happens to work on some versions of gcc.
+    
+    However, it breaks gcc with -O0 and icc, and may break on future
+    versions of gcc.
+    
+    Reported-and-tested-by: Melanie Blower <melanie.blower@intel.com>
+    Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+    Link: http://lkml.kernel.org/r/B3584E72CFEBED439A3ECA9BCE67A4EF1B17AF90@FMSMSX107.amr.corp.intel.com
+    Reviewed-by: Paolo Bonzini <pbonzini@redhat.com>
+    Acked-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+ arch/x86/kvm/emulate.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 879dfd077cbe8d93046077f81c8bee5e8a4db5fe
+Author: Vincent Palatin <vpalatin@chromium.org>
+Date:   Fri Nov 30 12:15:32 2012 -0800
+
+    Upstream commit: 644c154186386bb1fa6446bc5e037b9ed098db46
+    
+    x86, fpu: Avoid FPU lazy restore after suspend
+    
+    When a cpu enters S3 state, the FPU state is lost.
+    After resuming for S3, if we try to lazy restore the FPU for a process running
+    on the same CPU, this will result in a corrupted FPU context.
+    
+    Ensure that "fpu_owner_task" is properly invalided when (re-)initializing a CPU,
+    so nobody will try to lazy restore a state which doesn't exist in the hardware.
+    
+    Tested with a 64-bit kernel on a 4-core Ivybridge CPU with eagerfpu=off,
+    by doing thousands of suspend/resume cycles with 4 processes doing FPU
+    operations running. Without the patch, a process is killed after a
+    few hundreds cycles by a SIGFPE.
+    
+    Cc: Duncan Laurie <dlaurie@chromium.org>
+    Cc: Olof Johansson <olofj@chromium.org>
+    Cc: <stable@kernel.org> v3.4+ # for 3.4 need to replace this_cpu_write by percpu_write
+    Signed-off-by: Vincent Palatin <vpalatin@chromium.org>
+    Link: http://lkml.kernel.org/r/1354306532-1014-1-git-send-email-vpalatin@chromium.org
+    Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+    
+    Conflicts:
+    
+    	arch/x86/kernel/smpboot.c
+
+ arch/x86/include/asm/fpu-internal.h |   15 +++++++++------
+ arch/x86/kernel/smpboot.c           |    5 +++++
+ 2 files changed, 14 insertions(+), 6 deletions(-)
+
+commit 01d6c304703b62444553abfbf7e1d976acaf84a1
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu Nov 29 22:00:51 2012 -0500
+
+    Upstream commit: 696199f8ccf7fc6d17ef89c296ad3b6c78c52d9c
+    
+    don't do blind d_drop() in nfs_prime_dcache()
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/nfs/dir.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 2f68d483056677de42322833c49b3882027e06c7
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu Nov 29 22:04:36 2012 -0500
+
+    Upstream commit: c44600c9d1de64314c2bd58103f15acb53e10073
+    
+    nfs_lookup_revalidate(): fix a leak
+    
+    We are leaking fattr and fhandle if we decide that dentry is not to
+    be invalidated, after all (e.g. happens to be a mountpoint).  Just
+    free both before that...
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/nfs/dir.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit abf18459dfc7cb5604365f6c655234bff0eb0e10
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu Nov 29 22:11:06 2012 -0500
+
+    Upstream commit: 0903a0c8491c1e987dfc6eb294199a36760398bc
+    
+    cifs: get rid of blind d_drop() in readdir
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/cifs/readdir.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 8600558967c1475dca2a9d48da9353994760aed4
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu Nov 29 22:17:21 2012 -0500
+
+    Upstream commit: 21d8a15ac333b05f1fecdf9fdc30996be2e11d60
+    
+    lookup_one_len: don't accept . and ..
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/namei.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit bdfb719323b0deaff6ebf442d167838c8adec129
+Author: Mike Galbraith <efault@gmx.de>
+Date:   Mon Dec 3 06:25:25 2012 +0100
+
+    Upstream commit: fd8ef11730f1d03d5d6555aa53126e9e34f52f12
+    
+    Revert "sched, autogroup: Stop going ahead if autogroup is disabled"
+    
+    This reverts commit 800d4d30c8f20bd728e5741a3b77c4859a613f7c.
+    
+    Between commits 8323f26ce342 ("sched: Fix race in task_group()") and
+    800d4d30c8f2 ("sched, autogroup: Stop going ahead if autogroup is
+    disabled"), autogroup is a wreck.
+    
+    With both applied, all you have to do to crash a box is disable
+    autogroup during boot up, then reboot..  boom, NULL pointer dereference
+    due to commit 800d4d30c8f2 not allowing autogroup to move things, and
+    commit 8323f26ce342 making that the only way to switch runqueues:
+    
+      BUG: unable to handle kernel NULL pointer dereference at           (null)
+      IP: [<ffffffff81063ac0>] effective_load.isra.43+0x50/0x90
+      Pid: 7047, comm: systemd-user-se Not tainted 3.6.8-smp #7 MEDIONPC MS-7502/MS-7502
+      RIP: effective_load.isra.43+0x50/0x90
+      Process systemd-user-se (pid: 7047, threadinfo ffff880221dde000, task ffff88022618b3a0)
+      Call Trace:
+        select_task_rq_fair+0x255/0x780
+        try_to_wake_up+0x156/0x2c0
+        wake_up_state+0xb/0x10
+        signal_wake_up+0x28/0x40
+        complete_signal+0x1d6/0x250
+        __send_signal+0x170/0x310
+        send_signal+0x40/0x80
+        do_send_sig_info+0x47/0x90
+        group_send_sig_info+0x4a/0x70
+        kill_pid_info+0x3a/0x60
+        sys_kill+0x97/0x1a0
+        ? vfs_read+0x120/0x160
+        ? sys_read+0x45/0x90
+        system_call_fastpath+0x16/0x1b
+      Code: 49 0f af 41 50 31 d2 49 f7 f0 48 83 f8 01 48 0f 46 c6 48 2b 07 48 8b bf 40 01 00 00 48 85 ff 74 3a 45 31 c0 48 8b 8f 50 01 00 00 <48> 8b 11 4c 8b 89 80 00 00 00 49 89 d2 48 01 d0 45 8b 59 58 4c
+      RIP  [<ffffffff81063ac0>] effective_load.isra.43+0x50/0x90
+       RSP <ffff880221ddfbd8>
+      CR2: 0000000000000000
+    
+    Signed-off-by: Mike Galbraith <efault@gmx.de>
+    Acked-by: Ingo Molnar <mingo@kernel.org>
+    Cc: Yong Zhang <yong.zhang0@gmail.com>
+    Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Cc: stable@vger.kernel.org # 2.6.39+
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/sched/auto_group.c |    4 ----
+ kernel/sched/auto_group.h |    5 -----
+ 2 files changed, 0 insertions(+), 9 deletions(-)
+
+commit 5ddac71cc27042493ba4123f956bcab686ba690c
+Merge: e54277c 9d5b3f4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 3 17:23:54 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9d5b3f42f50e7c7c4f49d86eb63bc2901d583d7a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 3 17:23:18 2012 -0500
+
+    Update to pax-linux-3.6.8-test13.patch:
+    - fixed a refcount false positive in the USB stack, thanks to Christian Perle for reporting it
+
+ drivers/usb/core/hcd.c   |    4 ++--
+ drivers/usb/core/sysfs.c |    2 +-
+ drivers/usb/core/usb.c   |    2 +-
+ include/linux/usb.h      |    2 +-
+ 4 files changed, 5 insertions(+), 5 deletions(-)
+
+commit e54277c32f315fe06aa7aef734cf444d387e2bea
+Merge: 691abc3 df78558
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 3 17:20:07 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit df78558f02f2ced29297ba01eb2a770dcbadab25
+Merge: af55f74 072e44f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 3 17:20:00 2012 -0500
+
+    Merge branch 'linux-3.6.y' into pax-test
+
 commit 691abc38ea3366555ff0e1d9860e04d06606f40b
 Author: Tommi Rantala <tt.rantala@gmail.com>
 Date:   Mon Nov 26 04:16:44 2012 +0000
