@@ -1,3 +1,37 @@
+commit 03ba4a269cf35d5a795338735a9df1fd4cad8fb1
+Author: Mel Gorman <mgorman@suse.de>
+Date:   Wed Dec 5 14:01:41 2012 -0800
+
+    Upstream commit: 18a2f371f5edf41810f6469cb9be39931ef9deb9
+    
+    tmpfs: fix shared mempolicy leak
+    
+    This fixes a regression in 3.7-rc, which has since gone into stable.
+    
+    Commit 00442ad04a5e ("mempolicy: fix a memory corruption by refcount
+    imbalance in alloc_pages_vma()") changed get_vma_policy() to raise the
+    refcount on a shmem shared mempolicy; whereas shmem_alloc_page() went
+    on expecting alloc_page_vma() to drop the refcount it had acquired.
+    This deserves a rework: but for now fix the leak in shmem_alloc_page().
+    
+    Hugh: shmem_swapin() did not need a fix, but surely it's clearer to use
+    the same refcounting there as in shmem_alloc_page(), delete its onstack
+    mempolicy, and the strange mpol_cond_copy() and __mpol_cond_copy() -
+    those were invented to let swapin_readahead() make an unknown number of
+    calls to alloc_pages_vma() with one mempolicy; but since 00442ad04a5e,
+    alloc_pages_vma() has kept refcount in balance, so now no problem.
+    
+    Reported-and-tested-by: Tommi Rantala <tt.rantala@gmail.com>
+    Signed-off-by: Mel Gorman <mgorman@suse.de>
+    Signed-off-by: Hugh Dickins <hughd@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/mempolicy.h |   16 ----------------
+ mm/mempolicy.c            |   22 ----------------------
+ mm/shmem.c                |   26 ++++++++++++++++----------
+ 3 files changed, 16 insertions(+), 48 deletions(-)
+
 commit ddd4b7d0455ec3fb6b5cd897afa645ee9bd95fc9
 Merge: a6b3a60 90cb027
 Author: Brad Spengler <spender@grsecurity.net>
