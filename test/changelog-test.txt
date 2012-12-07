@@ -1,3 +1,29 @@
+commit fb7bcec34c8c5e990899d142b84c44fa76b01ac6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 7 15:41:36 2012 -0500
+
+    compile fix
+
+ grsecurity/grsec_sig.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 6c0a6dd0f8a4c39d1dad386aba04e480a6642ba9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 7 15:16:19 2012 -0500
+
+    Improve usability of GRKERNSEC_BRUTE, sponsorship work for Exonet:
+    Log when activating bruteforce protection against a network daemon
+    Expire the bruteforce protection in 30 minutes if no new crashes occur
+    Check sysctl option at time of stalling forks so that flagged processes
+    don't still delay when the feature is disabled and require a service restart
+
+ fs/exec.c                  |    2 +-
+ grsecurity/grsec_sig.c     |   19 ++++++++++++++++---
+ include/linux/grmsg.h      |    1 +
+ include/linux/grsecurity.h |    2 +-
+ include/linux/sched.h      |    1 +
+ 5 files changed, 20 insertions(+), 5 deletions(-)
+
 commit 03ba4a269cf35d5a795338735a9df1fd4cad8fb1
 Author: Mel Gorman <mgorman@suse.de>
 Date:   Wed Dec 5 14:01:41 2012 -0800
