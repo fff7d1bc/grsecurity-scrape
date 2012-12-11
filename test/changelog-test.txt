@@ -1,3 +1,22 @@
+commit 11f8f55bcb8af2d03d944d86ba6e6d09064a4760
+Merge: fb7bcec f71903a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 10 18:17:28 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit f71903a3c7bd7671e24b4baa644d77900d7ca5a5
+Merge: 90cb027 a63a7cf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 10 18:16:00 2012 -0500
+
+    Update to pax-linux-3.6.10-test15.patch
+    
+    Merge branch 'linux-3.6.y' into pax-test
+
 commit fb7bcec34c8c5e990899d142b84c44fa76b01ac6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Dec 7 15:41:36 2012 -0500
