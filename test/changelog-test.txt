@@ -1,3 +1,13 @@
+commit a6585805419bd0353eb1354b67bde3a44ba4f0ed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 16 11:14:17 2012 -0500
+
+    Fix compilation error reported on forums
+
+ grsecurity/gracl.c    |   32 ++++++++++++++++----------------
+ include/linux/gracl.h |    8 ++++----
+ 2 files changed, 20 insertions(+), 20 deletions(-)
+
 commit 3311cf0dd87799620497f2ff5dcd0f2fd12b7f60
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Dec 15 13:02:17 2012 -0500
