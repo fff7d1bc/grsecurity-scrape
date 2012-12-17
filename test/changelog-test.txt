@@ -1,3 +1,26 @@
+commit bec73ee6456ee611f2df65a213c60564c2666a61
+Merge: a658580 cc5f850
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 17 17:34:26 2012 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit cc5f850f24e3222ef0b5ab8dc9640126b9648205
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 17 17:33:59 2012 -0500
+
+    Update to pax-linux-3.7.1-test1.patch
+
+ arch/x86/kvm/vmx.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 01ebf18c8cbc93c5a40978ca3dba02ee17644f43
+Merge: 37203d2 cc86050
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 17 17:33:44 2012 -0500
+
+    Merge branch 'linux-3.7.y' into pax-test
+
 commit a6585805419bd0353eb1354b67bde3a44ba4f0ed
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 16 11:14:17 2012 -0500
