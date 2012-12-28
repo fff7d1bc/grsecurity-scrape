@@ -1,3 +1,292 @@
+commit 2b4e24ef8a055dbd06143c7db4fa87b9b78d2e6a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 27 19:47:30 2012 -0500
+
+    Drop TCP SYN packets with URG or PSH set when sent to a listening socket,
+    as done already in 2.6.32 and 3.2 patches
+
+ net/ipv4/tcp_input.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ca8035db5aa16372031fa09af02b6b9f5978def8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 27 19:02:18 2012 -0500
+
+    Resolve compiler warning
+
+ fs/autofs4/waitq.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 232b689d8693e47212e45a7fef52c009d2b36f47
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 27 18:20:59 2012 -0500
+
+    Clarify documentation for GRKERNSEC_DMESG based on Twitter discussion
+
+ grsecurity/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a16dad7cd32371634f15e38e6918e060a942c0a1
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Tue Nov 6 10:42:42 2012 -0500
+
+    Upstream commit: ec8f02da9ea500474417d1d31fa3d46a562ab366
+    
+    random: prime last_data value per fips requirements
+    
+    The value stored in last_data must be primed for FIPS 140-2 purposes. Upon
+    first use, either on system startup or after an RNDCLEARPOOL ioctl, we
+    need to take an initial random sample, store it internally in last_data,
+    then pass along the value after that to the requester, so that consistency
+    checks aren't being run against stale and possibly known data.
+    
+    CC: Herbert Xu <herbert@gondor.apana.org.au>
+    CC: "David S. Miller" <davem@davemloft.net>
+    CC: Matt Mackall <mpm@selenic.com>
+    CC: linux-crypto@vger.kernel.org
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+
+ drivers/char/random.c |   17 +++++++++++++++++
+ 1 files changed, 17 insertions(+), 0 deletions(-)
+
+commit d9dc1195eaf876747b96f5f09100d611ea9ef3ca
+Author: Nick Kossifidis <mickflemm@gmail.com>
+Date:   Sun Dec 16 22:18:11 2012 -0500
+
+    Upstream commit: 6133705494bb02953e1e2cc3018a4373981b3c97
+    
+    random: Mix cputime from each thread that exits to the pool
+    
+    When a thread exits mix its cputime (userspace + kernelspace) to the entropy pool.
+    
+    We don't know how "random" this is, so we use add_device_randomness that doesn't mess
+    with entropy count.
+    
+    Signed-off-by: Nick Kossifidis <mickflemm@gmail.com>
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+ kernel/posix-cpu-timers.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit b723466c9a2804d436bf15a2ceed051ab3c332f0
+Author: David S. Miller <davem@davemloft.net>
+Date:   Wed Dec 19 15:19:11 2012 -0800
+
+    Upstream commit: 9f28ffc03e93343ac04874fda9edb7affea45165
+    
+    sparc64: Fix unrolled AES 256-bit key loops.
+    
+    The basic scheme of the block mode assembler is that we start by
+    enabling the FPU, loading the key into the floating point registers,
+    then iterate calling the encrypt/decrypt routine for each block.
+    
+    For the 256-bit key cases, we run short on registers in the unrolled
+    loops.
+    
+    So the {ENCRYPT,DECRYPT}_256_2() macros reload the key registers that
+    get clobbered.
+    
+    The unrolled macros, {ENCRYPT,DECRYPT}_256(), are not mindful of this.
+    
+    So if we have a mix of multi-block and single-block calls, the
+    single-block unrolled 256-bit encrypt/decrypt can run with some
+    of the key registers clobbered.
+    
+    Handle this by always explicitly loading those registers before using
+    the non-unrolled 256-bit macro.
+    
+    This was discovered thanks to all of the new test cases added by
+    Jussi Kivilinna.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/crypto/aes_asm.S |   20 ++++++++++++++------
+ 1 files changed, 14 insertions(+), 6 deletions(-)
+
+commit 296e498451e7346ac2a575c83fadfd2cc1fb7516
+Author: Scott Wolchok <swolchok@umich.edu>
+Date:   Thu Dec 20 15:05:52 2012 -0800
+
+    Upstream commit: a68c2f12b4b28994aaf622bbe5724b7258cc2fcf
+    
+    sendfile: allows bypassing of notifier events
+    
+    do_sendfile() in fs/read_write.c does not call the fsnotify functions,
+    unlike its neighbors.  This manifests as a lack of inotify ACCESS events
+    when a file is sent using sendfile(2).
+    
+    Addresses
+      https://bugzilla.kernel.org/show_bug.cgi?id=12812
+    
+    [akpm@linux-foundation.org: use fsnotify_modify(out.file), not fsnotify_access(), per Dave]
+    Signed-off-by: Alan Cox <alan@linux.intel.com>
+    Cc: Dave Chinner <david@fromorbit.com>
+    Cc: Jens Axboe <axboe@kernel.dk>
+    Cc: Scott Wolchok <swolchok@umich.edu>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/read_write.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 94f842f68083a56698ee66f02c0dc94629f292bd
+Author: Vahram Martirosyan <vmartirosyan@gmail.com>
+Date:   Wed Nov 28 12:44:16 2012 -0500
+
+    Upstream commit: 766f44d46a726cb59f52a75c5c87425a10c4bade
+    
+    ext4: fixed potential NULL dereference in ext4_calculate_overhead()
+    
+    The memset operation before check can cause a BUG if the memory
+    allocation failed.  Since we are using get_zeroed_age, there is no
+    need to use memset anyway.
+    
+    Found by the Spruce system in cooperation with the KEDR Framework.
+    
+    Signed-off-by: Vahram Martirosyan <vmartirosyan@linuxtesting.org>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+
+ fs/ext4/super.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit b2b35c9c6363e5b0b946a87459381d0499f12257
+Author: Eric Sandeen <sandeen@redhat.com>
+Date:   Wed Nov 14 22:22:05 2012 -0500
+
+    Upstream commit: 66bea92c69477a75a5d37b9bfed5773c92a3c4b4
+    
+    ext4: init pagevec in ext4_da_block_invalidatepages
+    
+    ext4_da_block_invalidatepages is missing a pagevec_init(),
+    which means that pvec->cold contains random garbage.
+    
+    This affects whether the page goes to the front or
+    back of the LRU when ->cold makes it to
+    free_hot_cold_page()
+    
+    Reviewed-by: Lukas Czerner <lczerner@redhat.com>
+    Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
+    Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Cc: stable@vger.kernel.org
+    
+    Conflicts:
+    
+    	fs/ext4/inode.c
+
+ fs/ext4/inode.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 027fcff5b98590973d007a04026fe232a64ead16
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Thu Nov 29 21:21:22 2012 -0500
+
+    Upstream commit: aeb1e5d69a5be592e86a926be73efb38c55af404
+    
+    ext4: fix possible use after free with metadata csum
+    
+    Commit fa77dcfafeaa introduces block bitmap checksum calculation into
+    ext4_new_inode() in the case that block group was uninitialized.
+    However we brelse() the bitmap buffer before we attempt to checksum it
+    so we have no guarantee that the buffer is still there.
+    
+    Fix this by releasing the buffer after the possible checksum
+    computation.
+    
+    Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Acked-by: Darrick J. Wong <darrick.wong@oracle.com>
+    Cc: stable@vger.kernel.org
+
+ fs/ext4/ialloc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d8c6ea2b2ad10ae30b52ae08069a607d994c2668
+Author: Christoffer Dall <cdall@cs.columbia.edu>
+Date:   Fri Dec 21 13:03:50 2012 -0500
+
+    Upstream commit: ad4b3fb7ff9940bcdb1e4cd62bd189d10fa636ba
+    
+    mm: Fix PageHead when !CONFIG_PAGEFLAGS_EXTENDED
+    
+    Unfortunately with !CONFIG_PAGEFLAGS_EXTENDED, (!PageHead) is false, and
+    (PageHead) is true, for tail pages.  If this is indeed the intended
+    behavior, which I doubt because it breaks cache cleaning on some ARM
+    systems, then the nomenclature is highly problematic.
+    
+    This patch makes sure PageHead is only true for head pages and PageTail
+    is only true for tail pages, and neither is true for non-compound pages.
+    
+    [ This buglet seems ancient - seems to have been introduced back in Apr
+      2008 in commit 6a1e7f777f61: "pageflags: convert to the use of new
+      macros".  And the reason nobody noticed is because the PageHead()
+      tests are almost all about just sanity-checking, and only used on
+      pages that are actual page heads.  The fact that the old code returned
+      true for tail pages too was thus not really noticeable.   - Linus ]
+    
+    Signed-off-by: Christoffer Dall <cdall@cs.columbia.edu>
+    Acked-by:  Andrea Arcangeli <aarcange@redhat.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: Will Deacon <Will.Deacon@arm.com>
+    Cc: Steve Capper <Steve.Capper@arm.com>
+    Cc: Christoph Lameter <cl@linux.com>
+    Cc: stable@kernel.org  # 2.6.26+
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/page-flags.h |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+commit 01e8997f369771596cd2d6f8c5ff6a09e8cd899b
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Dec 26 12:44:34 2012 +0000
+
+    Upstream commit: c3ae62af8e755ea68380fb5ce682e60079a4c388
+    
+    tcp: should drop incoming frames without ACK flag set
+    
+    In commit 96e0bf4b5193d (tcp: Discard segments that ack data not yet
+    sent) John Dykstra enforced a check against ack sequences.
+    
+    In commit 354e4aa391ed5 (tcp: RFC 5961 5.2 Blind Data Injection Attack
+    Mitigation) I added more safety tests.
+    
+    But we missed fact that these tests are not performed if ACK bit is
+    not set.
+    
+    RFC 793 3.9 mandates TCP should drop a frame without ACK flag set.
+    
+    " fifth check the ACK field,
+          if the ACK bit is off drop the segment and return"
+    
+    Not doing so permits an attacker to only guess an acceptable sequence
+    number, evading stronger checks.
+    
+    Many thanks to Zhiyun Qian for bringing this issue to our attention.
+    
+    See :
+    http://web.eecs.umich.edu/~zhiyunq/pub/ccs12_TCP_sequence_number_inference.pdf
+    
+    Reported-by: Zhiyun Qian <zhiyunq@umich.edu>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Nandita Dukkipati <nanditad@google.com>
+    Cc: Neal Cardwell <ncardwell@google.com>
+    Cc: John Dykstra <john.dykstra1@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_input.c |   14 ++++++++++----
+ 1 files changed, 10 insertions(+), 4 deletions(-)
+
+commit 246b089beffb2612ade24fa0063d8e7b58ec0f4c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 19 17:25:16 2012 -0500
+
+    Fix compile error reported by Michael Tremer
+
+ arch/arm/include/asm/thread_info.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit bec73ee6456ee611f2df65a213c60564c2666a61
 Merge: a658580 cc5f850
 Author: Brad Spengler <spender@grsecurity.net>
