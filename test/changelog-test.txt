@@ -1,3 +1,170 @@
+commit 4e61cb5c16cfaae8766ccd4915051a6035ab7aa6
+Merge: 95d118d e2e2155
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 2 17:45:40 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit e2e2155eb21ba50f5a82e8c48b577a61915da643
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 2 17:43:19 2013 -0500
+
+    Update to pax-linux-3.7.1-test2.patch:
+    - initial KERNEXEC port to arm from spender, it's still work in progress
+      - it's for LPAE for now and makes use of XN/PXN so it should be efficient
+    - more constification based on stats supplied by Larry H of Subreption
+    - ported USERCOPY to ia64 based on the discussion with Dennis Schridde at https://bugs.gentoo.org/show_bug.cgi?id=432100
+    - simplified the latent entropy code a bit
+
+ arch/arm/include/asm/cache.h                |    1 +
+ arch/arm/include/asm/delay.h                |    8 +-
+ arch/arm/include/asm/mach/map.h             |    3 +
+ arch/arm/include/asm/pgalloc.h              |   12 +-
+ arch/arm/include/asm/pgtable-2level-hwdef.h |    4 +
+ arch/arm/include/asm/pgtable-3level-hwdef.h |    4 +
+ arch/arm/include/asm/pgtable-3level.h       |    2 +
+ arch/arm/include/asm/pgtable.h              |   42 +-
+ arch/arm/include/asm/proc-fns.h             |    2 +-
+ arch/arm/include/asm/smp.h                  |    2 +-
+ arch/arm/kernel/head.S                      |    4 +-
+ arch/arm/kernel/module.c                    |   27 +-
+ arch/arm/kernel/setup.c                     |    4 +-
+ arch/arm/kernel/smp.c                       |    2 +-
+ arch/arm/kernel/vmlinux.lds.S               |   20 +-
+ arch/arm/lib/delay.c                        |   14 +-
+ arch/arm/mm/fault.c                         |   10 +-
+ arch/arm/mm/fault.h                         |    7 +
+ arch/arm/mm/init.c                          |   34 +
+ arch/arm/mm/mmu.c                           |   73 ++-
+ arch/ia64/include/asm/uaccess.h             |   28 +-
+ arch/x86/include/asm/io.h                   |    2 +-
+ arch/x86/kernel/cpu/intel_cacheinfo.c       |   48 +-
+ arch/x86/kernel/cpu/mcheck/mce.c            |    2 +-
+ arch/x86/kernel/ptrace.c                    |   10 +-
+ arch/x86/mm/ioremap.c                       |    2 +-
+ arch/x86/mm/mmio-mod.c                      |    4 +-
+ crypto/pcrypt.c                             |    2 +-
+ drivers/acpi/battery.c                      |    2 +-
+ drivers/acpi/video.c                        |    2 +-
+ drivers/base/firmware_class.c               |    2 +-
+ drivers/cdrom/cdrom.c                       |    9 +-
+ drivers/cdrom/gdrom.c                       |    1 -
+ drivers/char/random.c                       |   11 -
+ drivers/gpu/drm/i915/i915_drv.h             |    2 +-
+ drivers/gpu/drm/nouveau/nouveau_pm.h        |    2 +-
+ drivers/gpu/drm/radeon/radeon.h             |    2 +-
+ drivers/gpu/drm/vmwgfx/vmwgfx_drv.h         |    2 +-
+ drivers/hwmon/sht15.c                       |    2 +-
+ drivers/infiniband/hw/mlx4/mlx4_ib.h        |    2 +-
+ drivers/input/keyboard/adp5520-keys.c       |    2 +-
+ drivers/input/touchscreen/da9034-ts.c       |    2 +-
+ drivers/leds/ledtrig-backlight.c            |    2 +-
+ drivers/md/raid5.h                          |    2 +-
+ drivers/net/macvtap.c                       |    2 +-
+ drivers/net/team/team.c                     |    2 +-
+ drivers/net/wimax/i2400m/i2400m.h           |    2 +-
+ drivers/pci/hotplug/acpiphp.h               |    2 +-
+ drivers/power/da9030_battery.c              |    2 +-
+ drivers/power/da9052-battery.c              |    2 +-
+ drivers/power/isp1704_charger.c             |    2 +-
+ drivers/power/pda_power.c                   |    7 +-
+ drivers/power/twl4030_charger.c             |    2 +-
+ drivers/staging/csr/sdio_mmc.c              |    2 +-
+ drivers/tty/serial/samsung.c                |    9 +-
+ drivers/tty/vt/vc_screen.c                  |    2 +-
+ drivers/usb/musb/musb_dma.h                 |    2 +-
+ drivers/vfio/vfio.c                         |    2 +-
+ fs/exec.c                                   |    2 +-
+ fs/pstore/ftrace.c                          |    4 +-
+ fs/xfs/xfs_mount.h                          |    2 +-
+ include/crypto/algapi.h                     |    2 +-
+ include/linux/backlight.h                   |    2 +-
+ include/linux/cdrom.h                       |    1 -
+ include/linux/devfreq.h                     |    2 +-
+ include/linux/extcon.h                      |    2 +-
+ include/linux/hsi/hsi.h                     |    2 +-
+ include/linux/if_pppox.h                    |    2 +-
+ include/linux/ipc_namespace.h               |    2 +-
+ include/linux/kobject.h                     |    2 +-
+ include/linux/lcd.h                         |    2 +-
+ include/linux/mmc/host.h                    |    2 +-
+ include/linux/mmiotrace.h                   |    4 +-
+ include/linux/module.h                      |    1 +
+ include/linux/moduleloader.h                |    4 +
+ include/linux/mtd/mtd.h                     |    2 +-
+ include/linux/netfilter/ipset/ip_set.h      |    2 +-
+ include/linux/netfilter/nfnetlink.h         |    2 +-
+ include/linux/notifier.h                    |    3 +-
+ include/linux/padata.h                      |    2 +-
+ include/linux/pm_clock.h                    |    2 +-
+ include/linux/power/charger-manager.h       |    2 +-
+ include/linux/power/smartreflex.h           |    2 +-
+ include/linux/random.h                      |    4 -
+ include/linux/regset.h                      |    2 +-
+ include/linux/slab.h                        |    2 +-
+ include/linux/sysrq.h                       |    2 +-
+ include/linux/tty_driver.h                  |    2 +-
+ include/net/inet_connection_sock.h          |    2 +-
+ include/net/netfilter/nf_queue.h            |    2 +-
+ include/net/protocol.h                      |    4 +-
+ include/net/sctp/structs.h                  |    4 +-
+ include/net/xfrm.h                          |    2 +-
+ include/sound/soc.h                         |    2 +-
+ include/video/omapdss.h                     |    2 +-
+ init/main.c                                 |    8 +-
+ kernel/notifier.c                           |   17 +-
+ kernel/timer.c                              |    2 +-
+ kernel/trace/ftrace.c                       |    7 +-
+ kernel/trace/ring_buffer.c                  |    2 +-
+ lib/dma-debug.c                             |    2 +-
+ mm/slab.c                                   |    2 +-
+ mm/slob.c                                   |    2 +-
+ mm/slub.c                                   |    2 +-
+ net/8021q/vlan.c                            |    2 +-
+ net/can/af_can.c                            |    2 +-
+ net/can/bcm.c                               |    2 +-
+ net/can/gw.c                                |    6 +-
+ net/can/raw.c                               |    2 +-
+ net/core/flow.c                             |    2 +-
+ net/ipv6/ip6_gre.c                          |    2 +-
+ net/mac80211/ieee80211_i.h                  |    4 +-
+ net/netfilter/xt_TEE.c                      |    2 +-
+ net/sctp/ipv6.c                             |    4 +-
+ net/sctp/protocol.c                         |   10 +-
+ net/xfrm/xfrm_state.c                       |    4 +-
+ security/Kconfig                            |    4 +-
+ sound/pci/hda/hda_intel.c                   |    2 +-
+ sound/soc/codecs/tlv320aic3x.c              |    2 +-
+ sound/soc/codecs/wm8770.c                   |    2 +-
+ sound/soc/codecs/wm8804.c                   |    2 +-
+ sound/soc/codecs/wm8962.c                   |    2 +-
+ sound/soc/codecs/wm8995.c                   |    2 +-
+ sound/soc/codecs/wm8996.c                   |    2 +-
+ tools/gcc/size_overflow_hash.data           | 1172 ++++++++++++++-------------
+ 125 files changed, 1039 insertions(+), 782 deletions(-)
+
+commit 95d118df2561dafd2ee734497bc95e70c801bf5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 1 14:05:19 2013 -0500
+
+    Fix warning (from HIDESYM) on reading /proc/vmallocinfo
+    Thanks to Allan Wegan for the report
+
+ mm/vmalloc.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit d576f1167535d38d5dde0e3a24765c5a735023fe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 31 20:15:51 2012 -0500
+
+    Fix compiler warning
+
+ lib/vsprintf.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 2b4e24ef8a055dbd06143c7db4fa87b9b78d2e6a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Dec 27 19:47:30 2012 -0500
