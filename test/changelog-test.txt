@@ -1,3 +1,112 @@
+commit 31683f8fed06209b90e7f5ce12da841fd27de545
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 4 18:52:46 2013 -0500
+
+    Add IP reporting to PaX logs
+
+ arch/arm/mm/fault.c |   22 ++++++++++++++++------
+ 1 files changed, 16 insertions(+), 6 deletions(-)
+
+commit 076949657258e8863e32f294de23d5375e9c8f2a
+Merge: 0408c65 025c675
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 4 18:44:41 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 025c6759e3845f43a9b2d89fa97c74551e7d5d9d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 4 18:43:51 2013 -0500
+
+    Update to pax-linux-3.7.1-test4.patch:
+    - prefix the KERNEXEC related oops messages on arm with the usual PaX reports as on x86
+    - added some list handling wrappers for KERNEXEC/LIST_DEBUG to minimize the exposure of an open kernel
+
+ arch/arm/mm/fault.c                 |   15 +++++++-
+ arch/arm/mm/fault.h                 |    2 +-
+ drivers/mmc/host/dw_mmc.h           |    2 +-
+ drivers/net/ethernet/8390/ax88796.c |    4 ++-
+ include/linux/list.h                |    3 ++
+ lib/Makefile                        |    2 +-
+ lib/list_debug.c                    |   65 ++++++++++++++++++++++++++++++++---
+ net/sctp/ipv6.c                     |    4 +--
+ net/sctp/protocol.c                 |    6 +--
+ 9 files changed, 85 insertions(+), 18 deletions(-)
+
+commit 0408c6585532144ebd4749afc59b52fab5ef73cd
+Author: Hugh Dickins <hughd@google.com>
+Date:   Wed Jan 2 02:01:33 2013 -0800
+
+    Upstream commit: f2a07f40dbc603c15f8b06e6ec7f768af67b424f
+    
+    tmpfs mempolicy: fix /proc/mounts corrupting memory
+    
+    Recently I suggested using "mount -o remount,mpol=local /tmp" in NUMA
+    mempolicy testing.  Very nasty.  Reading /proc/mounts, /proc/pid/mounts
+    or /proc/pid/mountinfo may then corrupt one bit of kernel memory, often
+    in a page table (causing "Bad swap" or "Bad page map" warning or "Bad
+    pagetable" oops), sometimes in a vm_area_struct or rbnode or somewhere
+    worse.  "mpol=prefer" and "mpol=prefer:Node" are equally toxic.
+    
+    Recent NUMA enhancements are not to blame: this dates back to 2.6.35,
+    when commit e17f74af351c "mempolicy: don't call mpol_set_nodemask() when
+    no_context" skipped mpol_parse_str()'s call to mpol_set_nodemask(),
+    which used to initialize v.preferred_node, or set MPOL_F_LOCAL in flags.
+    With slab poisoning, you can then rely on mpol_to_str() to set the bit
+    for node 0x6b6b, probably in the next page above the caller's stack.
+    
+    mpol_parse_str() is only called from shmem_parse_options(): no_context
+    is always true, so call it unused for now, and remove !no_context code.
+    Set v.nodes or v.preferred_node or MPOL_F_LOCAL as mpol_to_str() might
+    expect.  Then mpol_to_str() can ignore its no_context argument also,
+    the mpol being appropriately initialized whether contextualized or not.
+    Rename its no_context unused too, and let subsequent patch remove them
+    (that's not needed for stable backporting, which would involve rejects).
+    
+    I don't understand why MPOL_LOCAL is described as a pseudo-policy:
+    it's a reasonable policy which suffers from a confusing implementation
+    in terms of MPOL_PREFERRED with MPOL_F_LOCAL.  I believe this would be
+    much more robust if MPOL_LOCAL were recognized in switch statements
+    throughout, MPOL_F_LOCAL deleted, and MPOL_PREFERRED use the (possibly
+    empty) nodes mask like everyone else, instead of its preferred_node
+    variant (I presume an optimization from the days before MPOL_LOCAL).
+    But that would take me too long to get right and fully tested.
+    
+    Signed-off-by: Hugh Dickins <hughd@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mempolicy.c |   64 ++++++++++++++++++++++---------------------------------
+ 1 files changed, 26 insertions(+), 38 deletions(-)
+
+commit 5c1c7a790f063b2eb27d26a7b27ba2a80a44319a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 3 18:30:42 2013 -0500
+
+    GR_NESTED is an outdated flag -- nested subjects don't exist in hash tables
+    these days and are directly attached to objects.  Remove it.
+
+ grsecurity/gracl.c     |   17 -----------------
+ include/linux/grdefs.h |    2 +-
+ 2 files changed, 1 insertions(+), 18 deletions(-)
+
+commit 9fb206b968d327b4456a7521b32e9ea9dc143830
+Merge: 4e61cb5 7c98783fa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 3 17:26:24 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7c98783fa95da5ef664825cd7897ff6d99abb8dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 3 17:23:10 2013 -0500
+
+    Make pte_modify() aware of PXN as well (functionally no different from previous code as all entries
+    in protection_map for userland had PXN set)
+
+ arch/arm/include/asm/pgtable.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 4e61cb5c16cfaae8766ccd4915051a6035ab7aa6
 Merge: 95d118d e2e2155
 Author: Brad Spengler <spender@grsecurity.net>
