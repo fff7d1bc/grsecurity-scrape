@@ -1,3 +1,381 @@
+commit c6cc96f780ca5894892e05d6093ec9ad4538ae76
+Merge: 0a146c3 816f764
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 18 07:52:57 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 816f764b93ebaa12e758d86081182af8285372c4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 17 21:01:53 2013 -0500
+
+    Update to pax-linux-3.7.3-test6.patch:
+    - fixed some fallout from the last constification changes
+    - reverted the native_set_pgd_batched change as the underlying problem is somewhere else
+
+ arch/x86/include/asm/pgtable_64.h    |    2 -
+ arch/x86/kernel/apic/numaq_32.c      |   16 +++++-----
+ arch/x86/kernel/head32.c             |    4 +-
+ arch/x86/lguest/boot.c               |   52 +++++++++++++++++-----------------
+ arch/x86/platform/efi/efi.c          |    4 +-
+ arch/x86/platform/mrst/mrst.c        |   40 +++++++++++++-------------
+ arch/x86/platform/mrst/vrtc.c        |    4 +-
+ arch/x86/platform/olpc/olpc.c        |    2 +-
+ drivers/gpu/drm/i915/intel_display.c |    3 +-
+ 9 files changed, 62 insertions(+), 65 deletions(-)
+
+commit 0a146c3a76dd8f07aa07b733b1bf5ec6ba6a23c1
+Merge: 82c7f86 b0ba2f1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 17 18:45:08 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b0ba2f1aed36351a1eb089f82e7a2fee812978bb
+Merge: 579aeb6 078314e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 17 18:45:00 2013 -0500
+
+    Merge branch 'linux-3.7.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/i915/intel_display.c
+
+commit 82c7f8666cc2dbad56e5e8eac5d116eecb848526
+Merge: 54d1fbf 579aeb6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 16 16:30:33 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 579aeb6caefbeb1481a2d5fb44f8228fd700a176
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 16 16:28:43 2013 -0500
+
+    Update to pax-linux-3.7.2-test5.patch:
+    - some constification work
+      - smarter plugin allowed the removal of many no_const attrs
+      - function pointer array fields are recognized as well
+    - heap-stack gap check is properly supported on arm
+    - KERNEXEC compatibility fix for native_set_pgd_batched
+    - new size overflow plugin from Emese to fix some false positives (http://forums.grsecurity.net/viewtopic.php?f=3&t=3208)
+
+ arch/arm/mach-kirkwood/common.c                    |   19 +++--
+ arch/arm/mm/mmap.c                                 |   21 +++---
+ arch/x86/include/asm/paravirt_types.h              |   12 ++--
+ arch/x86/include/asm/pgtable_64.h                  |    2 +
+ arch/x86/include/asm/reboot.h                      |    2 +-
+ arch/x86/include/asm/smp.h                         |    2 +-
+ arch/x86/include/asm/x86_init.h                    |   28 ++++----
+ arch/x86/kernel/acpi/boot.c                        |    2 +-
+ arch/x86/kernel/amd_gart_64.c                      |    2 +-
+ arch/x86/kernel/aperture_64.c                      |    2 +-
+ arch/x86/kernel/apic/apic_numachip.c               |    2 +-
+ arch/x86/kernel/apic/x2apic_uv_x.c                 |    4 +-
+ arch/x86/kernel/cpu/vmware.c                       |    2 +-
+ arch/x86/kernel/kvm.c                              |    8 +-
+ arch/x86/kernel/kvmclock.c                         |   18 ++--
+ arch/x86/kernel/paravirt.c                         |    8 +-
+ arch/x86/kernel/pci-calgary_64.c                   |    2 +-
+ arch/x86/kernel/vsmp_64.c                          |    4 +-
+ arch/x86/pci/acpi.c                                |    2 +-
+ arch/x86/pci/xen.c                                 |   16 ++--
+ arch/x86/platform/olpc/olpc_dt.c                   |    2 +-
+ arch/x86/xen/apic.c                                |    2 +-
+ arch/x86/xen/enlighten.c                           |   30 ++++----
+ arch/x86/xen/irq.c                                 |    2 +-
+ arch/x86/xen/mmu.c                                 |    4 +-
+ arch/x86/xen/smp.c                                 |   14 ++--
+ arch/x86/xen/spinlock.c                            |   12 ++--
+ arch/x86/xen/time.c                                |   26 +++---
+ crypto/pcrypt.c                                    |    2 +-
+ drivers/acpi/battery.c                             |    2 +-
+ drivers/acpi/video.c                               |    2 +-
+ drivers/base/firmware_class.c                      |    2 +-
+ drivers/firmware/efivars.c                         |    6 +-
+ drivers/gpu/drm/i915/i915_drv.h                    |    6 +-
+ drivers/gpu/drm/nouveau/nouveau_pm.h               |    2 +-
+ drivers/gpu/drm/radeon/radeon.h                    |    6 +-
+ drivers/gpu/drm/vmwgfx/vmwgfx_drv.h                |    2 +-
+ drivers/hwmon/sht15.c                              |    2 +-
+ drivers/i2c/i2c-mux.c                              |    2 +-
+ drivers/infiniband/hw/mlx4/mlx4_ib.h               |    2 +-
+ drivers/input/keyboard/adp5520-keys.c              |    2 +-
+ drivers/input/touchscreen/da9034-ts.c              |    2 +-
+ drivers/iommu/amd_iommu_init.c                     |    4 +-
+ drivers/iommu/dmar.c                               |    2 +-
+ drivers/isdn/hardware/eicon/divasync.h             |    2 +-
+ drivers/isdn/hardware/eicon/xdi_adapter.h          |    2 +-
+ drivers/leds/ledtrig-backlight.c                   |    2 +-
+ drivers/md/persistent-data/dm-space-map-disk.c     |    2 +-
+ drivers/md/persistent-data/dm-space-map-metadata.c |    2 +-
+ drivers/md/raid5.h                                 |    2 +-
+ drivers/media/dvb-core/dvb_demux.h                 |    2 +-
+ drivers/media/platform/timblogiw.c                 |    4 +-
+ drivers/media/radio/radio-tea5777.h                |    2 +-
+ drivers/media/usb/au0828/au0828.h                  |    2 +-
+ drivers/media/usb/pvrusb2/pvrusb2-hdw-internal.h   |    2 +-
+ drivers/mfd/abx500-core.c                          |    2 +-
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_cmn.h    |    2 +-
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_sp.c     |   11 +--
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_sp.h     |    5 +-
+ drivers/net/ethernet/dec/tulip/uli526x.c           |    2 +-
+ drivers/net/ethernet/intel/e1000e/hw.h             |    9 +--
+ drivers/net/ethernet/intel/igb/e1000_hw.h          |   12 +--
+ drivers/net/ethernet/intel/igbvf/vf.h              |    6 +-
+ drivers/net/ethernet/intel/ixgbe/ixgbe_type.h      |   12 +--
+ drivers/net/ethernet/intel/ixgbevf/vf.h            |    6 +-
+ drivers/net/ethernet/neterion/vxge/vxge-config.c   |    7 +-
+ drivers/net/ethernet/neterion/vxge/vxge-config.h   |    2 +-
+ drivers/net/ethernet/neterion/vxge/vxge-traffic.h  |    2 +-
+ drivers/net/wimax/i2400m/i2400m.h                  |    2 +-
+ drivers/net/wireless/ath/ath.h                     |    1 -
+ drivers/net/wireless/ath/ath9k/hw.h                |    2 +-
+ .../net/wireless/brcm80211/brcmfmac/wl_cfg80211.h  |    4 +-
+ .../net/wireless/brcm80211/brcmsmac/phy/phy_int.h  |    2 +-
+ drivers/net/wireless/mwifiex/main.h                |    2 +-
+ drivers/net/wireless/ti/wl1251/sdio.c              |   12 ++-
+ drivers/net/wireless/ti/wl1251/wl1251.h            |    2 +-
+ drivers/net/wireless/ti/wl12xx/main.c              |    8 ++-
+ drivers/net/wireless/ti/wl18xx/main.c              |    6 +-
+ drivers/net/wireless/ti/wlcore/wlcore.h            |    2 +-
+ drivers/pci/hotplug/acpiphp.h                      |    2 +-
+ drivers/pci/hotplug/cpci_hotplug.h                 |    2 +-
+ drivers/pci/hotplug/cpcihp_generic.c               |    6 +-
+ drivers/pci/hotplug/cpcihp_zt5550.c                |   14 ++-
+ drivers/power/bq27x00_battery.c                    |    2 +-
+ drivers/power/da9030_battery.c                     |    2 +-
+ drivers/power/da9052-battery.c                     |    2 +-
+ drivers/power/isp1704_charger.c                    |    2 +-
+ drivers/power/twl4030_charger.c                    |    2 +-
+ drivers/scsi/aacraid/aacraid.h                     |    2 +-
+ drivers/scsi/bfa/bfa_fcpim.c                       |    4 +-
+ drivers/scsi/bfa/bfa_fcpim.h                       |    5 +-
+ drivers/scsi/ips.h                                 |    2 +-
+ drivers/scsi/qla2xxx/qla_def.h                     |    2 +-
+ drivers/scsi/qla2xxx/qla_os.c                      |    6 +-
+ drivers/staging/csr/sdio_mmc.c                     |    2 +-
+ drivers/staging/usbip/usbip_common.h               |    2 +-
+ drivers/staging/wlan-ng/hfa384x_usb.c              |    2 +-
+ drivers/tty/vt/vc_screen.c                         |    2 +-
+ drivers/usb/musb/musb_dma.h                        |    2 +-
+ drivers/vfio/vfio.c                                |    2 +-
+ drivers/xen/xen-pciback/conf_space.h               |    6 +-
+ fs/btrfs/check-integrity.c                         |    2 +-
+ fs/seq_file.c                                      |    2 +-
+ fs/xfs/xfs_mount.h                                 |    2 +-
+ include/acpi/acpi_bus.h                            |    2 +-
+ include/drm/drm_crtc_helper.h                      |    2 +-
+ include/linux/backlight.h                          |    2 +-
+ include/linux/clk-provider.h                       |    1 -
+ include/linux/devfreq.h                            |    2 +-
+ include/linux/efi.h                                |    2 +-
+ include/linux/extcon.h                             |    2 +-
+ include/linux/firewire.h                           |    2 +-
+ include/linux/fsnotify_backend.h                   |    1 -
+ include/linux/ftrace_event.h                       |    2 +-
+ include/linux/hid.h                                |    2 +-
+ include/linux/hsi/hsi.h                            |    2 +-
+ include/linux/if_team.h                            |    3 +-
+ include/linux/intel-iommu.h                        |    2 +-
+ include/linux/ipc_namespace.h                      |    2 +-
+ include/linux/lcd.h                                |    2 +-
+ include/linux/memory.h                             |    2 +-
+ include/linux/mfd/abx500.h                         |    1 -
+ include/linux/mfd/abx500/ux500_chargalg.h          |    2 +-
+ include/linux/mmc/host.h                           |    2 +-
+ include/linux/mtd/mtd.h                            |    2 +-
+ include/linux/of_pdt.h                             |    2 +-
+ include/linux/padata.h                             |    2 +-
+ include/linux/pm_clock.h                           |    2 +-
+ include/linux/power/charger-manager.h              |    2 +-
+ include/linux/preempt.h                            |    2 +-
+ include/linux/proc_fs.h                            |    2 +-
+ include/linux/rfkill.h                             |    1 -
+ include/linux/sunrpc/sched.h                       |    1 -
+ include/linux/usb/renesas_usbhs.h                  |    2 +-
+ include/media/saa7146_vv.h                         |    4 +-
+ include/media/v4l2-dev.h                           |    1 -
+ include/media/v4l2-ioctl.h                         |    1 -
+ include/net/bluetooth/bluetooth.h                  |    2 +-
+ include/net/caif/caif_hsi.h                        |    2 +-
+ include/net/irda/ircomm_core.h                     |    2 +-
+ include/net/tcp.h                                  |    2 +-
+ include/net/udp.h                                  |    2 +-
+ include/sound/ak4xxx-adda.h                        |    2 +-
+ include/sound/hwdep.h                              |    2 +-
+ include/sound/info.h                               |    2 +-
+ include/sound/pcm.h                                |    1 -
+ include/sound/sb16_csp.h                           |    2 +-
+ include/sound/soc.h                                |    2 +-
+ include/sound/tea575x-tuner.h                      |    2 +-
+ include/target/target_core_base.h                  |    2 +-
+ kernel/trace/ring_buffer.c                         |    2 +-
+ kernel/trace/trace_output.c                        |    8 +-
+ net/atm/mpc.h                                      |    2 +-
+ net/can/bcm.c                                      |    2 +-
+ net/can/gw.c                                       |    2 +-
+ net/can/raw.c                                      |    2 +-
+ net/core/flow.c                                    |    2 +-
+ net/core/rtnetlink.c                               |   16 +++--
+ net/mac80211/ieee80211_i.h                         |    4 +-
+ net/netfilter/xt_TEE.c                             |    2 +-
+ net/wireless/core.h                                |    2 +-
+ sound/isa/cmi8330.c                                |    2 +-
+ sound/pci/hda/hda_codec.h                          |    7 +-
+ sound/pci/hda/hda_intel.c                          |    2 +-
+ sound/pci/ice1712/ice1712.h                        |    4 +-
+ sound/soc/codecs/tlv320aic3x.c                     |    2 +-
+ sound/soc/codecs/wm8770.c                          |    2 +-
+ sound/soc/codecs/wm8804.c                          |    2 +-
+ sound/soc/codecs/wm8962.c                          |    2 +-
+ sound/soc/codecs/wm8995.c                          |    2 +-
+ sound/soc/codecs/wm8996.c                          |    2 +-
+ tools/gcc/constify_plugin.c                        |   82 ++++++++++++--------
+ tools/gcc/size_overflow_plugin.c                   |   82 +++++++++++--------
+ virt/kvm/kvm_main.c                                |   10 ++-
+ 174 files changed, 441 insertions(+), 411 deletions(-)
+
+commit 54d1fbf61fe03b0e29b7ef4ed952cb42ac66a434
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Fri Jan 11 14:31:48 2013 -0800
+
+    Upstream commit: 6d92d4f6a74766cc885b18218268e0c47fbca399
+    
+    fs/exec.c: work around icc miscompilation
+    
+    The tricky problem is this check:
+    
+    	if (i++ >= max)
+    
+    icc (mis)optimizes this check as:
+    
+    	if (++i > max)
+    
+    The check now becomes a no-op since max is MAX_ARG_STRINGS (0x7FFFFFFF).
+    
+    This is "allowed" by the C standard, assuming i++ never overflows,
+    because signed integer overflow is undefined behavior.  This
+    optimization effectively reverts the previous commit 362e6663ef23
+    ("exec.c, compat.c: fix count(), compat_count() bounds checking") that
+    tries to fix the check.
+    
+    This patch simply moves ++ after the check.
+    
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Cc: Jason Baron <jbaron@redhat.com>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/exec.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit eb20c4009c3b59be19deb3a7708d17a42b51d13f
+Merge: 8510189 614a466
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 14 23:19:29 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 614a46687458fdda30abdece8cf27586e2146edc
+Merge: 025c675 e6577f3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 14 23:19:20 2013 -0500
+
+    Merge branch 'linux-3.7.y' into pax-test
+
+commit 8510189b5479a1adca17223092414ba4d586b9e1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 14 23:13:34 2013 -0500
+
+    Fix dup_mm() OOPS caused by exec_file refcnt imbalance, as reported at:
+    http://forums.grsecurity.net/viewtopic.php?f=3&t=3230
+
+ fs/fs_struct.c        |    4 ----
+ grsecurity/gracl_fs.c |   10 ++--------
+ kernel/exit.c         |    1 +
+ kernel/fork.c         |    8 +++++---
+ 4 files changed, 8 insertions(+), 15 deletions(-)
+
+commit 53b8d183e623bdf337f3d4404f69e5bd3c5f8983
+Author: Xi Wang <xi.wang@gmail.com>
+Date:   Sat Jan 5 11:19:24 2013 +0000
+
+    Upstream commit: c7e2e1d72ed7707239d20525e0ebcad7e3303659
+    
+    ipv4: fix NULL checking in devinet_ioctl()
+    
+    The NULL pointer check `!ifa' should come before its first use.
+    
+    [ Bug origin : commit fd23c3b31107e2fc483301ee923d8a1db14e53f4
+      (ipv4: Add hash table of interface addresses) in linux-2.6.39 ]
+    
+    Signed-off-by: Xi Wang <xi.wang@gmail.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/devinet.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c66aa2d9f710ce765b7c76187ce7d4294c8bc649
+Author: Nickolai Zeldovich <nickolai@csail.mit.edu>
+Date:   Sat Jan 5 14:19:51 2013 -0500
+
+    Upstream commit: ecf0eb9edbb607d74f74b73c14af8b43f3729528
+    
+    nfs: avoid dereferencing null pointer in initiate_bulk_draining
+    
+    Fix an inverted null pointer check in initiate_bulk_draining().
+    
+    Signed-off-by: Nickolai Zeldovich <nickolai@csail.mit.edu>
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+    Cc: stable@vger.kernel.org [>= 3.7]
+
+ fs/nfs/callback_proc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ed5c96041065f6a9f61815adbc6e01b010d8dd91
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 5 13:47:47 2013 -0500
+
+    Add a feature from Willy Tarreau to disable TCP Simultaneous Connect.
+    I've eliminated the sysctl and enabled the feature by default
+    in all automatic configurations.
+    
+    Willy's original commit message is below:
+    
+    >From 61abc5ef6c3bc210c63036b5f36cc96a7802b605 Mon Sep 17 00:00:00 2001
+    From: Willy Tarreau <w@1wt.eu>
+    Date: Wed, 8 Oct 2008 10:00:42 +0200
+    Subject: [PATCH] TCP: add a sysctl to disable simultaneous connection opening.
+    
+    Strict implementation of RFC793 (TCP) requires support for a feature
+    called "simultaneous connect", which allows two clients to connect to
+    each other without anyone entering a listening state.  While almost
+    never used, and supported by few OSes, Linux supports this feature.
+    
+    However, it introduces a weakness in the protocol which makes it very
+    easy for an attacker to prevent a client from connecting to a known
+    server. The attacker only has to guess the source port to shut down
+    the client connection during its establishment. The impact is limited,
+    but it may be used to prevent an antivirus or IPS from fetching updates
+    and not detecting an attack, or to prevent an SSL gateway from fetching
+    a CRL for example.
+    
+    This patch provides a new sysctl "tcp_simult_connect" to enable or disable
+    support for this useless feature. It comes disabled by default.
+    
+    Hundreds of systems running with that feature disabled for more than 4 years
+    have never encountered an application which requires it. It is almost never
+    supported by firewalls BTW.
+    
+    Signed-off-by: Willy Tarreau <w@1wt.eu>
+
+ grsecurity/Kconfig   |   18 ++++++++++++++++++
+ net/ipv4/tcp_input.c |    2 ++
+ 2 files changed, 20 insertions(+), 0 deletions(-)
+
 commit 31683f8fed06209b90e7f5ce12da841fd27de545
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Jan 4 18:52:46 2013 -0500
