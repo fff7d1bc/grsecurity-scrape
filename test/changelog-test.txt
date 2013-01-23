@@ -1,3 +1,130 @@
+commit 0f50a70b6efaa03610a69fc25cf8db62d887cc1a
+Merge: c70c02a f1c3039
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 21 18:57:52 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/ext4/inode.c
+
+commit f1c3039f6e9dc2913f6eb3203ba21eb857e5734f
+Merge: 816f764 8a69ca2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 21 18:56:24 2013 -0500
+
+    Update to pax-linux-3.7.4-test7.patch:
+    - fixed some more constification fallout (e.g., https://bugs.gentoo.org/show_bug.cgi?id=453216)
+    - fixed a pointless alloca in Xen that interfered with STACKLEAK
+    
+    Merge branch 'linux-3.7.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/setup.c
+
+commit c70c02a9cf0d854384acc1b4f076f8597c2acf7e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 19 17:37:10 2013 -0500
+
+    fix typo
+
+ grsecurity/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 6b22e27bfa41fff41f0d0d9c261c1ba91a2b1952
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 19 10:56:50 2013 -0500
+
+    fix typo in documentation
+
+ grsecurity/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 724b5684840fc6a1165ab3bd55f8fb2ea2034b58
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 19 02:31:15 2013 -0500
+
+    Choose "between" wording to cover both topdown and bottom-up allocators
+
+ grsecurity/Kconfig |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 56d0febf71174e8721a1e40c1d0c8ab9b5993661
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 18 19:47:09 2013 -0500
+
+    compile fix
+
+ mm/mmap.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit f23ee9c09aa5e507f4e50b543e901ef2d978c3dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 18 19:31:24 2013 -0500
+
+    compile fix
+
+ fs/stat.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 07cdd272611cdfb07d90da14621ae3e77e6ea51e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 18 19:22:11 2013 -0500
+
+    depend on PAX_RANDMMAP instead and make disabled version inline
+
+ grsecurity/Kconfig    |    2 +-
+ include/linux/sched.h |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 8dbecec28c3677066f9d21d04d52b0e09c8864bd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 18 19:15:21 2013 -0500
+
+    replace offset calculation with call to function
+
+ arch/x86/kernel/sys_i386_32.c |    2 +-
+ arch/x86/kernel/sys_x86_64.c  |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 7ffb48dde16ec8c8aff6871d29ab41dd93e0aefc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 18 19:09:04 2013 -0500
+
+    add CONFIG_GRKERNSEC_RAND_THREADSTACK
+
+ arch/alpha/kernel/osf_sys.c      |   14 +++++++-------
+ arch/arm/mm/mmap.c               |   14 ++++++++------
+ arch/frv/mm/elf-fdpic.c          |    7 ++++---
+ arch/ia64/kernel/sys_ia64.c      |    3 ++-
+ arch/ia64/mm/hugetlbpage.c       |    3 ++-
+ arch/mips/mm/mmap.c              |    9 +++++----
+ arch/parisc/kernel/sys_parisc.c  |   19 +++++++++++--------
+ arch/powerpc/mm/slice.c          |    8 ++++----
+ arch/sh/mm/mmap.c                |   14 ++++++++------
+ arch/sparc/kernel/sys_sparc_32.c |    3 ++-
+ arch/sparc/kernel/sys_sparc_64.c |   14 ++++++++------
+ arch/sparc/mm/hugetlbpage.c      |   13 ++++++++-----
+ arch/x86/kernel/sys_i386_32.c    |   14 ++++++++------
+ arch/x86/kernel/sys_x86_64.c     |   12 +++++++-----
+ arch/x86/mm/hugetlbpage.c        |   11 +++++++----
+ grsecurity/Kconfig               |   20 ++++++++++++++++++++
+ include/linux/sched.h            |   14 ++++++++++++--
+ mm/mmap.c                        |   26 ++++++++++++++++++++++----
+ 18 files changed, 145 insertions(+), 73 deletions(-)
+
+commit c4833327a1c35d2c27f74b6fad4f5997e2bb22a1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 18 16:24:58 2013 -0500
+
+    Add GRKERNSEC_DEVICE_SIDECHANNEL
+
+ fs/stat.c                |   19 +++++++++++++++----
+ grsecurity/Kconfig       |   13 +++++++++++++
+ include/linux/fs.h       |   10 ++++++++++
+ include/linux/fsnotify.h |    6 ++++++
+ 4 files changed, 44 insertions(+), 4 deletions(-)
+
 commit c6cc96f780ca5894892e05d6093ec9ad4538ae76
 Merge: 0a146c3 816f764
 Author: Brad Spengler <spender@grsecurity.net>
