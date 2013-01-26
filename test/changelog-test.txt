@@ -1,3 +1,29 @@
+commit 949064bc32849ff016b4bd79a2e2b09794ff68b9
+Merge: 0f50a70 816e9a2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 25 21:44:39 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 816e9a246e553b4b5227b0a7064f46b81ba95b7a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 25 21:43:47 2013 -0500
+
+    Update to pax-linux-3.7.4-test8.patch:
+    
+    - mips got more heap-stack gap enforcement
+    - more alloca related cleanup in xen
+    - added countermeasure against attacks that reduce ASLR by exhausting the address space on 32 bit userland
+      see kingcope's post for the windows version
+      http://kingcope.wordpress.com/2013/01/24/attacking-the-windows-78-address-space-randomization/
+
+ arch/mips/mm/mmap.c      |   10 ++++------
+ arch/x86/kernel/ptrace.c |    2 +-
+ arch/x86/xen/enlighten.c |    4 +---
+ fs/binfmt_elf.c          |    2 +-
+ fs/exec.c                |   22 ++++++++++++++++++++++
+ 5 files changed, 29 insertions(+), 11 deletions(-)
+
 commit 0f50a70b6efaa03610a69fc25cf8db62d887cc1a
 Merge: c70c02a f1c3039
 Author: Brad Spengler <spender@grsecurity.net>
