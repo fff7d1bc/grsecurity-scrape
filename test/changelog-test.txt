@@ -1,3 +1,55 @@
+commit 114f861bdba4abf1632ea5200a94ca4723cd3932
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 28 18:45:07 2013 -0500
+
+    compile fix on mips
+
+ arch/mips/mm/mmap.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ecc8846790ec0fb0a0b28f48c444894959a0b4bd
+Merge: eabeb39 d79f1b1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 28 18:37:17 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	kernel/module.c
+
+commit d79f1b183297c6b5f845f42f125456d3633caa15
+Merge: 816e9a2 13280f4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 28 18:17:15 2013 -0500
+
+    Update to pax-linux-3.7.5-test8.patch:
+    - forward port to 3.7.5
+    - fixed a section mismatch on ia64 due to constification (https://bugs.gentoo.org/show_bug.cgi?id=454228)
+    - fixed a USERCOPY detection (harmless infoleak from mnt_cache) reported by Michael Tremer
+    
+    Merge branch 'linux-3.7.y' into pax-test
+    
+    Conflicts:
+    	kernel/module.c
+
+commit eabeb3923234707a1371cd7b0320f5ecbfeb16ba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 28 06:08:12 2013 -0500
+
+    make kmemleak user-readonly
+
+ mm/kmemleak.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit eedd4eeccd8ef357d0a2d8651a0065bbb9fa7650
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 28 06:06:43 2013 -0500
+
+    allow kmemleak, it's a debugfs-only file marked user-readonly
+
+ mm/kmemleak.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 949064bc32849ff016b4bd79a2e2b09794ff68b9
 Merge: 0f50a70 816e9a2
 Author: Brad Spengler <spender@grsecurity.net>
