@@ -1,3 +1,101 @@
+commit 252baa97c0c3d91f667cab650375c29d8d6cbc3f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 6 18:14:13 2013 -0500
+
+    Kill yet another useless technique from Dan Rosenberg
+    (already unaffected due to GRKERNSEC_DMESG)
+
+ arch/x86/mm/fault.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 090d1fc72ed668671ec5a382969e827b75bcd88c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 6 17:38:55 2013 -0500
+
+    user namespace compat fixes, make some often-called functions
+    compile out completely if no relevant feature is enabled,
+    use atomic for slub refcount added in 3.7.6
+
+ grsecurity/gracl.c          |   82 ++++++++++++-------------------------------
+ grsecurity/grsec_disabled.c |    8 ----
+ grsecurity/grsec_log.c      |   27 +++++++++-----
+ include/linux/grinternal.h  |    8 ----
+ include/linux/grsecurity.h  |   20 ++++++++++
+ mm/slub.c                   |    2 +-
+ security/Kconfig            |   10 -----
+ 7 files changed, 61 insertions(+), 96 deletions(-)
+
+commit 0980bea589742e48100871aa689b9b54c22f6f67
+Merge: 21c764f78 6bafdef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 4 21:17:10 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/Kconfig
+    	arch/x86/mm/fault.c
+    	fs/exec.c
+    	security/Kconfig
+
+commit 6bafdef361de8d0f5e80d77fccabd8d1be405fa5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 4 21:06:49 2013 -0500
+
+    Update to pax-linux-3.7.5-test11.patch:
+    - fixed some more arm/CONSTIFY conflicts, reported by Michael Tremer
+    - added runtime arm/PXN support detection by spender
+    - added compile time detection for non-optimal use of kmalloc_array/kcalloc
+    - fixed arm/!LPAE compilation, reported by Michael Tremer
+    - adapted some PaX messages for user namespaces
+
+ arch/arm/include/asm/mach/dma.h                 |    2 +-
+ arch/arm/include/asm/pgalloc.h                  |    5 ++-
+ arch/arm/include/asm/pgtable-2level.h           |    1 +
+ arch/arm/include/asm/pgtable.h                  |   37 ++++++++++++----------
+ arch/arm/kernel/setup.c                         |   10 +++++-
+ arch/arm/mm/mmu.c                               |    2 +
+ arch/x86/Kconfig                                |    1 +
+ arch/x86/include/asm/pgtable.h                  |    4 +-
+ arch/x86/mm/fault.c                             |    4 +-
+ drivers/edac/edac_mc.c                          |    6 ++--
+ drivers/media/platform/s5p-tv/mixer.h           |    2 +-
+ drivers/media/platform/s5p-tv/mixer_grp_layer.c |    2 +-
+ drivers/media/platform/s5p-tv/mixer_reg.c       |    2 +-
+ drivers/media/platform/s5p-tv/mixer_video.c     |   24 +++++++-------
+ drivers/media/platform/s5p-tv/mixer_vp_layer.c  |    2 +-
+ drivers/mmc/host/sdhci-s3c.c                    |    8 +++--
+ fs/exec.c                                       |    9 ++---
+ include/linux/slab.h                            |   10 ++++++
+ include/net/gro_cells.h                         |    4 +-
+ security/Kconfig                                |    8 ++--
+ 20 files changed, 84 insertions(+), 59 deletions(-)
+
+commit 21c764f78cada63e493a9f8766d95c8aed184718
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 4 20:38:36 2013 -0500
+
+    remove unused gr_handle_chroot_rawio(), its functionality is in
+    gr_handle_rawio()
+
+ grsecurity/grsec_chroot.c |   11 -----------
+ security/Kconfig          |    6 ++++++
+ 2 files changed, 6 insertions(+), 11 deletions(-)
+
+commit 0b033fdd0322814f06cd385a3af91bdac92ee78b
+Merge: 71d1f1e 68c74e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 4 17:13:31 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 68c74e2033b4113d1c323f195bc7f5c584211044
+Merge: d79f1b1 07c4ee0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 4 17:13:24 2013 -0500
+
+    Merge branch 'linux-3.7.y' into pax-test
+
 commit 71d1f1efc79699adcfb5cf7cb1ead1ab9349d7ac
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jan 31 18:06:01 2013 -0500
