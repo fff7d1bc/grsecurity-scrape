@@ -1,3 +1,123 @@
+commit 94f0dd1143384b2b8a5e06ff67d829f169082a02
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 7 18:35:04 2013 -0500
+
+    Fix upstream bug of loading modules on ARM with 0-sized sections
+
+ arch/arm/kernel/module.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 4df5bb665555f09455dba1f9f48545e7ef508976
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 7 18:20:39 2013 -0500
+
+    fix !KERNEXEC booting
+
+ arch/arm/mm/mmu.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit b02e105469ef998b9028451383b55db68abc9a4c
+Author: Tony Lu <zlu@tilera.com>
+Date:   Mon Feb 4 14:28:46 2013 -0800
+
+    mm/hugetlb: set PTE as huge in hugetlb_change_protection and remove_migration_pte
+    
+    When setting a huge PTE, besides calling pte_mkhuge(), we also need to
+    call arch_make_huge_pte(), which we indeed do in make_huge_pte(), but we
+    forget to do in hugetlb_change_protection() and remove_migration_pte().
+    
+    Signed-off-by: Zhigang Lu <zlu@tilera.com>
+    Signed-off-by: Chris Metcalf <cmetcalf@tilera.com>
+    Reviewed-by: Michal Hocko <mhocko@suse.cz>
+    Acked-by: Hillf Danton <dhillf@gmail.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/hugetlb.c |    1 +
+ mm/migrate.c |    4 +++-
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
+commit d3081ddb9f449a73dfc9d487a5463f4d6517b594
+Merge: 7287153 6337e1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 7 18:05:44 2013 -0500
+
+    Make the new devel-only PAX_USERCOPY_DEBUG check all copies
+    for size/heap whitelist violations
+    
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/mm/fault.c
+
+commit 6337e1f28c2fe0a9ba0d2343d24cd360f8d27646
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 7 17:58:42 2013 -0500
+
+    Update to pax-linux-3.7.6-test12.patch:
+    - reworked the USERCOPY interface a bit to make checking for constant copy sizes easier
+    - various ASLR cleanups
+      - enabled it for hugetlb (x86 and generic)
+      - made arm/mips/powerpc/sparc ignore PF_RANDOMIZE as x86 does
+    - fixed the KERNEXEC instrumentation for twofish/avx
+    - removed some dead code from entry_32.S
+    - added a fix for http://vulnfactory.org/blog/2013/02/06/a-linux-memory-trick/
+
+ arch/arm/include/asm/uaccess.h              |   10 +++-----
+ arch/arm/mm/mmap.c                          |    4 +++
+ arch/mips/mm/mmap.c                         |   16 ++++++++++++++
+ arch/powerpc/mm/mmap_64.c                   |    4 +++
+ arch/sparc/kernel/sys_sparc_64.c            |    4 +++
+ arch/x86/crypto/twofish-avx-x86_64-asm_64.S |    6 ++--
+ arch/x86/include/asm/uaccess.h              |    2 -
+ arch/x86/include/asm/uaccess_32.h           |   15 ++++++-------
+ arch/x86/include/asm/uaccess_64.h           |   18 +++++++---------
+ arch/x86/kernel/entry_32.S                  |   30 ---------------------------
+ arch/x86/mm/fault.c                         |    6 +++-
+ arch/x86/mm/hugetlbpage.c                   |    4 +++
+ drivers/acpi/proc.c                         |    7 ++++-
+ fs/exec.c                                   |    4 +-
+ fs/hugetlbfs/inode.c                        |   15 ++++++++-----
+ include/linux/sched.h                       |    1 -
+ include/linux/thread_info.h                 |    7 ++++++
+ include/video/omapdss.h                     |    2 +-
+ kernel/module.c                             |    4 +-
+ mm/slab.c                                   |    2 +-
+ mm/slub.c                                   |    2 +-
+ 21 files changed, 86 insertions(+), 77 deletions(-)
+
+commit 72871538ed49debbf9a99c80dfb7c45c736b7bf1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 7 17:47:47 2013 -0500
+
+    It was "suggested by" Kees Cook to rewrite my previous patch
+    in exactly and only the ways in which I pasted code for.  Include these
+    changes!
+
+ arch/x86/mm/fault.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 5c98cf1b36fa4f9e77f3b8714c77aaa457b57dc0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 7 17:39:27 2013 -0500
+
+    Allow printing of symbols in kernel backtraces
+
+ arch/arm/kernel/process.c |    4 ++--
+ arch/arm/kernel/traps.c   |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 301262ea8f4e89fea2e704c7de36b46dda493fc7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 6 19:18:26 2013 -0500
+
+    more code cleanups
+
+ grsecurity/gracl.c         |    2 +-
+ include/linux/grsecurity.h |    2 --
+ 2 files changed, 1 insertions(+), 3 deletions(-)
+
 commit 252baa97c0c3d91f667cab650375c29d8d6cbc3f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Feb 6 18:14:13 2013 -0500
