@@ -1,3 +1,212 @@
+commit 17f3713470967cc5a2941c1ac9f88b1ec756847d
+Merge: 865aff3 43b876b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 11 22:22:33 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 43b876b8fa9465551bfa1d5caa6916e02b6af8dd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 11 22:21:13 2013 -0500
+
+    Update to pax-linux-3.7.7-test14.patch:
+    - fix some ARM/kernexec fallout
+    - gcc plugins should now work with gcc 4.8
+
+ arch/arm/kernel/module.c          |    2 +
+ arch/arm/mm/mmu.c                 |    5 ++++
+ arch/x86/kernel/module.c          |    2 +-
+ tools/gcc/colorize_plugin.c       |    7 ++++-
+ tools/gcc/constify_plugin.c       |   24 ++++++++++++++------
+ tools/gcc/kallocstat_plugin.c     |    7 ++++-
+ tools/gcc/kernexec_plugin.c       |   43 ++++++++++++++++++++++++++++++++----
+ tools/gcc/latent_entropy_plugin.c |   30 ++++++++++++++++++++++++-
+ tools/gcc/size_overflow_plugin.c  |   15 +++++++++++-
+ tools/gcc/stackleak_plugin.c      |   28 ++++++++++++++++++------
+ 10 files changed, 135 insertions(+), 28 deletions(-)
+
+commit 865aff341f764738be5b094799a956ebd3dfc2b9
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Fri Feb 8 03:04:34 2013 +0000
+
+    Upstream commit: 6ba542a291a5e558603ac51cda9bded347ce7627
+    
+    net: sctp: sctp_setsockopt_auth_key: use kzfree instead of kfree
+    
+    In sctp_setsockopt_auth_key, we create a temporary copy of the user
+    passed shared auth key for the endpoint or association and after
+    internal setup, we free it right away. Since it's sensitive data, we
+    should zero out the key before returning the memory back to the
+    allocator. Thus, use kzfree instead of kfree, just as we do in
+    sctp_auth_key_put().
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/socket.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit bdd5582f39d3211e64d05dea608ca1f32015f92a
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Fri Feb 8 03:04:35 2013 +0000
+
+    Upstream commit: b5c37fe6e24eec194bb29d22fdd55d73bcc709bf
+    
+    net: sctp: sctp_endpoint_free: zero out secret key data
+    
+    On sctp_endpoint_destroy, previously used sensitive keying material
+    should be zeroed out before the memory is returned, as we already do
+    with e.g. auth keys when released.
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Vlad Yasevich <vyasevic@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/endpointola.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 80384e36515e83c0d1510ecc73346f25dc440c37
+Author: Marcelo Ricardo Leitner <mleitner@redhat.com>
+Date:   Tue Jan 29 22:26:08 2013 +0000
+
+    Upstream commit: bd30e947207e2ea0ff2c08f5b4a03025ddce48d3
+    
+    ipv6: do not create neighbor entries for local delivery
+    
+    They will be created at output, if ever needed. This avoids creating
+    empty neighbor entries when TPROXYing/Forwarding packets for addresses
+    that are not even directly reachable.
+    
+    Note that IPv4 already handles it this way. No neighbor entries are
+    created for local input.
+    
+    Tested by myself and customer.
+    
+    Signed-off-by: Jiri Pirko <jiri@resnulli.us>
+    Signed-off-by: Marcelo Ricardo Leitner <mleitner@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/route.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 684c139039daeadd3c4a2c53a81a7a45b2a74e31
+Author: Bjørn Mork <bjorn@mork.no>
+Date:   Mon Jan 28 23:51:28 2013 +0000
+
+    Upstream commit: 70c37bf97f2a91accba76080db69144f3b69f736
+    
+    net: usbnet: prevent buggy devices from killing us
+    
+    A device sending 0 length frames as fast as it can has been
+    observed killing the host system due to the resulting memory
+    pressure.
+    
+    Temporarily disable RX skb allocation and URB submission when
+    the current error ratio is high, preventing us from trying to
+    allocate an infinite number of skbs.  Reenable as soon as we
+    are finished processing the done queue, allowing the device
+    to continue working after short error bursts.
+    
+    Signed-off-by: Bjørn Mork <bjorn@mork.no>
+    Acked-by: Oliver Neukum <oneukum@suse.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	include/linux/usb/usbnet.h
+
+ drivers/net/usb/usbnet.c   |   25 +++++++++++++++++++++++++
+ include/linux/usb/usbnet.h |    3 +++
+ 2 files changed, 28 insertions(+), 0 deletions(-)
+
+commit b88313e4c0867da61f4a16d39588cb8285ea5456
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Sat Feb 2 05:23:16 2013 +0000
+
+    Upstream commit: 973ec449bb4f2b8c514bacbcb4d9506fc31c8ce3
+    
+    tcp: fix an infinite loop in tcp_slow_start()
+    
+    Since commit 9dc274151a548 (tcp: fix ABC in tcp_slow_start()),
+    a nul snd_cwnd triggers an infinite loop in tcp_slow_start()
+    
+    Avoid this infinite loop and log a one time error for further
+    analysis. FRTO code is suspected to cause this bug.
+    
+    Reported-by: Pasi Kärkkäinen <pasik@iki.fi>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Neal Cardwell <ncardwell@google.com>
+    Cc: Yuchung Cheng <ycheng@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_cong.c |   14 ++++++++++----
+ 1 files changed, 10 insertions(+), 4 deletions(-)
+
+commit c9dbe4e7ff20227b62bcff466596b8f22fec1b15
+Author: Phil Sutter <phil.sutter@viprinet.com>
+Date:   Fri Feb 1 07:21:41 2013 +0000
+
+    Upstream commit: 9665d5d62487e8e7b1f546c00e11107155384b9a
+    
+    packet: fix leakage of tx_ring memory
+    
+    When releasing a packet socket, the routine packet_set_ring() is reused
+    to free rings instead of allocating them. But when calling it for the
+    first time, it fills req->tp_block_nr with the value of rb->pg_vec_len
+    which in the second invocation makes it bail out since req->tp_block_nr
+    is greater zero but req->tp_block_size is zero.
+    
+    This patch solves the problem by passing a zeroed auto-variable to
+    packet_set_ring() upon each invocation from packet_release().
+    
+    As far as I can tell, this issue exists even since 69e3c75 (net: TX_RING
+    and packet mmap), i.e. the original inclusion of TX ring support into
+    af_packet, but applies only to sockets with both RX and TX ring
+    allocated, which is probably why this was unnoticed all the time.
+    
+    Signed-off-by: Phil Sutter <phil.sutter@viprinet.com>
+    Cc: Johann Baudy <johann.baudy@gnu-log.net>
+    Cc: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/packet/af_packet.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
+
+commit 405377e741817f6262cf64367a68c9df1b5620aa
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Thu Feb 7 00:55:37 2013 +0000
+
+    Upstream commit: 586c31f3bf04c290dc0a0de7fc91d20aa9a5ee53
+    
+    net: sctp: sctp_auth_key_put: use kzfree instead of kfree
+    
+    For sensitive data like keying material, it is common practice to zero
+    out keys before returning the memory back to the allocator. Thus, use
+    kzfree instead of kfree.
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/auth.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b4238e564de6b1e4b00e82129ee460a0b464d7b5
+Merge: e16be54 5d98cb9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 11 21:26:19 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5d98cb9acb2cf208e417df933a32eb870cc14605
+Merge: 6337e1f 89c5f13
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 11 21:26:11 2013 -0500
+
+    Merge branch 'linux-3.7.y' into pax-test
+
 commit e16be542f6899d93ec0dee48e95946ff1afe4cbf
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Feb 9 20:01:09 2013 -0500
