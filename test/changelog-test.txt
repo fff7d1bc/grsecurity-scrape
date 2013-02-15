@@ -1,3 +1,111 @@
+commit e30a5945db35c373fe295b9cf6ccff10048224aa
+Author: Mel Gorman <mgorman@suse.de>
+Date:   Mon Feb 11 14:52:36 2013 +0000
+
+    Upstream commit: 0ee364eb316348ddf3e0dfcd986f5f13f528f821
+    
+    x86/mm: Check if PUD is large when validating a kernel address
+    
+    A user reported the following oops when a backup process reads
+    /proc/kcore:
+    
+     BUG: unable to handle kernel paging request at ffffbb00ff33b000
+     IP: [<ffffffff8103157e>] kern_addr_valid+0xbe/0x110
+     [...]
+    
+     Call Trace:
+      [<ffffffff811b8aaa>] read_kcore+0x17a/0x370
+      [<ffffffff811ad847>] proc_reg_read+0x77/0xc0
+      [<ffffffff81151687>] vfs_read+0xc7/0x130
+      [<ffffffff811517f3>] sys_read+0x53/0xa0
+      [<ffffffff81449692>] system_call_fastpath+0x16/0x1b
+    
+    Investigation determined that the bug triggered when reading
+    system RAM at the 4G mark. On this system, that was the first
+    address using 1G pages for the virt->phys direct mapping so the
+    PUD is pointing to a physical address, not a PMD page.
+    
+    The problem is that the page table walker in kern_addr_valid() is
+    not checking pud_large() and treats the physical address as if
+    it was a PMD.  If it happens to look like pmd_none then it'll
+    silently fail, probably returning zeros instead of real data. If
+    the data happens to look like a present PMD though, it will be
+    walked resulting in the oops above.
+    
+    This patch adds the necessary pud_large() check.
+    
+    Unfortunately the problem was not readily reproducible and now
+    they are running the backup program without accessing
+    /proc/kcore so the patch has not been validated but I think it
+    makes sense.
+    
+    Signed-off-by: Mel Gorman <mgorman@suse.de>
+    Reviewed-by: Rik van Riel <riel@redhat.coM>
+    Reviewed-by: Michal Hocko <mhocko@suse.cz>
+    Acked-by: Johannes Weiner <hannes@cmpxchg.org>
+    Cc: stable@vger.kernel.org
+    Cc: linux-mm@kvack.org
+    Link: http://lkml.kernel.org/r/20130211145236.GX21389@suse.de
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/include/asm/pgtable.h |    5 +++++
+ arch/x86/mm/init_64.c          |    3 +++
+ 2 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 2cd1f5de26ab953e8237a93a7ff06ca22d5f8320
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Tue Feb 12 06:16:53 2013 +0000
+
+    Upstream commit: 77c1090
+    
+    net: fix infinite loop in __skb_recv_datagram()
+    
+    Tommi was fuzzing with trinity and reported the following problem :
+    
+    commit 3f518bf745 (datagram: Add offset argument to __skb_recv_datagram)
+    missed that a raw socket receive queue can contain skbs with no payload.
+    
+    We can loop in __skb_recv_datagram() with MSG_PEEK mode, because
+    wait_for_packet() is not prepared to skip these skbs.
+    
+    [   83.541011] INFO: rcu_sched detected stalls on CPUs/tasks: {}
+    (detected by 0, t=26002 jiffies, g=27673, c=27672, q=75)
+    [   83.541011] INFO: Stall ended before state dump start
+    [  108.067010] BUG: soft lockup - CPU#0 stuck for 22s! [trinity-child31:2847]
+    ...
+    [  108.067010] Call Trace:
+    [  108.067010]  [<ffffffff818cc103>] __skb_recv_datagram+0x1a3/0x3b0
+    [  108.067010]  [<ffffffff818cc33d>] skb_recv_datagram+0x2d/0x30
+    [  108.067010]  [<ffffffff819ed43d>] rawv6_recvmsg+0xad/0x240
+    [  108.067010]  [<ffffffff818c4b04>] sock_common_recvmsg+0x34/0x50
+    [  108.067010]  [<ffffffff818bc8ec>] sock_recvmsg+0xbc/0xf0
+    [  108.067010]  [<ffffffff818bf31e>] sys_recvfrom+0xde/0x150
+    [  108.067010]  [<ffffffff81ca4329>] system_call_fastpath+0x16/0x1b
+    
+    Reported-by: Tommi Rantala <tt.rantala@gmail.com>
+    Tested-by: Tommi Rantala <tt.rantala@gmail.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Pavel Emelyanov <xemul@parallels.com>
+    Acked-by: Pavel Emelyanov <xemul@parallels.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/datagram.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1fc2d933a84723d02eda2f9fee9afe05e9d27c58
+Merge: 17f3713 4e3e4c5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 14 18:04:29 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 4e3e4c56dc9df0c526db6049ad749a50ed37383f
+Merge: 43b876b 7773647
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 14 18:04:20 2013 -0500
+
+    Merge branch 'linux-3.7.y' into pax-test
+
 commit 17f3713470967cc5a2941c1ac9f88b1ec756847d
 Merge: 865aff3 43b876b
 Author: Brad Spengler <spender@grsecurity.net>
