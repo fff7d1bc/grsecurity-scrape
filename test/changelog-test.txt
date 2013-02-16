@@ -1,3 +1,79 @@
+commit 7746d5d02efc1335221da733123334012ef72f03
+Merge: e30a594 e49159d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 16 11:58:08 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e49159d760a17bf940e7105b374a78e7c7c0c705
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 16 11:57:34 2013 -0500
+
+    Update to pax-linux-3.7.8-test15.patch:
+    - reverted/rewrote some of the recent constification changes as gcc proved to be
+      a bit too smart in optimizing constified function pointer dereferences that in
+      turn broke special cases where such pointers did have to be modified, reported
+      by gaima (http://forums.grsecurity.net/viewtopic.php?f=3&t=3276)
+
+ arch/x86/include/asm/apic.h           |    2 +-
+ arch/x86/include/asm/kvm_host.h       |    2 +-
+ arch/x86/include/asm/paravirt_types.h |   10 +++---
+ arch/x86/include/asm/reboot.h         |    2 +-
+ arch/x86/include/asm/smp.h            |    2 +-
+ arch/x86/include/asm/x86_init.h       |   10 +++---
+ arch/x86/kernel/acpi/boot.c           |    2 +-
+ arch/x86/kernel/amd_gart_64.c         |    2 +-
+ arch/x86/kernel/aperture_64.c         |    2 +-
+ arch/x86/kernel/apic/apic.c           |    4 +--
+ arch/x86/kernel/apic/apic_flat_64.c   |    4 +-
+ arch/x86/kernel/apic/apic_numachip.c  |    2 +-
+ arch/x86/kernel/apic/bigsmp_32.c      |    2 +-
+ arch/x86/kernel/apic/es7000_32.c      |    5 +--
+ arch/x86/kernel/apic/numaq_32.c       |   19 +++++-----
+ arch/x86/kernel/apic/probe_32.c       |    2 +-
+ arch/x86/kernel/apic/summit_32.c      |    2 +-
+ arch/x86/kernel/apic/x2apic_cluster.c |    2 +-
+ arch/x86/kernel/apic/x2apic_phys.c    |    2 +-
+ arch/x86/kernel/apic/x2apic_uv_x.c    |    6 ++--
+ arch/x86/kernel/cpu/vmware.c          |    2 +-
+ arch/x86/kernel/head32.c              |    4 +-
+ arch/x86/kernel/kvm.c                 |    8 ++--
+ arch/x86/kernel/kvmclock.c            |   18 +++++-----
+ arch/x86/kernel/paravirt.c            |    8 ++--
+ arch/x86/kernel/pci-calgary_64.c      |    2 +-
+ arch/x86/kernel/ptrace.c              |    8 ++--
+ arch/x86/kernel/reboot.c              |    2 +-
+ arch/x86/kernel/smp.c                 |    2 +-
+ arch/x86/kernel/vsmp_64.c             |    8 ++--
+ arch/x86/kernel/x86_init.c            |    8 ++--
+ arch/x86/lguest/boot.c                |   64 ++++++++++++++++----------------
+ arch/x86/pci/acpi.c                   |    2 +-
+ arch/x86/pci/xen.c                    |   16 ++++----
+ arch/x86/platform/efi/efi.c           |    4 +-
+ arch/x86/platform/mrst/mrst.c         |   40 ++++++++++----------
+ arch/x86/platform/mrst/vrtc.c         |    4 +-
+ arch/x86/platform/olpc/olpc.c         |    2 +-
+ arch/x86/xen/apic.c                   |    2 +-
+ arch/x86/xen/enlighten.c              |   56 ++++++++++++++--------------
+ arch/x86/xen/irq.c                    |    2 +-
+ arch/x86/xen/mmu.c                    |    4 +-
+ arch/x86/xen/smp.c                    |   12 +++---
+ arch/x86/xen/spinlock.c               |   12 +++---
+ arch/x86/xen/time.c                   |   26 +++++++-------
+ drivers/firmware/efivars.c            |    8 ++--
+ drivers/gpu/drm/radeon/radeon_ttm.c   |    8 ++---
+ drivers/iommu/amd_iommu_init.c        |    4 +-
+ drivers/iommu/dmar.c                  |    2 +-
+ include/linux/efi.h                   |    1 +
+ include/linux/interrupt.h             |    2 +-
+ include/linux/mm.h                    |    1 +
+ include/linux/regset.h                |    1 +
+ kernel/softirq.c                      |    8 ++---
+ kernel/trace/trace_events.c           |    8 ++--
+ net/core/rtnetlink.c                  |   16 +++-----
+ virt/kvm/kvm_main.c                   |   12 +++---
+ 57 files changed, 231 insertions(+), 240 deletions(-)
+
 commit e30a5945db35c373fe295b9cf6ccff10048224aa
 Author: Mel Gorman <mgorman@suse.de>
 Date:   Mon Feb 11 14:52:36 2013 +0000
