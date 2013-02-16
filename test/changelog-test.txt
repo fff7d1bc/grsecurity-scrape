@@ -1,3 +1,18 @@
+commit b2a22b1459a55c58361c36e07519687c1e3970b5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 16 13:32:42 2013 -0500
+
+    Make capable_nolog call security_capable_noaudit so that SELinux doesn't
+    complain about capabilities that aren't necessarily used.
+    Patch from Luis Ressel
+    
+    Conflicts:
+    
+    	kernel/capability.c
+
+ kernel/capability.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 7746d5d02efc1335221da733123334012ef72f03
 Merge: e30a594 e49159d
 Author: Brad Spengler <spender@grsecurity.net>
