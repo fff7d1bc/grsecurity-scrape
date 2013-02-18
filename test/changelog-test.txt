@@ -1,3 +1,122 @@
+commit bfa14c9eb2a7cf49582eba4d8558d8cd3da9b6f4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 17 17:36:28 2013 -0500
+
+    Fix radeon driver crash reported on forums
+
+ drivers/gpu/drm/radeon/radeon_ttm.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e884bb13b9de9849116faddc43765ebfda26aed5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 17 17:01:59 2013 -0500
+
+    From f70baf464631ee8d6d67d13a9982d61b3c8e12c5 Mon Sep 17 00:00:00 2001
+    From: Mathias Krause <minipli@googlemail.com>
+    Date: Wed, 30 Jan 2013 12:14:18 +0100
+    Subject: [PATCHv2 1/3] crypto: user - fix info leaks in report API
+    
+    Three errors resulting in kernel memory disclosure:
+    
+    1/ The structures used for the netlink based crypto algorithm report API
+    are located on the stack. As snprintf() does not fill the remainder of
+    the buffer with null bytes, those stack bytes will be disclosed to users
+    of the API. Switch to strncpy() to fix this.
+    
+    2/ crypto_report_one() does not initialize all field of struct
+    crypto_user_alg. Fix this to fix the heap info leak.
+    
+    3/ For the module name we should copy only as many bytes as
+    module_name() returns -- not as much as the destination buffer could
+    hold. But the current code does not and therefore copies random data
+    from behind the end of the module name, as the module name is always
+    shorter than CRYPTO_MAX_ALG_NAME.
+    
+    Also switch to use strncpy() to copy the algorithm's name and
+    driver_name. They are strings, after all.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    
+    From f70baf464631ee8d6d67d13a9982d61b3c8e12c5 Mon Sep 17 00:00:00 2001
+    From: Mathias Krause <minipli@googlemail.com>
+    Date: Wed, 30 Jan 2013 12:14:18 +0100
+    Subject: [PATCHv2 1/3] crypto: user - fix info leaks in report API
+    
+    Three errors resulting in kernel memory disclosure:
+    
+    1/ The structures used for the netlink based crypto algorithm report API
+    are located on the stack. As snprintf() does not fill the remainder of
+    the buffer with null bytes, those stack bytes will be disclosed to users
+    of the API. Switch to strncpy() to fix this.
+    
+    2/ crypto_report_one() does not initialize all field of struct
+    crypto_user_alg. Fix this to fix the heap info leak.
+    
+    3/ For the module name we should copy only as many bytes as
+    module_name() returns -- not as much as the destination buffer could
+    hold. But the current code does not and therefore copies random data
+    from behind the end of the module name, as the module name is always
+    shorter than CRYPTO_MAX_ALG_NAME.
+    
+    Also switch to use strncpy() to copy the algorithm's name and
+    driver_name. They are strings, after all.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    
+    From b834b19a076b1d1448d903cf4e7e69a4bd83d8d9 Mon Sep 17 00:00:00 2001
+    From: Mathias Krause <minipli@googlemail.com>
+    Date: Tue, 5 Feb 2013 17:56:37 +0100
+    Subject: [PATCH 3/3] crypto: user - ensure user supplied strings are
+     nul-terminated
+    
+    To avoid misuse, ensure cru_name and cru_driver_name are always
+    nul-terminated strings.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ crypto/ablkcipher.c  |   12 ++++++------
+ crypto/aead.c        |    9 ++++-----
+ crypto/ahash.c       |    2 +-
+ crypto/blkcipher.c   |    6 +++---
+ crypto/crypto_user.c |   38 ++++++++++++++++++++++++++------------
+ crypto/pcompress.c   |    3 +--
+ crypto/rng.c         |    2 +-
+ crypto/shash.c       |    3 ++-
+ 8 files changed, 44 insertions(+), 31 deletions(-)
+
+commit f7d82ee4deff65a476078c6ce860e98fe85338ce
+Merge: b2a22b1 e53daba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 17 16:16:08 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/mm/fault.c
+
+commit e53daba31c0e663f79a8561e3f2272a77bf37d80
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 17 16:11:30 2013 -0500
+
+    Update to pax-linux-3.7.9-test15.patch
+
+ arch/x86/mm/fault.c       |    6 ++----
+ arch/x86/xen/xen-asm_32.S |    7 -------
+ 2 files changed, 2 insertions(+), 11 deletions(-)
+
+commit 53839da5cfa94c0fea0d62dfdecbd17df6f6f128
+Merge: e49159d 5b7be63
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 17 15:41:25 2013 -0500
+
+    Merge branch 'linux-3.7.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/mm/fault.c
+    	arch/x86/xen/xen-asm_32.S
+
 commit b2a22b1459a55c58361c36e07519687c1e3970b5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Feb 16 13:32:42 2013 -0500
