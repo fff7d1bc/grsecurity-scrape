@@ -1,3 +1,33 @@
+commit 2816ff91e69a910cd6ce0bbfeeb9649401747986
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Feb 19 18:31:42 2013 -0500
+
+    Apply patch:
+    "arp: fix possible crash in arp_rcv()" from Eric Dumazet
+
+ net/ipv4/arp.c |   21 +++++++++++----------
+ 1 files changed, 11 insertions(+), 10 deletions(-)
+
+commit 08a1aa1c73b69c5468611ee1c1049711c23ab754
+Merge: bfa14c9 6187fdc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 17 18:15:19 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	Makefile
+
+commit 6187fdc0055e74ecd4d22411ac0fb199258f8b99
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 17 18:11:29 2013 -0500
+
+    Update to pax-linux-3.7.9-test16.patch
+
+ Makefile              |    4 ++++
+ scripts/gcc-plugin.sh |    2 +-
+ 2 files changed, 5 insertions(+), 1 deletions(-)
+
 commit bfa14c9eb2a7cf49582eba4d8558d8cd3da9b6f4
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Feb 17 17:36:28 2013 -0500
