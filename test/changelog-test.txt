@@ -1,3 +1,33 @@
+commit 614943c76d9e49f12f3e1154f1dea80dc4bb2743
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 23 11:08:05 2013 -0500
+
+    Userland can send a netlink message requesting SOCK_DIAG_BY_FAMILY
+    with a family greater or equal then AF_MAX -- the array size of
+    sock_diag_handlers[]. The current code does not test for this
+    condition therefore is vulnerable to an out-of-bound access opening
+    doors for a privilege escalation.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    
+    The sock_diag_lock_handler() and sock_diag_unlock_handler() actually
+    make the code less readable. Get rid of them and make the lock usage
+    and access to sock_diag_handlers[] clear on the first sight.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/core/sock_diag.c |   27 ++++++++++-----------------
+ 1 files changed, 10 insertions(+), 17 deletions(-)
+
+commit e8d44970f8ac5ceda7b0e3f2c2ab33cefb800990
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 23 10:58:52 2013 -0500
+
+    Fix compilation failure reported by Hinnerk van Bruinehsen when CPU_USE_DOMAINS is not defined
+
+ arch/arm/include/asm/domain.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 7b729586eb81f344fdedf0942fab0acc738a6725
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Feb 22 19:02:51 2013 -0500
