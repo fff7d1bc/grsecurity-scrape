@@ -1,3 +1,224 @@
+commit 66c04806f5660988c3cb4855e60de294e77e3d0e
+Author: David Howells <dhowells@redhat.com>
+Date:   Thu Feb 21 12:00:25 2013 +0000
+
+    Upstream commit: fe9453a1dcb5fb146f9653267e78f4a558066f6f
+    
+    KEYS: Revert one application of "Fix unreachable code" patch
+    
+    A patch to fix some unreachable code in search_my_process_keyrings() got
+    applied twice by two different routes upstream as commits e67eab39bee2
+    and b010520ab3d2 (both "fix unreachable code").
+    
+    Unfortunately, the second application removed something it shouldn't
+    have and this wasn't detected by GIT.  This is due to the patch not
+    having sufficient lines of context to distinguish the two places of
+    application.
+    
+    The effect of this is relatively minor: inside the kernel, the keyring
+    search routines may search multiple keyrings and then prioritise the
+    errors if no keys or negative keys are found in any of them.  With the
+    extra deletion, the presence of a negative key in the thread keyring
+    (causing ENOKEY) is incorrectly overridden by an error searching the
+    process keyring.
+    
+    So revert the second application of the patch.
+    
+    Signed-off-by: David Howells <dhowells@redhat.com>
+    Cc: Jiri Kosina <jkosina@suse.cz>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ security/keys/process_keys.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 954b0c8a95b08c09c3d15ec38106ce403bf714da
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Thu Feb 21 16:42:43 2013 -0800
+
+    Upstream commit: 49deb4bc227cb9db5b8ebf9434367f8bed057c7a
+    
+    configfs: move the dereference below the NULL test
+    
+    The dereference should be moved below the NULL test.
+    
+    spatch with a semantic match is used to found this.
+    (http://coccinelle.lip6.fr/)
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Cc: Joel Becker <jlbec@evilplan.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/configfs/dir.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit d16d42c4fdc8baca5816d75b4a115102bf3d3423
+Author: Nicolas Pitre <nicolas.pitre@linaro.org>
+Date:   Sun Feb 24 20:06:09 2013 -0500
+
+    Upstream commit: a883b70d8e0a88278c0a1f80753b4dc99962b541
+    
+    tty vt: fix character insertion overflow
+    
+    Commit 81732c3b2fed ("tty vt: Fix line garbage in virtual console on
+    command line edition") broke insert_char() in multiple ways.  Then
+    commit b1a925f44a3a ("tty vt: Fix a regression in command line edition")
+    partially fixed it.  However, the buffer being moved is still too large
+    and overflowing beyond the end of the current line, corrupting existing
+    characters on the next line.
+    
+    Example test case:
+    
+    echo -e "abc\nde\x1b[A\x1b[4h \x1b[4l\x1b[B"
+    
+    Expected result:
+    
+    ab c
+    de
+    
+    Current result:
+    
+    ab c
+     e
+    
+    Needless to say that this is very annoying when inserting words in the
+    middle of paragraphs with certain text editors.
+    
+    Signed-off-by: Nicolas Pitre <nico@linaro.org>
+    Cc: Jean-François Moine <moinejf@free.fr>
+    Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/tty/vt/vt.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 6cda35071669b4aabde081bd039e0ffea36f997a
+Author: Robin Holt <holt@sgi.com>
+Date:   Fri Feb 22 16:35:34 2013 -0800
+
+    Upstream commit: 751efd8610d3d7d67b7bdf7f62646edea7365dd7
+    
+    mmu_notifier_unregister NULL Pointer deref and multiple ->release() callouts
+    
+    There is a race condition between mmu_notifier_unregister() and
+    __mmu_notifier_release().
+    
+    Assume two tasks, one calling mmu_notifier_unregister() as a result of a
+    filp_close() ->flush() callout (task A), and the other calling
+    mmu_notifier_release() from an mmput() (task B).
+    
+                    A                               B
+    t1                                              srcu_read_lock()
+    t2              if (!hlist_unhashed())
+    t3                                              srcu_read_unlock()
+    t4              srcu_read_lock()
+    t5                                              hlist_del_init_rcu()
+    t6                                              synchronize_srcu()
+    t7              srcu_read_unlock()
+    t8              hlist_del_rcu()  <--- NULL pointer deref.
+    
+    Additionally, the list traversal in __mmu_notifier_release() is not
+    protected by the by the mmu_notifier_mm->hlist_lock which can result in
+    callouts to the ->release() notifier from both mmu_notifier_unregister()
+    and __mmu_notifier_release().
+    
+    -stable suggestions:
+    
+    The stable trees prior to 3.7.y need commits 21a92735f660 and
+    70400303ce0c cherry-picked in that order prior to cherry-picking this
+    commit.  The 3.7.y tree already has those two commits.
+    
+    Signed-off-by: Robin Holt <holt@sgi.com>
+    Cc: Andrea Arcangeli <aarcange@redhat.com>
+    Cc: Wanpeng Li <liwanp@linux.vnet.ibm.com>
+    Cc: Xiao Guangrong <xiaoguangrong@linux.vnet.ibm.com>
+    Cc: Avi Kivity <avi@redhat.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Cc: Marcelo Tosatti <mtosatti@redhat.com>
+    Cc: Sagi Grimberg <sagig@mellanox.co.il>
+    Cc: Haggai Eran <haggaie@mellanox.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mmu_notifier.c |   82 +++++++++++++++++++++++++++--------------------------
+ 1 files changed, 42 insertions(+), 40 deletions(-)
+
+commit bf5167ed78ba6131c6874887f714bda50c2cab83
+Author: Mike Galbraith <bitbucket@online.de>
+Date:   Mon Jan 28 12:19:25 2013 +0100
+
+    Upstream commit: e0a79f529d5ba2507486d498b25da40911d95cf6
+    
+    sched: Fix select_idle_sibling() bouncing cow syndrome
+    
+    If the previous CPU is cache affine and idle, select it.
+    
+    The current implementation simply traverses the sd_llc domain,
+    taking the first idle CPU encountered, which walks buddy pairs
+    hand in hand over the package, inflicting excruciating pain.
+    
+    1 tbench pair (worst case) in a 10 core + SMT package:
+    
+      pre   15.22 MB/sec 1 procs
+      post 252.01 MB/sec 1 procs
+    
+    Signed-off-by: Mike Galbraith <bitbucket@online.de>
+    Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Link: http://lkml.kernel.org/r/1359371965.5783.127.camel@marge.simpson.net
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ kernel/sched/fair.c |   21 +++++++--------------
+ 1 files changed, 7 insertions(+), 14 deletions(-)
+
+commit cf7c2d257836fdcb5d51ad142cbc56ac12f7a37c
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Fri Dec 28 18:58:39 2012 -0800
+
+    Upstream commit: c61a2810a2161986353705b44d9503e6bb079f4f
+    
+    userns: Avoid recursion in put_user_ns
+    
+    When freeing a deeply nested user namespace free_user_ns calls
+    put_user_ns on it's parent which may in turn call free_user_ns again.
+    When -fno-optimize-sibling-calls is passed to gcc one stack frame per
+    user namespace is left on the stack, potentially overflowing the
+    kernel stack.  CONFIG_FRAME_POINTER forces -fno-optimize-sibling-calls
+    so we can't count on gcc to optimize this code.
+    
+    Remove struct kref and use a plain atomic_t.  Making the code more
+    flexible and easier to comprehend.  Make the loop in free_user_ns
+    explict to guarantee that the stack does not overflow with
+    CONFIG_FRAME_POINTER enabled.
+    
+    I have tested this fix with a simple program that uses unshare to
+    create a deeply nested user namespace structure and then calls exit.
+    With 1000 nesteuser namespaces before this change running my test
+    program causes the kernel to die a horrible death.  With 10,000,000
+    nested user namespaces after this change my test program runs to
+    completion and causes no harm.
+    
+    Acked-by: Serge Hallyn <serge.hallyn@canonical.com>
+    Pointed-out-by: Vasily Kulikov <segoon@openwall.com>
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+
+ include/linux/user_namespace.h |   10 +++++-----
+ kernel/user.c                  |    4 +---
+ kernel/user_namespace.c        |   17 +++++++++--------
+ 3 files changed, 15 insertions(+), 16 deletions(-)
+
+commit 81501c7106ccc186c94806f4db954626295b5ebe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Feb 26 17:12:30 2013 -0500
+
+    Pass the same flags to kern_path_create as the original function
+
+ fs/namei.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit a677c8eee35afe48868f92c7d6745bfe809cd481
 Author: Al Viro <viro@zeniv.linux.org.uk>
 Date:   Fri Feb 22 22:45:42 2013 -0500
