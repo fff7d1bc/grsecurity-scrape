@@ -1,3 +1,29 @@
+commit 9f1e7fe130803fde83eb903b575335f59cd2bd18
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 27 17:52:31 2013 -0500
+
+    declare check_syslog_permissions() earlier in file, fix bug in syslog_action_restricted() in upstream kernel
+
+ kernel/printk.c |   12 +++++++-----
+ 1 files changed, 7 insertions(+), 5 deletions(-)
+
+commit 11dd499888fa76f3466821ce4daa5e0c55e43d39
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 27 17:23:46 2013 -0500
+
+    Fix upstream vulnerability from addition of a /dev/kmsg device
+    while neglecting to add the same set of existing permission checks
+    from do_syslog.  This bit both dmesg_restrict and GRKERNSEC_DMESG.
+    A temporary workaround without this patch would be to
+    chmod 0600 /dev/kmsg (and is likely a good idea anyway).
+    
+    Notified in #grsecurity IRC by Jason A. Donenfeld and Petr Matousek
+    Initially reported to Redhat bugzilla by Christian Kujau:
+    https://bugzilla.redhat.com/show_bug.cgi?id=903192
+
+ kernel/printk.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
 commit 66c04806f5660988c3cb4855e60de294e77e3d0e
 Author: David Howells <dhowells@redhat.com>
 Date:   Thu Feb 21 12:00:25 2013 +0000
