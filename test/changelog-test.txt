@@ -1,3 +1,38 @@
+commit b53b3b14330920c6f7cfb74c8508a3026e1be620
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 28 18:29:26 2013 -0500
+
+    Fix bad git merge
+
+ fs/namespace.c |    8 --------
+ 1 files changed, 0 insertions(+), 8 deletions(-)
+
+commit 71886f69ea10fa22e593dba1bdbe5c0334c6fede
+Merge: 1cce1dd ab30472
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 28 17:45:14 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	net/core/sock_diag.c
+
+commit ab3047280e1dfb43f1b301a296123757b4ac4f6e
+Merge: 4b61d21 4c91a0e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 28 17:43:56 2013 -0500
+
+    Merge branch 'linux-3.8.y' into pax-test
+
+commit 1cce1ddd17c584c80465521834c3faf1a7c607d7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 27 22:20:22 2013 -0500
+
+    add compiler.h to sysrq.h to fix compilation problem reported by micu on forums
+
+ include/linux/sysrq.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 9f1e7fe130803fde83eb903b575335f59cd2bd18
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Feb 27 17:52:31 2013 -0500
