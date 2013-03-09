@@ -1,3 +1,41 @@
+commit a38c1a640729b3d8e584d1ab98e908c221bc12cf
+Merge: 1580bb3 47c3f47
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 8 18:18:37 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 47c3f47ba4f874f5c72e4c04b76b6b92e44daebe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 8 18:17:22 2013 -0500
+
+    Update to pax-linux-3.8.2-test5.patch:
+    - fixed some fallout after the last round of constification changes, reported by several people
+
+ arch/arm/common/gic.c                   |    4 ++--
+ arch/arm/include/asm/hardware/gic.h     |    3 ++-
+ arch/x86/include/asm/nmi.h              |    2 +-
+ arch/x86/kernel/nmi.c                   |    2 +-
+ arch/x86/pci/irq.c                      |    2 +-
+ drivers/base/power/domain.c             |    4 ++--
+ drivers/cpufreq/cpufreq_governor.c      |    4 ++--
+ drivers/mfd/twl4030-irq.c               |    1 +
+ drivers/video/vesafb.c                  |    7 +++++--
+ include/linux/irq.h                     |    1 +
+ include/linux/pm_domain.h               |    2 +-
+ kernel/sched/core.c                     |    4 ++++
+ lib/Kconfig.debug                       |    4 ++--
+ net/core/sysctl_net_core.c              |    2 +-
+ net/decnet/af_decnet.c                  |    1 +
+ net/ipv4/devinet.c                      |    2 +-
+ net/ipv4/ip_fragment.c                  |    2 +-
+ net/ipv4/route.c                        |    2 +-
+ net/ipv4/sysctl_net_ipv4.c              |    2 +-
+ net/ipv6/netfilter/nf_conntrack_reasm.c |    2 +-
+ net/ipv6/reassembly.c                   |    2 +-
+ scripts/sortextable.h                   |    6 +++---
+ 22 files changed, 36 insertions(+), 25 deletions(-)
+
 commit 1580bb38b4db0bf2a46316599815e8b234edad81
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Mar 7 22:02:59 2013 -0500
