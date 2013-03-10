@@ -1,3 +1,33 @@
+commit 6480ce919bd7d68ba14f3194e4bdd7b61bc8e491
+Merge: 4a5305e 25b3569
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 10 10:41:16 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 25b356980568bed9958315bb5a551fdc610055ed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 10 10:40:48 2013 -0400
+
+    Update to pax-linux-3.8.2-test6.patch:
+    - fixed a KERNEXEC false positive on arm reported by Gu1
+    - fixed various compile errors reported by x14sg1 (http://forums.grsecurity.net/viewtopic.php?f=3&t=3340)
+    - fixed too strict mmap parameter checking on i386, reported by browndav (http://forums.grsecurity.net/viewtopic.php?f=1&t=3339)
+    - added fix from spender for some namespace breakage reported by zakalwe
+    - small latent entropy improvement: pass pax_extra_latent_entropy to the kernel to extract entropy from RAM content during boot
+
+ Documentation/kernel-parameters.txt |    5 +++++
+ arch/arm/kernel/patch.c             |    2 ++
+ arch/x86/kernel/sys_i386_32.c       |    5 +++--
+ drivers/acpi/blacklist.c            |    2 +-
+ drivers/video/aty/mach64_cursor.c   |    1 +
+ init/main.c                         |    4 ----
+ mm/page_alloc.c                     |   27 +++++++++++++++++++++++++++
+ net/ipv4/ip_fragment.c              |    2 +-
+ security/Kconfig                    |    5 +++++
+ tools/gcc/latent_entropy_plugin.c   |    7 +++++--
+ 10 files changed, 50 insertions(+), 10 deletions(-)
+
 commit 4a5305eb7b6c5e49c332feeca9b6bfead9ab917f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Mar 9 11:19:06 2013 -0500
