@@ -1,3 +1,27 @@
+commit 79b130c4b11c7940daf2b33d653a17666331c634
+Merge: 6480ce9 3c865f9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 10 20:04:03 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3c865f9184c6fd56c634bce0096cfc8039d5c43d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 10 20:03:12 2013 -0400
+
+    Update to pax-linux-3.8.2-test7.patch:
+    - fixed gcc asserts reported by KDE (http://forums.grsecurity.net/viewtopic.php?f=3&t=3342)
+    - adjusted RLIMIT_AS accounting for the extra ASLR gap mappings, reported by Alexander Stoll (https://bugs.gentoo.org/show_bug.cgi?id=459268)
+
+ fs/binfmt_elf.c                   |    3 ++-
+ fs/exec.c                         |    3 +++
+ include/linux/mm_types.h          |    2 +-
+ init/main.c                       |    4 ++--
+ mm/mmap.c                         |    2 +-
+ mm/page_alloc.c                   |    4 ++--
+ tools/gcc/latent_entropy_plugin.c |   11 +++++++----
+ 7 files changed, 18 insertions(+), 11 deletions(-)
+
 commit 6480ce919bd7d68ba14f3194e4bdd7b61bc8e491
 Merge: 4a5305e 25b3569
 Author: Brad Spengler <spender@grsecurity.net>
