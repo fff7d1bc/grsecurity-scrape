@@ -1,3 +1,12 @@
+commit 13487f197ab2d5bc76156224c24c45a44bbd6a11
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 11 18:38:38 2013 -0400
+
+    Fix leak of signal handler addresses across execve, found by Emese Revfy
+
+ kernel/signal.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
 commit 79b130c4b11c7940daf2b33d653a17666331c634
 Merge: 6480ce9 3c865f9
 Author: Brad Spengler <spender@grsecurity.net>
