@@ -1,3 +1,152 @@
+commit 67a94583659cf6c583fbbb023ec2a8ed471ba94a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 14 20:59:26 2013 -0400
+
+    Add peer information to /proc/net/unix from Kenan Kalajdzic:
+    http://marc.info/?l=linux-netdev&m=126745636809191&w=2
+    
+    We use a "P" prefix to the inode number instead of "peer=".  This
+    additional information can be used, for instance, to find what processes
+    are connected to MySQL's unix domain socket.
+
+ net/unix/af_unix.c |   12 +++++++++---
+ 1 files changed, 9 insertions(+), 3 deletions(-)
+
+commit 1cd623d11a462d151ea8a5cace4521e1724911a3
+Author: Oliver Neukum <oneukum@suse.de>
+Date:   Tue Mar 12 14:52:42 2013 +0100
+
+    Upstream commit: c0f5ecee4e741667b2493c742b60b6218d40b3aa
+    
+    USB: cdc-wdm: fix buffer overflow
+    
+    The buffer for responses must not overflow.
+    If this would happen, set a flag, drop the data and return
+    an error after user space has read all remaining data.
+    
+    Signed-off-by: Oliver Neukum <oliver@neukum.org>
+    CC: stable@kernel.org
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/usb/class/cdc-wdm.c |   23 ++++++++++++++++++++---
+ 1 files changed, 20 insertions(+), 3 deletions(-)
+
+commit 3e9e7beb379eaf424d0634c0c556e47c07d367fc
+Merge: 9cdf9bc db4cb92
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 14 20:23:14 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/keys/compat.c
+
+commit db4cb924546e3fec3a59f78d056f48176eaf7100
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 14 20:22:24 2013 -0400
+
+    Update to pax-linux-3.8.2-test8.patch
+
+ arch/arm/include/asm/cache.h                |    2 ++
+ arch/arm/mach-omap2/gpmc.c                  |   22 ++++++++++++----------
+ arch/arm/mach-omap2/omap_device.c           |    4 ++--
+ arch/arm/mach-omap2/omap_device.h           |    4 ++--
+ arch/arm/plat-orion/include/plat/addr-map.h |    2 +-
+ 5 files changed, 19 insertions(+), 15 deletions(-)
+
+commit 5e72fcce7c468d29168c64c72c18ff5ff0d3b4ae
+Merge: 3c865f9 1a45c31
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 14 20:20:54 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+    
+    Conflicts:
+    	arch/arm/include/asm/delay.h
+    	arch/arm/include/asm/pgtable.h
+    	arch/arm/lib/delay.c
+    	security/keys/compat.c
+
+commit 9cdf9bccf22d6a6741e4152bb5d32335beb8caf1
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Tue Mar 12 02:59:49 2013 +0000
+
+    Upstream commit: a930d8790552658140d7d0d2e316af4f0d76a512
+    
+    vfs: fix pipe counter breakage
+    
+    If you open a pipe for neither read nor write, the pipe code will not
+    add any usage counters to the pipe, causing the 'struct pipe_inode_info"
+    to be potentially released early.
+    
+    That doesn't normally matter, since you cannot actually use the pipe,
+    but the pipe release code - particularly fasync handling - still expects
+    the actual pipe infrastructure to all be there.  And rather than adding
+    NULL pointer checks, let's just disallow this case, the same way we
+    already do for the named pipe ("fifo") case.
+    
+    This is ancient going back to pre-2.4 days, and until trinity, nobody
+    naver noticed.
+    
+    Reported-by: Dave Jones <davej@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/pipe.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit c11fa4be226659a40a6c73f0fa09fee074fba1b2
+Author: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+Date:   Mon Feb 25 10:20:36 2013 -0500
+
+    Upstream commit: 8aec0f5d4137532de14e6554fd5dd201ff3a3c49
+    
+    Fix: compat_rw_copy_check_uvector() misuse in aio, readv, writev, and security keys
+    
+    Looking at mm/process_vm_access.c:process_vm_rw() and comparing it to
+    compat_process_vm_rw() shows that the compatibility code requires an
+    explicit "access_ok()" check before calling
+    compat_rw_copy_check_uvector(). The same difference seems to appear when
+    we compare fs/read_write.c:do_readv_writev() to
+    fs/compat.c:compat_do_readv_writev().
+    
+    This subtle difference between the compat and non-compat requirements
+    should probably be debated, as it seems to be error-prone. In fact,
+    there are two others sites that use this function in the Linux kernel,
+    and they both seem to get it wrong:
+    
+    Now shifting our attention to fs/aio.c, we see that aio_setup_iocb()
+    also ends up calling compat_rw_copy_check_uvector() through
+    aio_setup_vectored_rw(). Unfortunately, the access_ok() check appears to
+    be missing. Same situation for
+    security/keys/compat.c:compat_keyctl_instantiate_key_iov().
+    
+    I propose that we add the access_ok() check directly into
+    compat_rw_copy_check_uvector(), so callers don't have to worry about it,
+    and it therefore makes the compat call code similar to its non-compat
+    counterpart. Place the access_ok() check in the same location where
+    copy_from_user() can trigger a -EFAULT error in the non-compat code, so
+    the ABI behaviors are alike on both compat and non-compat.
+    
+    While we are here, fix compat_do_readv_writev() so it checks for
+    compat_rw_copy_check_uvector() negative return values.
+    
+    And also, fix a memory leak in compat_keyctl_instantiate_key_iov() error
+    handling.
+    
+    Acked-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Acked-by: Al Viro <viro@ZenIV.linux.org.uk>
+    Signed-off-by: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	security/keys/compat.c
+
+ fs/compat.c            |   15 +++++++--------
+ mm/process_vm_access.c |    8 --------
+ security/keys/compat.c |    3 ++-
+ 3 files changed, 9 insertions(+), 17 deletions(-)
+
 commit 13487f197ab2d5bc76156224c24c45a44bbd6a11
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Mar 11 18:38:38 2013 -0400
