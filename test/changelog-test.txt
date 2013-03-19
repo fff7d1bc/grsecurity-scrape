@@ -1,3 +1,162 @@
+commit f00195c633f91cfbd8c1f530d2c371b713026e20
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 18 22:27:33 2013 -0400
+
+    Fix compile error reported by KDE on the forums
+
+ kernel/user_namespace.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2979c6ee78aabb4421873ea53581380c6bb6ed05
+Merge: 0949569 c57d855
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 18 22:20:46 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/arm/mm/fault.c
+    	arch/x86/mm/fault.c
+    	fs/exec.c
+
+commit c57d8557f5f2d77c2c7fa1f58316819a5e1f9293
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 18 21:22:03 2013 -0400
+
+    Update to pax-linux-3.8.2-test9.patch:
+     arm changes from spender
+      - removed userland access to the vectors page
+      - removed obsolete sigreturn trampoline handling
+      - added emulation for __kuser_get_tls
+      - fixed missing uderef instrumentation in unaligned memory accessors (failed safe)
+    - fixed recent sysfs/power_supply attr breakage reported by Steven Allen
+    - hopefully fixed the remaining issues with aslr_gap accounting (http://forums.grsecurity.net/viewtopic.php?f=3&t=2960)
+    - changed debian packager rules to include the compiler plugins, from Tyler Coumbes <coumbes@gmail.com>
+    - fixed the sa_restorer leak discovered and reported by Emese Revfy (CVE-2013-0914, google chromium bug #177956)
+    - new size overflow plugin from Emese that instruments a whole lot more code due to tracking function return values
+      and more type casts as well. this found the above mentioned sa_restorer leak and would have protected against CVE-2013-0913.
+
+ arch/arm/kernel/process.c                     |    5 +-
+ arch/arm/kernel/signal.c                      |   24 +-
+ arch/arm/kernel/traps.c                       |    7 -
+ arch/arm/mm/alignment.c                       |    8 +
+ arch/arm/mm/fault.c                           |   23 +-
+ arch/arm/mm/mmu.c                             |    2 +-
+ arch/x86/include/asm/bitops.h                 |    2 +-
+ arch/x86/include/asm/desc.h                   |    2 +-
+ arch/x86/include/asm/div64.h                  |    2 +-
+ arch/x86/include/asm/io.h                     |    8 +-
+ arch/x86/include/asm/paravirt.h               |    2 +-
+ arch/x86/kernel/cpu/perf_event_intel_uncore.c |   16 +-
+ arch/x86/kernel/setup_percpu.c                |    2 +-
+ arch/x86/mm/fault.c                           |    4 +-
+ arch/x86/mm/numa.c                            |    2 +-
+ arch/x86/mm/physaddr.c                        |    4 +-
+ drivers/ata/libahci.c                         |    2 +-
+ drivers/gpu/drm/i915/i915_gem_execbuffer.c    |    2 +-
+ drivers/infiniband/hw/mthca/mthca_cmd.c       |    2 +-
+ drivers/infiniband/hw/mthca/mthca_mr.c        |    2 +-
+ drivers/lguest/page_tables.c                  |    2 +-
+ drivers/net/wireless/at76c50x-usb.c           |    2 +-
+ drivers/oprofile/oprofile_files.c             |    2 +-
+ drivers/power/power_supply_core.c             |    1 +
+ drivers/usb/core/message.c                    |    2 +-
+ fs/befs/endian.h                              |    4 +-
+ fs/binfmt_elf.c                               |    5 +-
+ fs/exec.c                                     |    4 +-
+ fs/qnx6/qnx6.h                                |    4 +-
+ fs/sysv/sysv.h                                |    2 +-
+ fs/ubifs/io.c                                 |    2 +-
+ fs/ufs/swab.h                                 |    4 +-
+ include/linux/compat.h                        |    4 +-
+ include/linux/completion.h                    |    6 +-
+ include/linux/cpumask.h                       |   12 +-
+ include/linux/ctype.h                         |    2 +-
+ include/linux/err.h                           |    4 +-
+ include/linux/math64.h                        |    6 +-
+ include/linux/sched.h                         |    2 +-
+ include/linux/unaligned/access_ok.h           |   12 +-
+ include/linux/usb.h                           |    2 +-
+ include/uapi/linux/byteorder/little_endian.h  |    4 +-
+ include/uapi/linux/swab.h                     |    6 +-
+ kernel/sched/core.c                           |    6 +-
+ kernel/signal.c                               |    3 +
+ kernel/time.c                                 |    2 +-
+ kernel/timer.c                                |    2 +-
+ lib/div64.c                                   |    4 +-
+ mm/page-writeback.c                           |    2 +-
+ net/socket.c                                  |    2 +
+ scripts/package/builddeb                      |    1 +
+ tools/gcc/size_overflow_hash.data             | 8869 +++++++++++++++----------
+ tools/gcc/size_overflow_plugin.c              | 1072 ++--
+ 53 files changed, 6227 insertions(+), 3951 deletions(-)
+
+commit 09495691bb31f11ec14d9127429f9a0f3f716f22
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 17 20:51:50 2013 -0400
+
+    fix typo
+
+ grsecurity/gracl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit deb85b00d0f9f886e264e116313f298401ec5c59
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 17 20:03:33 2013 -0400
+
+    Call update_rlimit_cpu to immediately change RLIMIT_CPU on the task
+    with a subject applied to it with RES_CPU.  Otherwise, the limit will only
+    begin to be applied at fork time.
+    
+    Thanks to Bjornar Ness for the report.
+
+ grsecurity/gracl.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 2126421f123513f604ceef2b23ba9ed516de7e58
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 16 22:07:43 2013 -0400
+
+    Move inode auditing prior to our refcnt dropping
+
+ fs/namei.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4d4e665885aab4bacfe662ad6d2190fc9d817146
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 16 22:00:30 2013 -0400
+
+    Drop reference on completed path walked in RCU mode or when violating
+    the chroot fchdir check inside a chroot -- possible culprit for a reported
+    vfsmount_lock hang during unmount
+
+ fs/namei.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 53a8a413f45340ee176dd36dd283de3a1ebb7417
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 16 16:43:45 2013 -0400
+
+    add user_arg_ptr back to exec.c
+
+ fs/exec.c |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+commit 83d285953c7e75db388c7f65be5cf1e16fcedec8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 16 11:22:36 2013 -0400
+
+    Don't globally include compat.h -- with the new X32 support it
+    changes some definitions involving ELF binaries resulting in invalid
+    coredumps, as reported by KDE on the forums:
+    http://forums.grsecurity.net/viewtopic.php?f=3&t=3310
+    Thanks to the PaX Team for debugging
+
+ fs/exec.c                  |    3 +++
+ grsecurity/grsec_exec.c    |   13 +++++++++++++
+ include/linux/grsecurity.h |   15 ---------------
+ 3 files changed, 16 insertions(+), 15 deletions(-)
+
 commit 67a94583659cf6c583fbbb023ec2a8ed471ba94a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Mar 14 20:59:26 2013 -0400
