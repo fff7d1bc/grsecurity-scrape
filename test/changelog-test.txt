@@ -1,3 +1,57 @@
+commit 1f1109e97bc609218e52e4bb57683d3b23cf2e8e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 19 18:42:20 2013 -0400
+
+    fix missing sock_release()
+
+ net/irda/af_irda.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit dd65c05cd24faf8946d4941434a553ee285c35a3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 19 18:36:17 2013 -0400
+
+    fix mpt fusion infoleak
+
+ drivers/message/fusion/mptbase.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit e297b4f150b769efdc4c547d3caf1e3c0f24735f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 19 18:33:45 2013 -0400
+
+    Fix size_overflow false positive reported by slashbeast
+
+ include/linux/zlib.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5b9982733764361c7102c2b1a9cbe42e5bf4f4be
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 19 17:35:36 2013 -0400
+
+    fix up failed merge
+
+ arch/arm/mm/fault.c |    9 ++-------
+ 1 files changed, 2 insertions(+), 7 deletions(-)
+
+commit a1bdc34d1d882da3abf47923a760e5b0bbdaf0bd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 19 17:34:36 2013 -0400
+
+    update documentation on consequences of building without gcc plugin support
+
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f49ae0f6c3bbedf6b3817ee2b1b232e0da7fa537
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 19 17:18:13 2013 -0400
+
+    fix compilation failure associated with the latent entropy plugin and lack of gcc plugin support reported on the forums
+
+ init/main.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit f00195c633f91cfbd8c1f530d2c371b713026e20
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Mar 18 22:27:33 2013 -0400
