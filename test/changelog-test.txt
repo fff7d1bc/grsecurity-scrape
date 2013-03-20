@@ -1,3 +1,12 @@
+commit aec3cd4d2bd54673b155d9ae3fb9c44becc790d1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 19 19:56:04 2013 -0400
+
+    include linux/compiler.h
+
+ include/linux/zlib.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 1f1109e97bc609218e52e4bb57683d3b23cf2e8e
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Mar 19 18:42:20 2013 -0400
