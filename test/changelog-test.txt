@@ -1,3 +1,111 @@
+commit 675a8ab4a8fe8315df348735a37a302a7535224c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 20 23:36:14 2013 -0400
+
+    From c4dab66c31612717f798e1e8ff11b57253a81a31 Mon Sep 17 00:00:00 2001
+    From: Kees Cook <keescook@chromium.org>
+    Date: Sun, 10 Mar 2013 20:09:31 +0000
+    Subject: drm/i915: bounds check execbuffer relocation count
+    
+    It is possible to wrap the counter used to allocate the buffer for
+    relocation copies. This could lead to heap writing overflows.
+    
+    CVE-2013-0913
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Reported-by: Pinkie Pie
+    Cc: stable@vger.kernel.org
+
+ drivers/gpu/drm/i915/i915_gem_execbuffer.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit ddeac12cbb9076bffd51c544e03463f94c9eaa39
+Author: Andy Honig <ahonig@google.com>
+Date:   Wed Feb 20 14:48:10 2013 -0800
+
+    Upstream commit: 0b79459b482e85cb7426aa7da683a9f2c97aeae1
+    
+    KVM: x86: Convert MSR_KVM_SYSTEM_TIME to use gfn_to_hva_cache functions (CVE-2013-1797)
+    
+    There is a potential use after free issue with the handling of
+    MSR_KVM_SYSTEM_TIME.  If the guest specifies a GPA in a movable or removable
+    memory such as frame buffers then KVM might continue to write to that
+    address even after it's removed via KVM_SET_USER_MEMORY_REGION.  KVM pins
+    the page in memory so it's unlikely to cause an issue, but if the user
+    space component re-purposes the memory previously used for the guest, then
+    the guest will be able to corrupt that memory.
+    
+    Tested: Tested against kvmclock unit test
+    
+    Signed-off-by: Andrew Honig <ahonig@google.com>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+ arch/x86/include/asm/kvm_host.h |    4 +-
+ arch/x86/kvm/x86.c              |   47 ++++++++++++++++----------------------
+ 2 files changed, 22 insertions(+), 29 deletions(-)
+
+commit 0bcac31b57c381001feb69fd6ec8069e61e03432
+Author: Andy Honig <ahonig@google.com>
+Date:   Mon Mar 11 09:34:52 2013 -0700
+
+    Upstream commit: c300aa64ddf57d9c5d9c898a64b36877345dd4a9
+    
+    KVM: x86: fix for buffer overflow in handling of MSR_KVM_SYSTEM_TIME (CVE-2013-1796)
+    
+    If the guest sets the GPA of the time_page so that the request to update the
+    time straddles a page then KVM will write onto an incorrect page.  The
+    write is done byusing kmap atomic to get a pointer to the page for the time
+    structure and then performing a memcpy to that page starting at an offset
+    that the guest controls.  Well behaved guests always provide a 32-byte aligned
+    address, however a malicious guest could use this to corrupt host kernel
+    memory.
+    
+    Tested: Tested against kvmclock unit test.
+    
+    Signed-off-by: Andrew Honig <ahonig@google.com>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+ arch/x86/kvm/x86.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 695c59887e4ec10b0b695ab4f645d1226c433be0
+Author: Andy Honig <ahonig@google.com>
+Date:   Wed Feb 20 14:49:16 2013 -0800
+
+    Upstream commit: a2c118bfab8bc6b8bb213abfc35201e441693d55
+    
+    KVM: Fix bounds checking in ioapic indirect register reads (CVE-2013-1798)
+    
+    If the guest specifies a IOAPIC_REG_SELECT with an invalid value and follows
+    that with a read of the IOAPIC_REG_WINDOW KVM does not properly validate
+    that request.  ioapic_read_indirect contains an
+    ASSERT(redir_index < IOAPIC_NUM_PINS), but the ASSERT has no effect in
+    non-debug builds.  In recent kernels this allows a guest to cause a kernel
+    oops by reading invalid memory.  In older kernels (pre-3.3) this allows a
+    guest to read from large ranges of host memory.
+    
+    Tested: tested against apic unit tests.
+    
+    Signed-off-by: Andrew Honig <ahonig@google.com>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+ virt/kvm/ioapic.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit c77e4017f6f372ac09751b6fcd85c35781dc2d9e
+Merge: aec3cd4 c522e3a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 20 19:38:25 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c522e3a2167ff5e18996e55ca8cca5ca6f6d29e3
+Merge: c57d855 405acc3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 20 19:38:11 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+
 commit aec3cd4d2bd54673b155d9ae3fb9c44becc790d1
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Mar 19 19:56:04 2013 -0400
