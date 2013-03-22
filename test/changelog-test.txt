@@ -1,3 +1,36 @@
+commit 44cb11a9470f72157601d0ad4d572d111f90f504
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 22 18:11:42 2013 -0400
+
+    use VM_DONTDUMP
+
+ fs/binfmt_elf.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 92dd7f850ae63e3ddc3d262f2b7134cf54b51abb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 22 17:53:09 2013 -0400
+
+    fix recent RLIMIT_AS changes (due to vm_flags typo)
+    
+    Conflicts:
+    
+    	fs/binfmt_elf.c
+
+ fs/binfmt_elf.c |    2 +-
+ mm/mmap.c       |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit fd5f0d92b0fbec02029dad124501a9c80e527a32
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 22 17:08:48 2013 -0400
+
+    complete_walk drops rcu-walk mode, no need for our own dropping
+    method outside of generic_permission
+
+ fs/namei.c |   30 ------------------------------
+ 1 files changed, 0 insertions(+), 30 deletions(-)
+
 commit b49ab1c73edb6442eec609b26bba4d850b3111b6
 Merge: 5e9a707 783ade9
 Author: Brad Spengler <spender@grsecurity.net>
