@@ -1,3 +1,46 @@
+commit b49ab1c73edb6442eec609b26bba4d850b3111b6
+Merge: 5e9a707 783ade9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 21 21:56:28 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 783ade9f97f0f736e3c83275b7c9fcb2d6e9d9c4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 21 21:55:31 2013 -0400
+
+    Update to pax-linux-3.8.3-test11.patch:
+    - rewrote the ASLR gap accounting code once again
+    - fixed ptrace compat bug found by the size overflow plugin
+
+ fs/binfmt_elf.c          |   25 ++++++++++++-------------
+ fs/exec.c                |    7 ++-----
+ include/linux/compat.h   |    2 +-
+ include/linux/mm.h       |    5 +++++
+ include/linux/mm_types.h |    2 +-
+ kernel/ptrace.c          |    2 +-
+ mm/mmap.c                |   15 ++++++++++-----
+ 7 files changed, 32 insertions(+), 26 deletions(-)
+
+commit 5e9a7077d935b2279f25428c5d32fd53cbbfb92a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 21 19:37:33 2013 -0400
+
+    Make the constify plugin usage actually depend on the introduced config option
+    (it was still forced on)
+
+ tools/gcc/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1974b4f58d9d729c80ac1987785446115304a54c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 21 16:12:38 2013 -0400
+
+    fix failed merge
+
+ arch/arm/mm/fault.c |   15 +++------------
+ 1 files changed, 3 insertions(+), 12 deletions(-)
+
 commit 675a8ab4a8fe8315df348735a37a302a7535224c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Mar 20 23:36:14 2013 -0400
