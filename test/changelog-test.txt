@@ -1,3 +1,44 @@
+commit d3859c71e2ec174b6f3e5cbe06d3011cdddaa59e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 23 13:02:32 2013 -0400
+
+    Don't use constify plugin if not enabled in config,
+    reported by Alexey Vlasov
+
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3afb82e020593249ac394e9859397c3e0ef5341c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 23 12:50:13 2013 -0400
+
+    oded 0day #2
+    http://cansecwest.com/slides/2013/PrivateCore%20CSW%202013.pdf
+    slide 20
+
+ drivers/net/ethernet/broadcom/tg3.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 4cc4b98b29faff2530540be16e0fcd8a74800b06
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 23 12:15:50 2013 -0400
+
+    oded 0day #1
+    http://cansecwest.com/slides/2013/PrivateCore%20CSW%202013.pdf
+    slide 18
+
+ drivers/net/wireless/zd1211rw/zd_usb.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8a3292af6fdae4b88b49a2a4ef96eee145b4d479
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Mar 23 12:13:12 2013 -0400
+
+    remove warning on accessing this /proc entry, HIDESYM already caught the infoleak
+
+ drivers/gpu/drm/i915/i915_debugfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 44cb11a9470f72157601d0ad4d572d111f90f504
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Mar 22 18:11:42 2013 -0400
