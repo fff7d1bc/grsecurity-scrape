@@ -1,3 +1,207 @@
+commit 2cf84a1843bfdf9298e2a1dc8df4e52d11a1af89
+Author: Jeff Layton <jlayton@redhat.com>
+Date:   Mon Mar 11 09:52:19 2013 -0400
+
+    Upstream commit: f853c616883a8de966873a1dab283f1369e275a1
+    
+    cifs: ignore everything in SPNEGO blob after mechTypes
+    
+    We've had several reports of people attempting to mount Windows 8 shares
+    and getting failures with a return code of -EINVAL. The default sec=
+    mode changed recently to sec=ntlmssp. With that, we expect and parse a
+    SPNEGO blob from the server in the NEGOTIATE reply.
+    
+    The current decode_negTokenInit function first parses all of the
+    mechTypes and then tries to parse the rest of the negTokenInit reply.
+    The parser however currently expects a mechListMIC or nothing to follow the
+    mechTypes, but Windows 8 puts a mechToken field there instead to carry
+    some info for the new NegoEx stuff.
+    
+    In practice, we don't do anything with the fields after the mechTypes
+    anyway so I don't see any real benefit in continuing to parse them.
+    This patch just has the kernel ignore the fields after the mechTypes.
+    We'll probably need to reinstate some of this if we ever want to support
+    NegoEx.
+    
+    Reported-by: Jason Burgess <jason@jacknife2.dns2go.com>
+    Reported-by: Yan Li <elliot.li.tech@gmail.com>
+    Signed-off-by: Jeff Layton <jlayton@redhat.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Steve French <sfrench@us.ibm.com>
+
+ fs/cifs/asn1.c |   53 +++++------------------------------------------------
+ 1 files changed, 5 insertions(+), 48 deletions(-)
+
+commit 0b1c6223105a05d5a84e39a5e951868e37610e1c
+Merge: 93ff726 0deb54c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 25 18:35:15 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0deb54c1f47145aef38f4d2bf0b7de3e9fbab959
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 25 18:35:05 2013 -0400
+
+    fix typo
+
+ arch/x86/mm/ioremap.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 93ff72680353534d4b0b213aecb61f1fc2f9a152
+Merge: be9f8b8 f95e53a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 25 18:30:06 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f95e53abadb6e4665866e4502ff9f518514193e1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 25 18:29:25 2013 -0400
+
+    Update to pax-linux-3.8.4-test12.patch:
+    
+    - fixed perf compilation reported by Michael Tremer
+    - fixed USERCOPY reports triggered by SCTP, reported by mcp
+    - last fix for aslr gap accounting, promise (thanks to spender)
+
+ arch/x86/mm/ioremap.c                    |    3 +++
+ fs/binfmt_elf.c                          |    5 ++---
+ mm/mmap.c                                |    2 +-
+ net/sctp/socket.c                        |   19 +++++++++++++++----
+ tools/perf/util/include/linux/compiler.h |    8 ++++++++
+ 5 files changed, 29 insertions(+), 8 deletions(-)
+
+commit be9f8b82b0d8a21d7515fb6e44a907623381c5df
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 25 16:48:34 2013 -0400
+
+    From: Al Viro <viro@ZenIV.linux.org.uk>
+    To: Brad Spengler <spender@grsecurity.net>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Umm...  I see what you are describing, and AFAICS you are correct; let me
+    see if I am misreading your analysis:
+            * vfsmount_lock may act fair; A holding it shared, with B spinning
+    on attempt to take it exclusive may lead to C spinning on attempt to take
+    it shared.
+            * path_is_under() tries get rename_lock while holding vfsmount_lock
+    shared.
+            * d_path() et.al. try to take vfsmount_lock shared, while holding
+    rename_lock.
+    
+    All true and yes, it's a bug (I'd probably classify it as a livelock, but
+    that doesn't make any real difference).  There are three possible solutions,
+    AFAICS:
+            1) two-liner in path_is_under() replacing the use of vfsmount_lock
+    with that of namespace_sem; trivial, but results in function unexpectedly
+    blocking.  The current callers are fine with that, but it's a trouble
+    waiting to happen.
+            2) replace write_seqlock() in prepend_path() callers with
+    read_seqbegin/read_seqretry loops; bigger and more brittle, since unlike
+    is_subdir() we need more than just ->d_parent not pointing to something
+    freed - we also care about ->d_name.len being in sync with ->d_name.name.
+    It probably can be worked around, but...
+    
+            3) declare that rename_lock nests inside vfsmount_lock and let
+    the callers of prepend_path() take vfsmount_lock().  I'd probably prefer
+    that one...
+    
+    Nest rename_lock inside vfsmount_lock
+    
+    ... lest we get livelocks between path_is_under() and d_path() and friends.
+    
+    [ add grsec-specific bits, thanks to Alexey Vlasov for his patience in reproducing
+      the issue ]
+    
+    Spotted-by: Brad Spengler <spender@grsecurity.net>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/dcache.c        |   16 +++++++++++-----
+ grsecurity/gracl.c |   20 ++++++++++----------
+ 2 files changed, 21 insertions(+), 15 deletions(-)
+
+commit d9253ae96e0e88510ae7b8adb8ab3ef089be6dee
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Fri Mar 22 11:44:04 2013 -0700
+
+    Upstream commit: 51f0885e5415b4cc6535e9cdcc5145bfbc134353
+    
+    vfs,proc: guarantee unique inodes in /proc
+    
+    Dave Jones found another /proc issue with his Trinity tool: thanks to
+    the namespace model, we can have multiple /proc dentries that point to
+    the same inode, aliasing directories in /proc/<pid>/net/ for example.
+    
+    This ends up being a total disaster, because it acts like hardlinked
+    directories, and causes locking problems.  We rely on the topological
+    sort of the inodes pointed to by dentries, and if we have aliased
+    directories, that odering becomes unreliable.
+    
+    In short: don't do this.  Multiple dentries with the same (directory)
+    inode is just a bad idea, and the namespace code should never have
+    exposed things this way.  But we're kind of stuck with it.
+    
+    This solves things by just always allocating a new inode during /proc
+    dentry lookup, instead of using "iget_locked()" to look up existing
+    inodes by superblock and number.  That actually simplies the code a bit,
+    at the cost of potentially doing more inode [de]allocations.
+    
+    That said, the inode lookup wasn't free either (and did a lot of locking
+    of inodes), so it is probably not that noticeable.  We could easily keep
+    the old lookup model for non-directory entries, but rather than try to
+    be excessively clever this just implements the minimal and simplest
+    workaround for the problem.
+    
+    Reported-and-tested-by: Dave Jones <davej@redhat.com>
+    Analyzed-by: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	fs/proc/inode.c
+
+ fs/proc/inode.c |    9 +++------
+ 1 files changed, 3 insertions(+), 6 deletions(-)
+
+commit 399d3bbdb82db765c86118ae5a0bf1d2d17762fb
+Author: Vladimir Davydov <vdavydov@parallels.com>
+Date:   Fri Mar 22 15:04:51 2013 -0700
+
+    Upstream commit: 38d78e587d4960d0db94add518d27ee74bad2301
+    
+    mqueue: sys_mq_open: do not call mnt_drop_write() if read-only
+    
+    mnt_drop_write() must be called only if mnt_want_write() succeeded,
+    otherwise the mnt_writers counter will diverge.
+    
+    mnt_writers counters are used to check if remounting FS as read-only is
+    OK, so after an extra mnt_drop_write() call, it would be impossible to
+    remount mqueue FS as read-only.  Besides, on umount a warning would be
+    printed like this one:
+    
+      =====================================
+      [ BUG: bad unlock balance detected! ]
+      3.9.0-rc3 #5 Not tainted
+      -------------------------------------
+      a.out/12486 is trying to release lock (sb_writers) at:
+      mnt_drop_write+0x1f/0x30
+      but there are no more locks to release!
+    
+    Signed-off-by: Vladimir Davydov <vdavydov@parallels.com>
+    Cc: Doug Ledford <dledford@redhat.com>
+    Cc: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ ipc/mqueue.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit d3859c71e2ec174b6f3e5cbe06d3011cdddaa59e
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Mar 23 13:02:32 2013 -0400
