@@ -1,3 +1,183 @@
+commit 01e1d503fd2220adaaec0b92ea19441bdff73555
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 29 19:53:50 2013 -0400
+
+    fix intentional_overflow marking on sys_sendto
+
+ include/linux/syscalls.h |    2 +-
+ net/socket.c             |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit cd5ff114d958470f471c63775278e8c05e774630
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 29 18:46:16 2013 -0400
+
+    fix size_overflow false positive
+
+ kernel/futex_compat.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 295ba16cc53df2375261accbedd6575ea327770a
+Merge: 18340f1 278a989
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 29 17:36:18 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/exec.c
+    	include/linux/thread_info.h
+
+commit 278a989c831d62193c7b3d119fe2302babd45d12
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 29 17:34:34 2013 -0400
+
+    Resync with pax-linux-3.8.5-test13.patch
+
+ arch/arm/include/asm/pgtable.h |    3 ++-
+ arch/arm/lib/delay.c           |    1 +
+ fs/exec.c                      |    8 ++++----
+ include/linux/compiler.h       |    1 +
+ include/linux/proc_fs.h        |    2 +-
+ include/linux/thread_info.h    |    6 +++---
+ include/linux/zlib.h           |    3 ++-
+ init/main.c                    |    4 ++--
+ kernel/user_namespace.c        |    2 +-
+ lib/list_debug.c               |    4 ++--
+ mm/slab.c                      |    1 +
+ mm/slob.c                      |    1 +
+ mm/slub.c                      |    1 +
+ net/core/sysctl_net_core.c     |    3 +--
+ tools/gcc/constify_plugin.c    |    1 +
+ 15 files changed, 24 insertions(+), 17 deletions(-)
+
+commit 18340f14bd42d06c60995ab04cf6bb235bcaade6
+Merge: 05f01ae e8cfeae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 29 17:30:57 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e8cfeae7751abb844911a15114dff5c9b2b9fcd9
+Merge: b461cb7 aa4cfde
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 29 17:30:44 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/i915/i915_gem_execbuffer.c
+    	fs/nfsd/vfs.c
+
+commit 05f01ae4c3479541586a2387f916a6620889c479
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 29 17:05:39 2013 -0400
+
+    Another infoleak, up to 128 bytes on the stack in __sys_recvmsg
+    takes user-provided length, copies up to that amount in a sockaddr_storage
+    struct on the stack, then takes an upper-bounded-only user-provided length
+    and copies the sockaddr_storage struct back out to userland, complete with
+    uninitialized data
+
+ net/socket.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit eea6ade59490784e83e08ec67322288fcf14cb31
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 28 23:07:37 2013 -0400
+
+    return a proper error, otherwise we could be accessing uninitialized data
+    (previous define was a positive value)
+
+ drivers/usb/storage/realtek_cr.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3cc43b90104c3016adb40f412ce2e4b0dcdd4c9e
+Merge: c3dc9a6 b461cb7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 28 20:54:24 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b461cb7b1d85490430ef7896c247794af72c3749
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 28 20:54:11 2013 -0400
+
+    Add structleak plugin
+
+ tools/gcc/structleak_plugin.c |  270 +++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 270 insertions(+), 0 deletions(-)
+
+commit c3dc9a6ef10782894bb11fd088fd712db44d8062
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 28 20:53:22 2013 -0400
+
+    Enable structleak by default for the security auto-config
+
+ security/Kconfig |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 6568e7348222fbe00256c9d337c4c24ee57e3f7e
+Merge: d8503a3 74bec16
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 28 20:47:10 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 74bec16b657147a5575b1f14f4423a717ba317a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 28 20:46:13 2013 -0400
+
+    Update to pax-linux-3.8.4-test13.patch:
+    - fixed bug with the old PAGEEXEC method and hugetlb, reported by Alex Efros (https://bugs.gentoo.org/show_bug.cgi?id=437722)
+    - added a new gcc plugin to plug (pun intended) some of the kernel stack leaks to userland
+
+ Makefile                      |    5 +++-
+ arch/x86/include/asm/compat.h |    2 +-
+ arch/x86/mm/fault.c           |    3 +-
+ fs/binfmt_elf.c               |    2 +-
+ include/linux/compiler.h      |   42 ++++++++++++++--------------------------
+ security/Kconfig              |   16 +++++++++++++++
+ tools/gcc/Makefile            |    2 +
+ tools/gcc/constify_plugin.c   |    7 +++++-
+ 8 files changed, 47 insertions(+), 32 deletions(-)
+
+commit d8503a3a35d68b9ba1615d29335aef3f70d51465
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 28 20:02:40 2013 -0400
+
+    Fix 8-byte stack infoleak in ia32_rt_sigpending
+    User controls length, kernel only performs check on the upper bound, will
+    fill in any amount less than sizeof(sigset_t) via a copy_to_user under
+    KERNEL_DS in sys_rt_sigpending, then will copy the full size of compat_sigset_t
+    regardless of whether the sigset_t content copied into it has been initialized
+    or not
+
+ arch/x86/ia32/sys_ia32.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 46a9f4b871ebf298ee67cc3f799dbd6c2382022b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 26 21:05:05 2013 -0400
+
+    commit 814d9d4f9164c3d778dadd093a54bb55d9a0c576
+    Author: J. Bruce Fields <bfields@redhat.com>
+    Date:   Tue Mar 26 14:11:13 2013 -0400
+    
+        nfsd4: reject "negative" acl lengths
+    
+        Since we only enforce an upper bound, not a lower bound, a "negative"
+        length can get through here.
+    
+        The symptom seen was a warning when we attempt to a kmalloc with an
+        excessive size.
+    
+        Reported-by: Toralf Förster <toralf.foerster@gmx.de>
+        Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+
+ fs/nfsd/nfs4xdr.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 2cf84a1843bfdf9298e2a1dc8df4e52d11a1af89
 Author: Jeff Layton <jlayton@redhat.com>
 Date:   Mon Mar 11 09:52:19 2013 -0400
