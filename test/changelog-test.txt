@@ -1,3 +1,41 @@
+commit baec40e6708fd5ae2000cad6c70c5980c998b91c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 2 19:50:32 2013 -0400
+
+    fix compilation as reported on forums for gcc versions lacking plugin
+    support
+
+ include/net/net_namespace.h |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit f6da5efca8a7edc9d3af02d6c35fddae0d2fd095
+Merge: 6b69c35 0db9d15
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 2 17:47:27 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0db9d156826bdd50510086fde837648a3dfd370e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 2 17:46:05 2013 -0400
+
+    Update to pax-linux-3.8.5-test14.patch:
+    - removed some no longer necessary __size_overflow marks and updated the overflow plugin's hash table
+
+ arch/x86/include/asm/uaccess_64.h |    6 +-
+ include/linux/moduleloader.h      |    4 +-
+ tools/gcc/size_overflow_hash.data |   98 +++++++++++++++++++++----------------
+ 3 files changed, 61 insertions(+), 47 deletions(-)
+
+commit 6b69c3589fa97b454a08c28ecfac5a512f610f4d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 2 17:35:06 2013 -0400
+
+    remove duplicate compiler.h
+
+ include/linux/sysrq.h |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
 commit 01e1d503fd2220adaaec0b92ea19441bdff73555
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Mar 29 19:53:50 2013 -0400
