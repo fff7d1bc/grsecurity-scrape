@@ -1,3 +1,22 @@
+commit e988d7c8d946c816a2cb97f0d38048a1584966b8
+Merge: baec40e 0277fa1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 3 22:05:41 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0277fa123b486cf11420967e4568d7653e225fd3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 3 22:04:48 2013 -0400
+
+    Update to pax-linux-3.8.5-test15.patch:
+    - fixed section mismatch error caused by CONSTIFY (http://forums.grsecurity.net/viewtopic.php?f=3&t=3388 and http://forums.grsecurity.net/viewtopic.php?f=3&t=3391)
+    - fixed integer type mixup in the cx88 driver (http://forums.grsecurity.net/viewtopic.php?f=3&t=3394)
+
+ drivers/media/pci/cx88/cx88-video.c |    6 +++---
+ include/net/net_namespace.h         |    4 ++++
+ 2 files changed, 7 insertions(+), 3 deletions(-)
+
 commit baec40e6708fd5ae2000cad6c70c5980c998b91c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Apr 2 19:50:32 2013 -0400
