@@ -1,3 +1,41 @@
+commit 5a216624a06429488f24ce47db093da042f90e48
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 6 13:22:24 2013 -0400
+
+    fix typo
+
+ arch/sparc/kernel/us3_cpufreq.c |    5 +----
+ 1 files changed, 1 insertions(+), 4 deletions(-)
+
+commit e476ca18d21788898cd3acd1b57049971a2fb70f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 6 13:16:13 2013 -0400
+
+    properly fix cpufreq_driver for ultrasparc III with constification
+
+ arch/sparc/kernel/us3_cpufreq.c |   35 +++++++++++++++++------------------
+ 1 files changed, 17 insertions(+), 18 deletions(-)
+
+commit 3ef64a33c8a38d17db7d1e6ff13d9036c75598ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 6 12:58:48 2013 -0400
+
+    mark prom_sparc_ops __initconst
+
+ arch/sparc/kernel/prom_common.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit daaa8e290cb1eb08e86c6d3f0fb1a8270d897439
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 6 12:53:16 2013 -0400
+
+    fix ia64/powerpc/sparc compilation
+
+ arch/ia64/include/asm/uaccess.h    |    2 --
+ arch/powerpc/include/asm/uaccess.h |    2 --
+ arch/sparc/include/asm/uaccess.h   |    7 -------
+ 3 files changed, 0 insertions(+), 11 deletions(-)
+
 commit 4a0cd3af0fd8788bd1c84de775743c8ae51e9a39
 Author: Johannes Berg <johannes.berg@intel.com>
 Date:   Tue Mar 19 20:26:57 2013 +0100
