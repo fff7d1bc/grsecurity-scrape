@@ -1,3 +1,533 @@
+commit 4a0cd3af0fd8788bd1c84de775743c8ae51e9a39
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Tue Mar 19 20:26:57 2013 +0100
+
+    Upstream commit: ce1eadda6badef9e4e3460097ede674fca47383d
+    
+    cfg80211: fix wdev tracing crash
+    
+    Arend reported a crash in tracing if the driver returns an
+    ERR_PTR() value from the add_virtual_intf() callback. This
+    is due to the tracing then still attempting to dereference
+    the "pointer", fix this by using IS_ERR_OR_NULL().
+    
+    Reported-by: Arend van Spriel <arend@broadcom.com>
+    Tested-by: Arend van Spriel <arend@broadcom.com>
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+ net/wireless/trace.h |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 68e6eafdaf9a3b37c780b3916a35a1961b1559fd
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Mon Mar 25 11:51:14 2013 +0100
+
+    Upstream commit: 3fbd45ca8d1c98f3c2582ef8bc70ade42f70947b
+    
+    mac80211: fix remain-on-channel cancel crash
+    
+    If a ROC item is canceled just as it expires, the work
+    struct may be scheduled while it is running (and waiting
+    for the mutex). This results in it being run after being
+    freed, which obviously crashes.
+    
+    To fix this don't free it when aborting is requested but
+    instead mark it as "to be freed", which makes the work a
+    no-op and allows freeing it outside.
+    
+    Cc: stable@vger.kernel.org [3.6+]
+    Reported-by: Jouni Malinen <j@w1.fi>
+    Tested-by: Jouni Malinen <j@w1.fi>
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+
+ net/mac80211/cfg.c         |    6 ++++--
+ net/mac80211/ieee80211_i.h |    3 ++-
+ net/mac80211/offchannel.c  |   23 +++++++++++++++++------
+ 3 files changed, 23 insertions(+), 9 deletions(-)
+
+commit dd5df32b00e3c2344ba39fe01071e7b67b83e1e4
+Author: Stone Piao <piaoyun@marvell.com>
+Date:   Fri Mar 29 19:21:21 2013 -0700
+
+    Upstream commit: 901ceba4e81e9dd6b4a3c4c37ee22000a6c5c65f
+    
+    mwifiex: limit channel number not to overflow memory
+    
+    Limit the channel number in scan request, or the driver scan
+    config structure memory will be overflowed.
+    
+    Cc: <stable@vger.kernel.org> # 3.5+
+    Signed-off-by: Stone Piao <piaoyun@marvell.com>
+    Signed-off-by: Bing Zhao <bzhao@marvell.com>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+ drivers/net/wireless/mwifiex/cfg80211.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 207c411512bdaf0e4271f93ecac6ca26588da36f
+Author: Gao feng <gaofeng@cn.fujitsu.com>
+Date:   Thu Mar 21 19:48:41 2013 +0000
+
+    Upstream commit: 130549fed828cc34c22624c6195afcf9e7ae56fe
+    
+    netfilter: reset nf_trace in nf_reset
+    
+    We forgot to clear the nf_trace of sk_buff in nf_reset,
+    When we use veth device, this nf_trace information will
+    be leaked from one net namespace to another net namespace.
+    
+    Signed-off-by: Gao feng <gaofeng@cn.fujitsu.com>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ include/linux/skbuff.h |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 3b12800d73c763265b2de5f2a7a745d9caa62c6f
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Fri Mar 22 01:28:18 2013 +0000
+
+    Upstream commit: 558724a5b2a73ad0c7638e21e8dffc419d267b6c
+    
+    netfilter: nfnetlink_queue: fix error return code in nfnetlink_queue_init()
+    
+    Fix to return a negative error code from the error handling
+    case instead of 0, as returned elsewhere in this function.
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/nfnetlink_queue_core.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit a79feb7d3251eca577d83d7f69eee2b961ab2924
+Author: Pablo Neira Ayuso <pablo@netfilter.org>
+Date:   Sat Mar 23 16:57:59 2013 +0100
+
+    Upstream commit: deadcfc3324410726cd6a663fb4fc46be595abe7
+    
+    netfilter: nfnetlink_acct: return -EINVAL if object name is empty
+    
+    If user-space tries to create accounting object with an empty
+    name, then return -EINVAL.
+    
+    Reported-by: Michael Zintakis <michael.zintakis@googlemail.com>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/nfnetlink_acct.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 1a51dca4fc16538d90a7a4c92b1ffe7e0fd76cf7
+Author: Matthias Schiffer <mschiffer@universe-factory.net>
+Date:   Sat Mar 30 10:23:12 2013 +0000
+
+    Upstream commit: 906b1c394d0906a154fbdc904ca506bceb515756
+    
+    netfilter: ip6t_NPT: Fix translation for non-multiple of 32 prefix lengths
+    
+    The bitmask used for the prefix mangling was being calculated
+    incorrectly, leading to the wrong part of the address being replaced
+    when the prefix length wasn't a multiple of 32.
+    
+    Signed-off-by: Matthias Schiffer <mschiffer@universe-factory.net>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/ipv6/netfilter/ip6t_NPT.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3425de1e3dc22e1602f9c77fe8d258da58416d5e
+Author: Veaceslav Falico <vfalico@redhat.com>
+Date:   Wed Apr 3 05:46:33 2013 +0000
+
+    Upstream commit: 4de79c737b200492195ebc54a887075327e1ec1d
+    
+    bonding: remove sysfs before removing devices
+    
+    We have a race condition if we try to rmmod bonding and simultaneously add
+    a bond master through sysfs. In bonding_exit() we first remove the devices
+    (through rtnl_link_unregister() ) and only after that we remove the sysfs.
+    If we manage to add a device through sysfs after that the devices were
+    removed - we'll end up with that device/sysfs structure and with the module
+    unloaded.
+    
+    Fix this by first removing the sysfs and only after that calling
+    rtnl_link_unregister().
+    
+    Signed-off-by: Veaceslav Falico <vfalico@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/bonding/bond_main.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d12cae44a9d12441d81c489178803237219d403d
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Wed Apr 3 16:14:47 2013 +0000
+
+    Upstream commit: 0e82e7f6dfeec1013339612f74abc2cdd29d43d2
+    
+    af_unix: If we don't care about credentials coallesce all messages
+    
+    It was reported that the following LSB test case failed
+    https://lsbbugs.linuxfoundation.org/attachment.cgi?id=2144 because we
+    were not coallescing unix stream messages when the application was
+    expecting us to.
+    
+    The problem was that the first send was before the socket was accepted
+    and thus sock->sk_socket was NULL in maybe_add_creds, and the second
+    send after the socket was accepted had a non-NULL value for sk->socket
+    and thus we could tell the credentials were not needed so we did not
+    bother.
+    
+    The unnecessary credentials on the first message cause
+    unix_stream_recvmsg to start verifying that all messages had the same
+    credentials before coallescing and then the coallescing failed because
+    the second message had no credentials.
+    
+    Ignoring credentials when we don't care in unix_stream_recvmsg fixes a
+    long standing pessimization which would fail to coallesce messages when
+    reading from a unix stream socket if the senders were different even if
+    we did not care about their credentials.
+    
+    I have tested this and verified that the in the LSB test case mentioned
+    above that the messages do coallesce now, while the were failing to
+    coallesce without this change.
+    
+    Reported-by: Karel Srot <ksrot@redhat.com>
+    Reported-by: Ding Tianhong <dingtianhong@huawei.com>
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 126d882492b130da6367f71cdf3ac59bf4f4c1bf
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Wed Apr 3 16:13:35 2013 +0000
+
+    Upstream commit: 25da0e3e9d3fb2b522bc2a598076735850310eb1
+    
+    Revert "af_unix: dont send SCM_CREDENTIAL when dest socket is NULL"
+    
+    This reverts commit 14134f6584212d585b310ce95428014b653dfaf6.
+    
+    The problem that the above patch was meant to address is that af_unix
+    messages are not being coallesced because we are sending unnecesarry
+    credentials.  Not sending credentials in maybe_add_creds totally
+    breaks unconnected unix domain sockets that wish to send credentails
+    to other sockets.
+    
+    In practice this break some versions of udev because they receive a
+    message and the sending uid is bogus so they drop the message.
+    
+    Reported-by: Sven Joachim <svenjoac@gmx.de>
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 1295b4f600e8f5ab56af71e5a89e4c0e74e95663
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Wed Mar 20 21:31:42 2013 +0000
+
+    Upstream commit: cb0e51d80694fc9964436be1a1a15275e991cb1e
+    
+    lantiq_etop: use free_netdev(netdev) instead of kfree()
+    
+    Freeing netdev without free_netdev() leads to net, tx leaks.
+    And it may lead to dereferencing freed pointer.
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/lantiq_etop.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1dcdddf846697fbd0b474e7b12ff92f7b408fe5f
+Author: Cong Wang <amwang@redhat.com>
+Date:   Fri Mar 22 19:14:07 2013 +0000
+
+    Upstream commit: 4a7df340ed1bac190c124c1601bfc10cde9fb4fb
+    
+    8021q: fix a potential use-after-free
+    
+    vlan_vid_del() could possibly free ->vlan_info after a RCU grace
+    period, however, we may still refer to the freed memory area
+    by 'grp' pointer. Found by code inspection.
+    
+    This patch moves vlan_vid_del() as behind as possible.
+    
+    Cc: Patrick McHardy <kaber@trash.net>
+    Cc: "David S. Miller" <davem@davemloft.net>
+    Signed-off-by: Cong Wang <amwang@redhat.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/8021q/vlan.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit fff29c277024a39845d4b535083c8dafc21b45d9
+Author: Hong zhi guo <honkiko@gmail.com>
+Date:   Sat Mar 23 02:27:50 2013 +0000
+
+    Upstream commit: 9b46922e15f4d9d2aedcd320c3b7f7f54d956da7
+    
+    bridge: fix crash when set mac address of br interface
+    
+    When I tried to set mac address of a bridge interface to a mac
+    address which already learned on this bridge, I got system hang.
+    
+    The cause is straight forward: function br_fdb_change_mac_address
+    calls fdb_insert with NULL source nbp. Then an fdb lookup is
+    performed. If an fdb entry is found and it's local, it's OK. But
+    if it's not local, source is dereferenced for printk without NULL
+    check.
+    
+    Signed-off-by: Hong Zhiguo <honkiko@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bridge/br_fdb.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b72eca0f8495b4b084bcf3eb4fbb425281ba5349
+Author: Kumar Amit Mehta <gmate.amit@gmail.com>
+Date:   Sat Mar 23 20:10:25 2013 +0000
+
+    Upstream commit: 8fe7f99a9e11a43183bc27420309ae105e1fec1a
+    
+    bnx2x: fix assignment of signed expression to unsigned variable
+    
+    fix for incorrect assignment of signed expression to unsigned variable.
+    
+    Signed-off-by: Kumar Amit Mehta <gmate.amit@gmail.com>
+    Acked-by: Dmitry Kravkov <dmitry@broadcom.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_dcb.c |   18 +++++++++---------
+ 1 files changed, 9 insertions(+), 9 deletions(-)
+
+commit 4d2d5e3694574d8e9d7594bf6111f144dccc873e
+Author: dingtianhong <dingtianhong@huawei.com>
+Date:   Mon Mar 25 17:02:04 2013 +0000
+
+    Upstream commit: 14134f6584212d585b310ce95428014b653dfaf6
+    
+    af_unix: dont send SCM_CREDENTIAL when dest socket is NULL
+    
+    SCM_SCREDENTIALS should apply to write() syscalls only either source or destination
+    socket asserted SOCK_PASSCRED. The original implememtation in maybe_add_creds is wrong,
+    and breaks several LSB testcases ( i.e. /tset/LSB.os/netowkr/recvfrom/T.recvfrom).
+    
+    Origionally-authored-by: Karel Srot <ksrot@redhat.com>
+    Signed-off-by: Ding Tianhong <dingtianhong@huawei.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit b964e1e61f0f0ccaa380be3342f956c604054bdc
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Thu Mar 21 02:30:41 2013 -0700
+
+    Upstream commit: eddc0a3abff273842a94784d2d022bbc36dc9015
+    
+    yama:  Better permission check for ptraceme
+    
+    Change the permission check for yama_ptrace_ptracee to the standard
+    ptrace permission check, testing if the traceer has CAP_SYS_PTRACE
+    in the tracees user namespace.
+    
+    Reviewed-by: Kees Cook <keescook@chromium.org>
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+
+ security/yama/yama_lsm.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit b94e71c7b6abe75989edff18aca2781233fa143b
+Author: Stanislav Kinsbursky <skinsbursky@parallels.com>
+Date:   Mon Apr 1 11:40:51 2013 +0400
+
+    Upstream commit: 2dc958fa2fe6987e7ab106bd97029a09a82fcd8d
+    
+    ipc: set msg back to -EAGAIN if copy wasn't performed
+    
+    Make sure that msg pointer is set back to error value in case of
+    MSG_COPY flag is set and desired message to copy wasn't found.  This
+    garantees that msg is either a error pointer or a copy address.
+    
+    Otherwise the last message in queue will be freed without unlinking from
+    the queue (which leads to memory corruption) and the dummy allocated
+    copy won't be released.
+    
+    Signed-off-by: Stanislav Kinsbursky <skinsbursky@parallels.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ ipc/msg.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit a997fbbe7a37ffd805f4784a18b8e530da6978d1
+Author: Jan Kara <jack@suse.cz>
+Date:   Fri Mar 29 15:39:16 2013 +0100
+
+    Upstream commit: 35e5cbc0af240778e61113286c019837e06aeec6
+    
+    reiserfs: Fix warning and inode leak when deleting inode with xattrs
+    
+    After commit 21d8a15a (lookup_one_len: don't accept . and ..) reiserfs
+    started failing to delete xattrs from inode. This was due to a buggy
+    test for '.' and '..' in fill_with_dentries() which resulted in passing
+    '.' and '..' entries to lookup_one_len() in some cases. That returned
+    error and so we failed to iterate over all xattrs of and inode.
+    
+    Fix the test in fill_with_dentries() along the lines of the one in
+    lookup_one_len().
+    
+    Reported-by: Pawel Zawora <pzawora@gmail.com>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/reiserfs/xattr.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 9f07957378e0f55abb81da8e23b124a608fbe1cc
+Author: Paul Bolle <pebolle@tiscali.nl>
+Date:   Wed Apr 3 12:24:45 2013 +0100
+
+    Upstream commit: 4e1db26a0b42e2b6e27c05d68adcc01709c2eed2
+    
+    ARM: 7690/1: mm: fix CONFIG_LPAE typos
+    
+    CONFIG_LPAE doesn't exist: the correct option is CONFIG_ARM_LPAE, so fix
+    up the two typos under arch/arm/.
+    
+    The fix to head.S is slightly scary, but this is just for setting up
+    an early io-mapping for the serial port when running on a big-endian,
+    LPAE system. Since these systems don't exist in the wild (at least, I
+    have no access to one outside of kvmtool, which doesn't provide a serial
+    port suitable for earlyprintk), then we can revisit the code later if it
+    causes any problems.
+    
+    Signed-off-by: Paul Bolle <pebolle@tiscali.nl>
+    Signed-off-by: Will Deacon <will.deacon@arm.com>
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+
+ arch/arm/kernel/head.S  |    2 +-
+ arch/arm/kernel/setup.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 984ba346b2d8f158473e9723ba145031368431ed
+Author: Catalin Marinas <catalin.marinas@arm.com>
+Date:   Tue Mar 26 23:35:04 2013 +0100
+
+    Upstream commit: 93dc68876b608da041fe40ed39424b0fcd5aa2fb
+    
+    ARM: 7684/1: errata: Workaround for Cortex-A15 erratum 798181 (TLBI/DSB operations)
+    
+    On Cortex-A15 (r0p0..r3p2) the TLBI/DSB are not adequately shooting down
+    all use of the old entries. This patch implements the erratum workaround
+    which consists of:
+    
+    1. Dummy TLBIMVAIS and DSB on the CPU doing the TLBI operation.
+    2. Send IPI to the CPUs that are running the same mm (and ASID) as the
+       one being invalidated (or all the online CPUs for global pages).
+    3. CPU receiving the IPI executes a DMB and CLREX (part of the exception
+       return code already).
+    
+    Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+    
+    Conflicts:
+    
+    	arch/arm/include/asm/tlbflush.h
+    	arch/arm/kernel/smp_tlb.c
+    	arch/arm/mm/context.c
+
+ arch/arm/Kconfig                   |   10 +++++
+ arch/arm/include/asm/highmem.h     |    7 ++++
+ arch/arm/include/asm/mmu_context.h |    2 +
+ arch/arm/include/asm/tlbflush.h    |   15 ++++++++
+ arch/arm/kernel/smp_tlb.c          |   66 ++++++++++++++++++++++++++++++++++++
+ arch/arm/mm/context.c              |    6 ++-
+ 6 files changed, 104 insertions(+), 2 deletions(-)
+
+commit 9a6ef010c38b3d5471886d2dea6e3c1622e2a286
+Author: Jan Stancek <jstancek@redhat.com>
+Date:   Thu Apr 4 11:35:10 2013 -0700
+
+    Upstream commit: b6a9b7f6b1f21735a7456d534dc0e68e61359d2c
+    
+    mm: prevent mmap_cache race in find_vma()
+    
+    find_vma() can be called by multiple threads with read lock
+    held on mm->mmap_sem and any of them can update mm->mmap_cache.
+    Prevent compiler from re-fetching mm->mmap_cache, because other
+    readers could update it in the meantime:
+    
+                   thread 1                             thread 2
+                                            |
+      find_vma()                            |  find_vma()
+        struct vm_area_struct *vma = NULL;  |
+        vma = mm->mmap_cache;               |
+        if (!(vma && vma->vm_end > addr     |
+            && vma->vm_start <= addr)) {    |
+                                            |    mm->mmap_cache = vma;
+        return vma;                         |
+         ^^ compiler may optimize this      |
+            local variable out and re-read  |
+            mm->mmap_cache                  |
+    
+    This issue can be reproduced with gcc-4.8.0-1 on s390x by running
+    mallocstress testcase from LTP, which triggers:
+    
+      kernel BUG at mm/rmap.c:1088!
+        Call Trace:
+         ([<000003d100c57000>] 0x3d100c57000)
+          [<000000000023a1c0>] do_wp_page+0x2fc/0xa88
+          [<000000000023baae>] handle_pte_fault+0x41a/0xac8
+          [<000000000023d832>] handle_mm_fault+0x17a/0x268
+          [<000000000060507a>] do_protection_exception+0x1e2/0x394
+          [<0000000000603a04>] pgm_check_handler+0x138/0x13c
+          [<000003fffcf1f07a>] 0x3fffcf1f07a
+        Last Breaking-Event-Address:
+          [<000000000024755e>] page_add_new_anon_rmap+0xc2/0x168
+    
+    Thanks to Jakub Jelinek for his insight on gcc and helping to
+    track this down.
+    
+    Signed-off-by: Jan Stancek <jstancek@redhat.com>
+    Acked-by: David Rientjes <rientjes@google.com>
+    Signed-off-by: Hugh Dickins <hughd@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mmap.c  |    2 +-
+ mm/nommu.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 53f5096daa14967938bc154e6c41f9119863fb36
+Merge: e988d7c 0a45285
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 5 17:32:31 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/net/ethernet/broadcom/tg3.c
+
+commit 0a452855444d02502df6eb21ef3083cf303f71e1
+Merge: 0277fa1 00cfbb8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 5 17:31:15 2013 -0400
+
+    Update to pax-linux-3.8.6-test16.patch:
+    - fixed some attribute leakage into userland headers, patch by Mathias Krause
+    - fixed some of the access_*_vm related breakage that trigger size overflows, reported by Hunger
+    
+    Merge branch 'linux-3.8.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/i915/intel_display.c
+
 commit e988d7c8d946c816a2cb97f0d38048a1584966b8
 Merge: baec40e 0277fa1
 Author: Brad Spengler <spender@grsecurity.net>
