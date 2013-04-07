@@ -1,3 +1,12 @@
+commit 675a41e42a636dcb1e97bffe0f0fa6262242e64b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 7 12:00:50 2013 -0400
+
+    fix similar leaks in sys_recvfrom as fixed in recvmsg, already handled by the new structleak plugin
+
+ net/socket.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 5a216624a06429488f24ce47db093da042f90e48
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Apr 6 13:22:24 2013 -0400
