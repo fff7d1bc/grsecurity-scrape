@@ -1,3 +1,29 @@
+commit 97bca8889e0f1e853f16b7026c39c6729a8587ab
+Merge: 675a41e e9d6073
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 8 21:32:59 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/sparc/kernel/us3_cpufreq.c
+
+commit e9d6073f15010ccace0b6b0f0a19ed63cf1adeef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 8 21:19:03 2013 -0400
+
+    Update to pax-linux-3.8.6-test17.patch:
+    - fixed ia64/ppc/sparc compilation by spender
+    - improved the STRUCTLEAK gcc plugin to cover a few more cases (credit to stef for the bugreport)
+
+ arch/ia64/include/asm/uaccess.h    |    2 -
+ arch/powerpc/include/asm/uaccess.h |    2 -
+ arch/sparc/include/asm/uaccess.h   |    7 ----
+ arch/sparc/kernel/prom_common.c    |    2 +-
+ arch/sparc/kernel/us3_cpufreq.c    |   69 ++++++++++--------------------------
+ tools/gcc/structleak_plugin.c      |   15 ++++----
+ 6 files changed, 28 insertions(+), 69 deletions(-)
+
 commit 675a41e42a636dcb1e97bffe0f0fa6262242e64b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Apr 7 12:00:50 2013 -0400
