@@ -1,3 +1,23 @@
+commit b5261a6384ee42499b29495aaae40b271e77d394
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 9 17:30:45 2013 -0400
+
+    some undefined behavior fixups
+
+ grsecurity/gracl.c      |    4 ++--
+ grsecurity/gracl_ip.c   |   10 +++++-----
+ grsecurity/gracl_segv.c |    4 ++--
+ 3 files changed, 9 insertions(+), 9 deletions(-)
+
+commit 9f83caa35e78be1f3e753586ab217555c3b21ff4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 9 17:28:54 2013 -0400
+
+    don't whine about denied ipv6 when it's not enabled
+
+ grsecurity/gracl_ip.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
 commit 5a02f8bc96bd0c31f9ff09e63f9d85d560b8be61
 Merge: 97bca88 9123489
 Author: Brad Spengler <spender@grsecurity.net>
