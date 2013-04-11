@@ -1,3 +1,273 @@
+commit fc98763e4f1f1487928750b26a63098b9e0ed5b1
+Author: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Date:   Fri Mar 29 10:20:56 2013 -0400
+
+    Upstream commit: b22227944b8fe92b19150b4c36421e37979d9a16
+    
+    xen/mmu: On early bootup, flush the TLB when changing RO->RW bits Xen provided pagetables.
+    
+    Occassionaly on a DL380 G4 the guest would crash quite early with this:
+    
+    (XEN) d244:v0: unhandled page fault (ec=0003)
+    (XEN) Pagetable walk from ffffffff84dc7000:
+    (XEN)  L4[0x1ff] = 00000000c3f18067 0000000000001789
+    (XEN)  L3[0x1fe] = 00000000c3f14067 000000000000178d
+    (XEN)  L2[0x026] = 00000000dc8b2067 0000000000004def
+    (XEN)  L1[0x1c7] = 00100000dc8da067 0000000000004dc7
+    (XEN) domain_crash_sync called from entry.S
+    (XEN) Domain 244 (vcpu#0) crashed on cpu#3:
+    (XEN) ----[ Xen-4.1.3OVM  x86_64  debug=n  Not tainted ]----
+    (XEN) CPU:    3
+    (XEN) RIP:    e033:[<ffffffff81263f22>]
+    (XEN) RFLAGS: 0000000000000216   EM: 1   CONTEXT: pv guest
+    (XEN) rax: 0000000000000000   rbx: ffffffff81785f88   rcx: 000000000000003f
+    (XEN) rdx: 0000000000000000   rsi: 00000000dc8da063   rdi: ffffffff84dc7000
+    
+    The offending code shows it to be a loop writting the value zero
+    (%rax) in the %rdi (the L4 provided by Xen) register:
+    
+       0: 44 00 00             add    %r8b,(%rax)
+       3: 31 c0                 xor    %eax,%eax
+       5: b9 40 00 00 00       mov    $0x40,%ecx
+       a: 66 0f 1f 84 00 00 00 nopw   0x0(%rax,%rax,1)
+      11: 00 00
+      13: ff c9                 dec    %ecx
+      15:* 48 89 07             mov    %rax,(%rdi)     <-- trapping instruction
+      18: 48 89 47 08           mov    %rax,0x8(%rdi)
+      1c: 48 89 47 10           mov    %rax,0x10(%rdi)
+    
+    which fails. xen_setup_kernel_pagetable recycles some of the Xen's
+    page-table entries when it has switched over to its Linux page-tables.
+    
+    Right before try to clear the page, we  make a hypercall to change
+    it from _RO to  _RW and that works (otherwise we would hit an BUG()).
+    And the _RW flag is set for that page:
+    (XEN)  L1[0x1c7] = 001000004885f067 0000000000004dc7
+    
+    The error code is 3, so PFEC_page_present and PFEC_write_access, so page is
+    present (correct), and we tried to write to the page, but a violation
+    occurred. The one theory is that the the page entries in hardware
+    (which are cached) are not up to date with what we just set. Especially
+    as we have just done an CR3 write and flushed the multicalls.
+    
+    This patch does solve the problem by flusing out the TLB page
+    entry after changing it from _RO to _RW and we don't hit this
+    issue anymore.
+    
+    Fixed-Oracle-Bug: 16243091 [ON OCCASIONS VM START GOES INTO
+    'CRASH' STATE: CLEAR_PAGE+0X12 ON HP DL380 G4]
+    Reported-and-Tested-by: Saar Maoz <Saar.Maoz@oracle.com>
+    Signed-off-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+
+ arch/x86/xen/mmu.c |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+commit d56bdc2595e76ca48cbfd695def7f82c3ab80c11
+Author: Namhyung Kim <namhyung.kim@lge.com>
+Date:   Mon Apr 1 21:46:23 2013 +0900
+
+    Upstream commit: 83e03b3fe4daffdebbb42151d5410d730ae50bd1
+    
+    tracing: Fix double free when function profile init failed
+    
+    On the failure path, stat->start and stat->pages will refer same page.
+    So it'll attempt to free the same page again and get kernel panic.
+    
+    Link: http://lkml.kernel.org/r/1364820385-32027-1-git-send-email-namhyung@kernel.org
+    
+    Cc: Frederic Weisbecker <fweisbec@gmail.com>
+    Cc: Namhyung Kim <namhyung.kim@lge.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Namhyung Kim <namhyung@kernel.org>
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ kernel/trace/ftrace.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit c86b0de9f4c42a7ede40df5af9436e87ccc784bb
+Author: Neil Horman <nhorman@tuxdriver.com>
+Date:   Tue Apr 9 23:19:00 2013 +0000
+
+    Upstream commit: 61a0f6efc8932e9914e1782ff3a027e23c687fc6
+    
+    e100: Add dma mapping error check
+    
+    e100 uses pci_map_single, but fails to check for a dma mapping error after its
+    use, resulting in a stack trace:
+    
+    [   46.656594] ------------[ cut here ]------------
+    [   46.657004] WARNING: at lib/dma-debug.c:933 check_unmap+0x47b/0x950()
+    [   46.657004] Hardware name: To Be Filled By O.E.M.
+    [   46.657004] e100 0000:00:0e.0: DMA-API: device driver failed to check map
+    error[device address=0x000000007a4540fa] [size=90 bytes] [mapped as single]
+    [   46.657004] Modules linked in:
+    [   46.657004]  w83627hf hwmon_vid snd_via82xx ppdev snd_ac97_codec ac97_bus
+    snd_seq snd_pcm snd_mpu401 snd_mpu401_uart ns558 snd_rawmidi gameport parport_pc
+    e100 snd_seq_device parport snd_page_alloc snd_timer snd soundcore skge shpchp
+    k8temp mii edac_core i2c_viapro edac_mce_amd nfsd auth_rpcgss nfs_acl lockd
+    sunrpc binfmt_misc uinput ata_generic pata_acpi radeon i2c_algo_bit
+    drm_kms_helper ttm firewire_ohci drm firewire_core pata_via sata_via i2c_core
+    sata_promise crc_itu_t
+    [   46.657004] Pid: 792, comm: ip Not tainted 3.8.0-0.rc6.git0.1.fc19.x86_64 #1
+    [   46.657004] Call Trace:
+    [   46.657004]  <IRQ>  [<ffffffff81065ed0>] warn_slowpath_common+0x70/0xa0
+    [   46.657004]  [<ffffffff81065f4c>] warn_slowpath_fmt+0x4c/0x50
+    [   46.657004]  [<ffffffff81364cfb>] check_unmap+0x47b/0x950
+    [   46.657004]  [<ffffffff8136522f>] debug_dma_unmap_page+0x5f/0x70
+    [   46.657004]  [<ffffffffa030f0f0>] ? e100_tx_clean+0x30/0x210 [e100]
+    [   46.657004]  [<ffffffffa030f1a8>] e100_tx_clean+0xe8/0x210 [e100]
+    [   46.657004]  [<ffffffffa030fc6f>] e100_poll+0x56f/0x6c0 [e100]
+    [   46.657004]  [<ffffffff8159dce1>] ? net_rx_action+0xa1/0x370
+    [   46.657004]  [<ffffffff8159ddb2>] net_rx_action+0x172/0x370
+    [   46.657004]  [<ffffffff810703bf>] __do_softirq+0xef/0x3d0
+    [   46.657004]  [<ffffffff816e4ebc>] call_softirq+0x1c/0x30
+    [   46.657004]  [<ffffffff8101c485>] do_softirq+0x85/0xc0
+    [   46.657004]  [<ffffffff81070885>] irq_exit+0xd5/0xe0
+    [   46.657004]  [<ffffffff816e5756>] do_IRQ+0x56/0xc0
+    [   46.657004]  [<ffffffff816dacb2>] common_interrupt+0x72/0x72
+    [   46.657004]  <EOI>  [<ffffffff816da1eb>] ?
+    _raw_spin_unlock_irqrestore+0x3b/0x70
+    [   46.657004]  [<ffffffff816d124d>] __slab_free+0x58/0x38b
+    [   46.657004]  [<ffffffff81214424>] ? fsnotify_clear_marks_by_inode+0x34/0x120
+    [   46.657004]  [<ffffffff811b0417>] ? kmem_cache_free+0x97/0x320
+    [   46.657004]  [<ffffffff8157fc14>] ? sock_destroy_inode+0x34/0x40
+    [   46.657004]  [<ffffffff8157fc14>] ? sock_destroy_inode+0x34/0x40
+    [   46.657004]  [<ffffffff811b0692>] kmem_cache_free+0x312/0x320
+    [   46.657004]  [<ffffffff8157fc14>] sock_destroy_inode+0x34/0x40
+    [   46.657004]  [<ffffffff811e8c28>] destroy_inode+0x38/0x60
+    [   46.657004]  [<ffffffff811e8d5e>] evict+0x10e/0x1a0
+    [   46.657004]  [<ffffffff811e9605>] iput+0xf5/0x180
+    [   46.657004]  [<ffffffff811e4338>] dput+0x248/0x310
+    [   46.657004]  [<ffffffff811ce0e1>] __fput+0x171/0x240
+    [   46.657004]  [<ffffffff811ce26e>] ____fput+0xe/0x10
+    [   46.657004]  [<ffffffff8108d54c>] task_work_run+0xac/0xe0
+    [   46.657004]  [<ffffffff8106c6ed>] do_exit+0x26d/0xc30
+    [   46.657004]  [<ffffffff8109eccc>] ? finish_task_switch+0x7c/0x120
+    [   46.657004]  [<ffffffff816dad58>] ? retint_swapgs+0x13/0x1b
+    [   46.657004]  [<ffffffff8106d139>] do_group_exit+0x49/0xc0
+    [   46.657004]  [<ffffffff8106d1c4>] sys_exit_group+0x14/0x20
+    [   46.657004]  [<ffffffff816e3b19>] system_call_fastpath+0x16/0x1b
+    [   46.657004] ---[ end trace 4468c44e2156e7d1 ]---
+    [   46.657004] Mapped at:
+    [   46.657004]  [<ffffffff813663d1>] debug_dma_map_page+0x91/0x140
+    [   46.657004]  [<ffffffffa030e8eb>] e100_xmit_prepare+0x12b/0x1c0 [e100]
+    [   46.657004]  [<ffffffffa030c924>] e100_exec_cb+0x84/0x140 [e100]
+    [   46.657004]  [<ffffffffa030e56a>] e100_xmit_frame+0x3a/0x190 [e100]
+    [   46.657004]  [<ffffffff8159ee89>] dev_hard_start_xmit+0x259/0x6c0
+    
+    Easy fix, modify the cb paramter to e100_exec_cb to return an error, and do the
+    dma_mapping_error check in the obvious place
+    
+    This was reported previously here:
+    http://article.gmane.org/gmane.linux.network/257893
+    
+    But nobody stepped up and fixed it.
+    
+    CC: Josh Boyer <jwboyer@redhat.com>
+    CC: e1000-devel@lists.sourceforge.net
+    Signed-off-by: Neil Horman <nhorman@tuxdriver.com>
+    Reported-by: Michal Jaegermann <michal@harddata.com>
+    Tested-by: Aaron Brown <aaron.f.brown@intel.com>
+    Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/intel/e100.c |   36 +++++++++++++++++++++++++-----------
+ 1 files changed, 25 insertions(+), 11 deletions(-)
+
+commit df93708573ce6c512b9a9406a83a6fd4e87ff6a6
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Wed Apr 10 12:44:18 2013 -0400
+
+    Upstream commit: eb04e0ac198cec3bab407ad220438dfa65c19c67
+    
+    NFSv4: Doh! Typo in the fix to nfs41_walk_client_list
+    
+    Make sure that we set the status to 0 on success. Missed in testing
+    because it never appears when doing multiple mounts to _different_
+    servers.
+    
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+    Cc: <stable@vger.kernel.org> # 3.7.x: 7b1f1fd: NFSv4/4.1: Fix bugs in nfs4[01]_walk_client_list
+
+ fs/nfs/nfs4client.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 0ea7b7294f627588b0b3dc26a8a0ff8e1e27b5ea
+Author: Yuval Mintz <yuvalmin@broadcom.com>
+Date:   Wed Apr 10 13:34:39 2013 +0300
+
+    Upstream commit: fea75645342c7ad574214497a78e562db12dfd7b
+    
+    bnx2x: Prevent null pointer dereference in AFEX mode
+    
+    The cnic module is responsible for initializing various bnx2x structs
+    via callbacks provided by the bnx2x module.
+    One such struct is the queue object for the FCoE queue.
+    
+    If a device is working in AFEX mode and its configuration allows FCoE yet
+    the cnic module is not loaded, it's very likely a null pointer dereference
+    will occur, as the bnx2x will erroneously access the FCoE's queue object.
+    
+    Prevent said access until cnic properly registers itself.
+    
+    Signed-off-by: Yuval Mintz <yuvalmin@broadcom.com>
+    Signed-off-by: Ariel Elior <ariele@broadcom.com>
+    Signed-off-by: Eilon Greenstein <eilong@broadcom.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 2908830232725db624aaa052f7ad38d1f98bf541
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Tue Apr 9 14:16:04 2013 +0800
+
+    Upstream commit: 3480a2125923e4b7a56d79efc76743089bf273fc
+    
+    can: gw: use kmem_cache_free() instead of kfree()
+    
+    Memory allocated by kmem_cache_alloc() should be freed using
+    kmem_cache_free(), not kfree().
+    
+    Cc: linux-stable <stable@vger.kernel.org> # >= v3.2
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Acked-by: Oliver Hartkopp <socketcan@hartkopp.net>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+
+ net/can/gw.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit d40b572e845a5fb561e3c4a80cc306cd38888a4e
+Author: Christoph Paasch <christoph.paasch@uclouvain.be>
+Date:   Sun Apr 7 04:53:15 2013 +0000
+
+    Upstream commit: 50a75a8914539c5dcd441c5f54d237a666a426fd
+    
+    ipv6/tcp: Stop processing ICMPv6 redirect messages
+    
+    Tetja Rediske found that if the host receives an ICMPv6 redirect message
+    after sending a SYN+ACK, the connection will be reset.
+    
+    He bisected it down to 093d04d (ipv6: Change skb->data before using
+    icmpv6_notify() to propagate redirect), but the origin of the bug comes
+    from ec18d9a26 (ipv6: Add redirect support to all protocol icmp error
+    handlers.). The bug simply did not trigger prior to 093d04d, because
+    skb->data did not point to the inner IP header and thus icmpv6_notify
+    did not call the correct err_handler.
+    
+    This patch adds the missing "goto out;" in tcp_v6_err. After receiving
+    an ICMPv6 Redirect, we should not continue processing the ICMP in
+    tcp_v6_err, as this may trigger the removal of request-socks or setting
+    sk_err(_soft).
+    
+    Reported-by: Tetja Rediske <tetja@tetja.de>
+    Signed-off-by: Christoph Paasch <christoph.paasch@uclouvain.be>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/tcp_ipv6.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit c7d5c2524456ef3ea9194840e7a9a75069a46824
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Apr 10 20:32:54 2013 -0400
