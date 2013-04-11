@@ -1,3 +1,187 @@
+commit c7d5c2524456ef3ea9194840e7a9a75069a46824
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 10 20:32:54 2013 -0400
+
+    - fixed typo in Makefile reported by mlarm (https://forums.grsecurity.net/viewtopic.php?t=3411)
+
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit acac2380fd97acee4367d2aa24c74322dcf1d22b
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Fri Apr 5 16:11:11 2013 -0400
+
+    Upstream commit: 7b1f1fd1842e6ede25183c267ae733a7f67f00bc
+    
+    NFSv4/4.1: Fix bugs in nfs4[01]_walk_client_list
+    
+    It is unsafe to use list_for_each_entry_safe() here, because
+    when we drop the nn->nfs_client_lock, we pin the _current_ list
+    entry and ensure that it stays in the list, but we don't do the
+    same for the _next_ list entry. Use of list_for_each_entry() is
+    therefore the correct thing to do.
+    
+    Also fix the refcounting in nfs41_walk_client_list().
+    
+    Finally, ensure that the nfs_client has finished being initialised
+    and, in the case of NFSv4.1, that the session is set up.
+    
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+    Cc: Chuck Lever <chuck.lever@oracle.com>
+    Cc: Bryan Schumaker <bjschuma@netapp.com>
+    Cc: stable@vger.kernel.org [>= 3.7]
+
+ fs/nfs/nfs4client.c |   44 ++++++++++++++++++++++++++++----------------
+ 1 files changed, 28 insertions(+), 16 deletions(-)
+
+commit a6cf5f387b882ac0ce655b75f623f86c075517be
+Author: Chuck Lever <chuck.lever@oracle.com>
+Date:   Fri Mar 22 12:52:59 2013 -0400
+
+    Upstream commit: a58e0be6f6b3eb2079b0b8fedc9df6fa86869f1e
+    
+    SUNRPC: Remove extra xprt_put()
+    
+    While testing error cases where rpc_new_client() fails, I saw
+    some oopses.
+    
+    If rpc_new_client() fails, it already invokes xprt_put().  Thus
+    __rpc_clone_client() does not need to invoke it again.
+    
+    Introduced by commit 1b63a751 "SUNRPC: Refactor rpc_clone_client()"
+    Fri Sep 14, 2012.
+    
+    Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+    Cc: stable@vger.kernel.org [>=3.7]
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+
+ net/sunrpc/clnt.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit a744b307c1f65ceb100412dc18cdd7ecc9a8ae00
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Fri Apr 5 14:13:21 2013 -0400
+
+    Upstream commit: f05c124a70a4953a66acbd6d6c601ea1eb5d0fa7
+    
+    SUNRPC: Fix a potential memory leak in rpc_new_client
+    
+    If the call to rpciod_up() fails, we currently leak a reference to the
+    struct rpc_xprt.
+    As part of the fix, we also remove the redundant check for xprt!=NULL.
+    This is already taken care of by the callers.
+    
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+
+ net/sunrpc/clnt.c |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
+commit 43b9f1b9b8380984c5c100978bd33e8f16da06ac
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 10 19:16:05 2013 -0400
+
+    From https://lkml.org/lkml/2013/4/8/469:
+    [PATCH] rtnetlink: call nlmsg_parse() with correct header length
+
+ net/core/rtnetlink.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 9529169b8c405874fd543b785f53c74fa0501c2a
+Author: Christopher Harvey <charvey@matrox.com>
+Date:   Fri Apr 5 10:51:15 2013 -0400
+
+    Upstream commit: 1812a3db0874be1d1524086da9e84397b800f546
+    
+    drm/mgag200: Index 24 in extended CRTC registers is 24 in hex, not decimal.
+    
+    This change properly enables the "requester" in G200ER cards that is
+    responsible for getting pixels out of memory and clocking them out to
+    the screen.
+    
+    Signed-off-by: Christopher Harvey <charvey@matrox.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+ drivers/gpu/drm/mgag200/mgag200_mode.c |   13 +++----------
+ 1 files changed, 3 insertions(+), 10 deletions(-)
+
+commit 07c42243c7b01e2a7a9d168ad491e28b9ef9082a
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu Mar 28 13:30:23 2013 -0400
+
+    Upstream commit: 52f21999c7b921a0390708b66ed286282c2e4bee
+    
+    ecryptfs: close rmmod race
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/ecryptfs/miscdev.c |   14 ++------------
+ 1 files changed, 2 insertions(+), 12 deletions(-)
+
+commit 2800bdcf9cd642b967e5fdc2a15c1c4aefbadd9b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 10 19:03:45 2013 -0400
+
+    Backport overflow fix from upstream commit: ccf932042fa7785832d8989ba1369cd7c7f5d7a1
+
+ arch/ia64/kernel/palinfo.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 83280e384ae3ceadad30369ced111dc7d4b46085
+Author: Andrey Vagin <avagin@openvz.org>
+Date:   Tue Apr 9 17:33:29 2013 +0400
+
+    Upstream commit: e9c5d8a562f01b211926d70443378eb14b29a676
+    
+    mnt: release locks on error path in do_loopback
+    
+    do_loopback calls lock_mount(path) and forget to unlock_mount
+    if clone_mnt or copy_mnt fails.
+    
+    [   77.661566] ================================================
+    [   77.662939] [ BUG: lock held when returning to user space! ]
+    [   77.664104] 3.9.0-rc5+ #17 Not tainted
+    [   77.664982] ------------------------------------------------
+    [   77.666488] mount/514 is leaving the kernel with locks still held!
+    [   77.668027] 2 locks held by mount/514:
+    [   77.668817]  #0:  (&sb->s_type->i_mutex_key#7){+.+.+.}, at: [<ffffffff811cca22>] lock_mount+0x32/0xe0
+    [   77.671755]  #1:  (&namespace_sem){+++++.}, at: [<ffffffff811cca3a>] lock_mount+0x4a/0xe0
+    
+    Signed-off-by: Andrey Vagin <avagin@openvz.org>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/namespace.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 679e536b9d9536d804f049fe942367a596253e6d
+Author: Alex Williamson <alex.williamson@redhat.com>
+Date:   Tue Mar 26 11:33:16 2013 -0600
+
+    Upstream commit: 904c680c7bf016a8619a045850937427f8d7368c
+    
+    vfio-pci: Fix possible integer overflow
+    
+    The VFIO_DEVICE_SET_IRQS ioctl takes a start and count parameter, both
+    of which are unsigned.  We attempt to bounds check these, but fail to
+    account for the case where start is a very large number, allowing
+    start + count to wrap back into the valid range.  Bounds check both
+    start and start + count.
+    
+    Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Alex Williamson <alex.williamson@redhat.com>
+
+ drivers/vfio/pci/vfio_pci.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 63badcd2023717cc62b6c3ad5f25fe504c49e6d7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 10 18:48:45 2013 -0400
+
+    Don't auto-enable stackleak if kernel is used for xen dom0, kernel will not boot
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit b5261a6384ee42499b29495aaae40b271e77d394
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Apr 9 17:30:45 2013 -0400
