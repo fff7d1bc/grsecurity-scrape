@@ -1,3 +1,50 @@
+commit 521e573fc77d1783c1d4636dfbb4617a922f043d
+Merge: 032f626 f807619
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 12 19:29:34 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f80761993b85df96fc142dfc3a317cadc0f8eae5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 12 19:28:21 2013 -0400
+
+    Update to pax-linux-3.8.7-test19.patch:
+    - fixed STACKLEAK/XEN interference once again, reported by Jason A. Donenfeld
+    - fixed small typo, reported by mlarm (http://forums.grsecurity.net/viewtopic.php?f=3&t=3411)
+    - fixed the structleak plugin to compile for gcc 4.5-4.6 as well
+
+ Makefile                      |    2 +-
+ arch/x86/xen/enlighten.c      |    6 +++---
+ tools/gcc/structleak_plugin.c |    5 +++--
+ 3 files changed, 7 insertions(+), 6 deletions(-)
+
+commit 032f626a4ae9bc3196313a2e762650c3d9abdc96
+Merge: a3a770e 89886f5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 12 18:38:40 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 89886f561cc0d1c42a99624ec8c3704711088155
+Merge: 9123489 531ec28
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 12 18:38:30 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+
+commit a3a770e18578841e4fbe2aa0831a22811b4812cf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 11 20:46:20 2013 -0400
+
+    Revert "Don't auto-enable stackleak if kernel is used for xen dom0, kernel will not boot"
+    Will be fixed with the next PaX patch
+    
+    This reverts commit 63badcd2023717cc62b6c3ad5f25fe504c49e6d7.
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit fc98763e4f1f1487928750b26a63098b9e0ed5b1
 Author: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
 Date:   Fri Mar 29 10:20:56 2013 -0400
