@@ -1,3 +1,195 @@
+commit 802d1193dcb507b2a62a2de0a869a7dbadd66b9b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 14 21:39:51 2013 -0400
+
+    move location of RBAC user check on setfsuid until after capability checks
+    for consistency with other checks
+
+ kernel/sys.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 1a860d7d67051559ab2e6d10f9888649c92904e6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 14 21:34:46 2013 -0400
+
+    A denied setfsuid by the RBAC system would result in an abort_creds() being called
+    with an uninitalized pointer, introduced by a bad forward-port
+
+ kernel/sys.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 9f94b84d0e5e101fe8ea8ebcc8eeb141d8a6edb9
+Merge: c38d142 bc88628
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 14 21:28:33 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit bc88628a6a8fcccaabb90908640809b0540df225
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 14 21:26:41 2013 -0400
+
+    Update to pax-linux-3.8.7-test20.patch:
+    - fixed KERNEXEC and NMI nesting problem reported by stef&hunger
+    - changed PHYSICAL_ALIGN/START to fix http://forums.grsecurity.net/viewtopic.php?f=3&t=3414
+    - CONSTIFY depends on KERNEXEC (for the kernel open/close feature)
+    - fixed CONSTIFY and powerpc interference, reported by  John Hardin (https://bugs.gentoo.org/show_bug.cgi?id=456364)
+
+ arch/powerpc/include/asm/smp.h |    2 +-
+ arch/x86/Kconfig               |    4 ++--
+ arch/x86/kernel/entry_64.S     |    8 ++++----
+ security/Kconfig               |    2 +-
+ 4 files changed, 8 insertions(+), 8 deletions(-)
+
+commit c38d142744489fc4d9be80188b6435a278438fd9
+Author: Suleiman Souhlal <suleiman@google.com>
+Date:   Sat Apr 13 16:03:06 2013 -0700
+
+    Upstream commit: 5b55d708335a9e3e4f61f2dadf7511502205ccd1
+    
+    vfs: Revert spurious fix to spinning prevention in prune_icache_sb
+    
+    Revert commit 62a3ddef6181 ("vfs: fix spinning prevention in prune_icache_sb").
+    
+    This commit doesn't look right: since we are looking at the tail of the
+    list (sb->s_inode_lru.prev) if we want to skip an inode, we should put
+    it back at the head of the list instead of the tail, otherwise we will
+    keep spinning on it.
+    
+    Discovered when investigating why prune_icache_sb came top in perf
+    reports of a swapping load.
+    
+    Signed-off-by: Suleiman Souhlal <suleiman@google.com>
+    Signed-off-by: Hugh Dickins <hughd@google.com>
+    Cc: stable@vger.kernel.org # v3.2+
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/inode.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 93019624b80ba59798393942798d7f6ed0c1dbc6
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Sat Apr 13 15:15:30 2013 -0700
+
+    Upstream commit: a49b7e82cab0f9b41f483359be83f44fbb6b4979
+    
+    kobject: fix kset_find_obj() race with concurrent last kobject_put()
+    
+    Anatol Pomozov identified a race condition that hits module unloading
+    and re-loading.  To quote Anatol:
+    
+     "This is a race codition that exists between kset_find_obj() and
+      kobject_put().  kset_find_obj() might return kobject that has refcount
+      equal to 0 if this kobject is freeing by kobject_put() in other
+      thread.
+    
+      Here is timeline for the crash in case if kset_find_obj() searches for
+      an object tht nobody holds and other thread is doing kobject_put() on
+      the same kobject:
+    
+        THREAD A (calls kset_find_obj())     THREAD B (calls kobject_put())
+        splin_lock()
+                                             atomic_dec_return(kobj->kref), counter gets zero here
+                                             ... starts kobject cleanup ....
+                                             spin_lock() // WAIT thread A in kobj_kset_leave()
+        iterate over kset->list
+        atomic_inc(kobj->kref) (counter becomes 1)
+        spin_unlock()
+                                             spin_lock() // taken
+                                             // it does not know that thread A increased counter so it
+                                             remove obj from list
+                                             spin_unlock()
+                                             vfree(module) // frees module object with containing kobj
+    
+        // kobj points to freed memory area!!
+        kobject_put(kobj) // OOPS!!!!
+    
+      The race above happens because module.c tries to use kset_find_obj()
+      when somebody unloads module.  The module.c code was introduced in
+      commit 6494a93d55fa"
+    
+    Anatol supplied a patch specific for module.c that worked around the
+    problem by simply not using kset_find_obj() at all, but rather than make
+    a local band-aid, this just fixes kset_find_obj() to be thread-safe
+    using the proper model of refusing the get a new reference if the
+    refcount has already dropped to zero.
+    
+    See examples of this proper refcount handling not only in the kref
+    documentation, but in various other equivalent uses of this pattern by
+    grepping for atomic_inc_not_zero().
+    
+    [ Side note: the module race does indicate that module loading and
+      unloading is not properly serialized wrt sysfs information using the
+      module mutex.  That may require further thought, but this is the
+      correct fix at the kobject layer regardless. ]
+    
+    Reported-analyzed-and-tested-by: Anatol Pomozov <anatol.pomozov@gmail.com>
+    Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ lib/kobject.c |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
+
+commit 5277b052b5fab36729e1255fb3b12f47a4b12867
+Author: Dave Hansen <dave@sr71.net>
+Date:   Fri Apr 12 16:23:54 2013 -0700
+
+    Upstream commit: 1de14c3c5cbc9bb17e9dcc648cda51c0c85d54b9
+    
+    x86-32: Fix possible incomplete TLB invalidate with PAE pagetables
+    
+    This patch attempts to fix:
+    
+    	https://bugzilla.kernel.org/show_bug.cgi?id=56461
+    
+    The symptom is a crash and messages like this:
+    
+    	chrome: Corrupted page table at address 34a03000
+    	*pdpt = 0000000000000000 *pde = 0000000000000000
+    	Bad pagetable: 000f [#1] PREEMPT SMP
+    
+    Ingo guesses this got introduced by commit 611ae8e3f520 ("x86/tlb:
+    enable tlb flush range support for x86") since that code started to free
+    unused pagetables.
+    
+    On x86-32 PAE kernels, that new code has the potential to free an entire
+    PMD page and will clear one of the four page-directory-pointer-table
+    (aka pgd_t entries).
+    
+    The hardware aggressively "caches" these top-level entries and invlpg
+    does not actually affect the CPU's copy.  If we clear one we *HAVE* to
+    do a full TLB flush, otherwise we might continue using a freed pmd page.
+    (note, we do this properly on the population side in pud_populate()).
+    
+    This patch tracks whenever we clear one of these entries in the 'struct
+    mmu_gather', and ensures that we follow up with a full tlb flush.
+    
+    BTW, I disassembled and checked that:
+    
+    	if (tlb->fullmm == 0)
+    and
+    	if (!tlb->fullmm && !tlb->need_flush_all)
+    
+    generate essentially the same code, so there should be zero impact there
+    to the !PAE case.
+    
+    Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: Peter Anvin <hpa@zytor.com>
+    Cc: Ingo Molnar <mingo@kernel.org>
+    Cc: Artem S Tashkinov <t.artem@mailcity.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/x86/include/asm/tlb.h |    2 +-
+ arch/x86/mm/pgtable.c      |    7 +++++++
+ include/asm-generic/tlb.h  |    7 ++++++-
+ mm/memory.c                |    1 +
+ 4 files changed, 15 insertions(+), 2 deletions(-)
+
 commit 521e573fc77d1783c1d4636dfbb4617a922f043d
 Merge: 032f626 f807619
 Author: Brad Spengler <spender@grsecurity.net>
