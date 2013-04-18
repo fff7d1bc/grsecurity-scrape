@@ -1,3 +1,46 @@
+commit 0942d16614b0ef59d50b10151d77ec52fc98c2d0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 17 20:17:00 2013 -0400
+
+    Improve PAX_USERCOPY to reject direct copies to/from main kernel text
+
+ fs/exec.c |   29 +++++++++++++++++++++++++++--
+ 1 files changed, 27 insertions(+), 2 deletions(-)
+
+commit 3cb37d0c0c77dc3928ff8417f982139f95366eba
+Merge: e87c19f c664779
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 17 20:06:08 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c664779987cb0c27a242029f0e0db812e3236203
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 17 19:54:09 2013 -0400
+
+    add intentional_overflow marking for resource_size() as reasoned by:
+    http://forums.grsecurity.net/viewtopic.php?f=3&t=3412
+
+ include/linux/ioport.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit e87c19f8312355b8658e5138c16bfa6043a379c8
+Merge: 802d119 d0c636c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 17 16:57:12 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d0c636ceaaf406e606898ce3e770e32fb043ea8a
+Merge: bc88628 2396403
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 17 16:57:01 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/paravirt.c
+
 commit 802d1193dcb507b2a62a2de0a869a7dbadd66b9b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Apr 14 21:39:51 2013 -0400
