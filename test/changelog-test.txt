@@ -1,3 +1,204 @@
+commit e126225d1fcaa405ff2a7f1518d615cffe42e7d5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 18 19:22:40 2013 -0400
+
+    move _etext to only cover kernel code, not read-only data, as reported by Gu1
+
+ arch/arm/kernel/vmlinux.lds.S |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 98ad6adbc48759e4f9eae435d3e51ba487155685
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 18 19:17:24 2013 -0400
+
+    add asm/sections.h for USERCOPY change
+
+ fs/exec.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit c403a6c43da1bcac9b1ef2bca9bba0fb84a40f10
+Author: Dmitry Popov <dp@highloadlab.com>
+Date:   Thu Apr 11 08:55:07 2013 +0000
+
+    Upstream commit: d66954a066158781ccf9c13c91d0316970fe57b6
+    
+    tcp: incoming connections might use wrong route under synflood
+    
+    There is a bug in cookie_v4_check (net/ipv4/syncookies.c):
+    	flowi4_init_output(&fl4, 0, sk->sk_mark, RT_CONN_FLAGS(sk),
+    			   RT_SCOPE_UNIVERSE, IPPROTO_TCP,
+    			   inet_sk_flowi_flags(sk),
+    			   (opt && opt->srr) ? opt->faddr : ireq->rmt_addr,
+    			   ireq->loc_addr, th->source, th->dest);
+    
+    Here we do not respect sk->sk_bound_dev_if, therefore wrong dst_entry may be
+    taken. This dst_entry is used by new socket (get_cookie_sock ->
+    tcp_v4_syn_recv_sock), so its packets may take the wrong path.
+    
+    Signed-off-by: Dmitry Popov <dp@highloadlab.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/syncookies.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 3600395e8fef3ae712e72f9b68c3609639616df8
+Author: Thomas Graf <tgraf@suug.ch>
+Date:   Thu Apr 11 10:57:18 2013 +0000
+
+    Upstream commit: 50bceae9bd3569d56744882f3012734d48a1d413
+    
+    tcp: Reallocate headroom if it would overflow csum_start
+    
+    If a TCP retransmission gets partially ACKed and collapsed multiple
+    times it is possible for the headroom to grow beyond 64K which will
+    overflow the 16bit skb->csum_start which is based on the start of
+    the headroom. It has been observed rarely in the wild with IPoIB due
+    to the 64K MTU.
+    
+    Verify if the acking and collapsing resulted in a headroom exceeding
+    what csum_start can cover and reallocate the headroom if so.
+    
+    A big thank you to Jim Foraker <foraker1@llnl.gov> and the team at
+    LLNL for helping out with the investigation and testing.
+    
+    Reported-by: Jim Foraker <foraker1@llnl.gov>
+    Signed-off-by: Thomas Graf <tgraf@suug.ch>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_output.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 4b0b9a5038da806a2b6eba9efc3f3a53c5188a61
+Author: Ivan Vecera <ivecera@redhat.com>
+Date:   Fri Apr 12 16:49:24 2013 +0200
+
+    Upstream commit: f11a869d4e38397ac81f2a3d22e8d2aeb3992b0f
+    
+    be2net: take care of __vlan_put_tag return value
+    
+    The driver should use return value of __vlan_put_tag with appropriate
+    NULL-check instead of old skb pointer.
+    
+    Signed-off-by: Ivan Vecera <ivecera@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/emulex/benet/be_main.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 8d3aca40a891f13b9b1e0d957913fa788fd1cc55
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Fri Apr 12 03:17:12 2013 +0000
+
+    Upstream commit: 3be8fbab18fbc06b6ff94a56f9c225e29ea64a73
+    
+    tuntap: fix error return code in tun_set_iff()
+    
+    Fix to return a negative error code from the error handling
+    case instead of 0, as returned elsewhere in this function.
+    
+    [ Bug added in linux-3.8 , commit 4008e97f866db665
+      ("tuntap: fix ambigious multiqueue API") ]
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/tun.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 42cfd101287e0ffa5e8425ca7dd3c4131a7a601c
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Sat Apr 13 15:49:03 2013 +0000
+
+    Upstream commit: 06848c10f720cbc20e3b784c0df24930b7304b93
+    
+    esp4: fix error return code in esp_output()
+    
+    Fix to return a negative error code from the error handling
+    case instead of 0, as returned elsewhere in this function.
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Acked-by: Steffen Klassert <steffen.klassert@secunet.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/esp4.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 2b45b5f52c2a8930f80c62de392a62516c83e225
+Author: Bjørn Mork <bjorn@mork.no>
+Date:   Tue Apr 16 00:17:07 2013 +0000
+
+    Upstream commit: 32b161aa88aa40a83888a995c6e2ef81140219b1
+    
+    net: cdc_mbim: remove bogus sizeof()
+    
+    The intention was to test against the constant, not the size of
+    the constant.
+    
+    Signed-off-by: Bjørn Mork <bjorn@mork.no>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/usb/cdc_mbim.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 17d7408795519037a5a1272c7888238e20830bfe
+Author: Vyacheslav Dubeyko <slava@dubeyko.com>
+Date:   Wed Apr 17 15:58:33 2013 -0700
+
+    Upstream commit: 12f267a20aecf8b84a2a9069b9011f1661c779b4
+    
+    hfsplus: fix potential overflow in hfsplus_file_truncate()
+    
+    Change a u32 to loff_t hfsplus_file_truncate().
+    
+    Signed-off-by: Vyacheslav Dubeyko <slava@dubeyko.com>
+    Cc: Christoph Hellwig <hch@infradead.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Hin-Tak Leung <htl10@users.sourceforge.net>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/hfsplus/extents.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5c9574e7f16e7a9b3ea9b419c46ddc57110a555b
+Author: Emese Revfy <re.emese@gmail.com>
+Date:   Wed Apr 17 15:58:36 2013 -0700
+
+    Upstream commit: b9e146d8eb3b9ecae5086d373b50fa0c1f3e7f0f
+    
+    kernel/signal.c: stop info leak via the tkill and the tgkill syscalls
+    
+    This fixes a kernel memory contents leak via the tkill and tgkill syscalls
+    for compat processes.
+    
+    This is visible in the siginfo_t->_sifields._rt.si_sigval.sival_ptr field
+    when handling signals delivered from tkill.
+    
+    The place of the infoleak:
+    
+    int copy_siginfo_to_user32(compat_siginfo_t __user *to, siginfo_t *from)
+    {
+            ...
+            put_user_ex(ptr_to_compat(from->si_ptr), &to->si_ptr);
+            ...
+    }
+    
+    Signed-off-by: Emese Revfy <re.emese@gmail.com>
+    Reviewed-by: PaX Team <pageexec@freemail.hu>
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Serge Hallyn <serge.hallyn@canonical.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/signal.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 0942d16614b0ef59d50b10151d77ec52fc98c2d0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Apr 17 20:17:00 2013 -0400
