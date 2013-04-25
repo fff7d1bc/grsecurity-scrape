@@ -1,3 +1,113 @@
+commit dc080cfd57c7cdc426f8c6c2da11911ac99959d8
+Author: David S. Miller <davem@davemloft.net>
+Date:   Fri Apr 19 17:26:26 2013 -0400
+
+    Upstream commit: f36391d2790d04993f48da6a45810033a2cdf847
+    
+    sparc64: Fix race in TLB batch processing.
+    
+    As reported by Dave Kleikamp, when we emit cross calls to do batched
+    TLB flush processing we have a race because we do not synchronize on
+    the sibling cpus completing the cross call.
+    
+    So meanwhile the TLB batch can be reset (tb->tlb_nr set to zero, etc.)
+    and either flushes are missed or flushes will flush the wrong
+    addresses.
+    
+    Fix this by using generic infrastructure to synchonize on the
+    completion of the cross call.
+    
+    This first required getting the flush_tlb_pending() call out from
+    switch_to() which operates with locks held and interrupts disabled.
+    The problem is that smp_call_function_many() cannot be invoked with
+    IRQs disabled and this is explicitly checked for with WARN_ON_ONCE().
+    
+    We get the batch processing outside of locked IRQ disabled sections by
+    using some ideas from the powerpc port. Namely, we only batch inside
+    of arch_{enter,leave}_lazy_mmu_mode() calls.  If we're not in such a
+    region, we flush TLBs synchronously.
+    
+    1) Get rid of xcall_flush_tlb_pending and per-cpu type
+       implementations.
+    
+    2) Do TLB batch cross calls instead via:
+    
+    	smp_call_function_many()
+    		tlb_pending_func()
+    			__flush_tlb_pending()
+    
+    3) Batch only in lazy mmu sequences:
+    
+    	a) Add 'active' member to struct tlb_batch
+    	b) Define __HAVE_ARCH_ENTER_LAZY_MMU_MODE
+    	c) Set 'active' in arch_enter_lazy_mmu_mode()
+    	d) Run batch and clear 'active' in arch_leave_lazy_mmu_mode()
+    	e) Check 'active' in tlb_batch_add_one() and do a synchronous
+               flush if it's clear.
+    
+    4) Add infrastructure for synchronous TLB page flushes.
+    
+    	a) Implement __flush_tlb_page and per-cpu variants, patch
+    	   as needed.
+    	b) Likewise for xcall_flush_tlb_page.
+    	c) Implement smp_flush_tlb_page() to invoke the cross-call.
+    	d) Wire up global_flush_tlb_page() to the right routine based
+               upon CONFIG_SMP
+    
+    5) It turns out that singleton batches are very common, 2 out of every
+       3 batch flushes have only a single entry in them.
+    
+       The batch flush waiting is very expensive, both because of the poll
+       on sibling cpu completeion, as well as because passing the tlb batch
+       pointer to the sibling cpus invokes a shared memory dereference.
+    
+       Therefore, in flush_tlb_pending(), if there is only one entry in
+       the batch perform a completely asynchronous global_flush_tlb_page()
+       instead.
+    
+    Reported-by: Dave Kleikamp <dave.kleikamp@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    Acked-by: Dave Kleikamp <dave.kleikamp@oracle.com>
+
+ arch/sparc/include/asm/pgtable_64.h   |    1 +
+ arch/sparc/include/asm/switch_to_64.h |    3 +-
+ arch/sparc/include/asm/tlbflush_64.h  |   37 +++++++++--
+ arch/sparc/kernel/smp_64.c            |   41 ++++++++++-
+ arch/sparc/mm/tlb.c                   |   38 +++++++++-
+ arch/sparc/mm/tsb.c                   |   57 ++++++++++++----
+ arch/sparc/mm/ultra.S                 |  119 ++++++++++++++++++++++++++-------
+ 7 files changed, 241 insertions(+), 55 deletions(-)
+
+commit cd80cc3cfd122295e6ec6db1e5e16e5b7a5d3b59
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Fri Apr 19 15:32:32 2013 +0000
+
+    Upstream commit: 83f1b4ba917db5dc5a061a44b3403ddb6e783494
+    
+    net: fix incorrect credentials passing
+    
+    Commit 257b5358b32f ("scm: Capture the full credentials of the scm
+    sender") changed the credentials passing code to pass in the effective
+    uid/gid instead of the real uid/gid.
+    
+    Obviously this doesn't matter most of the time (since normally they are
+    the same), but it results in differences for suid binaries when the wrong
+    uid/gid ends up being used.
+    
+    This just undoes that (presumably unintentional) part of the commit.
+    
+    Reported-by: Andy Lutomirski <luto@amacapital.net>
+    Cc: Eric W. Biederman <ebiederm@xmission.com>
+    Cc: Serge E. Hallyn <serge@hallyn.com>
+    Cc: David S. Miller <davem@davemloft.net>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Acked-by: "Eric W. Biederman" <ebiederm@xmission.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/scm.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit e126225d1fcaa405ff2a7f1518d615cffe42e7d5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Apr 18 19:22:40 2013 -0400
