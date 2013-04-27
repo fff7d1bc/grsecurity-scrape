@@ -1,3 +1,149 @@
+commit 5b72e3790fa0e8a16a09c0ef745d8065620a1e74
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 26 20:53:06 2013 -0400
+
+    don't use file_inode()
+
+ drivers/tty/tty_io.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a2df9595fa2e3c7a0c63b1acac75425fd4feb946
+Author: Jiri Slaby <jslaby@suse.cz>
+Date:   Fri Apr 26 13:48:53 2013 +0200
+
+    Upstream commit: 37b7f3c76595e23257f61bd80b223de8658617ee
+    
+    TTY: fix atime/mtime regression
+    
+    In commit b0de59b5733d ("TTY: do not update atime/mtime on read/write")
+    we removed timestamps from tty inodes to fix a security issue and waited
+    if something breaks.  Well, 'w', the utility to find out logged users
+    and their inactivity time broke.  It shows that users are inactive since
+    the time they logged in.
+    
+    To revert to the old behaviour while still preventing attackers to
+    guess the password length, we update the timestamps in one-minute
+    intervals by this patch.
+    
+    Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+    Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	drivers/tty/tty_io.c
+
+ drivers/tty/tty_io.c |   15 ++++++++++++++-
+ 1 files changed, 14 insertions(+), 1 deletions(-)
+
+commit c9c76fe07da7611a5062dd3234e5d2369e0a78ec
+Author: Jiri Slaby <jslaby@suse.cz>
+Date:   Fri Feb 15 15:25:05 2013 +0100
+
+    Upstream commit: b0de59b5733d
+    
+    TTY: do not update atime/mtime on read/write
+    
+    On http://vladz.devzero.fr/013_ptmx-timing.php, we can see how to find
+    out length of a password using timestamps of /dev/ptmx. It is
+    documented in "Timing Analysis of Keystrokes and Timing Attacks on
+    SSH". To avoid that problem, do not update time when reading
+    from/writing to a TTY.
+    
+    I am afraid of regressions as this is a behavior we have since 0.97
+    and apps may expect the time to be current, e.g. for monitoring
+    whether there was a change on the TTY. Now, there is no change. So
+    this would better have a lot of testing before it goes upstream.
+    
+    References: CVE-2013-0160
+    
+    Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+    Cc: stable <stable@vger.kernel.org> # after 3.9 is out
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_io.c |    8 ++------
+ 1 files changed, 2 insertions(+), 6 deletions(-)
+
+commit 5344a24e2320d61dbdb88aae04922f0799deefd0
+Author: Zhao Hongjiang <zhaohongjiang@huawei.com>
+Date:   Fri Apr 26 11:03:53 2013 +0800
+
+    Upstream commit: 91d80a84bbc8f28375cca7e65ec666577b4209ad
+    
+    aio: fix possible invalid memory access when DEBUG is enabled
+    
+    dprintk() shouldn't access @ring after it's unmapped.
+    
+    Signed-off-by: Zhao Hongjiang <zhaohongjiang@huawei.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/aio.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 786841cb279bbd8e458d67e112a1d01a3d4598a7
+Author: John David Anglin <dave.anglin@bell.net>
+Date:   Tue Apr 23 22:42:07 2013 +0200
+
+    Upstream commit: bda079d336cd8183e1d844a265ea87ae3e1bbe78
+    
+    parisc: use spin_lock_irqsave/spin_unlock_irqrestore for PTE updates
+    
+    User applications running on SMP kernels have long suffered from instability
+    and random segmentation faults.  This patch improves the situation although
+    there is more work to be done.
+    
+    One of the problems is the various routines in pgtable.h that update page table
+    entries use different locking mechanisms, or no lock at all (set_pte_at).  This
+    change modifies the routines to all use the same lock pa_dbit_lock.  This lock
+    is used for dirty bit updates in the interruption code. The patch also purges
+    the TLB entries associated with the PTE to ensure that inconsistent values are
+    not used after the page table entry is updated.  The UP and SMP code are now
+    identical.
+    
+    The change also includes a minor update to the purge_tlb_entries function in
+    cache.c to improve its efficiency.
+    
+    Signed-off-by: John David Anglin <dave.anglin@bell.net>
+    Cc: Helge Deller <deller@gmx.de>
+    Signed-off-by: Helge Deller <deller@gmx.de>
+
+ arch/parisc/include/asm/pgtable.h |   47 +++++++++++++++++++-----------------
+ arch/parisc/kernel/cache.c        |    5 +---
+ 2 files changed, 26 insertions(+), 26 deletions(-)
+
+commit 775a77ad179d4c25bc94e85ef81135cbdffcfdc1
+Merge: ba54c97 4d05084
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 26 18:17:20 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kvm/x86.c
+    	include/linux/capability.h
+
+commit 4d0508463d0ee3ec4b9eca1ea6bed3be03a3df21
+Merge: c664779 bb8dd67
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 26 18:15:45 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+
+commit ba54c977fe8c3afc4a9efd7afc3f30cf10b02fa2
+Author: David S. Miller <davem@davemloft.net>
+Date:   Wed Apr 24 16:52:18 2013 -0700
+
+    Upstream commit: f0af97070acbad5d6a361f485828223a4faaa0ee
+    
+    sparc64: Fix missing put_cpu_var() in tlb_batch_add_one() when not batching.
+    
+    Reported-by: Meelis Roos <mroos@linux.ee>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/mm/tlb.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit dc080cfd57c7cdc426f8c6c2da11911ac99959d8
 Author: David S. Miller <davem@davemloft.net>
 Date:   Fri Apr 19 17:26:26 2013 -0400
