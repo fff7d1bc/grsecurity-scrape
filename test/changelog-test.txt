@@ -1,3 +1,55 @@
+commit a8dbe8ee7a0a3ace489e2f95d69d33e14d5f0b78
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 29 18:44:23 2013 -0400
+
+    add module.h to silence compiler warning, thanks to
+    Sergei Trofimovich
+
+ fs/btrfs/inode.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 55eba82aca97aa56378e000840c48965557721e8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 29 18:43:03 2013 -0400
+
+    compilation fix
+
+ kernel/trace/trace.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit e3bf912b54af6df7fbebc68b5999554562056c5c
+Merge: 5b72e37 cdbcbef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 29 18:34:42 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit cdbcbef45c4f003cbee11e10668a35d424c17c60
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 29 18:33:35 2013 -0400
+
+    Update to pax-linux-3.8.10-test21.patch:
+    - removed size overflow coverage of resource_size(), reported at http://forums.grsecurity.net/viewtopic.php?f=3&t=3412
+    - fixed bad pointer arithmetic in nfsd_cache_update, reported by Jason A. Donenfeld and http://forums.grsecurity.net/viewtopic.php?f=3&t=3438
+      note that the false positive is not fixed yet
+    - fixed a few unintended bitmask computations found by a not-yet-public gcc plugin
+    - fixed the kernel stack leak bug in do_tgkill, found by the size overflow plugin (https://code.google.com/p/chromium/issues/detail?id=223444)
+    - reverted the nested NMI fix in search for a real one
+    - simplified the arm_delay_ops constification
+
+ arch/arm/include/asm/delay.h     |    8 ++++----
+ arch/arm/lib/delay.c             |   17 +++++------------
+ arch/x86/kernel/entry_64.S       |   11 ++++++++++-
+ arch/x86/kernel/i8259.c          |    2 +-
+ arch/x86/kernel/pci-calgary_64.c |    2 +-
+ arch/x86/kvm/vmx.c               |    4 ++--
+ drivers/block/pktcdvd.c          |    2 +-
+ fs/btrfs/extent-tree.c           |    2 +-
+ fs/nfsd/nfscache.c               |    6 ++++--
+ kernel/trace/trace.c             |    2 +-
+ tools/gcc/structleak_plugin.c    |    4 ++++
+ 11 files changed, 34 insertions(+), 26 deletions(-)
+
 commit 5b72e3790fa0e8a16a09c0ef745d8065620a1e74
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Apr 26 20:53:06 2013 -0400
