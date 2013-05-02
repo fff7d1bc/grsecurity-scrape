@@ -1,3 +1,31 @@
+commit a4e8dd5b1cca13c2e4145af75694a04aaa811f3f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 1 18:30:48 2013 -0400
+
+    remove references to CONFIG_X86_WP_WORKS_OK
+
+ arch/um/defconfig |    1 -
+ security/Kconfig  |    2 +-
+ 2 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 408da6791f93ffe00d26bfe919f1b2218fe0804d
+Merge: a8dbe8e 6c850d8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 1 18:28:44 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/sparc/mm/ultra.S
+    	drivers/tty/tty_io.c
+
+commit 6c850d8b76b375e418b6a18a33cc8263f36fabcf
+Merge: cdbcbef 9fa1d01
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 1 18:25:18 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+
 commit a8dbe8ee7a0a3ace489e2f95d69d33e14d5f0b78
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Apr 29 18:44:23 2013 -0400
