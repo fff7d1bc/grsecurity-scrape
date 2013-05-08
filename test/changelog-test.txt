@@ -1,3 +1,107 @@
+commit 539fff0cf95c3dcc02c5e0ac3ef8da4519efdb9a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 7 21:43:00 2013 -0400
+
+    turn counter into a flag
+
+ grsecurity/Kconfig        |    2 +-
+ grsecurity/grsec_chroot.c |    8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 3da48c0f89377e1ef76470d4b19f19df793fdf32
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 7 21:02:39 2013 -0400
+
+    add GRKERNSEC_CHROOT_INITRD to work around Plymouth stupidity
+    useful for Fedora/RHEL users
+
+ grsecurity/Kconfig        |   10 ++++++++++
+ grsecurity/grsec_chroot.c |   17 +++++++++++++++--
+ 2 files changed, 25 insertions(+), 2 deletions(-)
+
+commit 418102925c0cfb0de51b0a021abaa575e28fafa6
+Author: Peter Zijlstra <a.p.zijlstra@chello.nl>
+Date:   Fri May 3 14:11:25 2013 +0200
+
+    Upstream commit: 7cc23cd6c0c7d7f4bee057607e7ce01568925717
+    
+    perf/x86/intel/lbr: Demand proper privileges for PERF_SAMPLE_BRANCH_KERNEL
+    
+    We should always have proper privileges when requesting kernel
+    data.
+    
+    Signed-off-by: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Cc: <stable@kernel.org>
+    Cc: Andi Kleen <ak@linux.intel.com>
+    Cc: eranian@google.com
+    Link: http://lkml.kernel.org/r/20130503121256.230745028@chello.nl
+    [ Fix build error reported by fengguang.wu@intel.com, propagate error code back. ]
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+    Link: http://lkml.kernel.org/n/tip-v0x9ky3ahzr6nm3c6ilwrili@git.kernel.org
+
+ arch/x86/kernel/cpu/perf_event_intel_lbr.c |   13 ++++++++++---
+ 1 files changed, 10 insertions(+), 3 deletions(-)
+
+commit f9e1af27cca1722a4c6a801000b5b3b5410401a2
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Mon Apr 29 05:58:52 2013 +0000
+
+    Upstream commit: aebda156a570782a86fc4426842152237a19427d
+    
+    net: defer net_secret[] initialization
+    
+    Instead of feeding net_secret[] at boot time, defer the init
+    at the point first socket is created.
+    
+    This permits some platforms to use better entropy sources than
+    the ones available at boot time.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/secure_seq.h |    1 +
+ net/core/secure_seq.c    |    4 +---
+ net/ipv4/af_inet.c       |    5 ++++-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
+
+commit a9229d75129cd9744a5e486ec99a0fe6aeaf10ac
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Wed May 1 02:59:23 2013 +0000
+
+    Upstream commit: be3e45810bb1ee0bdfa93f6b9532d8c451e50f48
+    
+    net: sctp: attribute printl with __printf for gcc fmt checks
+    
+    Let GCC check for format string errors in sctp's probe printl
+    function. This patch fixes the warning when compiled with W=1:
+    
+    net/sctp/probe.c:73:2: warning: function might be possible candidate
+    for 'gnu_printf' format attribute [-Wmissing-format-attribute]
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/probe.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 81b98190c66a90f0ed2de4560f542b1dea7664f2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 2 19:58:54 2013 -0400
+
+    remove no-longer-needed vmware 8 compat fix
+
+ mm/page_alloc.c |    6 ------
+ 1 files changed, 0 insertions(+), 6 deletions(-)
+
+commit a7716a90c1dbe09a8a6d98c74ea2f7fe2a530e94
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 2 19:55:23 2013 -0400
+
+    remove unnecessary < 0 check
+
+ net/phonet/af_phonet.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit a4e8dd5b1cca13c2e4145af75694a04aaa811f3f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed May 1 18:30:48 2013 -0400
