@@ -1,3 +1,38 @@
+commit c1b2cc5dd5f5ae5c88402c7acbcb270f8d36a9da
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 8 20:25:52 2013 -0400
+
+    User jorgus on the forums:
+    http://forums.grsecurity.net/viewtopic.php?f=3&t=3446
+    discovered that the upstreamed version of enforcing RLIMIT_NPROC
+    at setuid/exec time missed an important corner case:
+    If RLIMIT_NPROC is set after a setuid occurs and the user's process
+    limit is reached elsewhere, no enforcement of RLIMIT_NPROC will
+    happen at exec time for the task with a modified RLIMIT_NPROC.
+    
+    This patch fixes that.
+
+ kernel/sys.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit 85ffce8c95bd1d9114852f74db8c66ddbc2e77ff
+Merge: 539fff0 2452d8d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 8 18:13:41 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2452d8d0416d5c9c32805443dd89e5c9778dea4a
+Merge: 6c850d8 9c9ab76
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 8 18:13:31 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/irq.c
+    	kernel/trace/trace_stack.c
+
 commit 539fff0cf95c3dcc02c5e0ac3ef8da4519efdb9a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue May 7 21:43:00 2013 -0400
