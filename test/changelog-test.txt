@@ -1,3 +1,23 @@
+commit 04638852588cf243f865f5a73aa9dab94fab53b7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 10 16:53:07 2013 -0400
+
+    MODULES_EXEC_VADDR is a virtual address
+
+ fs/exec.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 017fc58a177b8b3fd9c2a7a4366f3590c9d49435
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 10 16:51:03 2013 -0400
+
+    exempt module rx areas from usercopy protection under i386 kernexec
+    their .rodata will be placed between stext/etext causing copies of
+    constant strings to trigger usercopy reports/terminations
+
+ fs/exec.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
 commit c1b2cc5dd5f5ae5c88402c7acbcb270f8d36a9da
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed May 8 20:25:52 2013 -0400
