@@ -1,3 +1,134 @@
+commit c982acca364cbd7677bad7e53b9c7ecfaa6dfeb7
+Merge: 814820a 3a59a59
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 12 21:51:18 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit 3a59a59cf5e1bf88f96b05c64f7969e97f7f051f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 12 21:50:07 2013 -0400
+
+    Update to pax-linux-3.8.13-test24.patch:
+    - fixed sparc/constification compile error, reported by blake
+    - UDEREF/amd64 should be a bit more efficient when disabled at boot time
+    - fixed some unnecessary integer truncations that could trip up the size overflow plugin
+
+ arch/arm/kernel/vmlinux.lds.S       |    4 ++--
+ arch/sparc/kernel/us3_cpufreq.c     |    4 ++--
+ arch/x86/ia32/ia32entry.S           |    4 ++--
+ arch/x86/include/asm/pgtable.h      |    6 ++++--
+ arch/x86/include/asm/uaccess.h      |    6 +++---
+ arch/x86/kernel/kprobes-opt.c       |    4 ++++
+ arch/x86/lib/copy_user_nocache_64.S |    2 +-
+ arch/x86/lib/getuser.S              |    8 ++++----
+ arch/x86/lib/putuser.S              |    8 ++++----
+ arch/x86/mm/fault.c                 |    6 +++---
+ drivers/net/slip/slhc.c             |    2 +-
+ drivers/staging/iio/ring_sw.c       |    2 +-
+ fs/binfmt_elf.c                     |    6 +++---
+ fs/nfsd/nfscache.c                  |    2 +-
+ fs/xattr.c                          |   21 +++++++++++++++++++++
+ include/linux/syscalls.h            |    2 +-
+ include/linux/xattr.h               |    3 +++
+ init/main.c                         |    3 +++
+ kernel/futex_compat.c               |    2 +-
+ kernel/trace/trace.h                |    2 +-
+ net/socket.c                        |    2 +-
+ security/Kconfig                    |    2 +-
+ 22 files changed, 67 insertions(+), 34 deletions(-)
+
+commit 814820abfe5b9a34401d838b2510431a4cd92be9
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Mon May 6 09:31:17 2013 +0000
+
+    Upstream commit: 6bf15191f666c5965d212561d7a5c7b78b808dfa
+    
+    tipc: potential divide by zero in tipc_link_recv_fragment()
+    
+    The worry here is that fragm_sz could be zero since it comes from
+    skb->data.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/tipc/link.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit b58503d2784f0a4dbf4d9dbef9bdcc7bf163e3c1
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Mon May 6 08:28:41 2013 +0000
+
+    Upstream commit: cb4b102f0ab29fcbaf945c6b1f85ef006cdb8edc
+    
+    tipc: add a bounds check in link_recv_changeover_msg()
+    
+    The bearer_id here comes from skb->data and it can be a number from 0 to
+    7.  The problem is that the ->links[] array has only 2 elements so I
+    have added a range check.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/tipc/link.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit ed0428c4ef6c5498870772f212ac651216eb8d0c
+Merge: 2452d8d dbf932a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 12 21:18:25 2013 -0400
+
+    Merge branch 'linux-3.8.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/cpu/perf_event_intel_uncore.c
+    	arch/x86/mm/init.c
+
+commit a113d6ac19303cd76d405df5aef5a4d190e6e7d7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 12 20:24:01 2013 -0400
+
+    compile fix
+
+ grsecurity/gracl.c      |    1 +
+ grsecurity/gracl_segv.c |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 1bd664ee9054a28bbcf1dad6f9ffbc9e8500bb00
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 12 18:25:26 2013 -0400
+
+    fix btrfs support here as well
+
+ grsecurity/gracl_segv.c |   17 +++++++++--------
+ 1 files changed, 9 insertions(+), 8 deletions(-)
+
+commit c75e4664fe4d20da1639f70d9def097c4f20856b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 12 18:12:57 2013 -0400
+
+    Fix RBAC compatibility with btrfs compiled as a module, as
+    reported on the forums by YuHg at:
+    http://forums.grsecurity.net/viewtopic.php?t=2575&p=12952#p12952
+
+ fs/btrfs/inode.c            |   11 +----------
+ grsecurity/gracl.c          |   19 ++++++++++---------
+ grsecurity/gracl_segv.c     |    2 +-
+ grsecurity/grsec_disabled.c |    2 +-
+ 4 files changed, 13 insertions(+), 21 deletions(-)
+
+commit e40c5804acc5b83e10d16ca3ba92502a3e5f7f27
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 11 12:12:00 2013 -0400
+
+    allow copies just up to the start of kernel code
+
+ fs/exec.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 04638852588cf243f865f5a73aa9dab94fab53b7
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri May 10 16:53:07 2013 -0400
