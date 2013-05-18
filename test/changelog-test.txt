@@ -1,3 +1,113 @@
+commit 62588fa72b82a8ff7027f52dc2a05729f41e0f53
+Merge: e261c7b 0598b37
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 17 22:57:36 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0598b3778624dbc6c3887af025c040dbd6e92ba5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 17 22:57:07 2013 -0400
+
+    Update to pax-linux-3.9.2-test6.patch:
+    - fixed a gcc assert in the structleak plugin, reported by Emese Revfy
+    - fixed pfn extraction from pud/pgd entries, reported by ousado
+
+ arch/x86/include/asm/pgtable.h |    9 +++++++--
+ tools/gcc/structleak_plugin.c  |    3 ++-
+ 2 files changed, 9 insertions(+), 3 deletions(-)
+
+commit e261c7bc611e9127bbb7bd95cddd51524bf255ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 16 22:54:12 2013 -0400
+
+    add offset to topdown check, fixes compilation
+
+ arch/x86/kernel/sys_x86_64.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 455c5ed5279cf546f5d5c3844fb16f17300b2219
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 16 20:57:41 2013 -0400
+
+    CONFIG_GRKERNSEC depends on the recently-introduced CONFIG_TTY,
+    reported by lulzh3ad on irc
+
+ security/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 0d4593e84707cdf6deb6b925c18c676a476b1613
+Merge: 43cd0c0 39a877f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 16 20:39:11 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 39a877f192ed305d88edac10a14a9e8e1e161f3f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 16 20:37:35 2013 -0400
+
+    Update to pax-linux-3.9.2-test105.patch:
+    - fixed !EFI boot problem, reported by spender
+    - fixed a few compile warnings
+    - fixed some more compile errors due to constification
+    - fixed some arm fallout, reported by Michael Tremer
+
+ arch/arm/include/asm/psci.h                        |    2 +-
+ arch/arm/kernel/psci.c                             |    2 +-
+ arch/x86/kernel/sys_x86_64.c                       |    3 +--
+ arch/x86/realmode/init.c                           |    2 +-
+ drivers/hwmon/pmbus/pmbus_core.c                   |   10 +++++-----
+ drivers/irqchip/irq-gic.c                          |    2 +-
+ .../net/ethernet/qlogic/qlcnic/qlcnic_83xx_init.c  |    4 +++-
+ .../net/ethernet/qlogic/qlcnic/qlcnic_83xx_vnic.c  |   12 +++++++++---
+ drivers/platform/x86/chromeos_laptop.c             |    2 +-
+ fs/jfs/super.c                                     |    4 ++--
+ include/linux/irqchip/arm-gic.h                    |    2 ++
+ include/sound/compress_driver.h                    |    2 +-
+ net/mac80211/cfg.c                                 |    4 ++--
+ sound/soc/fsl/fsl_ssi.c                            |    2 +-
+ 14 files changed, 31 insertions(+), 22 deletions(-)
+
+commit 43cd0c0c7bf3f3331689f88130a8e8ce58fc8540
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 16 20:35:22 2013 -0400
+
+    Fix usercopy false positive under gcc 4.1
+
+ arch/x86/kernel/signal.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit 56a166129d817f6634c8c230e6ec497669bdfaca
+Author: Amerigo Wang <amwang@redhat.com>
+Date:   Thu May 9 21:56:37 2013 +0000
+
+    Upstream commit: 5dbd5068430b8bd1c19387d46d6c1a88b261257f
+    
+    ipv6,gre: do not leak info to user-space
+    
+    There is a hole in struct ip6_tnl_parm2, so we have to
+    zero the struct on stack before copying it to user-space.
+    
+    Cc: David S. Miller <davem@davemloft.net>
+    Signed-off-by: Cong Wang <amwang@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_gre.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit d6f50dae2653ad912952da40417a8ccbd59c7699
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 14 16:52:35 2013 -0400
+
+    disable unprivileged kernel profiling under HIDESYM, rename
+    the variable to something more appropriate
+
+ include/linux/perf_event.h |    8 ++++----
+ kernel/events/core.c       |    6 +++++-
+ kernel/sysctl.c            |    4 ++--
+ 3 files changed, 11 insertions(+), 7 deletions(-)
+
 commit 01322c6951bed4eedefbd2178dbd99292b365d99
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon May 13 17:19:57 2013 -0400
