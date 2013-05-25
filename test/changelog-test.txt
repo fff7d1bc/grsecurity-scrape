@@ -1,3 +1,50 @@
+commit 65d05c7ea468c23c175105526dd4f163302a92cf
+Merge: 1a98d0a 6ce3a135
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 25 07:48:15 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kernel/vm86_32.c
+
+commit 6ce3a13567ec17c1e72a88871ddf46da61ad5166
+Merge: 79bdd65 0bfd8ff
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 25 07:46:55 2013 -0400
+
+    Merge branch 'linux-3.9.y' into pax-test
+
+commit 1a98d0a10ede55ae99fabfb2d67eb536d3de9444
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 23 18:42:23 2013 -0400
+
+    use existing local variable
+
+ fs/exec.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b2b80ef8586061e32e986b31608717c25d1e7c54
+Merge: cb45fbd 79bdd65
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 23 17:58:53 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 79bdd65dac68267bc1b201c6b4a99966a373c305
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 23 17:57:46 2013 -0400
+
+    Update to pax-linux-3.9.3-test7.patch:
+    - fixed some size overflow related warnings (hash table, attributes)
+    - fixed a gcc bug/feature exposed by constification, the investigation was prompted by http://rikiji.it/2013/05/10/CVE-2013-2094-x86.html
+
+ arch/x86/include/asm/page_64.h    |    2 +-
+ arch/x86/kernel/head64.c          |    2 +-
+ tools/gcc/constify_plugin.c       |   48 ++-
+ tools/gcc/size_overflow_hash.data | 1191 +++++++++++++++++++------------------
+ 4 files changed, 651 insertions(+), 592 deletions(-)
+
 commit cb45fbda4967b1b544a754fbdc92d73283379522
 Merge: 62588fa 57c11b8
 Author: Brad Spengler <spender@grsecurity.net>
