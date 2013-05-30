@@ -1,3 +1,253 @@
+commit 0ed0c927ce3db94e2d0c0f328e24a28fe4f143e7
+Merge: 643b294 ed9b427
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 29 19:19:28 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ed9b4276488528d0c3803df1dc0df804238241e0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 29 19:18:45 2013 -0400
+
+    Updated to pax-linux-3.9.4-test8.patch:
+    - fixed some fallout detected by the checker plugin
+
+ arch/x86/kernel/crash_dump_64.c               |    2 +-
+ drivers/base/devtmpfs.c                       |    6 +++---
+ drivers/char/agp/compat_ioctl.c               |    2 +-
+ drivers/char/agp/frontend.c                   |    2 +-
+ drivers/char/mem.c                            |    2 +-
+ drivers/gpu/drm/vmwgfx/vmwgfx_ioctl.c         |    4 ++--
+ drivers/i2c/i2c-dev.c                         |    2 +-
+ drivers/media/v4l2-core/v4l2-compat-ioctl32.c |    6 +++---
+ drivers/media/v4l2-core/v4l2-ioctl.c          |   20 ++++++++++++--------
+ fs/9p/vfs_addr.c                              |    2 +-
+ fs/binfmt_elf.c                               |    4 ++--
+ fs/compat_ioctl.c                             |    4 ++--
+ fs/exec.c                                     |    2 +-
+ fs/namespace.c                                |    8 ++++----
+ fs/proc/vmcore.c                              |   12 ++++++++----
+ fs/read_write.c                               |    2 +-
+ include/linux/syscalls.h                      |    8 ++++----
+ init/do_mounts_initrd.c                       |    8 ++++----
+ init/main.c                                   |    4 ++--
+ kernel/events/core.c                          |    2 +-
+ kernel/events/internal.h                      |   10 +++++-----
+ mm/page_io.c                                  |    2 +-
+ security/keys/internal.h                      |    2 +-
+ tools/gcc/checker_plugin.c                    |    1 +
+ 24 files changed, 63 insertions(+), 54 deletions(-)
+
+commit 643b294b41c6adcad1cf107efe4ae52a834e6f15
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 29 18:51:31 2013 -0400
+
+    eliminate gcc warning
+
+ fs/exec.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit cf6f73059387ffeddb7b1de3e97a3cf588bcef86
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 29 18:30:20 2013 -0400
+
+    use BUILD_BUG() instead of BUILD_BUG_ON(1)
+
+ arch/x86/net/bpf_jit_comp.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 5343410354267368e5809f3ad8d9a264f141be18
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 29 17:57:41 2013 -0400
+
+    defensively handle additions to the BPF JIT by introducing a BUILD_BUG_ON
+    for unknown opcodes
+
+ arch/x86/net/bpf_jit_comp.c |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 01f78a604b47c93fb26e8aeb68ef619bb3b8579d
+Author: Xiao Guangrong <xiaoguangrong@linux.vnet.ibm.com>
+Date:   Fri May 24 15:55:11 2013 -0700
+
+    Upstream commit: d34883d4e35c0a994e91dd847a82b4c9e0c31d83
+    
+    mm: mmu_notifier: re-fix freed page still mapped in secondary MMU
+    
+    Commit 751efd8610d3 ("mmu_notifier_unregister NULL Pointer deref and
+    multiple ->release()") breaks the fix 3ad3d901bbcf ("mm: mmu_notifier:
+    fix freed page still mapped in secondary MMU").
+    
+    Since hlist_for_each_entry_rcu() is changed now, we can not revert that
+    patch directly, so this patch reverts the commit and simply fix the bug
+    spotted by that patch
+    
+    This bug spotted by commit 751efd8610d3 is:
+    
+        There is a race condition between mmu_notifier_unregister() and
+        __mmu_notifier_release().
+    
+        Assume two tasks, one calling mmu_notifier_unregister() as a result
+        of a filp_close() ->flush() callout (task A), and the other calling
+        mmu_notifier_release() from an mmput() (task B).
+    
+                            A                               B
+        t1                                            srcu_read_lock()
+        t2            if (!hlist_unhashed())
+        t3                                            srcu_read_unlock()
+        t4            srcu_read_lock()
+        t5                                            hlist_del_init_rcu()
+        t6                                            synchronize_srcu()
+        t7            srcu_read_unlock()
+        t8            hlist_del_rcu()  <--- NULL pointer deref.
+    
+    This can be fixed by using hlist_del_init_rcu instead of hlist_del_rcu.
+    
+    The another issue spotted in the commit is "multiple ->release()
+    callouts", we needn't care it too much because it is really rare (e.g,
+    can not happen on kvm since mmu-notify is unregistered after
+    exit_mmap()) and the later call of multiple ->release should be fast
+    since all the pages have already been released by the first call.
+    Anyway, this issue should be fixed in a separate patch.
+    
+    -stable suggestions: Any version that has commit 751efd8610d3 need to be
+    backported.  I find the oldest version has this commit is 3.0-stable.
+    
+    [akpm@linux-foundation.org: tweak comments]
+    Signed-off-by: Xiao Guangrong <xiaoguangrong@linux.vnet.ibm.com>
+    Tested-by: Robin Holt <holt@sgi.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mmu_notifier.c |   79 ++++++++++++++++++++++++++---------------------------
+ 1 files changed, 39 insertions(+), 40 deletions(-)
+
+commit 163a5539b36247865d39b2bcfa8efc03a62124a6
+Author: Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>
+Date:   Fri May 24 15:55:21 2013 -0700
+
+    Upstream commit: 7c3425123ddfdc5f48e7913ff59d908789712b18
+    
+    mm/THP: use pmd_populate() to update the pmd with pgtable_t pointer
+    
+    We should not use set_pmd_at to update pmd_t with pgtable_t pointer.
+    set_pmd_at is used to set pmd with huge pte entries and architectures
+    like ppc64, clear few flags from the pte when saving a new entry.
+    Without this change we observe bad pte errors like below on ppc64 with
+    THP enabled.
+    
+      BUG: Bad page map in process ld mm=0xc000001ee39f4780 pte:7fc3f37848000001 pmd:c000001ec0000000
+    
+    Signed-off-by: Aneesh Kumar K.V <aneesh.kumar@linux.vnet.ibm.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+    Reviewed-by: Andrea Arcangeli <aarcange@redhat.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/huge_memory.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit 3e54faf888d324d5f362dcba16173ea7bba61e8a
+Author: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+Date:   Fri May 24 15:55:08 2013 -0700
+
+    Upstream commit: 7b92d03c3239f43e5b86c9cc9630f026d36ee995
+    
+    fat: fix possible overflow for fat_clusters
+    
+    Intermediate value of fat_clusters can be overflowed on 32bits arch.
+    
+    Reported-by: Krzysztof Strasburger <strasbur@chkw386.ch.pwr.wroc.pl>
+    Signed-off-by: OGAWA Hirofumi <hirofumi@mail.parknet.co.jp>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/fat/inode.c |   15 ++++++++++++++-
+ 1 files changed, 14 insertions(+), 1 deletions(-)
+
+commit 2d9fc67d9d63641e6bbf389edba8d8514c68655d
+Author: Jarod Wilson <jarod@redhat.com>
+Date:   Fri May 24 15:55:31 2013 -0700
+
+    Upstream commit: 1e7e2e05c179a68aaf8830fe91547a87f4589e53
+    
+    drivers/char/random.c: fix priming of last_data
+    
+    Commit ec8f02da9ea5 ("random: prime last_data value per fips
+    requirements") added priming of last_data per fips requirements.
+    
+    Unfortuantely, it did so in a way that can lead to multiple threads all
+    incrementing nbytes, but only one actually doing anything with the extra
+    data, which leads to some fun random corruption and panics.
+    
+    The fix is to simply do everything needed to prime last_data in a single
+    shot, so there's no window for multiple cpus to increment nbytes -- in
+    fact, we won't even increment or decrement nbytes anymore, we'll just
+    extract the needed EXTRACT_SIZE one time per pool and then carry on with
+    the normal routine.
+    
+    All these changes have been tested across multiple hosts and
+    architectures where panics were previously encoutered.  The code changes
+    are are strictly limited to areas only touched when when booted in fips
+    mode.
+    
+    This change should also go into 3.8-stable, to make the myriads of fips
+    users on 3.8.x happy.
+    
+    Signed-off-by: Jarod Wilson <jarod@redhat.com>
+    Tested-by: Jan Stancek <jstancek@redhat.com>
+    Tested-by: Jan Stodola <jstodola@redhat.com>
+    Cc: Herbert Xu <herbert@gondor.apana.org.au>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Cc: "David S. Miller" <davem@davemloft.net>
+    Cc: Matt Mackall <mpm@selenic.com>
+    Cc: "Theodore Ts'o" <tytso@mit.edu>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/char/random.c |   30 +++++++++++++++---------------
+ 1 files changed, 15 insertions(+), 15 deletions(-)
+
+commit 2d74639040ba6ce47f57ec010714ec06529c4b42
+Author: Jiri Kosina <jkosina@suse.cz>
+Date:   Fri May 24 15:55:33 2013 -0700
+
+    Upstream commit: 10b3a32d292c21ea5b3ad5ca5975e88bb20b8d68
+    
+    random: fix accounting race condition with lockless irq entropy_count update
+    
+    Commit 902c098a3663 ("random: use lockless techniques in the interrupt
+    path") turned IRQ path from being spinlock protected into lockless
+    cmpxchg-retry update.
+    
+    That commit removed r->lock serialization between crediting entropy bits
+    from IRQ context and accounting when extracting entropy on userspace
+    read path, but didn't turn the r->entropy_count reads/updates in
+    account() to use cmpxchg as well.
+    
+    It has been observed, that under certain circumstances this leads to
+    read() on /dev/urandom to return 0 (EOF), as r->entropy_count gets
+    corrupted and becomes negative, which in turn results in propagating 0
+    all the way from account() to the actual read() call.
+    
+    Convert the accounting code to be the proper lockless counterpart of
+    what has been partially done by 902c098a3663.
+    
+    Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+    Cc: Theodore Ts'o <tytso@mit.edu>
+    Cc: Greg KH <greg@kroah.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/char/random.c |   26 +++++++++++++++++---------
+ 1 files changed, 17 insertions(+), 9 deletions(-)
+
 commit 65d05c7ea468c23c175105526dd4f163302a92cf
 Merge: 1a98d0a 6ce3a135
 Author: Brad Spengler <spender@grsecurity.net>
