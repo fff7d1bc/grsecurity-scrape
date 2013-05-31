@@ -1,3 +1,15 @@
+commit 8578566969d91678a3d7d5251b4eafc6d7775314
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 30 17:44:15 2013 -0400
+
+    Apply compatibility fix to previous RLIMIT_NPROC change
+    don't enforce the rlimit check at exec time if the user is root
+    Prevents problems with sudo if root is listed as part of a group
+    in limits.conf with process limits enforced
+
+ kernel/sys.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 0ed0c927ce3db94e2d0c0f328e24a28fe4f143e7
 Merge: 643b294 ed9b427
 Author: Brad Spengler <spender@grsecurity.net>
