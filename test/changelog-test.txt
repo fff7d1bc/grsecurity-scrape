@@ -1,3 +1,333 @@
+commit 4e8553989b0406f15be4a2dccdbc7599cc2b4f42
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Mon May 13 21:25:52 2013 +0000
+
+    Upstream commit: 54d27fcb338bd9c42d1dfc5a39e18f6f9d373c2e
+    
+    tcp: fix tcp_md5_hash_skb_data()
+    
+    TCP md5 communications fail [1] for some devices, because sg/crypto code
+    assume page offsets are below PAGE_SIZE.
+    
+    This was discovered using mlx4 driver [2], but I suspect loopback
+    might trigger the same bug now we use order-3 pages in tcp_sendmsg()
+    
+    [1] Failure is giving following messages.
+    
+    huh, entered softirq 3 NET_RX ffffffff806ad230 preempt_count 00000100,
+    exited with 00000101?
+    
+    [2] mlx4 driver uses order-2 pages to allocate RX frags
+    
+    Reported-by: Matt Schnall <mischnal@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Bernhard Beck <bbeck@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit 4f1ed254c28a1b3e03c0b0b744c5042661c295eb
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Fri May 17 04:53:13 2013 +0000
+
+    Upstream commit: 284041ef21fdf2e0d216ab6b787bc9072b4eb58a
+    
+    ipv6: fix possible crashes in ip6_cork_release()
+    
+    commit 0178b695fd6b4 ("ipv6: Copy cork options in ip6_append_data")
+    added some code duplication and bad error recovery, leading to potential
+    crash in ip6_cork_release() as kfree() could be called with garbage.
+    
+    use kzalloc() to make sure this wont happen.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    Cc: Herbert Xu <herbert@gondor.apana.org.au>
+    Cc: Hideaki YOSHIFUJI <yoshfuji@linux-ipv6.org>
+    Cc: Neal Cardwell <ncardwell@google.com>
+
+ net/ipv6/ip6_output.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5771263fe368cd384127dd17d7596a7e1a4e2eec
+Author: Chen Gang <gang.chen@asianux.com>
+Date:   Thu May 16 23:13:04 2013 +0000
+
+    Upstream commit: ff0102ee104847023c36357e2b9f133f3f40d211
+    
+    net: irda: using kzalloc() instead of kmalloc() to avoid strncpy() issue.
+    
+    'discovery->data.info' length is 22, NICKNAME_MAX_LEN is 21, so the
+    strncpy() will always left the last byte of 'discovery->data.info'
+    uninitialized.
+    
+    When 'text' length is longer than 21 (NICKNAME_MAX_LEN), if still left
+    the last byte of 'discovery->data.info' uninitialized, the next
+    strlen() will cause issue.
+    
+    Also 'discovery->data' is 'struct irda_device_info' which defined in
+    "include/uapi/...", it may copy to user mode, so need whole initialized.
+    
+    All together, need use kzalloc() instead of kmalloc() to initialize all
+    members firstly.
+    
+    Signed-off-by: Chen Gang <gang.chen@asianux.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/irda/irlap_frame.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c01c9af268cb066f240aec53454b8b74d8d01688
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Sun May 19 08:36:36 2013 +0000
+
+    Upstream commit: 25dff94ff9df40d4d663bb6ea3193a7758cc50e5
+    
+    isdn/kcapi: fix a small underflow
+    
+    In get_capi_ctr_by_nr() and get_capi_appl_by_nr() the parameter comes
+    from skb->data.  The current code can underflow to one space before the
+    start of the array.
+    
+    The sanity check isn't needed in __get_capi_appl_by_nr() but I changed
+    it to match the others.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/isdn/capi/kcapi.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 4a3f12a9df775147b0c4b0277de1aa99eddc5c66
+Author: Timo Teräs <timo.teras@iki.fi>
+Date:   Wed May 22 01:40:47 2013 +0000
+
+    Upstream commit: 497574c72c9922cf20c12aed15313c389f722fa0
+    
+    xfrm: properly handle invalid states as an error
+    
+    The error exit path needs err explicitly set. Otherwise it
+    returns success and the only caller, xfrm_output_resume(),
+    would oops in skb_dst(skb)->ops derefence as skb_dst(skb) is
+    NULL.
+    
+    Bug introduced in commit bb65a9cb (xfrm: removes a superfluous
+    check and add a statistic).
+    
+    Signed-off-by: Timo Teräs <timo.teras@iki.fi>
+    Cc: Li RongQing <roy.qing.li@gmail.com>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/xfrm/xfrm_output.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 61d8e1e848afa93cd971f6d1da875ad98b6ddfbd
+Author: Jeff Mahoney <jeffm@jeffreymahoney.com>
+Date:   Fri May 31 15:07:52 2013 -0400
+
+    Upstream commit: 0bdc7acba56a7ca4232f15f37b16f7ec079385ab
+    
+    reiserfs: fix spurious multiple-fill in reiserfs_readdir_dentry
+    
+    After sleeping for filldir(), we check to see if the file system has
+    changed and research. The next_pos pointer is updated but its value
+    isn't pushed into the key used for the search itself. As a result,
+    the search returns the same item that the last cycle of the loop did
+    and filldir() is called multiple times with the same data.
+    
+    The end result is that the buffer can contain the same name multiple
+    times. This can be returned to userspace or used internally in the
+    xattr code where it can manifest with the following warning:
+    
+    jdm-20004 reiserfs_delete_xattrs: Couldn't delete all xattrs (-2)
+    
+    reiserfs_for_each_xattr uses reiserfs_readdir_dentry to iterate over
+    the xattr names and ends up trying to unlink the same name twice. The
+    second attempt fails with -ENOENT and the error is returned. At some
+    point I'll need to add support into reiserfsck to remove the orphaned
+    directories left behind when this occurs.
+    
+    The fix is to push the value into the key before researching.
+    
+    Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/reiserfs/dir.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit ca0746bf380eec77d75d1741ac4742ded0e55ec7
+Author: Jeff Mahoney <jeffm@suse.com>
+Date:   Fri May 31 15:51:17 2013 -0400
+
+    Upstream commit: a1457c0ce976bad1356b9b0437f2a5c3ab8a9cfc
+    
+    reiserfs: fix deadlock with nfs racing on create/lookup
+    
+    Reiserfs is currently able to be deadlocked by having two NFS clients
+    where one has removed and recreated a file and another is accessing the
+    file with an open file handle.
+    
+    If one client deletes and recreates a file with timing such that the
+    recreated file obtains the same [dirid, objectid] pair as the original
+    file while another client accesses the file via file handle, the create
+    and lookup can race and deadlock if the lookup manages to create the
+    in-memory inode first.
+    
+    The create thread, in insert_inode_locked4, will hold the write lock
+    while waiting on the other inode to be unlocked. The lookup thread,
+    anywhere in the iget path, will release and reacquire the write lock while
+    it schedules. If it needs to reacquire the lock while the create thread
+    has it, it will never be able to make forward progress because it needs
+    to reacquire the lock before ultimately unlocking the inode.
+    
+    This patch drops the write lock across the insert_inode_locked4 call so
+    that the ordering of inode_wait -> write lock is retained. Since this
+    would have been the case before the BKL push-down, this is safe.
+    
+    Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/reiserfs/inode.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit cd21c0eb4950498be46a07257426c0cea4aa2bf1
+Author: Jeff Mahoney <jeffm@suse.com>
+Date:   Fri May 31 15:54:17 2013 -0400
+
+    Upstream commit: 4a8570112b76a63ad21cfcbe2783f98f7fd5ba1b
+    
+    reiserfs: fix problems with chowning setuid file w/ xattrs
+    
+    reiserfs_chown_xattrs() takes the iattr struct passed into ->setattr
+    and uses it to iterate over all the attrs associated with a file to change
+    ownership of xattrs (and transfer quota associated with the xattr files).
+    
+    When the setuid bit is cleared during chown, ATTR_MODE and iattr->ia_mode
+    are passed to all the xattrs as well. This means that the xattr directory
+    will have S_IFREG added to its mode bits.
+    
+    This has been prevented in practice by a missing IS_PRIVATE check
+    in reiserfs_acl_chmod, which caused a double-lock to occur while holding
+    the write lock. Since the file system was completely locked up, the
+    writeout of the corrupted mode never happened.
+    
+    This patch temporarily clears everything but ATTR_UID|ATTR_GID for the
+    calls to reiserfs_setattr and adds the missing IS_PRIVATE check.
+    
+    Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/reiserfs/xattr.c     |   14 +++++++++++++-
+ fs/reiserfs/xattr_acl.c |    3 +++
+ 2 files changed, 16 insertions(+), 1 deletions(-)
+
+commit c18cef940310c06bdf86d64d8cb227e56e165300
+Author: Dave Chinner <dchinner@redhat.com>
+Date:   Mon May 27 16:38:25 2013 +1000
+
+    Upstream commit: 2962f5a5dcc56f69cbf62121a7be67cc15d6940b
+    
+    xfs: kill suid/sgid through the truncate path.
+    
+    XFS has failed to kill suid/sgid bits correctly when truncating
+    files of non-zero size since commit c4ed4243 ("xfs: split
+    xfs_setattr") introduced in the 3.1 kernel. Fix it.
+    
+    Fix it.
+    
+    cc: stable kernel <stable@vger.kernel.org>
+    Signed-off-by: Dave Chinner <dchinner@redhat.com>
+    Reviewed-by: Brian Foster <bfoster@redhat.com>
+    Signed-off-by: Ben Myers <bpm@sgi.com>
+    
+    (cherry picked from commit 56c19e89b38618390addfc743d822f99519055c6)
+
+ fs/xfs/xfs_iops.c |   47 ++++++++++++++++++++++++++++++++---------------
+ 1 files changed, 32 insertions(+), 15 deletions(-)
+
+commit 8e62c6a0946a4b11a55540094a0ee5d3a222dbcc
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Wed May 29 15:36:40 2013 -0400
+
+    Upstream commit: f448badd34700ae728a32ba024249626d49c10e1
+    
+    NFSv4: Fix a thinko in nfs4_try_open_cached
+    
+    We need to pass the full open mode flags to nfs_may_open() when doing
+    a delegated open.
+    
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+    Cc: stable@vger.kernel.org
+
+ fs/nfs/nfs4proc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c47de62893a9f269be0a272c2840aac1e2a35c68
+Author: Chen Gang <gang.chen@asianux.com>
+Date:   Thu May 30 01:18:43 2013 +0000
+
+    Upstream commit: ea99b1adf22abd62bdcf14b1c9a0a4d3664eefd8
+    
+    parisc: kernel: using strlcpy() instead of strcpy()
+    
+    'boot_args' is an input args, and 'boot_command_line' has a fix length.
+    So use strlcpy() instead of strcpy() to avoid memory overflow.
+    
+    Signed-off-by: Chen Gang <gang.chen@asianux.com>
+    Acked-by: Kyle McMartin <kyle@mcmartin.ca>
+    Signed-off-by: Helge Deller <deller@gmx.de>
+
+ arch/parisc/kernel/setup.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit ce869e6f799f95fcac340420ba3612503df80dbf
+Author: Chen Gang <gang.chen@asianux.com>
+Date:   Mon May 27 04:57:09 2013 +0000
+
+    Upstream commit: 3f108de96ba449a8df3d7e3c053bf890fee2cb95
+    
+    parisc: memory overflow, 'name' length is too short for using
+    
+    'path.bc[i]' can be asigned by PCI_SLOT() which can '> 10', so sizeof(6
+    * "%u:" + "%u" + '\0') may be 21.
+    
+    Since 'name' length is 20, it may be memory overflow.
+    
+    And 'path.bc[i]' is 'unsigned char' for printing, we can be sure the
+    max length of 'name' must be less than 28.
+    
+    So simplify thinking, we can use 28 instead of 20 directly, and do not
+    think of whether 'patchc.bc[i]' can '> 100'.
+    
+    Signed-off-by: Chen Gang <gang.chen@asianux.com>
+    Signed-off-by: Helge Deller <deller@gmx.de>
+
+ arch/parisc/kernel/drivers.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5dc65cd34d442783118a17c518e2daedb90a31d0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 4 17:52:23 2013 -0400
+
+    add PERF_HARDEN recommendation
+
+ grsecurity/Kconfig |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 45b0f6e97666ca330b9a69e7fd2d2d9345d9618c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 4 17:22:44 2013 -0400
+
+    Introduce new feature: CONFIG_GRKERNSEC_PERF_HARDEN
+
+ grsecurity/Kconfig         |   19 +++++++++++++++++++
+ include/linux/perf_event.h |    5 +++++
+ kernel/events/core.c       |   10 +++++++++-
+ kernel/sysctl.c            |    9 ++++++++-
+ 4 files changed, 41 insertions(+), 2 deletions(-)
+
 commit 84619a3501fd38285a72d9e963f58d1827beedd6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jun 1 14:23:31 2013 -0400
