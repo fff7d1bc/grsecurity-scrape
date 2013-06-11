@@ -1,3 +1,22 @@
+commit bc43377e1e757cd37a06be0187884a42af718aab
+Merge: 3cdea63 c6aadb1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 11 18:50:39 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c6aadb12ae8dd3d12c2d6b8fbe80d29e514d60c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 11 18:49:36 2013 -0400
+
+    Update to pax-linux-3.9.4-test9.patch:
+    - fixed a KERNEXEC regression resulting in unusable RAM regions (http://forums.grsecurity.net/viewtopic.php?f=3&t=3506)
+    - removed a user-triggerable BUG_ON, fixing it properly wasn't worth the effort
+
+ arch/x86/kernel/setup.c |    2 +-
+ mm/mlock.c              |    1 -
+ 2 files changed, 1 insertions(+), 2 deletions(-)
+
 commit 3cdea63e90607d8d55820b101854091623feedb8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jun 10 21:21:44 2013 -0400
