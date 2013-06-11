@@ -1,3 +1,84 @@
+commit 3cdea63e90607d8d55820b101854091623feedb8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 10 21:21:44 2013 -0400
+
+    Fix fanotify infoleak reported by Dan Carpenter at:
+    https://lkml.org/lkml/2013/6/3/128
+    
+    Requires CAP_SYS_ADMIN, so this is about as low priority as it gets
+
+ fs/notify/fanotify/fanotify_user.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 373a2b5df78f82b9d3db72bd6577e29a71591323
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 10 21:16:46 2013 -0400
+
+    Backport infoleak fix by Dan Carpenter in cpqarray:
+    https://lkml.org/lkml/2013/6/3/131
+
+ drivers/block/cpqarray.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 251e84b9b05e063981b20be154c9389862f94759
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 10 21:04:17 2013 -0400
+
+    Backport 050e4b8fb7cdd7096c987a9cd556029c622c7fe2
+
+ drivers/cdrom/cdrom.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 383d89bf95818b05a485a6e8b118963b5bcbc83e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 10 18:34:32 2013 -0400
+
+    change const to __read_only
+
+ kernel/sysctl.c |   18 +++++++++---------
+ 1 files changed, 9 insertions(+), 9 deletions(-)
+
+commit 8f08f803f605649e63f0857a1b9a9805b629eaa4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 10 17:34:13 2013 -0400
+
+    compile fix, make const values const
+
+ kernel/sysctl.c |   18 +++++++++---------
+ 1 files changed, 9 insertions(+), 9 deletions(-)
+
+commit 6b90c228f6d4a3c2cc9c2b9a6a7ac14534ebd42d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 10 17:37:13 2013 -0400
+
+    Backport upstream commit: af733960ca59f7d59ea337e1f633771c9e67101a
+
+ drivers/char/mwave/tp3780i.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 1c590aa70c95ebd76ba9672aa23d800b81780615
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 9 19:50:35 2013 -0400
+
+    allow -1 perf_event_paranoid
+
+ kernel/sysctl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit defdc4a2bd3efda4af2bb6f3aa8f495fa8078584
+Merge: 4e85539 117c3fa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 9 17:30:12 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 117c3fa8d26c3806103123560f807d99071b60b6
+Merge: ed9b427 5dd2e98
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 9 17:30:00 2013 -0400
+
+    Merge branch 'linux-3.9.y' into pax-test
+
 commit 4e8553989b0406f15be4a2dccdbc7599cc2b4f42
 Author: Eric Dumazet <edumazet@google.com>
 Date:   Mon May 13 21:25:52 2013 +0000
