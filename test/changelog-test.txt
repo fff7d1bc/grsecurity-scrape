@@ -1,3 +1,539 @@
+commit 49bee3c5341687504669bf62becf4a419a226ba0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 17 18:48:04 2013 -0400
+
+    Revert "Upstream commit: cf7df378aa4ff7da3a44769b7ff6e9eef1a9f3db"
+    
+    This reverts commit 066d9226bc6c569d5f420c978b758e0bddd23444.
+
+ kernel/sys.c |   29 +++--------------------------
+ 1 files changed, 3 insertions(+), 26 deletions(-)
+
+commit bece88b4276babb2039a3e4f3e3b0cdeb8cd8328
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Sun Jun 16 18:06:06 2013 +0100
+
+    Upstream commit: 8177a9d79c0e942dcac3312f15585d0344d505a5
+    
+    lseek(fd, n, SEEK_END) does *not* go to eof - n
+    
+    When you copy some code, you are supposed to read it.  If nothing else,
+    there's a chance to spot and fix an obvious bug instead of sharing it...
+    
+    X-Song: "I Got It From Agnes", by Tom Lehrer
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    [ Tom Lehrer? You're dating yourself, Al ]
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/net/ethernet/brocade/bna/bnad_debugfs.c |    2 +-
+ drivers/scsi/bfa/bfad_debugfs.c                 |    2 +-
+ drivers/scsi/fnic/fnic_debugfs.c                |    2 +-
+ drivers/scsi/lpfc/lpfc_debugfs.c                |    2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 5a450f1c46f0c84379518aee878993d3f4a331b6
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Thu Jun 6 11:14:31 2013 -0400
+
+    Upstream commit: 40c87e7a5404861cef33f6ced9809525a5ee2c50
+    
+    ext4: verify group number in verify_group_input() before using it
+    
+    Check the group number for sanity earilier, before calling routines
+    such as ext4_bg_has_super() or ext4_group_overhead_blocks().
+    
+    Reported-by: Jonathan Salwan <jonathan.salwan@gmail.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+
+ fs/ext4/resize.c |   17 +++++++++++------
+ 1 files changed, 11 insertions(+), 6 deletions(-)
+
+commit e2700ce1305cc746d2d9000392f00d96fdf28fb8
+Author: Neil Horman <nhorman@tuxdriver.com>
+Date:   Wed Jun 12 14:26:44 2013 -0400
+
+    Upstream commit: c5c7774d7eb4397891edca9ebdf750ba90977a69
+    
+    sctp: fully initialize sctp_outq in sctp_outq_init
+    
+    In commit 2f94aabd9f6c925d77aecb3ff020f1cc12ed8f86
+    (refactor sctp_outq_teardown to insure proper re-initalization)
+    we modified sctp_outq_teardown to use sctp_outq_init to fully re-initalize the
+    outq structure.  Steve West recently asked me why I removed the q->error = 0
+    initalization from sctp_outq_teardown.  I did so because I was operating under
+    the impression that sctp_outq_init would properly initalize that value for us,
+    but it doesn't.  sctp_outq_init operates under the assumption that the outq
+    struct is all 0's (as it is when called from sctp_association_init), but using
+    it in __sctp_outq_teardown violates that assumption. We should do a memset in
+    sctp_outq_init to ensure that the entire structure is in a known state there
+    instead.
+    
+    Signed-off-by: Neil Horman <nhorman@tuxdriver.com>
+    Reported-by: "West, Steve (NSN - US/Fort Worth)" <steve.west@nsn.com>
+    CC: Vlad Yasevich <vyasevich@gmail.com>
+    CC: netdev@vger.kernel.org
+    CC: davem@davemloft.net
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/sctp/outqueue.c
+
+ net/sctp/outqueue.c |    8 ++------
+ 1 files changed, 2 insertions(+), 6 deletions(-)
+
+commit e13515ad7a9c7634599a105b2527752e527a905d
+Author: Saurabh Mohan <saurabh@vyatta.com>
+Date:   Mon Jun 10 17:45:10 2013 -0700
+
+    Upstream commit: baafc77b32f647daa7c45825f7af8cdd55d00817
+    
+    net/ipv4: ip_vti clear skb cb before tunneling.
+    
+    If users apply shaper to vti tunnel then it will cause a kernel crash. The
+    problem seems to be due to the vti_tunnel_xmit function not clearing
+    skb->opt field before passing the packet to xfrm tunneling code.
+    
+    Signed-off-by: Saurabh Mohan <saurabh@vyatta.com>
+    Acked-by: Stephen Hemminger <stephen@networkplumber.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ip_vti.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit e63056a252ed6fc0f16ab158d7c34cb57bd762e4
+Author: Guillaume Nault <g.nault@alphalink.fr>
+Date:   Wed Jun 12 16:07:36 2013 +0200
+
+    Upstream commit: a6f79d0f26704214b5b702bbac525cb72997f984
+    
+    l2tp: Fix sendmsg() return value
+    
+    PPPoL2TP sockets should comply with the standard send*() return values
+    (i.e. return number of bytes sent instead of 0 upon success).
+    
+    Signed-off-by: Guillaume Nault <g.nault@alphalink.fr>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/l2tp/l2tp_ppp.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit af361b412e816e894fb42ddff7a0545b7def64c0
+Author: Guillaume Nault <g.nault@alphalink.fr>
+Date:   Wed Jun 12 16:07:23 2013 +0200
+
+    Upstream commit: 55b92b7a11690bc377b5d373872a6b650ae88e64
+    
+    l2tp: Fix PPP header erasure and memory leak
+    
+    Copy user data after PPP framing header. This prevents erasure of the
+    added PPP header and avoids leaking two bytes of uninitialised memory
+    at the end of skb's data buffer.
+    
+    Signed-off-by: Guillaume Nault <g.nault@alphalink.fr>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/l2tp/l2tp_ppp.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 1f43aca088c35dda35abf76e08544e534c71fed4
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Wed Jun 12 16:02:27 2013 +0200
+
+    Upstream commit: 2dc85bf323515e59e15dfa858d1472bb25cad0fe
+    
+    packet: packet_getname_spkt: make sure string is always 0-terminated
+    
+    uaddr->sa_data is exactly of size 14, which is hard-coded here and
+    passed as a size argument to strncpy(). A device name can be of size
+    IFNAMSIZ (== 16), meaning we might leave the destination string
+    unterminated. Thus, use strlcpy() and also sizeof() while we're
+    at it. We need to memset the data area beforehand, since strlcpy
+    does not padd the remaining buffer with zeroes for user space, so
+    that we do not possibly leak anything.
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/packet/af_packet.c |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+commit d0ae62fae5528bf2a393377f50b8dd9888d1e49f
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Wed Jun 5 19:38:26 2013 +0000
+
+    Upstream commit: a7526eb5d06b0084ef12d7b168d008fcf516caab
+    
+    net: Unbreak compat_sys_{send,recv}msg
+    
+    I broke them in this commit:
+    
+        commit 1be374a0518a288147c6a7398792583200a67261
+        Author: Andy Lutomirski <luto@amacapital.net>
+        Date:   Wed May 22 14:07:44 2013 -0700
+    
+            net: Block MSG_CMSG_COMPAT in send(m)msg and recv(m)msg
+    
+    This patch adds __sys_sendmsg and __sys_sendmsg as common helpers that accept
+    MSG_CMSG_COMPAT and blocks MSG_CMSG_COMPAT at the syscall entrypoints.  It
+    also reverts some unnecessary checks in sys_socketcall.
+    
+    Apparently I was suffering from underscore blindness the first time around.
+    
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Tested-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/linux/socket.h |    3 ++
+ net/compat.c           |   13 +++++++-
+ net/socket.c           |   72 ++++++++++++++++++++++--------------------------
+ 3 files changed, 47 insertions(+), 41 deletions(-)
+
+commit b481a366021e5db07a9ea138bc0c1fe598a5ba2f
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Wed May 22 14:07:44 2013 -0700
+
+    Upstream commit: 1be374a0518a288147c6a7398792583200a67261
+    
+    net: Block MSG_CMSG_COMPAT in send(m)msg and recv(m)msg
+    
+    To: linux-kernel@vger.kernel.org
+    Cc: x86@kernel.org, trinity@vger.kernel.org, Andy Lutomirski <luto@amacapital.net>, netdev@vger.kernel.org, "David S.
+    	Miller" <davem@davemloft.net>
+    Subject: [PATCH 5/5] net: Block MSG_CMSG_COMPAT in send(m)msg and recv(m)msg
+    
+    MSG_CMSG_COMPAT is (AFAIK) not intended to be part of the API --
+    it's a hack that steals a bit to indicate to other networking code
+    that a compat entry was used.  So don't allow it from a non-compat
+    syscall.
+    
+    This prevents an oops when running this code:
+    
+    int main()
+    {
+    	int s;
+    	struct sockaddr_in addr;
+    	struct msghdr *hdr;
+    
+    	char *highpage = mmap((void*)(TASK_SIZE_MAX - 4096), 4096,
+    	                      PROT_READ | PROT_WRITE,
+    	                      MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0);
+    	if (highpage == MAP_FAILED)
+    		err(1, "mmap");
+    
+    	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    	if (s == -1)
+    		err(1, "socket");
+    
+            addr.sin_family = AF_INET;
+            addr.sin_port = htons(1);
+            addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    	if (connect(s, (struct sockaddr*)&addr, sizeof(addr)) != 0)
+    		err(1, "connect");
+    
+    	void *evil = highpage + 4096 - COMPAT_MSGHDR_SIZE;
+    	printf("Evil address is %p\n", evil);
+    
+    	if (syscall(__NR_sendmmsg, s, evil, 1, MSG_CMSG_COMPAT) < 0)
+    		err(1, "sendmmsg");
+    
+    	return 0;
+    }
+    
+    Cc: David S. Miller <davem@davemloft.net>
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/socket.c |   33 +++++++++++++++++++++++++++++++--
+ 1 files changed, 31 insertions(+), 2 deletions(-)
+
+commit 6ccb09f408cc4ff23adbf68c7d2307f5fffcf88e
+Author: Kees Cook <keescook@chromium.org>
+Date:   Fri May 10 14:48:21 2013 -0700
+
+    Upstream commit: e0e29b683d6784ef59bbc914eac85a04b650e63c
+    
+    b43: stop format string leaking into error msgs
+    
+    The module parameter "fwpostfix" is userspace controllable, unfiltered,
+    and is used to define the firmware filename. b43_do_request_fw() populates
+    ctx->errors[] on error, containing the firmware filename. b43err()
+    parses its arguments as a format string. For systems with b43 hardware,
+    this could lead to a uid-0 to ring-0 escalation.
+    
+    CVE-2013-2852
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+ drivers/net/wireless/b43/main.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit dfb67a67049ace7b94ad7e2febfac69816d50d85
+Author: Mark A. Greer <mgreer@animalcreek.com>
+Date:   Wed May 29 12:25:34 2013 -0700
+
+    Upstream commit: f873ded213d6d8c36354c0fc903af44da4fd6ac5
+    
+    mwifiex: debugfs: Fix out of bounds array access
+    
+    When reading the contents of '/sys/kernel/debug/mwifiex/p2p0/info',
+    the following panic occurs:
+    
+    $ cat /sys/kernel/debug/mwifiex/p2p0/info
+    Unable to handle kernel paging request at virtual address 74706164
+    pgd = de530000
+    [74706164] *pgd=00000000
+    Internal error: Oops: 5 [#1] SMP ARM
+    Modules linked in: phy_twl4030_usb omap2430 musb_hdrc mwifiex_sdio mwifiex
+    CPU: 0 PID: 1635 Comm: cat Not tainted 3.10.0-rc1-00010-g1268390 #1
+    task: de16b6c0 ti: de048000 task.ti: de048000
+    PC is at strnlen+0xc/0x4c
+    LR is at string+0x3c/0xf8
+    pc : [<c02c123c>]    lr : [<c02c2d1c>]    psr: a0000013
+    sp : de049e10  ip : c06efba0  fp : de6d2092
+    r10: bf01a260  r9 : ffffffff  r8 : 74706164
+    r7 : 0000ffff  r6 : ffffffff  r5 : de6d209c  r4 : 00000000
+    r3 : ff0a0004  r2 : 74706164  r1 : ffffffff  r0 : 74706164
+    Flags: NzCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment user
+    Control: 10c5387d  Table: 9e530019  DAC: 00000015
+    Process cat (pid: 1635, stack limit = 0xde048240)
+    Stack: (0xde049e10 to 0xde04a000)
+    9e00:                                     de6d2092 00000002 bf01a25e de6d209c
+    9e20: de049e80 c02c438c 0000000a ff0a0004 ffffffff 00000000 00000000 de049e48
+    9e40: 00000000 2192df6d ff0a0004 ffffffff 00000000 de6d2092 de049ef8 bef3cc00
+    9e60: de6b0000 dc358000 de6d2000 00000000 00000003 c02c45a4 bf01790c bf01a254
+    9e80: 74706164 bf018698 00000000 de59c3c0 de048000 de049f80 00001000 bef3cc00
+    9ea0: 00000008 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+    9ec0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+    9ee0: 00000000 00000000 00000000 00000001 00000000 00000000 6669776d 20786569
+    9f00: 20302e31 2e343128 392e3636 3231702e 00202933 00000000 00000003 c0294898
+    9f20: 00000000 00000000 00000000 00000000 de59c3c0 c0107c04 de554000 de59c3c0
+    9f40: 00001000 bef3cc00 de049f80 bef3cc00 de049f80 00000000 00000003 c0108a00
+    9f60: de048000 de59c3c0 00000000 00000000 de59c3c0 00001000 bef3cc00 c0108b60
+    9f80: 00000000 00000000 00001000 bef3cc00 00000003 00000003 c0014128 de048000
+    9fa0: 00000000 c0013f80 00001000 bef3cc00 00000003 bef3cc00 00001000 00000000
+    9fc0: 00001000 bef3cc00 00000003 00000003 00000001 00000001 00000001 00000003
+    9fe0: 00000000 bef3cbdc 00011984 b6f1127c 60000010 00000003 18dbdd2c 7f7bfffd
+    [<c02c123c>] (strnlen+0xc/0x4c) from [<c02c2d1c>] (string+0x3c/0xf8)
+    [<c02c2d1c>] (string+0x3c/0xf8) from [<c02c438c>] (vsnprintf+0x1e8/0x3e8)
+    [<c02c438c>] (vsnprintf+0x1e8/0x3e8) from [<c02c45a4>] (sprintf+0x18/0x24)
+    [<c02c45a4>] (sprintf+0x18/0x24) from [<bf01790c>] (mwifiex_info_read+0xfc/0x3e8 [mwifiex])
+    [<bf01790c>] (mwifiex_info_read+0xfc/0x3e8 [mwifiex]) from [<c0108a00>] (vfs_read+0xb0/0x144)
+    [<c0108a00>] (vfs_read+0xb0/0x144) from [<c0108b60>] (SyS_read+0x44/0x70)
+    [<c0108b60>] (SyS_read+0x44/0x70) from [<c0013f80>] (ret_fast_syscall+0x0/0x30)
+    Code: e12fff1e e3510000 e1a02000 0a00000d (e5d03000)
+    ---[ end trace ca98273dc605a04f ]---
+    
+    The panic is caused by the mwifiex_info_read() routine assuming that
+    there can only be four modes (0-3) which is an invalid assumption.
+    For example, when testing P2P, the mode is '8' (P2P_CLIENT) so the
+    code accesses data beyond the bounds of the bss_modes[] array which
+    causes the panic.  Fix this by updating bss_modes[] to support the
+    current list of modes and adding a check to prevent the out-of-bounds
+    access from occuring in the future when more modes are added.
+    
+    Signed-off-by: Mark A. Greer <mgreer@animalcreek.com>
+    Acked-by: Bing Zhao <bzhao@marvell.com>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+ drivers/net/wireless/mwifiex/debugfs.c |   22 +++++++++++++++++-----
+ 1 files changed, 17 insertions(+), 5 deletions(-)
+
+commit 04152dec6e99ca4c0fc52219f7cf2152dafe6b52
+Author: Johan Hedberg <johan.hedberg@intel.com>
+Date:   Tue May 28 13:46:30 2013 +0300
+
+    Upstream commit: cb3b3152b2f5939d67005cff841a1ca748b19888
+    
+    Bluetooth: Fix missing length checks for L2CAP signalling PDUs
+    
+    There has been code in place to check that the L2CAP length header
+    matches the amount of data received, but many PDU handlers have not been
+    checking that the data received actually matches that expected by the
+    specific PDU. This patch adds passing the length header to the specific
+    handler functions and ensures that those functions fail cleanly in the
+    case of an incorrect amount of data.
+    
+    Signed-off-by: Johan Hedberg <johan.hedberg@intel.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Gustavo Padovan <gustavo.padovan@collabora.co.uk>
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+ net/bluetooth/l2cap_core.c |   70 ++++++++++++++++++++++++++++++++-----------
+ 1 files changed, 52 insertions(+), 18 deletions(-)
+
+commit 628be2427afb241b5a1aa24bc5907d05287e1f25
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Mon Jun 3 12:00:49 2013 +0300
+
+    Upstream commit: a8241c63517ec0b900695daa9003cddc41c536a1
+    
+    ipvs: info leak in __ip_vs_get_dest_entries()
+    
+    The entry struct has a 2 byte hole after ->port and another 4 byte
+    hole after ->stats.outpkts.  You must have CAP_NET_ADMIN in your
+    namespace to hit this information leak.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Acked-by: Julian Anastasov <ja@ssi.bg>
+    Signed-off-by: Simon Horman <horms@verge.net.au>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/ipvs/ip_vs_ctl.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 066d9226bc6c569d5f420c978b758e0bddd23444
+Author: Robin Holt <holt@sgi.com>
+Date:   Wed Jun 12 14:04:37 2013 -0700
+
+    Upstream commit: cf7df378aa4ff7da3a44769b7ff6e9eef1a9f3db
+    
+    reboot: rigrate shutdown/reboot to boot cpu
+    
+    We recently noticed that reboot of a 1024 cpu machine takes approx 16
+    minutes of just stopping the cpus.  The slowdown was tracked to commit
+    f96972f2dc63 ("kernel/sys.c: call disable_nonboot_cpus() in
+    kernel_restart()").
+    
+    The current implementation does all the work of hot removing the cpus
+    before halting the system.  We are switching to just migrating to the
+    boot cpu and then continuing with shutdown/reboot.
+    
+    This also has the effect of not breaking x86's command line parameter
+    for specifying the reboot cpu.  Note, this code was shamelessly copied
+    from arch/x86/kernel/reboot.c with bits removed pertaining to the
+    reboot_cpu command line parameter.
+    
+    Signed-off-by: Robin Holt <holt@sgi.com>
+    Tested-by: Shawn Guo <shawn.guo@linaro.org>
+    Cc: "Srivatsa S. Bhat" <srivatsa.bhat@linux.vnet.ibm.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Ingo Molnar <mingo@elte.hu>
+    Cc: Russ Anderson <rja@sgi.com>
+    Cc: Robin Holt <holt@sgi.com>
+    Cc: Russell King <linux@arm.linux.org.uk>
+    Cc: Guan Xuetao <gxt@mprc.pku.edu.cn>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/sys.c |   29 ++++++++++++++++++++++++++---
+ 1 files changed, 26 insertions(+), 3 deletions(-)
+
+commit 94e2a91600b07d39825e7059195f35eb611a39a2
+Merge: 20cc761 e6e3059
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 13 16:23:46 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e6e3059de5525ebcd55af43b20c9cdbf43b9d30a
+Merge: c6aadb1 4b73feb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 13 16:23:39 2013 -0400
+
+    Merge branch 'linux-3.9.y' into pax-test
+
+commit 20cc7613e38cde07adc73179a91d6c15292e8d43
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Thu Jun 6 15:53:47 2013 +0200
+
+    Upstream commit: 1abd165ed757db1afdefaac0a4bc8a70f97d258c
+    
+    net: sctp: fix NULL pointer dereference in socket destruction
+    
+    While stress testing sctp sockets, I hit the following panic:
+    
+    BUG: unable to handle kernel NULL pointer dereference at 0000000000000020
+    IP: [<ffffffffa0490c4e>] sctp_endpoint_free+0xe/0x40 [sctp]
+    PGD 7cead067 PUD 7ce76067 PMD 0
+    Oops: 0000 [#1] SMP
+    Modules linked in: sctp(F) libcrc32c(F) [...]
+    CPU: 7 PID: 2950 Comm: acc Tainted: GF            3.10.0-rc2+ #1
+    Hardware name: Dell Inc. PowerEdge T410/0H19HD, BIOS 1.6.3 02/01/2011
+    task: ffff88007ce0e0c0 ti: ffff88007b568000 task.ti: ffff88007b568000
+    RIP: 0010:[<ffffffffa0490c4e>]  [<ffffffffa0490c4e>] sctp_endpoint_free+0xe/0x40 [sctp]
+    RSP: 0018:ffff88007b569e08  EFLAGS: 00010292
+    RAX: 0000000000000000 RBX: ffff88007db78a00 RCX: dead000000200200
+    RDX: ffffffffa049fdb0 RSI: ffff8800379baf38 RDI: 0000000000000000
+    RBP: ffff88007b569e18 R08: ffff88007c230da0 R09: 0000000000000001
+    R10: 0000000000000000 R11: 0000000000000000 R12: 0000000000000000
+    R13: ffff880077990d00 R14: 0000000000000084 R15: ffff88007db78a00
+    FS:  00007fc18ab61700(0000) GS:ffff88007fc60000(0000) knlGS:0000000000000000
+    CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+    CR2: 0000000000000020 CR3: 000000007cf9d000 CR4: 00000000000007e0
+    DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+    DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+    Stack:
+     ffff88007b569e38 ffff88007db78a00 ffff88007b569e38 ffffffffa049fded
+     ffffffff81abf0c0 ffff88007db78a00 ffff88007b569e58 ffffffff8145b60e
+     0000000000000000 0000000000000000 ffff88007b569eb8 ffffffff814df36e
+    Call Trace:
+     [<ffffffffa049fded>] sctp_destroy_sock+0x3d/0x80 [sctp]
+     [<ffffffff8145b60e>] sk_common_release+0x1e/0xf0
+     [<ffffffff814df36e>] inet_create+0x2ae/0x350
+     [<ffffffff81455a6f>] __sock_create+0x11f/0x240
+     [<ffffffff81455bf0>] sock_create+0x30/0x40
+     [<ffffffff8145696c>] SyS_socket+0x4c/0xc0
+     [<ffffffff815403be>] ? do_page_fault+0xe/0x10
+     [<ffffffff8153cb32>] ? page_fault+0x22/0x30
+     [<ffffffff81544e02>] system_call_fastpath+0x16/0x1b
+    Code: 0c c9 c3 66 2e 0f 1f 84 00 00 00 00 00 e8 fb fe ff ff c9 c3 66 0f
+          1f 84 00 00 00 00 00 55 48 89 e5 53 48 83 ec 08 66 66 66 66 90 <48>
+          8b 47 20 48 89 fb c6 47 1c 01 c6 40 12 07 e8 9e 68 01 00 48
+    RIP  [<ffffffffa0490c4e>] sctp_endpoint_free+0xe/0x40 [sctp]
+     RSP <ffff88007b569e08>
+    CR2: 0000000000000020
+    ---[ end trace e0d71ec1108c1dd9 ]---
+    
+    I did not hit this with the lksctp-tools functional tests, but with a
+    small, multi-threaded test program, that heavily allocates, binds,
+    listens and waits in accept on sctp sockets, and then randomly kills
+    some of them (no need for an actual client in this case to hit this).
+    Then, again, allocating, binding, etc, and then killing child processes.
+    
+    This panic then only occurs when ``echo 1 > /proc/sys/net/sctp/auth_enable''
+    is set. The cause for that is actually very simple: in sctp_endpoint_init()
+    we enter the path of sctp_auth_init_hmacs(). There, we try to allocate
+    our crypto transforms through crypto_alloc_hash(). In our scenario,
+    it then can happen that crypto_alloc_hash() fails with -EINTR from
+    crypto_larval_wait(), thus we bail out and release the socket via
+    sk_common_release(), sctp_destroy_sock() and hit the NULL pointer
+    dereference as soon as we try to access members in the endpoint during
+    sctp_endpoint_free(), since endpoint at that time is still NULL. Now,
+    if we have that case, we do not need to do any cleanup work and just
+    leave the destruction handler.
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/socket.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 386ba837978cc8a1111440bdcd8600f2df4634a4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 12 20:37:48 2013 -0400
+
+    fix deadlock when booting i386 kernel without NX
+
+ mm/mmap.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit fe96e11acb36fcda9a9e6f6439557db4aa4e8da0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 11 22:18:07 2013 -0400
+
+    fix elif / elif defined() typo in recent change
+
+ kernel/events/core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit bc43377e1e757cd37a06be0187884a42af718aab
 Merge: 3cdea63 c6aadb1
 Author: Brad Spengler <spender@grsecurity.net>
