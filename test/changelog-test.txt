@@ -1,3 +1,13 @@
+commit 39efd8f4b9573d1ce31f47cdbea00b6c12054d4d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 18 17:20:18 2013 -0400
+
+    add apparmor compat patch
+
+ security/apparmor/Kconfig      |    9 ++
+ security/apparmor/apparmorfs.c |  231 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 240 insertions(+), 0 deletions(-)
+
 commit 49bee3c5341687504669bf62becf4a419a226ba0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jun 17 18:48:04 2013 -0400
