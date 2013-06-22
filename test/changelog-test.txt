@@ -1,3 +1,130 @@
+commit 1fc9a5e2e267205d28302e1e86ca0da434561111
+Author: Ben Hutchings <ben@decadent.org.uk>
+Date:   Sun Jun 16 21:27:12 2013 +0100
+
+    Upstream commit: b8cb62f82103083a6e8fa5470bfe634a2c06514d
+    
+    x86/efi: Fix dummy variable buffer allocation
+    
+    1. Check for allocation failure
+    2. Clear the buffer contents, as they may actually be written to flash
+    3. Don't leak the buffer
+    
+    Compile-tested only.
+    
+    [ Tested successfully on my buggy ASUS machine - Matt ]
+    
+    Signed-off-by: Ben Hutchings <ben@decadent.org.uk>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+
+ arch/x86/platform/efi/efi.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit 83e15c8baaa620d8c777e84aa037b4302f0487c5
+Author: Dave Kleikamp <dave.kleikamp@oracle.com>
+Date:   Tue Jun 18 09:05:36 2013 -0500
+
+    Upstream commit: 23a01138efe216f8084cfaa74b0b90dd4b097441
+    
+    sparc: tsb must be flushed before tlb
+    
+    This fixes a race where a cpu may re-load a tlb from a stale tsb right
+    after it has been flushed by a remote function call.
+    
+    I still see some instability when stressing the system with parallel
+    kernel builds while creating memory pressure by writing to
+    /proc/sys/vm/nr_hugepages, but this patch improves the stability
+    significantly.
+    
+    Signed-off-by: Dave Kleikamp <dave.kleikamp@oracle.com>
+    Acked-by: Bob Picco <bob.picco@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/mm/tlb.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d93b62f6485db9aadda34322a6867868db07f56f
+Merge: 4ef62f5 71d83e9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 21 16:52:55 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit 71d83e97c936563913bcfb5a25c45b2021a331eb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 21 16:48:42 2013 -0400
+
+    Update to pax-linux-3.9.7-test10.patch:
+    - fixed a few format string problems uncovered by -Wformat-nonliteral
+    - another attempt at fixing the nested nmi/cr0.wp problem
+    - fixed vmalloc when used for allocating executable memory on non-modular kernels, reported by Lorand Kelemen (https://bugs.gentoo.org/show_bug.cgi?id=473866)
+    - worked around an intentional gcc overflow in nfscache that tripped up the size overflow plugin (https://bugs.gentoo.org/show_bug.cgi?id=472274)
+    - fixed a locking issue with track_exec_limit reported by spender
+    - hunger reported a size overflow event in kobj_map that turned out to be a real bug, fix by Tejun Heo (https://patchwork.kernel.org/patch/2676631/)
+
+ Documentation/dontdiff                  |    1 +
+ arch/x86/boot/compressed/efi_stub_32.S  |   16 ++-----
+ arch/x86/kernel/cpu/mcheck/mce.c        |    2 +-
+ arch/x86/kernel/e820.c                  |    4 +-
+ arch/x86/kernel/entry_64.S              |   74 ++++++++++++++++++------------
+ arch/x86/kernel/vmlinux.lds.S           |    2 +-
+ block/genhd.c                           |   11 +++--
+ crypto/algapi.c                         |    2 +-
+ crypto/pcrypt.c                         |    6 +-
+ drivers/base/attribute_container.c      |    2 +-
+ drivers/base/power/sysfs.c              |    2 +-
+ drivers/block/nbd.c                     |    2 +-
+ drivers/cdrom/cdrom.c                   |    2 +-
+ drivers/char/hw_random/intel-rng.c      |    2 +-
+ drivers/char/mem.c                      |    2 +-
+ drivers/devfreq/devfreq.c               |    2 +-
+ drivers/gpu/drm/drm_encoder_slave.c     |    6 +--
+ drivers/gpu/drm/drm_sysfs.c             |    2 +-
+ drivers/gpu/drm/ttm/ttm_memory.c        |    4 +-
+ drivers/iommu/irq_remapping.c           |    2 +-
+ drivers/video/output.c                  |    2 +-
+ fs/ext4/mmp.c                           |    2 +-
+ fs/ext4/super.c                         |    2 +-
+ fs/lockd/svc.c                          |    2 +-
+ fs/nfs/callback.c                       |    4 +-
+ fs/nfs/nfs4state.c                      |    2 +-
+ fs/nfsd/nfscache.c                      |    3 +-
+ init/initramfs.c                        |    2 +-
+ kernel/rcutree.c                        |    2 +-
+ lib/kobject.c                           |    2 +-
+ mm/backing-dev.c                        |    4 +-
+ mm/mmap.c                               |    4 +-
+ mm/slub.c                               |    2 +-
+ mm/vmalloc.c                            |   15 +++----
+ net/bluetooth/hci_core.c                |    8 ++--
+ net/netfilter/nf_conntrack_proto_dccp.c |    4 +-
+ net/sunrpc/svc.c                        |    2 +-
+ security/Kconfig                        |   15 +++---
+ sound/core/sound.c                      |    2 +-
+ sound/sound_core.c                      |    2 +-
+ 40 files changed, 116 insertions(+), 111 deletions(-)
+
+commit 4ef62f52ab23ed87aaf0106be3eddf2019bc7d2c
+Merge: 39efd8f 256eff7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 21 16:45:15 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	kernel/printk.c
+
+commit 256eff7a817d5faa18cd56fb97cc8c25112ec0a6
+Merge: e6e3059 485f25f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 20 22:14:24 2013 -0400
+
+    Merge branch 'linux-3.9.y' into pax-test
+
 commit 39efd8f4b9573d1ce31f47cdbea00b6c12054d4d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 18 17:20:18 2013 -0400
