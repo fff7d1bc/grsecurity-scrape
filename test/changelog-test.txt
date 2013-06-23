@@ -1,3 +1,21 @@
+commit e58fe8c43f6ee7047ac830ebfa9a70626b7ed11d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 23 14:37:14 2013 -0400
+
+    second compile fix, reported by forsaken on forums
+
+ include/linux/vmalloc.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0ee10d89b09b56b46bc242ce760a1d9598276e2f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 23 14:36:35 2013 -0400
+
+    compile fix, reported by KDE on forums
+
+ kernel/printk.c |    7 -------
+ 1 files changed, 0 insertions(+), 7 deletions(-)
+
 commit 1fc9a5e2e267205d28302e1e86ca0da434561111
 Author: Ben Hutchings <ben@decadent.org.uk>
 Date:   Sun Jun 16 21:27:12 2013 +0100
