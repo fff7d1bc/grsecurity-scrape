@@ -1,3 +1,47 @@
+commit 26823469a08e59cb67bea18d448d9e8c65f82e08
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 25 21:26:51 2013 -0400
+
+    re-enable GRKERNSEC_RAND_THREADSTACK now that the generic PaX
+    vm_unmapped_area code is complete
+
+ arch/x86/kernel/sys_i386_32.c |    5 +++++
+ grsecurity/Kconfig            |    2 +-
+ mm/mmap.c                     |   11 ++++++++++-
+ 3 files changed, 16 insertions(+), 2 deletions(-)
+
+commit bcd93cc348a8faba1716f5cc137a48f25d6a67e7
+Merge: e58fe8c c4e0704
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 25 19:08:52 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kernel/sys_i386_32.c
+
+commit c4e07040c2c32c9eb2b093e5ae6e5bb050cb7511
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 25 19:05:39 2013 -0400
+
+    Update to pax-linux-3.9.7-test11.patch:
+    - fixed some fallout from the recent executable vmalloc changes (http://forums.grsecurity.net/viewtopic.php?t=3562#p13111)
+    - moved the PaX specific heap-stack gap check code over to the vm_unmapped_area_info based infrastructure
+    - fixed the recent nested nmi related fixes some more
+    - fixed a regression in kernel memory initialization on relocatable i386 kernels
+    - empty_zero_page can be read-only on amd64 as well
+
+ arch/arm/mm/mmap.c            |    6 --
+ arch/x86/kernel/entry_64.S    |    8 +--
+ arch/x86/kernel/head_64.S     |    1 -
+ arch/x86/kernel/setup.c       |    2 +-
+ arch/x86/kernel/sys_i386_32.c |  160 ++++++++++++----------------------------
+ drivers/lguest/core.c         |    2 +-
+ include/linux/mm.h            |    6 +-
+ include/linux/vmalloc.h       |    2 +-
+ mm/mmap.c                     |   30 +++++++-
+ 9 files changed, 83 insertions(+), 134 deletions(-)
+
 commit e58fe8c43f6ee7047ac830ebfa9a70626b7ed11d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 23 14:37:14 2013 -0400
