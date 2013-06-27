@@ -1,3 +1,55 @@
+commit 59571a9db7485f530a1e865a13cacc4c991ec41f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 26 18:39:08 2013 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: Steffen Klassert <steffen.klassert@secunet.com>,
+            "David S. Miller" <davem@davemloft.net>
+    Cc: Mathias Krause <minipli@googlemail.com>, netdev@vger.kernel.org,
+            Herbert Xu <herbert@gondor.apana.org.au>
+    Subject: [PATCH] af_key: fix info leaks in notify messages
+    
+    key_notify_sa_flush() and key_notify_policy_flush() miss to initialize
+    the sadb_msg_reserved member of the broadcasted message and thereby
+    leak 2 bytes of heap memory to listeners. Fix that.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    Cc: "David S. Miller" <davem@davemloft.net>
+    Cc: Herbert Xu <herbert@gondor.apana.org.au>
+
+ net/key/af_key.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e1dd9fb168b3597f15fd5bd4bc88a7dd4cce5fd9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 26 18:33:06 2013 -0400
+
+    update rand_threadstack code to continue the search for a gap if the first
+    choice doesn't have enough space, instead of returning ENOMEM
+
+ mm/mmap.c |   17 ++++++++++-------
+ 1 files changed, 10 insertions(+), 7 deletions(-)
+
+commit 87020d4a4d83038d65ff1fd519938840f6888b9e
+Merge: 2682346 c51e25a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 26 18:25:32 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c51e25a23f30a1198076bd085f19b2073caf164d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 26 18:24:54 2013 -0400
+
+    Update to pax-linux-3.9.7-test12.patch:
+    - fixed a regression on PARAVIRT/amd64 kernels
+    - simplified the recent vm_unmapped_area_info based change
+
+ arch/x86/kernel/entry_64.S |    8 ++++----
+ mm/mmap.c                  |   22 ++++++++++++----------
+ 2 files changed, 16 insertions(+), 14 deletions(-)
+
 commit 26823469a08e59cb67bea18d448d9e8c65f82e08
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 25 21:26:51 2013 -0400
