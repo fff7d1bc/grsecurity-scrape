@@ -1,3 +1,75 @@
+commit 4a0808a0aa34bf3692f9ade0f11f6fbe30418c4f
+Author: Artem Bityutskiy <artem.bityutskiy@linux.intel.com>
+Date:   Fri Jun 28 14:15:15 2013 +0300
+
+    Upstream commit: 605c912bb843c024b1ed173dc427cd5c08e5d54d
+    
+    UBIFS: fix a horrid bug
+    
+    Al Viro pointed me to the fact that '->readdir()' and '->llseek()' have no
+    mutual exclusion, which means the 'ubifs_dir_llseek()' can be run while we are
+    in the middle of 'ubifs_readdir()'.
+    
+    This means that 'file->private_data' can be freed while 'ubifs_readdir()' uses
+    it, and this is a very bad bug: not only 'ubifs_readdir()' can return garbage,
+    but this may corrupt memory and lead to all kinds of problems like crashes an
+    security holes.
+    
+    This patch fixes the problem by using the 'file->f_version' field, which
+    '->llseek()' always unconditionally sets to zero. We set it to 1 in
+    'ubifs_readdir()' and whenever we detect that it became 0, we know there was a
+    seek and it is time to clear the state saved in 'file->private_data'.
+    
+    I tested this patch by writing a user-space program which runds readdir and
+    seek in parallell. I could easily crash the kernel without these patches, but
+    could not crash it with these patches.
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Al Viro <viro@zeniv.linux.org.uk>
+    Tested-by: Artem Bityutskiy <artem.bityutskiy@linux.intel.com>
+    Signed-off-by: Artem Bityutskiy <artem.bityutskiy@linux.intel.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/ubifs/dir.c |   30 +++++++++++++++++++++++++++---
+ 1 files changed, 27 insertions(+), 3 deletions(-)
+
+commit c22280b85088978bd8b45bd23096879459b48008
+Author: Stephane Eranian <eranian@google.com>
+Date:   Thu Jun 20 11:36:28 2013 +0200
+
+    Upstream commit: 2976b10f05bd7f6dab9f9e7524451ddfed656a89
+    
+    perf: Disable monitoring on setuid processes for regular users
+    
+    There was a a bug in setup_new_exec(), whereby
+    the test to disabled perf monitoring was not
+    correct because the new credentials for the
+    process were not yet committed and therefore
+    the get_dumpable() test was never firing.
+    
+    The patch fixes the problem by moving the
+    perf_event test until after the credentials
+    are committed.
+    
+    Signed-off-by: Stephane Eranian <eranian@google.com>
+    Tested-by: Jiri Olsa <jolsa@redhat.com>
+    Acked-by: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Cc: <stable@kernel.org>
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ fs/exec.c |   16 +++++++++-------
+ 1 files changed, 9 insertions(+), 7 deletions(-)
+
+commit 16e6a61c34ae5ed0fbfa9151b24dc6a751cca7c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 29 13:10:02 2013 -0400
+
+    on context switch, make sure we switch DACR when domain support and
+    KERNEXEC is disabled but UDEREF is enabled
+
+ arch/arm/kernel/entry-armv.S |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 08d017fa51370921694ce087b28c96fec92993d4
 Author: Michael S. Tsirkin <mst@redhat.com>
 Date:   Sun Jun 23 17:26:58 2013 +0300
