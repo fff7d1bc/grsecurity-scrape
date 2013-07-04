@@ -1,3 +1,160 @@
+commit 40d67e38a42d4e94b43b3d7400addc662b9857dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 16:09:28 2013 -0400
+
+    fix up file comparisons
+
+ grsecurity/gracl_segv.c    |    2 +-
+ grsecurity/grsec_sig.c     |    4 ++--
+ include/linux/grinternal.h |   12 ++++++++++++
+ 3 files changed, 15 insertions(+), 3 deletions(-)
+
+commit a1fff2c95162314626dd96bec71d951a8c1c4708
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 15:33:18 2013 -0400
+
+    fix suid binary matching
+
+ grsecurity/grsec_sig.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 00131c458eea5200971c8fc326e90fdb6c2d0baa
+Merge: 37b97a9 47beb61
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 15:02:31 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 47beb61be9d430ab3fdb79a3b1e2099b4cfcf798
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 15:01:37 2013 -0400
+
+    Update to pax-linux-3.9.9-test13.patch:
+    - hopefully fixed the EFI boot regression (https://bugs.gentoo.org/show_bug.cgi?id=471626)
+    - fixed some arm compilation issues (http://forums.grsecurity.net/viewtopic.php?f=1&t=3586 and http://forums.grsecurity.net/viewtopic.php?f=1&t=3587)
+
+ arch/arm/include/asm/uaccess.h |   20 ++++++++++----------
+ arch/arm/kernel/armksyms.c     |    2 +-
+ arch/arm/kernel/entry-armv.S   |    4 ++--
+ arch/arm/mm/Kconfig            |    2 +-
+ arch/x86/ia32/ia32entry.S      |    4 ++--
+ arch/x86/include/asm/page.h    |    1 +
+ arch/x86/kernel/entry_32.S     |    4 ++--
+ arch/x86/kernel/entry_64.S     |    8 ++++----
+ arch/x86/kernel/head64.c       |   12 ++++++------
+ arch/x86/kernel/head_64.S      |   16 ++++++++++++----
+ arch/x86/mm/init.c             |    8 ++++++++
+ arch/x86/mm/init_32.c          |    6 ------
+ arch/x86/mm/init_64.c          |    6 ------
+ arch/x86/platform/efi/efi_32.c |    5 +++++
+ arch/x86/platform/efi/efi_64.c |   10 ++++++++++
+ 15 files changed, 64 insertions(+), 44 deletions(-)
+
+commit 89085d2d0643813a62f23d1199a335dc1e129bc0
+Merge: 963af7f 0adf2e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 14:55:44 2013 -0400
+
+    Merge branch 'linux-3.9.y' into pax-test
+
+commit 37b97a95e97badc79cc8b6e092f0f94ac24e4ae4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 13:46:02 2013 -0400
+
+    fix typo
+
+ grsecurity/gracl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 32538dba4959a290a1de81a7f8eeaba99f952aa6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 13:29:51 2013 -0400
+
+    update log arguments
+
+ grsecurity/grsec_sig.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 5c7ee197d6ecb3ec9b3b9588d2b0cb8541d9fa71
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 13:20:23 2013 -0400
+
+    Update logging of suid exec ban
+    
+    Conflicts:
+    
+    	grsecurity/grsec_sig.c
+
+ grsecurity/grsec_sig.c |    3 +--
+ include/linux/grmsg.h  |    1 +
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit ef808866c070aa1901bd2224521baaf5d145a3a7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 12:58:33 2013 -0400
+
+    Additional improvements to the user banning code:
+    
+    Separate the kernel-bruteforcing case from the suid bruteforcing case
+    In the suid bruteforcing case, only kill existing copies of the bruteforced
+    binary.  Instead of preventing all future execs by this user, prevent them
+    from executing any suid/sgid binaries for the next 15 minutes.
+    
+    Kernel case is mostly unchanged from before, except the task trying to change
+    real uid to the banned user will be terminated instead of failing the setuid
+    call.
+    
+    Configuration help has been updated to reflect the new changes.
+
+ fs/exec.c                  |   13 +++++---
+ grsecurity/Kconfig         |    5 ++-
+ grsecurity/gracl.c         |    6 ++--
+ grsecurity/grsec_sig.c     |   76 ++++++++++++++++++++++++++------------------
+ include/linux/grsecurity.h |    1 -
+ include/linux/sched.h      |    9 +++--
+ 6 files changed, 65 insertions(+), 45 deletions(-)
+
+commit 0f0b6c9d67d429364621b8784ef4a048b7e40736
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 3 16:14:09 2013 -0400
+
+    fix renamed export of csum_partial_copy_from_user, as reported by fabled
+    on the forums
+
+ arch/arm/kernel/armksyms.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 318235973c2a548c3d25562645d6b69f66e85934
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 3 16:09:16 2013 -0400
+
+    make CPU_USE_DOMAINS depend on !PAX_MEMORY_UDEREF, fixes compile error
+    reported on the forums by fabled
+
+ arch/arm/mm/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b569a7f60fab7a522d8c142765c8b847bbce8a1e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 3 15:53:12 2013 -0400
+
+    Revise the user ban code to kill the process issuing a banned
+    set*id instead of returning an error.  For the sake of keeping
+    unified user banning between the suid and kernel bruteforce case,
+    we will apply this killing to the suid bruteforce case, despite
+    a check just at exec time (that already existed) being sufficient.
+    
+    Returning an error could enable exploitation of the "failure to check
+    setuid return value" case which was recently effectively closed
+    upstream, albeit in a rare situation with a suitable binary and
+    two colluding users.
+    
+    Many thanks to stealth for reviewing the user ban code.
+
+ grsecurity/gracl.c     |    4 ++--
+ grsecurity/grsec_sig.c |   16 +++++++++++++---
+ 2 files changed, 15 insertions(+), 5 deletions(-)
+
 commit 4a0808a0aa34bf3692f9ade0f11f6fbe30418c4f
 Author: Artem Bityutskiy <artem.bityutskiy@linux.intel.com>
 Date:   Fri Jun 28 14:15:15 2013 +0300
