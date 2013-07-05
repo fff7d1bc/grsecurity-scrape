@@ -1,3 +1,12 @@
+commit d92091aac493a547d85ddf1b98bd9aaa8c7112a5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 4 23:05:14 2013 -0400
+
+    always enforce a non-zero gap for RAND_THREADSTACK
+
+ mm/mmap.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 40d67e38a42d4e94b43b3d7400addc662b9857dc
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jul 4 16:09:28 2013 -0400
