@@ -1,3 +1,553 @@
+commit 86f446e9d5c6b475d2e9360cc04f4361ad1b19b8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jul 12 23:02:11 2013 -0400
+
+    we always want the vector page to be noaccess for userland
+    therefore, when kernexec is disabled, instead of L_PTE_USER | L_PTE_RDONLY
+    which turns into supervisor rwx, userland rx, we instead omit that entirely,
+    leaving it as supervisor rwx only
+    
+    Fixes booting on ARMv5 and earlier, which need to write directly
+    to the high vector mapping via set_tls when context switching
+    
+    Thanks to Michael Tremer for the bugreport
+
+ arch/arm/mm/mmu.c |   12 ++++++++++--
+ 1 files changed, 10 insertions(+), 2 deletions(-)
+
+commit 90cd0827eef656ec884f19c977873fefe2f2e47d
+Author: Cong Wang <amwang@redhat.com>
+Date:   Sat Jun 29 12:02:59 2013 +0800
+
+    Upstream commit: 6c734fb8592f6768170e48e7102cb2f0a1bb9759
+    
+    gre: fix a regression in ioctl
+    
+    When testing GRE tunnel, I got:
+    
+     # ip tunnel show
+     get tunnel gre0 failed: Invalid argument
+     get tunnel gre1 failed: Invalid argument
+    
+    This is a regression introduced by commit c54419321455631079c7d
+    ("GRE: Refactor GRE tunneling code.") because previously we
+    only check the parameters for SIOCADDTUNNEL and SIOCCHGTUNNEL,
+    after that commit, the check is moved for all commands.
+    
+    So, just check for SIOCADDTUNNEL and SIOCCHGTUNNEL.
+    
+    After this patch I got:
+    
+     # ip tunnel show
+     gre0: gre/ip  remote any  local any  ttl inherit  nopmtudisc
+     gre1: gre/ip  remote 192.168.122.101  local 192.168.122.45  ttl inherit
+    
+    Cc: Pravin B Shelar <pshelar@nicira.com>
+    Cc: "David S. Miller" <davem@davemloft.net>
+    Signed-off-by: Cong Wang <amwang@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ip_gre.c |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+commit 50d4e90ec8da630eac8840da9c53b8738a2f98b5
+Author: Cong Wang <amwang@redhat.com>
+Date:   Sat Jun 29 13:00:57 2013 +0800
+
+    Upstream commit: ab6c7a0a43c2eaafa57583822b619b22637b49c7
+    
+    vti: remove duplicated code to fix a memory leak
+    
+    vti module allocates dev->tstats twice: in vti_fb_tunnel_init()
+    and in vti_tunnel_init(), this lead to a memory leak of
+    dev->tstats.
+    
+    Just remove the duplicated operations in vti_fb_tunnel_init().
+    
+    (candidate for -stable)
+    
+    Cc: Stephen Hemminger <stephen@networkplumber.org>
+    Cc: Saurabh Mohan <saurabh.mohan@vyatta.com>
+    Cc: "David S. Miller" <davem@davemloft.net>
+    Signed-off-by: Cong Wang <amwang@redhat.com>
+    Acked-by: Stephen Hemminger <stephen@networkplumber.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ip_vti.c |    7 -------
+ 1 files changed, 0 insertions(+), 7 deletions(-)
+
+commit af9e57897a8fab9bbeceb984bd0aeaedb36aefcd
+Author: Michal Schmidt <mschmidt@redhat.com>
+Date:   Mon Jul 1 17:23:05 2013 +0200
+
+    Upstream commit: 058eec4116935c5640299913e1e0715e87ec622a
+    
+    bnx2x: remove zeroing of dump data buffer
+    
+    There is no need to initialize the dump data with zeros.
+    data is allocated with vzalloc, so it's already zero-filled.
+    
+    More importantly, the memset is harmful, because dump->len (the length
+    requested by userspace) can be bigger than the allocated buffer (whose
+    size is determined by asking the driver's .get_dump_flag method).
+    
+    Signed-off-by: Michal Schmidt <mschmidt@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ .../net/ethernet/broadcom/bnx2x/bnx2x_ethtool.c    |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit c771072b72c261f9bddd6734dca6979c1b96e7df
+Author: Michal Schmidt <mschmidt@redhat.com>
+Date:   Mon Jul 1 17:23:06 2013 +0200
+
+    Upstream commit: 5bb680d6cbe36de9d7ba12b05f845c91a8692318
+    
+    bnx2x: fix dump flag handling
+    
+    bnx2x interprets the dump flag as an index of a register preset.
+    It is important to validate the index to avoid out of bounds
+    memory accesses.
+    
+    Signed-off-by: Michal Schmidt <mschmidt@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ .../net/ethernet/broadcom/bnx2x/bnx2x_ethtool.c    |    3 +++
+ drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c   |    2 ++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+
+commit aed315c8fad9b2044143b46b239574b1b72135ce
+Author: Michal Schmidt <mschmidt@redhat.com>
+Date:   Mon Jul 1 17:23:30 2013 +0200
+
+    Upstream commit: c590b5e2f05b5e98e614382582b7ae4cddb37599
+    
+    ethtool: make .get_dump_data() harder to misuse by drivers
+    
+    As the patch "bnx2x: remove zeroing of dump data buffer" showed,
+    it is too easy implement .get_dump_data incorrectly in a driver.
+    
+    Let's make sure drivers cannot get confused by userspace requesting
+    a too big dump.
+    
+    Also WARN if the driver sets dump->len to something weird and make
+    sure the length reported to userspace is the actual length of data
+    copied to userspace.
+    
+    Signed-off-by: Michal Schmidt <mschmidt@redhat.com>
+    Reviewed-by: Ben Hutchings <ben@decadent.org.uk>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/ethtool.c |   21 ++++++++++++++++++++-
+ 1 files changed, 20 insertions(+), 1 deletions(-)
+
+commit 5c57991e66216e386dcc875d34c33f0edd038569
+Author: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+Date:   Tue Jul 2 09:02:07 2013 +0800
+
+    Upstream commit: e1558a93b61962710733dc8c11a2bc765607f1cd
+    
+    l2tp: add missing .owner to struct pppox_proto
+    
+    Add missing .owner of struct pppox_proto. This prevents the
+    module from being removed from underneath its users.
+    
+    Signed-off-by: Wei Yongjun <yongjun_wei@trendmicro.com.cn>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/l2tp/l2tp_ppp.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 4613b8adae32cc774bb727d2ec71f3d0bd7ff1c4
+Author: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Date:   Sun Jun 30 14:37:11 2013 +1000
+
+    Upstream commit: 7cc47d139f9a815a91bd9e7377063238c69a0423
+    
+    cxgb3: Missing rtnl lock in error recovery
+    
+    When exercising error injection on IBM pseries machine, I hit the
+    following warning:
+    
+    [  251.450043] RTAS: event: 89, Type: Platform Error, Severity: 2
+    [  253.549822] cxgb3 0006:01:00.0: enabling device (0140 -> 0142)
+    [  253.713560] cxgb3 0006:01:00.0: adapter recovering, PEX ERR 0x100
+    [  254.895437] RTNL: assertion failed at net/core/dev.c (2031)
+    [  254.895467] CPU: 6 PID: 5449 Comm: eehd Tainted: G        W    3.10.0-rc7-00157-gea461ab #19
+    [  254.895474] Call Trace:
+    [  254.895483] [c000000fac56f7d0] [c000000000014dcc] .show_stack+0x7c/0x1f0 (unreliable)
+    [  254.895493] [c000000fac56f8a0] [c0000000007ba318] .dump_stack+0x28/0x3c
+    [  254.895500] [c000000fac56f910] [c0000000006c0384] .netif_set_real_num_tx_queues+0x224/0x230
+    [  254.895515] [c000000fac56f9b0] [d00000000ef35510] .cxgb_open+0x80/0x3f0 [cxgb3]
+    [  254.895525] [c000000fac56fa50] [d00000000ef35914] .t3_resume_ports+0x94/0x100 [cxgb3]
+    [  254.895533] [c000000fac56fae0] [c00000000005fc8c] .eeh_report_resume+0x8c/0xd0
+    [  254.895539] [c000000fac56fb60] [c00000000005e9fc] .eeh_pe_dev_traverse+0x9c/0x190
+    [  254.895545] [c000000fac56fc10] [c000000000060000] .eeh_handle_event+0x110/0x330
+    [  254.895551] [c000000fac56fca0] [c000000000060350] .eeh_event_handler+0x130/0x1a0
+    [  254.895558] [c000000fac56fd30] [c0000000000ad758] .kthread+0xe8/0xf0
+    [  254.895566] [c000000fac56fe30] [c00000000000a05c] .ret_from_kernel_thread+0x5c/0x80
+    
+    It appears that t3_resume_ports() is called with the rtnl_lock held from
+    the fatal error task but not from the PCI error callbacks. This fixes it.
+    
+    Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/chelsio/cxgb3/cxgb3_main.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit ea8f4222cddf3250dbcfc7db0437ebf74c352370
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Jul 1 20:21:30 2013 +0200
+
+    Upstream commit: 8822b64a0fa64a5dd1dfcf837c5b0be83f8c05d1
+    
+    ipv6: call udp_push_pending_frames when uncorking a socket with AF_INET pending data
+    
+    We accidentally call down to ip6_push_pending_frames when uncorking
+    pending AF_INET data on a ipv6 socket. This results in the following
+    splat (from Dave Jones):
+    
+    skbuff: skb_under_panic: text:ffffffff816765f6 len:48 put:40 head:ffff88013deb6df0 data:ffff88013deb6dec tail:0x2c end:0xc0 dev:<NULL>
+    ------------[ cut here ]------------
+    kernel BUG at net/core/skbuff.c:126!
+    invalid opcode: 0000 [#1] PREEMPT SMP DEBUG_PAGEALLOC
+    Modules linked in: dccp_ipv4 dccp 8021q garp bridge stp dlci mpoa snd_seq_dummy sctp fuse hidp tun bnep nfnetlink scsi_transport_iscsi rfcomm can_raw can_bcm af_802154 appletalk caif_socket can caif ipt_ULOG x25 rose af_key pppoe pppox ipx phonet irda llc2 ppp_generic slhc p8023 psnap p8022 llc crc_ccitt atm bluetooth
+    +netrom ax25 nfc rfkill rds af_rxrpc coretemp hwmon kvm_intel kvm crc32c_intel snd_hda_codec_realtek ghash_clmulni_intel microcode pcspkr snd_hda_codec_hdmi snd_hda_intel snd_hda_codec snd_hwdep usb_debug snd_seq snd_seq_device snd_pcm e1000e snd_page_alloc snd_timer ptp snd pps_core soundcore xfs libcrc32c
+    CPU: 2 PID: 8095 Comm: trinity-child2 Not tainted 3.10.0-rc7+ #37
+    task: ffff8801f52c2520 ti: ffff8801e6430000 task.ti: ffff8801e6430000
+    RIP: 0010:[<ffffffff816e759c>]  [<ffffffff816e759c>] skb_panic+0x63/0x65
+    RSP: 0018:ffff8801e6431de8  EFLAGS: 00010282
+    RAX: 0000000000000086 RBX: ffff8802353d3cc0 RCX: 0000000000000006
+    RDX: 0000000000003b90 RSI: ffff8801f52c2ca0 RDI: ffff8801f52c2520
+    RBP: ffff8801e6431e08 R08: 0000000000000000 R09: 0000000000000000
+    R10: 0000000000000001 R11: 0000000000000001 R12: ffff88022ea0c800
+    R13: ffff88022ea0cdf8 R14: ffff8802353ecb40 R15: ffffffff81cc7800
+    FS:  00007f5720a10740(0000) GS:ffff880244c00000(0000) knlGS:0000000000000000
+    CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+    CR2: 0000000005862000 CR3: 000000022843c000 CR4: 00000000001407e0
+    DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+    DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000600
+    Stack:
+     ffff88013deb6dec 000000000000002c 00000000000000c0 ffffffff81a3f6e4
+     ffff8801e6431e18 ffffffff8159a9aa ffff8801e6431e90 ffffffff816765f6
+     ffffffff810b756b 0000000700000002 ffff8801e6431e40 0000fea9292aa8c0
+    Call Trace:
+     [<ffffffff8159a9aa>] skb_push+0x3a/0x40
+     [<ffffffff816765f6>] ip6_push_pending_frames+0x1f6/0x4d0
+     [<ffffffff810b756b>] ? mark_held_locks+0xbb/0x140
+     [<ffffffff81694919>] udp_v6_push_pending_frames+0x2b9/0x3d0
+     [<ffffffff81694660>] ? udplite_getfrag+0x20/0x20
+     [<ffffffff8162092a>] udp_lib_setsockopt+0x1aa/0x1f0
+     [<ffffffff811cc5e7>] ? fget_light+0x387/0x4f0
+     [<ffffffff816958a4>] udpv6_setsockopt+0x34/0x40
+     [<ffffffff815949f4>] sock_common_setsockopt+0x14/0x20
+     [<ffffffff81593c31>] SyS_setsockopt+0x71/0xd0
+     [<ffffffff816f5d54>] tracesys+0xdd/0xe2
+    Code: 00 00 48 89 44 24 10 8b 87 d8 00 00 00 48 89 44 24 08 48 8b 87 e8 00 00 00 48 c7 c7 c0 04 aa 81 48 89 04 24 31 c0 e8 e1 7e ff ff <0f> 0b 55 48 89 e5 0f 0b 55 48 89 e5 0f 0b 55 48 89 e5 0f 0b 55
+    RIP  [<ffffffff816e759c>] skb_panic+0x63/0x65
+     RSP <ffff8801e6431de8>
+    
+    This patch adds a check if the pending data is of address family AF_INET
+    and directly calls udp_push_ending_frames from udp_v6_push_pending_frames
+    if that is the case.
+    
+    This bug was found by Dave Jones with trinity.
+    
+    (Also move the initialization of fl6 below the AF_INET check, even if
+    not strictly necessary.)
+    
+    Cc: Dave Jones <davej@redhat.com>
+    Cc: YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/udp.h |    1 +
+ net/ipv4/udp.c    |    3 ++-
+ net/ipv6/udp.c    |    7 ++++++-
+ 3 files changed, 9 insertions(+), 2 deletions(-)
+
+commit cd83094a85d9bbd5a67332156407d53cf8835432
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Tue Jul 2 08:04:05 2013 +0200
+
+    Upstream commit: 75a493e60ac4bbe2e977e7129d6d8cbb0dd236be
+    
+    ipv6: ip6_append_data_mtu did not care about pmtudisc and frag_size
+    
+    If the socket had an IPV6_MTU value set, ip6_append_data_mtu lost track
+    of this when appending the second frame on a corked socket. This results
+    in the following splat:
+    
+    [37598.993962] ------------[ cut here ]------------
+    [37598.994008] kernel BUG at net/core/skbuff.c:2064!
+    [37598.994008] invalid opcode: 0000 [#1] SMP
+    [37598.994008] Modules linked in: tcp_lp uvcvideo videobuf2_vmalloc videobuf2_memops videobuf2_core videodev media vfat fat usb_storage fuse ebtable_nat xt_CHECKSUM bridge stp llc ipt_MASQUERADE nf_conntrack_netbios_ns nf_conntrack_broadcast ip6table_mangle ip6t_REJECT nf_conntrack_ipv6 nf_defrag_ipv6 iptable_nat
+    +nf_nat_ipv4 nf_nat iptable_mangle nf_conntrack_ipv4 nf_defrag_ipv4 xt_conntrack nf_conntrack ebtable_filter ebtables ip6table_filter ip6_tables be2iscsi iscsi_boot_sysfs bnx2i cnic uio cxgb4i cxgb4 cxgb3i cxgb3 mdio libcxgbi ib_iser rdma_cm ib_addr iw_cm ib_cm ib_sa ib_mad ib_core iscsi_tcp libiscsi_tcp libiscsi
+    +scsi_transport_iscsi rfcomm bnep iTCO_wdt iTCO_vendor_support snd_hda_codec_conexant arc4 iwldvm mac80211 snd_hda_intel acpi_cpufreq mperf coretemp snd_hda_codec microcode cdc_wdm cdc_acm
+    [37598.994008]  snd_hwdep cdc_ether snd_seq snd_seq_device usbnet mii joydev btusb snd_pcm bluetooth i2c_i801 e1000e lpc_ich mfd_core ptp iwlwifi pps_core snd_page_alloc mei cfg80211 snd_timer thinkpad_acpi snd tpm_tis soundcore rfkill tpm tpm_bios vhost_net tun macvtap macvlan kvm_intel kvm uinput binfmt_misc
+    +dm_crypt i915 i2c_algo_bit drm_kms_helper drm i2c_core wmi video
+    [37598.994008] CPU 0
+    [37598.994008] Pid: 27320, comm: t2 Not tainted 3.9.6-200.fc18.x86_64 #1 LENOVO 27744PG/27744PG
+    [37598.994008] RIP: 0010:[<ffffffff815443a5>]  [<ffffffff815443a5>] skb_copy_and_csum_bits+0x325/0x330
+    [37598.994008] RSP: 0018:ffff88003670da18  EFLAGS: 00010202
+    [37598.994008] RAX: ffff88018105c018 RBX: 0000000000000004 RCX: 00000000000006c0
+    [37598.994008] RDX: ffff88018105a6c0 RSI: ffff88018105a000 RDI: ffff8801e1b0aa00
+    [37598.994008] RBP: ffff88003670da78 R08: 0000000000000000 R09: ffff88018105c040
+    [37598.994008] R10: ffff8801e1b0aa00 R11: 0000000000000000 R12: 000000000000fff8
+    [37598.994008] R13: 00000000000004fc R14: 00000000ffff0504 R15: 0000000000000000
+    [37598.994008] FS:  00007f28eea59740(0000) GS:ffff88023bc00000(0000) knlGS:0000000000000000
+    [37598.994008] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+    [37598.994008] CR2: 0000003d935789e0 CR3: 00000000365cb000 CR4: 00000000000407f0
+    [37598.994008] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+    [37598.994008] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+    [37598.994008] Process t2 (pid: 27320, threadinfo ffff88003670c000, task ffff88022c162ee0)
+    [37598.994008] Stack:
+    [37598.994008]  ffff88022e098a00 ffff88020f973fc0 0000000000000008 00000000000004c8
+    [37598.994008]  ffff88020f973fc0 00000000000004c4 ffff88003670da78 ffff8801e1b0a200
+    [37598.994008]  0000000000000018 00000000000004c8 ffff88020f973fc0 00000000000004c4
+    [37598.994008] Call Trace:
+    [37598.994008]  [<ffffffff815fc21f>] ip6_append_data+0xccf/0xfe0
+    [37598.994008]  [<ffffffff8158d9f0>] ? ip_copy_metadata+0x1a0/0x1a0
+    [37598.994008]  [<ffffffff81661f66>] ? _raw_spin_lock_bh+0x16/0x40
+    [37598.994008]  [<ffffffff8161548d>] udpv6_sendmsg+0x1ed/0xc10
+    [37598.994008]  [<ffffffff812a2845>] ? sock_has_perm+0x75/0x90
+    [37598.994008]  [<ffffffff815c3693>] inet_sendmsg+0x63/0xb0
+    [37598.994008]  [<ffffffff812a2973>] ? selinux_socket_sendmsg+0x23/0x30
+    [37598.994008]  [<ffffffff8153a450>] sock_sendmsg+0xb0/0xe0
+    [37598.994008]  [<ffffffff810135d1>] ? __switch_to+0x181/0x4a0
+    [37598.994008]  [<ffffffff8153d97d>] sys_sendto+0x12d/0x180
+    [37598.994008]  [<ffffffff810dfb64>] ? __audit_syscall_entry+0x94/0xf0
+    [37598.994008]  [<ffffffff81020ed1>] ? syscall_trace_enter+0x231/0x240
+    [37598.994008]  [<ffffffff8166a7e7>] tracesys+0xdd/0xe2
+    [37598.994008] Code: fe 07 00 00 48 c7 c7 04 28 a6 81 89 45 a0 4c 89 4d b8 44 89 5d a8 e8 1b ac b1 ff 44 8b 5d a8 4c 8b 4d b8 8b 45 a0 e9 cf fe ff ff <0f> 0b 66 0f 1f 84 00 00 00 00 00 66 66 66 66 90 55 48 89 e5 48
+    [37598.994008] RIP  [<ffffffff815443a5>] skb_copy_and_csum_bits+0x325/0x330
+    [37598.994008]  RSP <ffff88003670da18>
+    [37599.007323] ---[ end trace d69f6a17f8ac8eee ]---
+    
+    While there, also check if path mtu discovery is activated for this
+    socket. The logic was adapted from ip6_append_data when first writing
+    on the corked socket.
+    
+    This bug was introduced with commit
+    0c1833797a5a6ec23ea9261d979aa18078720b74 ("ipv6: fix incorrect ipsec
+    fragment").
+    
+    v2:
+    a) Replace IPV6_PMTU_DISC_DO with IPV6_PMTUDISC_PROBE.
+    b) Don't pass ipv6_pinfo to ip6_append_data_mtu (suggestion by Gao
+       feng, thanks!).
+    c) Change mtu to unsigned int, else we get a warning about
+       non-matching types because of the min()-macro type-check.
+    
+    Acked-by: Gao feng <gaofeng@cn.fujitsu.com>
+    Cc: YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_output.c |   16 ++++++++++------
+ 1 files changed, 10 insertions(+), 6 deletions(-)
+
+commit 23151ca7ca80e58d2616dac7be9fd62943c9a72c
+Author: Michael S. Tsirkin <mst@redhat.com>
+Date:   Sun Jul 7 14:26:53 2013 +0300
+
+    Upstream commit: dd7633ecd553a5e304d349aa6f8eb8a0417098c5
+    
+    vhost-net: fix use-after-free in vhost_net_flush
+    
+    vhost_net_ubuf_put_and_wait has a confusing name:
+    it will actually also free it's argument.
+    Thus since commit 1280c27f8e29acf4af2da914e80ec27c3dbd5c01
+        "vhost-net: flush outstanding DMAs on memory change"
+    vhost_net_flush tries to use the argument after passing it
+    to vhost_net_ubuf_put_and_wait, this results
+    in use after free.
+    To fix, don't free the argument in vhost_net_ubuf_put_and_wait,
+    add an new API for callers that want to free ubufs.
+    
+    Acked-by: Asias He <asias@redhat.com>
+    Acked-by: Jason Wang <jasowang@redhat.com>
+    Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/vhost/net.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit 088806db74ac2f08c106202bc5498585a9ee529f
+Author: Michal Hocko <mhocko@suse.cz>
+Date:   Mon Jul 8 16:00:29 2013 -0700
+
+    Upstream commit: f37a96914d1aea10fed8d9af10251f0b9caea31b
+    
+    memcg, kmem: fix reference count handling on the error path
+    
+    mem_cgroup_css_online calls mem_cgroup_put if memcg_init_kmem fails.
+    This is not correct because only memcg_propagate_kmem takes an
+    additional reference while mem_cgroup_sockets_init is allowed to fail as
+    well (although no current implementation fails) but it doesn't take any
+    reference.  This all suggests that it should be memcg_propagate_kmem
+    that should clean up after itself so this patch moves mem_cgroup_put
+    over there.
+    
+    Unfortunately this is not that easy (as pointed out by Li Zefan) because
+    memcg_kmem_mark_dead marks the group dead (KMEM_ACCOUNTED_DEAD) if it is
+    marked active (KMEM_ACCOUNTED_ACTIVE) which is the case even if
+    memcg_propagate_kmem fails so the additional reference is dropped in
+    that case in kmem_cgroup_destroy which means that the reference would be
+    dropped two times.
+    
+    The easiest way then would be to simply remove mem_cgrroup_put from
+    mem_cgroup_css_online and rely on kmem_cgroup_destroy doing the right
+    thing.
+    
+    Signed-off-by: Michal Hocko <mhocko@suse.cz>
+    Signed-off-by: Li Zefan <lizefan@huawei.com>
+    Acked-by: KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Cc: Tejun Heo <tj@kernel.org>
+    Cc: Glauber Costa <glommer@openvz.org>
+    Cc: Johannes Weiner <hannes@cmpxchg.org>
+    Cc: <stable@vger.kernel.org>	[3.8]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/memcontrol.c |    8 --------
+ 1 files changed, 0 insertions(+), 8 deletions(-)
+
+commit 08bfb6e700d13886ed722c2236e1ec10f03a95df
+Author: Michal Hocko <mhocko@suse.cz>
+Date:   Mon Jul 8 16:00:27 2013 -0700
+
+    Upstream commit: fa460c2d37870e0a6f94c70e8b76d05ca11b6db0
+    
+    Revert "memcg: avoid dangling reference count in creation failure"
+    
+    This reverts commit e4715f01be697a.
+    
+    mem_cgroup_put is hierarchy aware so mem_cgroup_put(memcg) already drops
+    an additional reference from all parents so the additional
+    mem_cgrroup_put(parent) potentially causes use-after-free.
+    
+    Signed-off-by: Michal Hocko <mhocko@suse.cz>
+    Signed-off-by: Li Zefan <lizefan@huawei.com>
+    Acked-by: KAMEZAWA Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Cc: Tejun Heo <tj@kernel.org>
+    Cc: Glauber Costa <glommer@openvz.org>
+    Cc: Johannes Weiner <hannes@cmpxchg.org>
+    Cc: <stable@vger.kernel.org>	[3.9+]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/memcontrol.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit 3267ec559f48327a1836eccecd53215afc5810d0
+Author: Tyler Hicks <tyhicks@canonical.com>
+Date:   Thu Jun 20 13:13:59 2013 -0700
+
+    Upstream commit: 2cb33cac622afde897aa02d3dcd9fbba8bae839e
+    
+    libceph: Fix NULL pointer dereference in auth client code
+    
+    A malicious monitor can craft an auth reply message that could cause a
+    NULL function pointer dereference in the client's kernel.
+    
+    To prevent this, the auth_none protocol handler needs an empty
+    ceph_auth_client_ops->build_request() function.
+    
+    CVE-2013-1059
+    
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Reported-by: Chanam Park <chanam.park@hkpco.kr>
+    Reviewed-by: Seth Arnold <seth.arnold@canonical.com>
+    Reviewed-by: Sage Weil <sage@inktank.com>
+    Cc: stable@vger.kernel.org
+
+ net/ceph/auth_none.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit cdfeb4049e7cb38702215b2c356ce0407974ac79
+Author: Eric Paris <eparis@redhat.com>
+Date:   Wed Jul 3 15:08:29 2013 -0700
+
+    Upstream commit: b57922b6c76c3ee401bb32fd3f298409dd6e6a53
+    
+    fork: reorder permissions when violating number of processes limits
+    
+    When a task is attempting to violate the RLIMIT_NPROC limit we have a
+    check to see if the task is sufficiently priviledged.  The check first
+    looks at CAP_SYS_ADMIN, then CAP_SYS_RESOURCE, then if the task is uid=0.
+    
+    A result is that tasks which are allowed by the uid=0 check are first
+    checked against the security subsystem.  This results in the security
+    subsystem auditting a denial for sys_admin and sys_resource and then the
+    task passing the uid=0 check.
+    
+    This patch rearranges the code to first check uid=0, since if we pass that
+    we shouldn't hit the security system at all.  We then check sys_resource,
+    since it is the smallest capability which will solve the problem.  Lastly
+    we check the fallback everything cap_sysadmin.  We don't want to give this
+    capability many places since it is so powerful.
+    
+    This will eliminate many of the false positive/needless denial messages we
+    get when a root task tries to violate the nproc limit.  (note that
+    kthreads count against root, so on a sufficiently large machine we can
+    actually get past the default limits before any userspace tasks are
+    launched.)
+    
+    Signed-off-by: Eric Paris <eparis@redhat.com>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/fork.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 08c87e049c8a50707908785d950fd48c334f4c09
+Author: Chen Gang <gang.chen@asianux.com>
+Date:   Sat Jun 22 13:26:09 2013 +0800
+
+    Upstream commit: f118e9abddfae94d7ef88858159d7556e1c2f7f6
+    
+    arch: sparc: kernel: check the memory length before use strcpy().
+    
+    For the related next strcpy(), the destination length is less than 512,
+    but the source maximize length may be 'OPROMMAXPARAM' (4096) which is
+    more than 512.
+    
+    One work flow may:
+      openprom_sunos_ioctl() ->  if (cmd == OPROMSETOPT)
+        getstrings() ->  will alloc buffer with size 'OPROMMAXPARAM'.
+        opromsetopt() ->  devide the buffer into 'var' and 'value'
+          of_set_property() -> pass
+            prom_setprop() -> pass
+              ldom_set_var()
+    
+    And do not mind the additional 4 alignment buffer increasing, since
+    'sizeof(pkt) - sizeof(pkt.header)' is 4 alignment at least.
+    
+    Signed-off-by: Chen Gang <gang.chen@asianux.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/kernel/ds.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 0f5d7e1171c65a8d4e9186b3656e1206121efb13
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jul 12 20:38:45 2013 -0400
+
+    Fix SLAB boot errors due to PAX_USERCOPY reported on the forums
+    
+    Unlike slub, slab can initally create two of the kmalloc_caches
+    which will be used later for generic kmallocs of their particular
+    aligned size (since the later loop in the unified allocator code
+    skips any already-existing kmalloc_caches)
+
+ mm/slab.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 7afc9d07a4c0a676aa5c4ac2b30882f60be6bae3
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jul 9 22:04:59 2013 -0400
