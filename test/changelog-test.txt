@@ -1,3 +1,24 @@
+commit 8542e1e973be7cc9a009d2ada8033576b2890e6f
+Merge: 86f446e 2577f8e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 13 20:46:58 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	mm/memcontrol.c
+
+commit 2577f8e4ec41efb347706a59c6838de20f0c90da
+Merge: 75a36f0 cb5d8be
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 13 20:43:42 2013 -0400
+
+    Merge branch 'linux-3.10.y' into pax-test
+    
+    Conflicts:
+    	crypto/algapi.c
+    	drivers/block/nbd.c
+
 commit 86f446e9d5c6b475d2e9360cc04f4361ad1b19b8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Jul 12 23:02:11 2013 -0400
