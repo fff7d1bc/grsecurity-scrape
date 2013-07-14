@@ -1,3 +1,53 @@
+commit 7bcd3db081454768542c3d741bcf32cd61a50cf5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 11:49:17 2013 -0400
+
+    Update PaX fix, just return the error
+
+ mm/madvise.c |   15 +++++++--------
+ 1 files changed, 7 insertions(+), 8 deletions(-)
+
+commit a10e377d0eddd37e8a3665b135e546ab03d9d171
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 11:36:00 2013 -0400
+
+    Fix madvise oops reported by Peter Keel
+
+ mm/madvise.c |   11 ++++++-----
+ 1 files changed, 6 insertions(+), 5 deletions(-)
+
+commit 08c5adca34d408772255b313f90d82c250c1d967
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 11:26:34 2013 -0400
+
+    don't make high vector mapping non-present on old ARM architectures, no
+    point in emulating some vector entries when the processor doesn't even support XN
+
+ arch/arm/mm/mmu.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit 2b40781d4197a89a003616af584884e36361c5b2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 09:51:58 2013 -0400
+
+    Temporary compile fix for code incorrectly modifying const data
+    Wrap a cast version of the code with open/close
+    
+    Thanks to Michael Tremer for the report
+
+ drivers/clk/socfpga/clk.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit a8258c1b4098c396cd4ea719e20858182feac1c1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 09:41:16 2013 -0400
+
+    Fix missing right parens in pipacs' "improvement" of my ARM code ;)
+    Thanks to Michael Tremer for reporting
+
+ arch/arm/include/asm/uaccess.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 8542e1e973be7cc9a009d2ada8033576b2890e6f
 Merge: 86f446e 2577f8e
 Author: Brad Spengler <spender@grsecurity.net>
