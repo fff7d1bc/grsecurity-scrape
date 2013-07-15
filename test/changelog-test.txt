@@ -1,3 +1,41 @@
+commit 36db325ef3b07ea8cdb47f549e706e5d71398e14
+Merge: 9c96441 f36ae8c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 19:23:13 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f36ae8c741ae32b1caff10825be12c327792c925
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 19:22:15 2013 -0400
+
+    Update to pax-linux-3.10-test2.patch:
+    - spender fixed a compile regression in a recent arm/UDEREF change, reported by Michael Tremer
+    - spender fixed arm/KERNEXEC for v5 and older CPUs, reported by Michael Tremer
+    - spender fixed a new CONSTIFY victim on arm, reported by Michael Tremer
+    - spender fixed an madvise regression, reported by Peter Keel
+    - spender fixed a SLAB regression, reported by Thorsten (http://forums.grsecurity.net/viewtopic.php?f=3&t=3614) and Jens (http://forums.grsecurity.net/viewtopic.php?f=1&t=3616)
+    - fixed a headers_install regression, reported by Mathias Krause
+    - fixed a SLOB compile regression, reported by Mathias Krause
+
+ arch/arm/include/asm/uaccess.h |    4 ++--
+ arch/arm/mm/mmu.c              |   15 +++++++++++++--
+ drivers/clk/socfpga/clk.c      |    6 ++++--
+ mm/madvise.c                   |    4 ++--
+ mm/slab.c                      |    4 ++--
+ mm/slob.c                      |    4 ++--
+ scripts/headers_install.sh     |    2 +-
+ 7 files changed, 26 insertions(+), 13 deletions(-)
+
+commit 9c9644156a49637050741d9165df79174e59b0ef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 14 19:19:54 2013 -0400
+
+    Fix sparc64 compilation, reported by Blake Self
+
+ arch/sparc/kernel/sys_sparc_64.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 7bcd3db081454768542c3d741bcf32cd61a50cf5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jul 14 11:49:17 2013 -0400
