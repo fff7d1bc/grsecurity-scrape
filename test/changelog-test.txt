@@ -1,3 +1,79 @@
+commit 817cd2d1e7a55720326599dd8f542578eef30927
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Fri Jul 12 23:46:33 2013 +0200
+
+    Upstream commit: 307f2fb95e9b96b3577916e73d92e104f8f26494
+    
+    ipv6: only static routes qualify for equal cost multipathing
+    
+    Static routes in this case are non-expiring routes which did not get
+    configured by autoconf or by icmpv6 redirects.
+    
+    To make sure we actually get an ecmp route while searching for the first
+    one in this fib6_node's leafs, also make sure it matches the ecmp route
+    assumptions.
+    
+    v2:
+    a) Removed RTF_EXPIRE check in dst.from chain. The check of RTF_ADDRCONF
+       already ensures that this route, even if added again without
+       RTF_EXPIRES (in case of a RA announcement with infinite timeout),
+       does not cause the rt6i_nsiblings logic to go wrong if a later RA
+       updates the expiration time later.
+    
+    v3:
+    a) Allow RTF_EXPIRES routes to enter the ecmp route set. We have to do so,
+       because an pmtu event could update the RTF_EXPIRES flag and we would
+       not count this route, if another route joins this set. We now filter
+       only for RTF_GATEWAY|RTF_ADDRCONF|RTF_DYNAMIC, which are flags that
+       don't get changed after rt6_info construction.
+    
+    Cc: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_fib.c |   15 +++++++++++----
+ 1 files changed, 11 insertions(+), 4 deletions(-)
+
+commit 77db8196d51b043e2e2d124094da101b0f01bccb
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Fri Jul 12 09:39:03 2013 +0300
+
+    Upstream commit: b2781e1021525649c0b33fffd005ef219da33926
+    
+    svcrdma: underflow issue in decode_write_list()
+    
+    My static checker marks everything from ntohl() as untrusted and it
+    complains we could have an underflow problem doing:
+    
+    	return (u32 *)&ary->wc_array[nchunks];
+    
+    Also on 32 bit systems the upper bound check could overflow.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+
+ net/sunrpc/xprtrdma/svc_rdma_marshal.c |   20 ++++++++++++++------
+ 1 files changed, 14 insertions(+), 6 deletions(-)
+
+commit 926473317fd7953137ef97835edd36dabc584b01
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 17 21:29:02 2013 -0400
+
+    add missing asm/pgtable.h include, reported by Michael Tremer
+
+ drivers/clk/socfpga/clk.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit c592ae0001b31932ef1491784dfa374058797c66
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 16 20:40:24 2013 -0400
+
+    allow viewing of ecryptfs version under SYSFS_RESTRICT
+
+ fs/sysfs/dir.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 36db325ef3b07ea8cdb47f549e706e5d71398e14
 Merge: 9c96441 f36ae8c
 Author: Brad Spengler <spender@grsecurity.net>
