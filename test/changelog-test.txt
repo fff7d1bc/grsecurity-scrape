@@ -1,3 +1,26 @@
+commit 3540cebbbfa4aef94527ad3e0e49097848147fb9
+Merge: ab95b58 d5142e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 21 22:47:46 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d5142e31785f8c32c7338c51fcc27313bdd4a84e
+Merge: f36ae8c 0f4a56e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 21 22:47:34 2013 -0400
+
+    Merge branch 'linux-3.10.y' into pax-test
+
+commit ab95b5842899d61ff5c30f4582e72029b3155be8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 21 22:28:40 2013 -0400
+
+    compile fix with constification reported by Michael Tremer
+
+ drivers/gpu/host1x/drm/dc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 817cd2d1e7a55720326599dd8f542578eef30927
 Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
 Date:   Fri Jul 12 23:46:33 2013 +0200
