@@ -1,3 +1,100 @@
+commit d5e5bfd6ecc1fc7e86d070df8eb0ce8d0643c558
+Merge: 19e077b 8a8a0d0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 25 21:05:18 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8a8a0d0b22a86bf65302d03bb6732e42bc0a2e56
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 25 21:04:09 2013 -0400
+
+    Update to pax-linux-3.10.3-test4.patch:
+    - introduced per-slab object sanitization, contributed by Mathias Krause and secunet.
+      this is finer grained sanitization than the existing per-page based approach (which
+      is still done) at a somewhat higher performance cost. the pax_sanitize_slab command
+      line option can be used to enable/disable it on boot (it's enabled by default when
+      CONFIG_PAX_MEMORY_SANITIZE is enabled).
+
+ Documentation/kernel-parameters.txt |    4 ++++
+ fs/buffer.c                         |    2 +-
+ fs/dcache.c                         |    3 ++-
+ include/linux/slab.h                |    7 +++++++
+ include/linux/slab_def.h            |    4 ++++
+ kernel/fork.c                       |    2 +-
+ mm/rmap.c                           |    6 ++++--
+ mm/slab.c                           |   27 +++++++++++++++++++++++++++
+ mm/slab.h                           |   12 +++++++++++-
+ mm/slab_common.c                    |   14 ++++++++++++++
+ mm/slob.c                           |    5 +++++
+ mm/slub.c                           |   11 +++++++++++
+ net/core/skbuff.c                   |    6 ++++--
+ security/Kconfig                    |   23 +++++++++++++++++------
+ 14 files changed, 112 insertions(+), 14 deletions(-)
+
+commit 19e077bfff54ca211d0142c07cb6dd88069a390c
+Merge: 960ec51 c8f7f51
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 25 19:53:34 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c8f7f51591207b82530214300e86277028919286
+Merge: d5142e3 81a4648
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 25 19:52:29 2013 -0400
+
+    Update to pax-linux-3.10.3-test3.patch:
+    - fixed some compile issues reported by Michael Tremer and spender
+    - fixed an i386 regression with the lower address space gap on i386, reported by cnu
+    
+    Merge branch 'linux-3.10.y' into pax-test
+    
+    Conflicts:
+    	kernel/time/tick-broadcast.c
+
+commit 960ec51ab2142544fbae563d4fd5744775408965
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sat Jul 20 03:13:55 2013 +0400
+
+    Upstream commit: acfec9a5a892f98461f52ed5770de99a3e571ae2
+    
+    livelock avoidance in sget()
+    
+    Eric Sandeen has found a nasty livelock in sget() - take a mount(2) about
+    to fail.  The superblock is on ->fs_supers, ->s_umount is held exclusive,
+    ->s_active is 1.  Along comes two more processes, trying to mount the same
+    thing; sget() in each is picking that superblock, bumping ->s_count and
+    trying to grab ->s_umount.  ->s_active is 3 now.  Original mount(2)
+    finally gets to deactivate_locked_super() on failure; ->s_active is 2,
+    superblock is still ->fs_supers because shutdown will *not* happen until
+    ->s_active hits 0.  ->s_umount is dropped and now we have two processes
+    chasing each other:
+    s_active = 2, A acquired ->s_umount, B blocked
+    A sees that the damn thing is stillborn, does deactivate_locked_super()
+    s_active = 1, A drops ->s_umount, B gets it
+    A restarts the search and finds the same superblock.  And bumps it ->s_active.
+    s_active = 2, B holds ->s_umount, A blocked on trying to get it
+    ... and we are in the earlier situation with A and B switched places.
+    
+    The root cause, of course, is that ->s_active should not grow until we'd
+    got MS_BORN.  Then failing ->mount() will have deactivate_locked_super()
+    shut the damn thing down.  Fortunately, it's easy to do - the key point
+    is that grab_super() is called only for superblocks currently on ->fs_supers,
+    so it can bump ->s_count and grab ->s_umount first, then check MS_BORN and
+    bump ->s_active; we must never increment ->s_count for superblocks past
+    ->kill_sb(), but grab_super() is never called for those.
+    
+    The bug is pretty old; we would've caught it by now, if not for accidental
+    exclusion between sget() for block filesystems; the things like cgroup or
+    e.g. mtd-based filesystems don't have anything of that sort, so they get
+    bitten.  The right way to deal with that is obviously to fix sget()...
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/super.c |   25 ++++++++++---------------
+ 1 files changed, 10 insertions(+), 15 deletions(-)
+
 commit 3540cebbbfa4aef94527ad3e0e49097848147fb9
 Merge: ab95b58 d5142e3
 Author: Brad Spengler <spender@grsecurity.net>
