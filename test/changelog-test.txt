@@ -1,3 +1,365 @@
+commit 8aea9fe5866dec3c847a34f743f343e18cf1cdcb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 2 23:54:51 2013 -0400
+
+    add include
+
+ grsecurity/grsec_log.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit d48425ef8cb3761ab6130e52f1f8e401f5b5a295
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 2 23:49:13 2013 -0400
+
+    fix compilation
+
+ include/linux/grinternal.h |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 1704c23fdc55b68f512dc9927940e72237f3f43e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 2 23:34:35 2013 -0400
+
+    Improve PaX reporting (tells when anon mapping is stack or heap)
+    Remove textrel logging option, combine into rwx logging option
+    Enhance RWX logging option to display when PT_GNU_STACK-enabled library
+    is loaded under an MPROTECTed binary
+    Enhance RWX mprotect logging to display stack/heap instead of just
+    anon mapping
+
+ fs/binfmt_elf.c            |   37 +++++++++++++++++++++++++++++++++++++
+ fs/exec.c                  |    4 ++++
+ grsecurity/Kconfig         |   21 +++++----------------
+ grsecurity/grsec_init.c    |    4 ----
+ grsecurity/grsec_log.c     |   14 ++++++++++++++
+ grsecurity/grsec_pax.c     |   19 ++++++++++++++-----
+ grsecurity/grsec_sysctl.c  |    9 ---------
+ include/linux/binfmts.h    |    1 +
+ include/linux/grinternal.h |    2 +-
+ include/linux/grmsg.h      |    3 ++-
+ include/linux/grsecurity.h |    3 ++-
+ mm/mmap.c                  |    7 +++++++
+ mm/mprotect.c              |    2 +-
+ 13 files changed, 88 insertions(+), 38 deletions(-)
+
+commit faf81c100c8565524e21c9af780a0ad2ce3fd925
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 1 18:52:02 2013 -0400
+
+    add missing #define
+
+ grsecurity/gracl.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit e87232d1fcb4da72df971cbc623aac6c9b3871a0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 1 18:43:53 2013 -0400
+
+    fix compilation for !COMPAT as reported on the forums
+
+ grsecurity/gracl.c |  195 ++++++++++++++++++++++++++--------------------------
+ 1 files changed, 97 insertions(+), 98 deletions(-)
+
+commit 65c9b9c6c42939dc55be1b8842e7c2e05733056c
+Merge: 65019c9 7f91ba1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 31 17:47:31 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 65019c9bd05f860437071cbf00e2027fd2d68615
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 31 17:47:20 2013 -0400
+
+    Revert "revert recent PaX change that causes boot failures with 32bit userland"
+    
+    This reverts commit 23278a1ee1c7738dd1e7005241394d32b82196e4.
+
+ arch/x86/include/asm/processor.h |    4 ++--
+ arch/x86/kernel/cpu/common.c     |    2 +-
+ arch/x86/kernel/process_64.c     |    2 +-
+ arch/x86/kernel/smpboot.c        |    2 +-
+ arch/x86/xen/smp.c               |    2 +-
+ 5 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 7f91ba11122fcaa96fc2dca42bddcd5f8db3b945
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 31 17:46:00 2013 -0400
+
+    Update to pax-linux-3.10.4-test7.patch:
+    - added a few more missing format strings
+    - added reporting of mismatched MPROTECT/EMUTRAMP flags between libraries and the main executable
+    - reverted the recent amd64 kstack alignment fix, it'll be done the harder way another time
+    - fixed a UDEREF/i386 regression, __get_user_8 would always fail
+
+ arch/x86/include/asm/processor.h           |    4 +-
+ arch/x86/kernel/cpu/common.c               |    2 +-
+ arch/x86/kernel/dumpstack.c                |    2 +-
+ arch/x86/kernel/process_64.c               |    2 +-
+ arch/x86/kernel/reboot_fixups_32.c         |    2 +-
+ arch/x86/kernel/smpboot.c                  |    2 +-
+ arch/x86/lib/getuser.S                     |    4 +-
+ arch/x86/xen/smp.c                         |    2 +-
+ drivers/net/wireless/iwlwifi/dvm/debugfs.c |    8 ++--
+ drivers/video/backlight/backlight.c        |    2 +-
+ drivers/video/backlight/lcd.c              |    2 +-
+ fs/binfmt_elf.c                            |   51 +++++++++++++++++++++++++---
+ fs/exec.c                                  |   50 +++++++++++++--------------
+ include/linux/sched.h                      |    2 +
+ 14 files changed, 88 insertions(+), 47 deletions(-)
+
+commit 043130da54cb7cc8dc44e0ce889d426e889a0532
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 31 16:26:58 2013 -0400
+
+    compile fix for !COMPAT as mentioned on forums
+
+ grsecurity/gracl.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit ed0a195abd4e41c2449a020a53a19c74dc866d78
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 22:33:14 2013 -0400
+
+    perform compat conversion of rlimit infinity
+
+ grsecurity/gracl_compat.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+commit a99c1b9f31678c1c72a63bea65aed1b2d3205259
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 22:21:40 2013 -0400
+
+    remove debugging
+
+ grsecurity/gracl_compat.c |   44 +++++++++++---------------------------------
+ 1 files changed, 11 insertions(+), 33 deletions(-)
+
+commit e75b3f504692b97960a7530ad0855d91441d79c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 22:20:32 2013 -0400
+
+    eliminate compat_dev_t
+
+ include/linux/gracl_compat.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit e5abbaf95313066a724e1a843d4fc902a9a6450e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 22:13:22 2013 -0400
+
+    fix compat rlimit size
+
+ grsecurity/gracl_compat.c    |   68 +++++++++++++++++++++++++++++-------------
+ include/linux/gracl_compat.h |    4 +-
+ 2 files changed, 49 insertions(+), 23 deletions(-)
+
+commit 877d6c2f8b3518ff39601084560bb33c58d35a1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 21:20:18 2013 -0400
+
+    compile fix
+
+ grsecurity/gracl.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit a2062eae8d1dc48d338480e599fedee2dc5e2f98
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 21:14:29 2013 -0400
+
+    copy correct pointer size in new compat code
+
+ grsecurity/gracl.c        |    8 ++++----
+ grsecurity/gracl_compat.c |    4 ++--
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 23278a1ee1c7738dd1e7005241394d32b82196e4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 19:48:58 2013 -0400
+
+    revert recent PaX change that causes boot failures with 32bit userland
+
+ arch/x86/include/asm/processor.h |    4 ++--
+ arch/x86/kernel/cpu/common.c     |    2 +-
+ arch/x86/kernel/process_64.c     |    2 +-
+ arch/x86/kernel/smpboot.c        |    2 +-
+ arch/x86/xen/smp.c               |    2 +-
+ 5 files changed, 6 insertions(+), 6 deletions(-)
+
+commit ec27f71a813656fea8ab37faecb2b485fe99d08e
+Merge: 3a11bcf 05f0a61
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 19:42:21 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 05f0a610373fa95df838f97c3fcfb59a3d79c5b8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 19:41:44 2013 -0400
+
+    Update to pax-linux-3.10.4-test6.patch:
+    - fixed some size_overflow false positives on i386 caused by __SC_LONG, reported by spender
+
+ include/linux/syscalls.h |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 3a11bcfcc738ed5dbf0d56713db872ed36351a26
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 19:15:50 2013 -0400
+
+    compile fix
+
+ grsecurity/gracl_compat.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 1dbd99b5cb0b6757eadf22309501e7fdd84f5de7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 19:12:46 2013 -0400
+
+    remove BUILD_BUG_ONs
+
+ grsecurity/gracl_compat.c |   20 --------------------
+ 1 files changed, 0 insertions(+), 20 deletions(-)
+
+commit a283b21cbd77622383a1dcb1f7bf1080db3bae88
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 00:18:36 2013 -0400
+
+    compile fixes
+
+ grsecurity/gracl_compat.c    |    8 ++++----
+ include/linux/gracl_compat.h |    2 +-
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 8b744005f8bae565e24c1fd88af77e6e619b9434
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 00:16:42 2013 -0400
+
+    compile fixes
+
+ grsecurity/gracl.c        |    4 ++--
+ grsecurity/gracl_compat.c |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 5cd86afa393bf9bf38c2e9063191709ac2beff2c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 00:13:51 2013 -0400
+
+    compile fixes
+
+ grsecurity/gracl.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit b93b829afcc98b6108b18d99ff63c53642d0b951
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 00:11:03 2013 -0400
+
+    compile fixes
+
+ grsecurity/gracl_compat.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 7da096415fa633c4ad2b1f74bd43d3a58a63b5c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 30 00:08:21 2013 -0400
+
+    more compile fixes
+
+ grsecurity/gracl.c |   28 ++++++++++++++--------------
+ 1 files changed, 14 insertions(+), 14 deletions(-)
+
+commit 6c1fd80e19f1449b6895f1ed77f23f1245470b3b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 29 23:59:50 2013 -0400
+
+    more compile fixes
+
+ grsecurity/gracl.c |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
+
+commit 89dda536f276dd4bb55fa0f9ea8980ac8b750d29
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 29 23:56:47 2013 -0400
+
+    additional compile fixes
+
+ grsecurity/gracl.c |   59 +++++++++++++++++++++++++++++++++++++++++++--------
+ 1 files changed, 49 insertions(+), 10 deletions(-)
+
+commit ac695a081d1124fb28bec46814535d34c5e40611
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 29 23:47:15 2013 -0400
+
+    fix typo
+
+ grsecurity/gracl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d95dd21a8d6d00c5cf34fee3f45dd914b6da6093
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 29 23:46:59 2013 -0400
+
+    compile fixes
+
+ grsecurity/gracl.c |   53 ++++++++++++++++++++++++++++++++++++++-------------
+ 1 files changed, 39 insertions(+), 14 deletions(-)
+
+commit 82631f451cc7432b6c5578cf8d24155473feb25c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 29 23:22:44 2013 -0400
+
+    Initial commit of compat RBAC loading
+    Permits 32bit gradm to load policy for a 64bit kernel
+    
+    Also removed code duplication for copying strings into the kernel
+    
+    Work performed as part of sponsorship
+
+ grsecurity/Makefile          |    4 +
+ grsecurity/gracl.c           |  315 +++++++++++++++++++++++-------------------
+ grsecurity/gracl_compat.c    |  270 ++++++++++++++++++++++++++++++++++++
+ include/linux/gracl_compat.h |  156 +++++++++++++++++++++
+ 4 files changed, 603 insertions(+), 142 deletions(-)
+
+commit 84c4a433dfb096e4a1162ee5e68025122c70b421
+Merge: c9d3ed3 9fe5897
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 29 17:08:56 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9fe58978938e357642885866ca48090a7753d403
+Merge: 8f693ad 6f7bb6b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 29 17:08:43 2013 -0400
+
+    Merge branch 'linux-3.10.y' into pax-test
+
+commit c9d3ed33c5370bbacfadf86f6a1566828a3d7775
+Merge: d5e5bfd 8f693ad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 28 10:03:08 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8f693ade9b3e448f92706d34148b00a087637f70
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 28 10:02:16 2013 -0400
+
+    Update to pax-linux-3.10.3-test5.patch:
+    - fixed amd64 kstack alignment (caught by some crazy codegen by clang/llvm)
+    - fixed handling of faulting userland accesses for UDEREF/arm, from spender
+    - updated the size overflow hash table, from Emese
+
+ arch/arm/kernel/entry-armv.S      |    3 +-
+ arch/x86/include/asm/processor.h  |    4 +-
+ arch/x86/kernel/cpu/common.c      |    2 +-
+ arch/x86/kernel/process_64.c      |    2 +-
+ arch/x86/kernel/smpboot.c         |    2 +-
+ arch/x86/xen/smp.c                |    2 +-
+ tools/gcc/size_overflow_hash.data |  553 +++++++++++++++++++++++++++++++++----
+ 7 files changed, 513 insertions(+), 55 deletions(-)
+
 commit d5e5bfd6ecc1fc7e86d070df8eb0ce8d0643c558
 Merge: 19e077b 8a8a0d0
 Author: Brad Spengler <spender@grsecurity.net>
