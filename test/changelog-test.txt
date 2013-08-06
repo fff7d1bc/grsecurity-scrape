@@ -1,3 +1,135 @@
+commit 1c92de4b8811c330af033c31d83c9c45e3d064b2
+Merge: e65aa3d 1660f49
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 5 18:50:45 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1660f496848b8400d263f7920989dae15e72185a
+Merge: 7f91ba1 dc51cd2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 5 18:50:12 2013 -0400
+
+    Update to pax-linux-3.10.5-test7.patch
+    
+    Merge branch 'linux-3.10.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/head_64.S
+    	mm/mempolicy.c
+
+commit e65aa3dd447115cb79b4815bc1ceac7b3cacef15
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 5 17:58:42 2013 -0400
+
+    Disable RANDKSTACK for a VirtualBox host as mentioned on the
+    gentoo-hardened bugzilla:
+    https://bugs.gentoo.org/show_bug.cgi?id=382793
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 60d8cffd7740fd1d527790caf9a24a35d8c45858
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Jul 30 13:23:39 2013 +0300
+
+    Upstream commit: 8cb3b9c3642c0263d48f31d525bcee7170eedc20
+    
+    net_sched: info leak in atm_tc_dump_class()
+    
+    The "pvc" struct has a hole after pvc.sap_family which is not cleared.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Reviewed-by: Jiri Pirko <jiri@resnulli.us>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sched/sch_atm.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 50d20ebce56b6e0b9622685930e007e46c7c04bb
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Fri Aug 2 11:32:43 2013 +0200
+
+    Upstream commit: 446266b0c742a2c9ee8f0dce759a0117bce58a86
+    
+    net: rtm_to_ifaddr: free ifa if ifa_cacheinfo processing fails
+    
+    Commit 5c766d642 ("ipv4: introduce address lifetime") leaves the ifa
+    resource that was allocated via inet_alloc_ifa() unfreed when returning
+    the function with -EINVAL. Thus, free it first via inet_free_ifa().
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Reviewed-by: Jiri Pirko <jiri@resnulli.us>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/devinet.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 0acaba4eea12097cc59bc61a46ba1ef4a468b260
+Author: Himanshu Madhani <himanshu.madhani@qlogic.com>
+Date:   Fri Aug 2 23:15:56 2013 -0400
+
+    Upstream commit: f91bbcb0b82186b4d5669021b142c263b66505e1
+    
+    qlcnic: Free up memory in error path.
+    
+    Signed-off-by: Himanshu Madhani <himanshu.madhani@qlogic.com>
+    Signed-off-by: Shahed Shaikh <shahed.shaikh@qlogic.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/qlogic/qlcnic/qlcnic_ctx.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 3626ec32c8b24cb38b8db2a1b2f5430bd898408a
+Author: Shahed Shaikh <shahed.shaikh@qlogic.com>
+Date:   Fri Aug 2 23:15:54 2013 -0400
+
+    Upstream commit: 4a99ab56cea66f9f67b9d07ace5cd40a336c8e6f
+    
+    qlcnic: Fix MAC address filter issue on 82xx adapter
+    
+    Driver was passing the address of a pointer instead of
+    the pointer itself.
+    
+    Signed-off-by: Shahed Shaikh <shahed.shaikh@qlogic.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/qlogic/qlcnic/qlcnic_io.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5570df953d6c143e05f1d60d9c23210e60dbbe81
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 5 17:26:40 2013 -0400
+
+    Move user namespace capability check to shared create_user_ns code so we
+    cover unshare() as well.
+    
+    Also kill a trivial 1-line, 22-character upstream kernel DoS, thanks to
+    user namespaces!
+
+ kernel/fork.c           |   17 -----------------
+ kernel/user_namespace.c |   24 ++++++++++++++++++++++--
+ 2 files changed, 22 insertions(+), 19 deletions(-)
+
+commit 97112fe30de4ca84e79c82ebfa2353b9c9988ca1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 5 16:05:41 2013 -0400
+
+    silence a warning on older gcc
+
+ grsecurity/gracl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b8966a5d577e9220fbc63306eee978f819f24e2e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 3 08:31:08 2013 -0400
+
+    we only care about mmaps of the beginning of an ELF, filter out
+    all others as suggested by pipacs
+
+ mm/mmap.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 8aea9fe5866dec3c847a34f743f343e18cf1cdcb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Aug 2 23:54:51 2013 -0400
