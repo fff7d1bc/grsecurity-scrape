@@ -1,3 +1,30 @@
+commit 223ac007ef18bf3a5095ba0a56675c1f16200149
+Merge: 1c92de4 13675b8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 8 20:45:24 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit 13675b848cf02bffd26924b2b84d927095bc253d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 8 20:43:52 2013 -0400
+
+    Update to pax-linux-3.10.5-test8.patch:
+    - Emese fixed a size overflow false positive, reported by markusle (http://forums.grsecurity.net/viewtopic.php?f=3&t=3692)
+    - fixed the use of PXN for 2-level pages tables on arm, by Corey Minyard <cminyard@mvista.com>
+    - added PAGEEXEC/XI violation reporting on mips, by Corey Minyard <cminyard@mvista.com>
+
+ arch/arm/include/asm/pgtable-2level.h |    4 +++-
+ arch/arm/mm/proc-v7-2level.S          |    3 ---
+ arch/mips/mm/fault.c                  |    8 ++++++++
+ arch/x86/include/asm/processor.h      |    3 ++-
+ include/linux/math64.h                |    2 +-
+ security/Kconfig                      |    2 --
+ 6 files changed, 14 insertions(+), 8 deletions(-)
+
 commit 1c92de4b8811c330af033c31d83c9c45e3d064b2
 Merge: e65aa3d 1660f49
 Author: Brad Spengler <spender@grsecurity.net>
