@@ -1,3 +1,881 @@
+commit d8efbc54f5c8aba589d4d12eed9257a754a67de8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 12:00:20 2013 -0400
+
+    make kallsyms_lookup_size_offset available to approved source files
+
+ include/linux/kallsyms.h |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 6c8feffa95ce2db280160015027b52bb41a344c8
+Merge: dbf6930 0bb1c2b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 11:57:50 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0bb1c2b2d9ba9a15fb504d47270499e8e2764106
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 11:56:43 2013 -0400
+
+    Update to pax-linux-3.10.7-test12.patch:
+    - fixed superfluous initializer in __native_flush_tlb_single, reported by Mathias Krause
+    - fixed some arm compile problems
+
+ arch/x86/include/asm/tlbflush.h      |    2 +-
+ drivers/clocksource/bcm_kona_timer.c |    2 +-
+ kernel/signal.c                      |    4 ++++
+ 3 files changed, 6 insertions(+), 2 deletions(-)
+
+commit dbf69305ad4f8a037aae95af90f9201f556dcb48
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 11:18:09 2013 -0400
+
+    allow use of kallsyms_lookup_name to approved source files
+
+ include/linux/kallsyms.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit a566c5f4dec33f410678c257e95ab6726ce8e4f9
+Merge: 68bd16f f562e3e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 10:35:02 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f562e3ef7737ea8d80431a722479b36a12504ace
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 10:34:51 2013 -0400
+
+    add uderef_64.c
+
+ arch/x86/mm/uderef_64.c |   37 +++++++++++++++++++++++++++++++++++++
+ 1 files changed, 37 insertions(+), 0 deletions(-)
+
+commit 68bd16fce3cf51c4c407e2ac6bc3db0629783622
+Author: Asbjoern Sloth Toennesen <ast@fiberby.net>
+Date:   Mon Aug 12 16:30:09 2013 +0000
+
+    Upstream commit: 3e805ad288c524bb65aad3f1e004402223d3d504
+    
+    rtnetlink: rtnl_bridge_getlink: Call nlmsg_find_attr() with ifinfomsg header
+    
+    Fix the iproute2 command `bridge vlan show`, after switching from
+    rtgenmsg to ifinfomsg.
+    
+    Let's start with a little history:
+    
+    Feb 20:   Vlad Yasevich got his VLAN-aware bridge patchset included in
+              the 3.9 merge window.
+              In the kernel commit 6cbdceeb, he added attribute support to
+              bridge GETLINK requests sent with rtgenmsg.
+    
+    Mar 6th:  Vlad got this iproute2 reference implementation of the bridge
+              vlan netlink interface accepted (iproute2 9eff0e5c)
+    
+    Apr 25th: iproute2 switched from using rtgenmsg to ifinfomsg (63338dca)
+              http://patchwork.ozlabs.org/patch/239602/
+              http://marc.info/?t=136680900700007
+    
+    Apr 28th: Linus released 3.9
+    
+    Apr 30th: Stephen released iproute2 3.9.0
+    
+    The `bridge vlan show` command haven't been working since the switch to
+    ifinfomsg, or in a released version of iproute2. Since the kernel side
+    only supports rtgenmsg, which iproute2 switched away from just prior to
+    the iproute2 3.9.0 release.
+    
+    I haven't been able to find any documentation, about neither rtgenmsg
+    nor ifinfomsg, and in which situation to use which, but kernel commit
+    88c5b5ce seams to suggest that ifinfomsg should be used.
+    
+    Fixing this in kernel will break compatibility, but I doubt that anybody
+    have been using it due to this bug in the user space reference
+    implementation, at least not without noticing this bug. That said the
+    functionality is still fully functional in 3.9, when reversing iproute2
+    commit 63338dca.
+    
+    This could also be fixed in iproute2, but thats an ugly patch that would
+    reintroduce rtgenmsg in iproute2, and from searching in netdev it seams
+    like rtgenmsg usage is discouraged. I'm assuming that the only reason
+    that Vlad implemented the kernel side to use rtgenmsg, was because
+    iproute2 was using it at the time.
+    
+    Signed-off-by: Asbjoern Sloth Toennesen <ast@fiberby.net>
+    Reviewed-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/rtnetlink.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8c7bc5bafddddff55ed4687203a977e96f72540a
+Author: Johannes Berg <johannes.berg@intel.com>
+Date:   Tue Aug 13 09:04:05 2013 +0200
+
+    Upstream commit: 58ad436fcf49810aa006016107f494c9ac9013db
+    
+    genetlink: fix family dump race
+    
+    When dumping generic netlink families, only the first dump call
+    is locked with genl_lock(), which protects the list of families,
+    and thus subsequent calls can access the data without locking,
+    racing against family addition/removal. This can cause a crash.
+    Fix it - the locking needs to be conditional because the first
+    time around it's already locked.
+    
+    A similar bug was reported to me on an old kernel (3.4.47) but
+    the exact scenario that happened there is no longer possible,
+    on those kernels the first round wasn't locked either. Looking
+    at the current code I found the race described above, which had
+    also existed on the old kernel.
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Andrei Otcheretianski <andrei.otcheretianski@intel.com>
+    Signed-off-by: Johannes Berg <johannes.berg@intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/netlink/genetlink.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit 0aef405c4f269d1e35abb5393cee4e7d452ed4bb
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Fri Aug 9 16:25:21 2013 +0200
+
+    Upstream commit: 771085d6bf3c52de29fc213e5bad07a82e57c23e
+    
+    net: sctp: sctp_transport_destroy{, _rcu}: fix potential pointer corruption
+    
+    Probably this one is quite unlikely to be triggered, but it's more safe
+    to do the call_rcu() at the end after we have dropped the reference on
+    the asoc and freed sctp packet chunks. The reason why is because in
+    sctp_transport_destroy_rcu() the transport is being kfree()'d, and if
+    we're unlucky enough we could run into corrupted pointers. Probably
+    that's more of theoretical nature, but it's safer to have this simple fix.
+    
+    Introduced by commit 8c98653f ("sctp: sctp_close: fix release of bindings
+    for deferred call_rcu's"). I also did the 8c98653f regression test and
+    it's fine that way.
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/transport.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 3925eab5483946fd746575a46f97bee9d566bb77
+Author: Stephane Grosjean <s.grosjean@peak-system.com>
+Date:   Fri Aug 9 11:44:06 2013 +0200
+
+    Upstream commit: 3c322a56b01695df15c70bfdc2d02e0ccd80654e
+    
+    can: pcan_usb: fix wrong memcpy() bytes length
+    
+    Fix possibly wrong memcpy() bytes length since some CAN records received from
+    PCAN-USB could define a DLC field in range [9..15].
+    In that case, the real DLC value MUST be used to move forward the record pointer
+    but, only 8 bytes max. MUST be copied into the data field of the struct
+    can_frame object of the skb given to the network core.
+    
+    Cc: linux-stable <stable@vger.kernel.org>
+    Signed-off-by: Stephane Grosjean <s.grosjean@peak-system.com>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/can/usb/peak_usb/pcan_usb.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c1ac6642baae4a400d1f87115024d1bb1ef53598
+Author: Linus Lüssing <linus.luessing@web.de>
+Date:   Tue Aug 6 20:21:15 2013 +0200
+
+    Upstream commit: 9d2c9488cedb666bc8206fbdcdc1575e0fbc5929
+    
+    batman-adv: fix potential kernel paging errors for unicast transmissions
+    
+    There are several functions which might reallocate skb data. Currently
+    some places keep reusing their old ethhdr pointer regardless of whether
+    they became invalid after such a reallocation or not. This potentially
+    leads to kernel paging errors.
+    
+    This patch fixes these by refetching the ethdr pointer after the
+    potential reallocations.
+    
+    Signed-off-by: Linus Lüssing <linus.luessing@web.de>
+    Signed-off-by: Marek Lindner <lindner_marek@yahoo.de>
+    Signed-off-by: Antonio Quartulli <ordex@autistici.org>
+
+ net/batman-adv/bridge_loop_avoidance.c |    2 ++
+ net/batman-adv/gateway_client.c        |   13 ++++++++++++-
+ net/batman-adv/gateway_client.h        |    3 +--
+ net/batman-adv/soft-interface.c        |    9 ++++++++-
+ net/batman-adv/unicast.c               |   13 ++++++++++---
+ 5 files changed, 33 insertions(+), 7 deletions(-)
+
+commit d11ebb55757d366b2e445dea5a96e3ef1b4d22eb
+Author: Yuchung Cheng <ycheng@google.com>
+Date:   Fri Aug 9 17:21:27 2013 -0700
+
+    Upstream commit: 356d7d88e088687b6578ca64601b0a2c9d145296
+    
+    netfilter: nf_conntrack: fix tcp_in_window for Fast Open
+    
+    Currently the conntrack checks if the ending sequence of a packet
+    falls within the observed receive window. However it does so even
+    if it has not observe any packet from the remote yet and uses an
+    uninitialized receive window (td_maxwin).
+    
+    If a connection uses Fast Open to send a SYN-data packet which is
+    dropped afterward in the network. The subsequent SYNs retransmits
+    will all fail this check and be discarded, leading to a connection
+    timeout. This is because the SYN retransmit does not contain data
+    payload so
+    
+    end == initial sequence number (isn) + 1
+    sender->td_end == isn + syn_data_len
+    receiver->td_maxwin == 0
+    
+    The fix is to only apply this check after td_maxwin is initialized.
+    
+    Reported-by: Michael Chan <mcfchan@stanford.edu>
+    Signed-off-by: Yuchung Cheng <ycheng@google.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Acked-by: Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/nf_conntrack_proto_tcp.c |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+commit 94462727d1f151aa2e3f7fbf0dedb19d8545d2ec
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Thu Aug 1 12:36:57 2013 +0300
+
+    Upstream commit: e4d091d7bf787cd303383725b8071d0bae76f981
+    
+    netfilter: nfnetlink_{log,queue}: fix information leaks in netlink message
+    
+    These structs have a "_pad" member.  Also the "phw" structs have an 8
+    byte "hw_addr[]" array but sometimes only the first 6 bytes are
+    initialized.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/nfnetlink_log.c        |    6 +++++-
+ net/netfilter/nfnetlink_queue_core.c |    5 ++++-
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+commit c5b469d0a0b480a8b2dcac9b4e6532c0ac17f81f
+Author: Pablo Neira Ayuso <pablo@netfilter.org>
+Date:   Thu Jul 25 10:46:46 2013 +0200
+
+    Upstream commit: a206bcb3b02025b23137f3228109d72e0f835c05
+    
+    netfilter: xt_TCPOPTSTRIP: fix possible off by one access
+    
+    Fix a possible off by one access since optlen()
+    touches opt[offset+1] unsafely when i == tcp_hdrlen(skb) - 1.
+    
+    This patch replaces tcp_hdrlen() by the local variable tcp_hdrlen
+    that stores the TCP header length, to save some cycles.
+    
+    Reported-by: Julian Anastasov <ja@ssi.bg>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/xt_TCPOPTSTRIP.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
+
+commit 4634def261cf5f635bc60afe8a6ad436b3ec151e
+Author: Pablo Neira Ayuso <pablo@netfilter.org>
+Date:   Thu Jul 25 10:37:49 2013 +0200
+
+    Upstream commit: 71ffe9c77dd7a2b62207953091efa8dafec958dd
+    
+    netfilter: xt_TCPMSS: fix handling of malformed TCP header and options
+    
+    Make sure the packet has enough room for the TCP header and
+    that it is not malformed.
+    
+    While at it, store tcph->doff*4 in a variable, as it is used
+    several times.
+    
+    This patch also fixes a possible off by one in case of malformed
+    TCP options.
+    
+    Reported-by: Julian Anastasov <ja@ssi.bg>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/xt_TCPMSS.c |   28 ++++++++++++++++------------
+ 1 files changed, 16 insertions(+), 12 deletions(-)
+
+commit dc552b7b377b8b0cba23513ee09a2341d6714ae8
+Author: Dave Jones <davej@redhat.com>
+Date:   Fri Aug 9 11:16:34 2013 -0700
+
+    Upstream commit: d06f5187469eee1b2932c02fd093d113cfc60d5e
+    
+    8139cp: Fix skb leak in rx_status_loop failure path.
+    
+    Introduced in cf3c4c03060b688cbc389ebc5065ebcce5653e96
+    ("8139cp: Add dma_mapping_error checking")
+    
+    Signed-off-by: Dave Jones <davej@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/realtek/8139cp.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 227b279491a0bbcc70ca3654f34903282c378600
+Author: Timo Teräs <timo.teras@iki.fi>
+Date:   Tue Aug 6 13:45:43 2013 +0300
+
+    Upstream commit: 77a482bdb2e68d13fae87541b341905ba70d572b
+    
+    ip_gre: fix ipgre_header to return correct offset
+    
+    Fix ipgre_header() (header_ops->create) to return the correct
+    amount of bytes pushed. Most callers of dev_hard_header() seem
+    to care only if it was success, but af_packet.c uses it as
+    offset to the skb to copy from userspace only once. In practice
+    this fixes packet socket sendto()/sendmsg() to gre tunnels.
+    
+    Regression introduced in c54419321455631079c7d6e60bc732dd0c5914c5
+    ("GRE: Refactor GRE tunneling code.")
+    
+    Cc: Pravin B Shelar <pshelar@nicira.com>
+    Signed-off-by: Timo Teräs <timo.teras@iki.fi>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ip_gre.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4b37d11c0ebb440d9335861ce8f1e690a34c10fb
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Mon Aug 5 11:18:49 2013 -0700
+
+    Upstream commit: aab515d7c32a34300312416c50314e755ea6f765
+    
+    fib_trie: remove potential out of bound access
+    
+    AddressSanitizer [1] dynamic checker pointed a potential
+    out of bound access in leaf_walk_rcu()
+    
+    We could allocate one more slot in tnode_new() to leave the prefetch()
+    in-place but it looks not worth the pain.
+    
+    Bug added in commit 82cfbb008572b ("[IPV4] fib_trie: iterator recode")
+    
+    [1] :
+    https://code.google.com/p/address-sanitizer/wiki/AddressSanitizerForKernel
+    
+    Reported-by: Andrey Konovalov <andreyknvl@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/fib_trie.c |    5 +----
+ 1 files changed, 1 insertions(+), 4 deletions(-)
+
+commit 3928184d65fdaf3eef446f0e6c5f305352c1fd02
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Mon Aug 5 12:49:35 2013 +0200
+
+    Upstream commit: 7921895a5e852fc99de347bc0600659997de9298
+    
+    net: esp{4,6}: fix potential MTU calculation overflows
+    
+    Commit 91657eafb ("xfrm: take net hdr len into account for esp payload
+    size calculation") introduced a possible interger overflow in
+    esp{4,6}_get_mtu() handlers in case of x->props.mode equals
+    XFRM_MODE_TUNNEL. Thus, the following expression will overflow
+    
+      unsigned int net_adj;
+      ...
+      <case ipv{4,6} XFRM_MODE_TUNNEL>
+             net_adj = 0;
+      ...
+      return ((mtu - x->props.header_len - crypto_aead_authsize(esp->aead) -
+               net_adj) & ~(align - 1)) + (net_adj - 2);
+    
+    where (net_adj - 2) would be evaluated as <foo> + (0 - 2) in an unsigned
+    context. Fix it by simply removing brackets as those operations here
+    do not need to have special precedence.
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Cc: Benjamin Poirier <bpoirier@suse.de>
+    Cc: Steffen Klassert <steffen.klassert@secunet.com>
+    Acked-by: Benjamin Poirier <bpoirier@suse.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/esp4.c |    2 +-
+ net/ipv6/esp6.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit f02bce292d1c2fe610be509c96593e70b3de387b
+Author: Julia Lawall <Julia.Lawall@lip6.fr>
+Date:   Mon Aug 5 16:47:38 2013 +0200
+
+    Upstream commit: d9af2d67e490b48f0d36f448d34e7bab9425f142
+    
+    net/vmw_vsock/af_vsock.c: drop unneeded semicolon
+    
+    Drop the semicolon at the end of the list_for_each_entry loop header.
+    
+    Signed-off-by: Julia Lawall <Julia.Lawall@lip6.fr>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/vmw_vsock/af_vsock.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4b62f0cbc3f949056e8bbe0af036acfc20e8e049
+Author: Tiger Yang <tiger.yang@oracle.com>
+Date:   Tue Aug 13 16:00:58 2013 -0700
+
+    Upstream commit: c7dd3392ad469e6ba125170ad29f881bed85b678
+    
+    ocfs2: fix NULL pointer dereference in ocfs2_duplicate_clusters_by_page
+    
+    Since ocfs2_cow_file_pos will invoke ocfs2_refcount_icow with a NULL as
+    the struct file pointer, it finally result in a null pointer dereference
+    in ocfs2_duplicate_clusters_by_page.
+    
+    This patch replace file pointer with inode pointer in
+    cow_duplicate_clusters to fix this issue.
+    
+    [jeff.liu@oracle.com: rebased patch against linux-next tree]
+    Signed-off-by: Tiger Yang <tiger.yang@oracle.com>
+    Signed-off-by: Jie Liu <jeff.liu@oracle.com>
+    Cc: Joel Becker <jlbec@evilplan.org>
+    Cc: Mark Fasheh <mfasheh@suse.com>
+    Acked-by: Tao Ma <tm@tao.ma>
+    Tested-by: David Weber <wb@munzinger.de>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/ocfs2/aops.c         |    2 +-
+ fs/ocfs2/file.c         |    6 ++--
+ fs/ocfs2/move_extents.c |    2 +-
+ fs/ocfs2/refcounttree.c |   53 +++++++---------------------------------------
+ fs/ocfs2/refcounttree.h |    6 ++--
+ 5 files changed, 16 insertions(+), 53 deletions(-)
+
+commit 433bf493c7472435b328b2bc85b6e54f6dd3d0d3
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Thu Aug 15 15:52:57 2013 +0300
+
+    Upstream commit: 15718ea0d844e4816dbd95d57a8a0e3e264ba90e
+    
+    tun: signedness bug in tun_get_user()
+    
+    The recent fix d9bf5f1309 "tun: compare with 0 instead of total_len" is
+    not totally correct.  Because "len" and "sizeof()" are size_t type, that
+    means they are never less than zero.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Acked-by: Michael S. Tsirkin <mst@redhat.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/tun.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 26ad267ddda451919357965a0cf271ca24d1bcf2
+Author: Weiping Pan <wpan@redhat.com>
+Date:   Tue Aug 13 21:46:56 2013 +0800
+
+    Upstream commit: d9bf5f130946695063469749bfd190087b7fad39
+    
+    tun: compare with 0 instead of total_len
+    
+    Since we set "len = total_len" in the beginning of tun_get_user(),
+    so we should compare the new len with 0, instead of total_len,
+    or the if statement always returns false.
+    
+    Signed-off-by: Weiping Pan <wpan@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/tun.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 70023d3ea40fae8b6b6a142a7a5c3db0bcc283f9
+Author: Guenter Roeck <linux@roeck-us.net>
+Date:   Fri Aug 16 20:50:55 2013 -0700
+
+    Upstream commit: 215b28a5308f3d332df2ee09ef11fda45d7e4a92
+    
+    s390: Fix broken build
+    
+    Fix this build error:
+    
+      In file included from fs/exec.c:61:0:
+      arch/s390/include/asm/tlb.h:35:23: error: expected identifier or '(' before 'unsigned'
+      arch/s390/include/asm/tlb.h:36:1: warning: no semicolon at end of struct or union [enabled by default]
+      arch/s390/include/asm/tlb.h: In function 'tlb_gather_mmu':
+      arch/s390/include/asm/tlb.h:57:5: error: 'struct mmu_gather' has no member named 'end'
+    
+    Broken due to commit 2b047252d0 ("Fix TLB gather virtual address range
+    invalidation corner cases").
+    
+    Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+    [ Oh well. We had build testing for ppc amd um, but no s390  - Linus ]
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/s390/include/asm/tlb.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4e57312c2de2a25ddb181d129dafbc0251062c33
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu Aug 15 11:42:25 2013 -0700
+
+    Upstream commit: 2b047252d087be7f2ba088b4933cd904f92e6fce
+    
+    Fix TLB gather virtual address range invalidation corner cases
+    
+    Ben Tebulin reported:
+    
+     "Since v3.7.2 on two independent machines a very specific Git
+      repository fails in 9/10 cases on git-fsck due to an SHA1/memory
+      failures.  This only occurs on a very specific repository and can be
+      reproduced stably on two independent laptops.  Git mailing list ran
+      out of ideas and for me this looks like some very exotic kernel issue"
+    
+    and bisected the failure to the backport of commit 53a59fc67f97 ("mm:
+    limit mmu_gather batching to fix soft lockups on !CONFIG_PREEMPT").
+    
+    That commit itself is not actually buggy, but what it does is to make it
+    much more likely to hit the partial TLB invalidation case, since it
+    introduces a new case in tlb_next_batch() that previously only ever
+    happened when running out of memory.
+    
+    The real bug is that the TLB gather virtual memory range setup is subtly
+    buggered.  It was introduced in commit 597e1c3580b7 ("mm/mmu_gather:
+    enable tlb flush range in generic mmu_gather"), and the range handling
+    was already fixed at least once in commit e6c495a96ce0 ("mm: fix the TLB
+    range flushed when __tlb_remove_page() runs out of slots"), but that fix
+    was not complete.
+    
+    The problem with the TLB gather virtual address range is that it isn't
+    set up by the initial tlb_gather_mmu() initialization (which didn't get
+    the TLB range information), but it is set up ad-hoc later by the
+    functions that actually flush the TLB.  And so any such case that forgot
+    to update the TLB range entries would potentially miss TLB invalidates.
+    
+    Rather than try to figure out exactly which particular ad-hoc range
+    setup was missing (I personally suspect it's the hugetlb case in
+    zap_huge_pmd(), which didn't have the same logic as zap_pte_range()
+    did), this patch just gets rid of the problem at the source: make the
+    TLB range information available to tlb_gather_mmu(), and initialize it
+    when initializing all the other tlb gather fields.
+    
+    This makes the patch larger, but conceptually much simpler.  And the end
+    result is much more understandable; even if you want to play games with
+    partial ranges when invalidating the TLB contents in chunks, now the
+    range information is always there, and anybody who doesn't want to
+    bother with it won't introduce subtle bugs.
+    
+    Ben verified that this fixes his problem.
+    
+    Reported-bisected-and-tested-by: Ben Tebulin <tebulin@googlemail.com>
+    Build-testing-by: Stephen Rothwell <sfr@canb.auug.org.au>
+    Build-testing-by: Richard Weinberger <richard.weinberger@gmail.com>
+    Reviewed-by: Michal Hocko <mhocko@suse.cz>
+    Acked-by: Peter Zijlstra <peterz@infradead.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/arm/include/asm/tlb.h   |    7 +++++--
+ arch/arm64/include/asm/tlb.h |    7 +++++--
+ arch/ia64/include/asm/tlb.h  |    9 ++++++---
+ arch/s390/include/asm/tlb.h  |    8 ++++++--
+ arch/sh/include/asm/tlb.h    |    6 ++++--
+ arch/um/include/asm/tlb.h    |    6 ++++--
+ fs/exec.c                    |    4 ++--
+ include/asm-generic/tlb.h    |    2 +-
+ mm/hugetlb.c                 |    2 +-
+ mm/memory.c                  |   36 +++++++++++++++++++++---------------
+ mm/mmap.c                    |    4 ++--
+ 11 files changed, 57 insertions(+), 34 deletions(-)
+
+commit 771ed01c6027772eca1a0df8de65043e7f0d94f8
+Merge: 5568c80 ffceabf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 09:11:41 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ffceabfcc65c60109ba5fca694d78d4dc7047809
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 09:10:44 2013 -0400
+
+    Update to pax-linux-3.10.7-test11.patch:
+    - simplified some arm code
+    - disabled preemption when calling show_regs, reported by Corey Minyard
+    - added PCID based support for UDEREF on amd64 (blog will have more details)
+      - requires Westmere/Sandy Bridge/Ivy Bridge/Haswell/etc
+      - nopcid turns it off
+      - by default a strong form of UDEREF is used under PCID
+      - pax_weakuderef switches to the older, less secure UDEREF
+      - fixed several bugs that would also have manifested under SMAP
+      - INVPCID is used when available (Haswell)
+    - added a few more return insn instrumentation in new amd64 crypto code
+
+ Documentation/kernel-parameters.txt          |    7 +
+ arch/arm/include/asm/uaccess.h               |    3 +
+ arch/x86/crypto/blowfish-avx2-asm_64.S       |    6 +
+ arch/x86/crypto/camellia-aesni-avx-asm_64.S  |   10 ++
+ arch/x86/crypto/camellia-aesni-avx2-asm_64.S |   10 ++
+ arch/x86/crypto/crc32c-pcl-intel-asm_64.S    |    2 +
+ arch/x86/crypto/ghash-clmulni-intel_asm.S    |    5 +
+ arch/x86/crypto/serpent-avx2-asm_64.S        |    9 ++
+ arch/x86/crypto/sha256-avx-asm.S             |    2 +
+ arch/x86/crypto/sha256-avx2-asm.S            |    2 +
+ arch/x86/crypto/sha256-ssse3-asm.S           |    2 +
+ arch/x86/crypto/sha512-avx-asm.S             |    2 +
+ arch/x86/crypto/sha512-avx2-asm.S            |    2 +
+ arch/x86/crypto/sha512-ssse3-asm.S           |    2 +
+ arch/x86/crypto/twofish-avx2-asm_64.S        |    8 ++
+ arch/x86/ia32/ia32_signal.c                  |    2 +-
+ arch/x86/ia32/ia32entry.S                    |   24 ++++-
+ arch/x86/include/asm/cpufeature.h            |    3 +-
+ arch/x86/include/asm/fpu-internal.h          |    2 +
+ arch/x86/include/asm/futex.h                 |    4 +
+ arch/x86/include/asm/mmu_context.h           |   80 +++++++++++---
+ arch/x86/include/asm/pgtable.h               |   10 +-
+ arch/x86/include/asm/processor.h             |   15 +++-
+ arch/x86/include/asm/segment.h               |    5 +-
+ arch/x86/include/asm/smap.h                  |   64 +++++++++++-
+ arch/x86/include/asm/tlbflush.h              |   63 +++++++++--
+ arch/x86/include/asm/uaccess.h               |   18 +++-
+ arch/x86/include/asm/xsave.h                 |    4 +
+ arch/x86/kernel/cpu/common.c                 |   38 +++++++
+ arch/x86/kernel/entry_32.S                   |    2 +-
+ arch/x86/kernel/entry_64.S                   |  152 +++++++++++++++++++++++---
+ arch/x86/kernel/head_32.S                    |    2 +-
+ arch/x86/kernel/head_64.S                    |    8 +-
+ arch/x86/kernel/process_64.c                 |    5 +
+ arch/x86/kernel/setup.c                      |    8 +-
+ arch/x86/kernel/signal.c                     |    4 +-
+ arch/x86/kernel/smpboot.c                    |   15 ++-
+ arch/x86/lib/copy_user_64.S                  |   50 +--------
+ arch/x86/lib/copy_user_nocache_64.S          |    2 +
+ arch/x86/lib/csum-wrappers_64.c              |   11 ++-
+ arch/x86/lib/memcpy_64.S                     |    4 +-
+ arch/x86/lib/memmove_64.S                    |    2 +-
+ arch/x86/lib/memset_64.S                     |    4 +-
+ arch/x86/lib/usercopy_64.c                   |    5 +-
+ arch/x86/mm/Makefile                         |    4 +
+ arch/x86/mm/fault.c                          |   29 ++++--
+ arch/x86/mm/init.c                           |    7 +-
+ arch/x86/mm/init_64.c                        |    9 ++-
+ arch/x86/mm/pageattr.c                       |    2 +-
+ arch/x86/mm/pgtable.c                        |    3 +
+ arch/x86/platform/efi/efi_32.c               |    2 +-
+ arch/x86/platform/efi/efi_64.c               |    2 +-
+ arch/x86/realmode/rm/trampoline_64.S         |    1 +
+ fs/exec.c                                    |    2 +
+ include/asm-generic/uaccess.h                |    8 ++
+ include/linux/compat.h                       |    1 +
+ include/linux/preempt.h                      |   19 +++
+ include/linux/signal.h                       |    1 +
+ include/linux/smp.h                          |    2 +
+ init/main.c                                  |   14 ++-
+ kernel/signal.c                              |   16 +++
+ security/Kconfig                             |    5 +
+ tools/lib/lk/Makefile                        |    2 +-
+ tools/perf/Makefile                          |    2 +-
+ 64 files changed, 673 insertions(+), 136 deletions(-)
+
+commit 5568c8059e78d6d002815409df4e90c83b3b08a8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 17 08:58:34 2013 -0400
+
+    Fix two harmless compiler warnings
+
+ arch/arm/kernel/process.c |    4 ++--
+ fs/exec.c                 |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit e4a41a3eef8c6bdebdbe273cc0fbe372bcb62806
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 16 22:55:24 2013 -0400
+
+    Upstream commit: c95eb3184ea1a3a2551df57190c81da695e2144b
+
+ arch/arm/kernel/perf_event.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 3637bc893b57a227b01852fe34685ab237285b10
+Author: Stephen Boyd <sboyd@codeaurora.org>
+Date:   Wed Aug 7 16:18:08 2013 -0700
+
+    Upstream commit: b88a2595b6d8aedbd275c07dfa784657b4f757eb
+    
+    perf/arm: Fix armpmu_map_hw_event()
+    
+    Fix constraint check in armpmu_map_hw_event().
+    
+    Reported-and-tested-by: Vince Weaver <vincent.weaver@maine.edu>
+    Cc: <stable@kernel.org>
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/arm/kernel/perf_event.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit 11802e1f961a088c39af58d1c1b14d861eedfb35
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 16 22:53:30 2013 -0400
+
+    More ARM backports
+
+ arch/arm/kernel/entry-armv.S |    3 ++-
+ arch/arm/kernel/fiq.c        |    8 ++------
+ 2 files changed, 4 insertions(+), 7 deletions(-)
+
+commit bf89938c71ddbd6efb2c2e43bf4f3f99fef623ea
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 16 22:46:01 2013 -0400
+
+    Fix HIDESYM compatibility with kprobes, as reported by feandil at:
+    http://forums.grsecurity.net/viewtopic.php?t=3701&p=13376#p13376
+
+ include/linux/kallsyms.h |    2 +-
+ kernel/kprobes.c         |    3 +++
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 3d1cf88bbdbe4c0e83dd7d731ecaf1741209d6b7
+Author: yonghua zheng <younghua.zheng@gmail.com>
+Date:   Tue Aug 13 16:01:03 2013 -0700
+
+    fs/proc/task_mmu.c: fix buffer overflow in add_page_map()
+    
+    Recently we met quite a lot of random kernel panic issues after enabling
+    CONFIG_PROC_PAGE_MONITOR.  After debuggind we found this has something
+    to do with following bug in pagemap:
+    
+    In struct pagemapread:
+    
+      struct pagemapread {
+          int pos, len;
+          pagemap_entry_t *buffer;
+          bool v2;
+      };
+    
+    pos is number of PM_ENTRY_BYTES in buffer, but len is the size of
+    buffer, it is a mistake to compare pos and len in add_page_map() for
+    checking buffer is full or not, and this can lead to buffer overflow and
+    random kernel panic issue.
+    
+    Correct len to be total number of PM_ENTRY_BYTES in buffer.
+    
+    [akpm@linux-foundation.org: document pagemapread.pos and .len units, fix PM_ENTRY_BYTES definition]
+    Signed-off-by: Yonghua Zheng <younghua.zheng@gmail.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	fs/proc/task_mmu.c
+
+ fs/proc/task_mmu.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 0a3dac834746de241c10d4978bf61b4f146ba89d
+Merge: dc19474 e12de30
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 16 17:39:01 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e12de30aa6b575fc3c9f5cd098dd03623598cb33
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 16 17:34:47 2013 -0400
+
+    Update to pax-linux-3.10.7-test9.patch:
+    - Emese fixed a size overflow false positive reported by Sven Vermeulen
+    - fixed some arm compile problems reported by spender
+    - added empty unchecked wrappers for local_t accessors on mips, by Corey Minyard <cminyard@mvista.com>
+      eventually we'll have full REFCOUNT support on mips
+
+ arch/arm/kernel/process.c     |    5 ++-
+ arch/arm/mm/Kconfig           |    2 +-
+ arch/arm/mm/fault.c           |    3 ++
+ arch/mips/include/asm/local.h |   57 +++++++++++++++++++++++++++++++++++++++++
+ mm/internal.h                 |    2 +-
+ 5 files changed, 65 insertions(+), 4 deletions(-)
+
+commit dc19474d0ea6ea3c939544ae5f906067b1784a10
+Merge: 51b78c0 82266f9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 15 21:47:37 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 82266f90a3f87ab5017329fb539aebf94c42253a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 15 21:14:47 2013 -0400
+
+    Update to pax-linux-3.10.7-test9.patch
+
+ arch/arm/kernel/process.c |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
+
+commit 51b78c06d1f41614f593cd36456b4af559e9d7fa
+Merge: e32d904 cb77ead
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 15 20:53:45 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit cb77ead0eccb5abb75f7e437a3725d0254558ccd
+Merge: 13675b8 519be45
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 15 20:50:47 2013 -0400
+
+    Update to pax-linux-3.10.7-test8.patch
+    
+    Merge branch 'linux-3.10.y' into pax-test
+
+commit e32d904b87292288e74e2637b900fd1115687b8e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 10 09:41:40 2013 -0400
+
+    propagate the threadstack offset through to the topdown/bottomup allocators
+    on sparc64 hugepages
+
+ arch/sparc/mm/hugetlbpage.c |   12 ++++++++----
+ 1 files changed, 8 insertions(+), 4 deletions(-)
+
+commit cefa30759f6c977fff5cc1634ecfbfe0ee44391c
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Thu Aug 8 18:55:32 2013 +0200
+
+    Upstream commit: 8742f229b635bf1c1c84a3dfe5e47c814c20b5c8
+    
+    another local DoS found in reaction to the one I reported,
+    we don't allow unpriv user ns use so this doesn't matter much to us
+    
+    userns: limit the maximum depth of user_namespace->parent chain
+    
+    Ensure that user_namespace->parent chain can't grow too much.
+    Currently we use the hardroded 32 as limit.
+    
+    Reported-by: Andy Lutomirski <luto@amacapital.net>
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/user_namespace.h |    1 +
+ kernel/user_namespace.c        |    4 ++++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+
 commit 223ac007ef18bf3a5095ba0a56675c1f16200149
 Merge: 1c92de4 13675b8
 Author: Brad Spengler <spender@grsecurity.net>
