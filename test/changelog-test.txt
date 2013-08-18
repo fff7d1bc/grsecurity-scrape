@@ -1,3 +1,41 @@
+commit 6eba999a3263c2ed3f7e87222a5c9c55315c7f00
+Merge: df347f6 64a293e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 18 18:13:04 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 64a293ebd17bf4a7ce6bd921ed879673e79fe128
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 18 18:12:37 2013 -0400
+
+    Update to pax-linux-3.10.7-test14.patch:
+    - fixed compile error introduced by the previous PCID change
+    - fixed timer_create kernel stack leak, reported by Roman Å½ilka (https://bugs.gentoo.org/show_bug.cgi?id=470214)
+
+ arch/x86/include/asm/tlbflush.h |    2 +-
+ kernel/posix-timers.c           |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit df347f6db6cc0aaa40406d8a8b7284b7c15bc685
+Merge: d8efbc5 e11b314
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 18 08:15:00 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e11b314734c5b7317f5468be75305ad812e78c2b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 18 08:14:26 2013 -0400
+
+    Update to pax-linux-3.10.7-test13.patch:
+    - always enable the use of PCID and INVPCID when available in the CPU
+      - kvm guest kernels can use these features even if the host kernel lacks UDEREF
+
+ arch/x86/include/asm/tlbflush.h |   69 ++++++++++++++++++++++----------------
+ arch/x86/kernel/cpu/common.c    |   48 +++++++++++++++++----------
+ 2 files changed, 70 insertions(+), 47 deletions(-)
+
 commit d8efbc54f5c8aba589d4d12eed9257a754a67de8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Aug 17 12:00:20 2013 -0400
