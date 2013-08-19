@@ -1,3 +1,33 @@
+commit 07f718e061bc4696b64a98ac1cf56e9ca1275dc3
+Merge: 6eba999 5de93c8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 18 22:03:19 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5de93c8e2a86865f7a2d62dbcf8702dbf12494db
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 18 22:02:47 2013 -0400
+
+    Update to pax-linux-3.10.7-test15.patch:
+    - fixed more PCID fallout, reported by spender, Negres and GBit (http://forums.grsecurity.net/viewtopic.php?f=3&t=3705)
+    - fixed some new REFCOUNT false positives, caught by inspection
+
+ arch/x86/kernel/cpu/common.c |    5 +++--
+ arch/x86/kernel/entry_64.S   |   11 +++++++----
+ fs/ceph/super.c              |    4 ++--
+ mm/backing-dev.c             |    4 ++--
+ 4 files changed, 14 insertions(+), 10 deletions(-)
+
+commit 94c119587c76723c1072237b98fff9886ccb7689
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 18 20:49:39 2013 -0400
+
+    fix pipacs' DEMORGAN typo
+
+ arch/x86/include/asm/tlbflush.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 6eba999a3263c2ed3f7e87222a5c9c55315c7f00
 Merge: df347f6 64a293e
 Author: Brad Spengler <spender@grsecurity.net>
