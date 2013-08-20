@@ -1,3 +1,52 @@
+commit f47a293a1440da2a3e2c239d43d636e37ca74f10
+Merge: f1e8ec7 f6ace8e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 18:20:05 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/arm/kernel/perf_event.c
+    	include/linux/sched.h
+
+commit f6ace8e1804aadc296bec38b4c4a2d711b9e7c72
+Merge: b4fa847 6f54059
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 18:18:02 2013 -0400
+
+    Update to pax-linux-3.10.8-test18.patch
+    
+    Merge branch 'linux-3.10.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/sys_x86_64.c
+    	arch/x86/mm/mmap.c
+    	include/linux/sched.h
+
+commit f1e8ec79b6019ca0aa6a6cdde5668c1bbd9f51ca
+Merge: 6f88011 b4fa847
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 18:05:12 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b4fa84790ec760430818ab9b74a8b5acc6b40e63
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 18:04:14 2013 -0400
+
+    Update to pax-linux-3.10.7-test18.patch:
+    - reverted constification of zcache, problem reported by Marcin MirosÅ‚aw (https://bugs.gentoo.org/show_bug.cgi?id=481752)
+    - fixed a UDEREF resume regression due to the constification of clone_pgd_mask
+    - fixed suspend/resume regression due to the recent constification of mmu_cr4_features, reported by Mathias Krause
+
+ arch/arm/kernel/process.c        |    2 +-
+ arch/x86/include/asm/processor.h |   25 ++-----------------------
+ arch/x86/kernel/cpu/common.c     |    4 ++++
+ arch/x86/kernel/setup.c          |   36 ++++++++++++++++++++++++++++++++++++
+ drivers/staging/zcache/tmem.c    |    4 ++--
+ drivers/staging/zcache/tmem.h    |    6 ++----
+ 6 files changed, 47 insertions(+), 30 deletions(-)
+
 commit 6f88011297cb3b1b79ff4d96f8a9b8e2ed5a025f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Aug 19 22:10:04 2013 -0400
