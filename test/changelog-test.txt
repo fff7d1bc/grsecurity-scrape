@@ -1,3 +1,13 @@
+commit 6f88011297cb3b1b79ff4d96f8a9b8e2ed5a025f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 19 22:10:04 2013 -0400
+
+    fix bad git merge (call to __cpu_disable_lazy_restore was duplicated)
+    as reported by pipacs
+
+ arch/x86/kernel/smpboot.c |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
 commit 07f718e061bc4696b64a98ac1cf56e9ca1275dc3
 Merge: 6eba999 5de93c8
 Author: Brad Spengler <spender@grsecurity.net>
