@@ -1,3 +1,38 @@
+commit 5a9ae577def10802fc8ad6957f05ce2a180dfa36
+Merge: 486ec00 f68df21
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 20:15:20 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f68df215c8bf7fada2710c14b3f3a0ea53fd9e43
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 20:14:50 2013 -0400
+
+    Update to pax-linux-3.10.9-test18.patch:
+    - fixed missing export of cpu_pgd, reported by Alexander Tsoy (https://bugs.gentoo.org/show_bug.cgi?id=481786)
+    - fixed UDEREF regression on !PCID processors, reported by Alexander Tsoy (https://bugs.gentoo.org/show_bug.cgi?id=481790)
+    - forward port to 3.10.9
+
+ arch/x86/kernel/entry_64.S       |   18 +++++++++---------
+ arch/x86/kernel/i386_ksyms_32.c  |    4 ++++
+ arch/x86/kernel/x8664_ksyms_64.c |    4 ++++
+ 3 files changed, 17 insertions(+), 9 deletions(-)
+
+commit 486ec00945b5dd8826f625e4af8995c5c8cb2a6f
+Merge: f47a293 d8fed0e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 20:12:47 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d8fed0eba89a7607afe296c0caf17bc72311d6e9
+Merge: f6ace8e 0a4b6d4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 20 20:12:33 2013 -0400
+
+    Merge branch 'linux-3.10.y' into pax-test
+
 commit f47a293a1440da2a3e2c239d43d636e37ca74f10
 Merge: f1e8ec7 f6ace8e
 Author: Brad Spengler <spender@grsecurity.net>
