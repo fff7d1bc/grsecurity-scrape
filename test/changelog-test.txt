@@ -1,3 +1,625 @@
+commit be2497c1b629a5ad604a8b0ec265ef5d801c7de8
+Merge: 081c22b e902dad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 28 20:52:44 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e902dad6b609a176f58c1b9393b3a98f14bd4b74
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 28 20:51:21 2013 -0400
+
+    Update to pax-linux-3.10.9-test21.patch:
+    - removed unnecessary type cast in do_PrefetchAbort, noticed by spender
+    - since pax_report_refcount_overflow disables preemption inside, no need to do it explicitly in do_ov
+    - fixed a REFCOUNT false positive in UHID
+    - inspired by Dan Carpenter's recent fix (http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=909bd5926d474e275599094acad986af79671ac9)
+      Emese Revfy wrote a gcc plugin to find other instances of the same error, here's the fallout
+      (come to the 10th H2HC if you want to learn about the magic behind this and other plugins):
+      - icmpv6_filter: no memory corruption, probably just some logical error in the caller
+      - dccp_new/dccp_packet/dccp_error: probably remote kernel stack overflow (12 byte network data overwriting a local ptr variable)
+      - gigaset_brkchars: causes DMA on the kernel stack, some archs don't like it (more of this is to come)
+      - isdn_ioctl/IIOCDBGVAR: kernel heap address leak (by design), restricted to CAP_SYS_RAWIO now
+      - __dwc3_gadget_ep_enable: probably forgotten memset, seems harmless
+      - lowpan_header_create: leaks 3 bytes of a kernel heap address over the network
+
+ arch/arm/mm/fault.c                        |    2 +-
+ arch/mips/kernel/traps.c                   |    2 --
+ drivers/hid/uhid.c                         |    6 +++---
+ drivers/isdn/gigaset/usb-gigaset.c         |    2 +-
+ drivers/isdn/i4l/isdn_common.c             |    2 ++
+ drivers/net/wireless/hostap/hostap_ioctl.c |    4 ++--
+ drivers/usb/dwc3/gadget.c                  |    2 --
+ net/ieee802154/6lowpan.c                   |    2 +-
+ net/ipv6/raw.c                             |    2 +-
+ net/netfilter/nf_conntrack_proto_dccp.c    |    6 +++---
+ 10 files changed, 14 insertions(+), 16 deletions(-)
+
+commit 081c22b436d4d4ac8c9ef7c3f3b9587cfb02d804
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 28 20:42:39 2013 -0400
+
+    add export of gr_handle_new_usb()
+
+ grsecurity/grsec_usb.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 2e708ca9984ef74536d1d9b1d4e6e73d27561ed6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 28 19:24:47 2013 -0400
+
+    Add new GRKERNSEC_DENYUSB feature that I've been sitting on for a bit
+    Kees' recent findings are motivation enough to publish it
+
+ drivers/usb/core/hub.c     |    5 +++++
+ grsecurity/Kconfig         |   20 ++++++++++++++++++++
+ grsecurity/Makefile        |    3 ++-
+ grsecurity/grsec_init.c    |    1 +
+ grsecurity/grsec_sysctl.c  |   11 +++++++++++
+ grsecurity/grsec_usb.c     |   13 +++++++++++++
+ include/linux/grinternal.h |    1 +
+ include/linux/grsecurity.h |    2 ++
+ 8 files changed, 55 insertions(+), 1 deletions(-)
+
+commit 8044382257ec75a03f3d784ce048ef14e94b90ca
+Author: Kees Cook <keescook@chromium.org>
+Date:   Wed Aug 14 09:35:07 2013 -0700
+
+    HID: zeroplus: validate output report details
+    
+    The zeroplus HID driver was not checking the size of allocated values
+    in fields it used. A HID device could send a malicious output report
+    that would cause the driver to write beyond the output report allocation
+    during initialization, causing a heap overflow:
+    
+    [ 1442.728680] usb 1-1: New USB device found, idVendor=0c12, idProduct=0005
+    ...
+    [ 1466.243173] BUG kmalloc-192 (Tainted: G        W   ): Redzone overwritten
+    
+    CVE-2013-2889
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-zpff.c |   14 ++------------
+ 1 files changed, 2 insertions(+), 12 deletions(-)
+
+commit 1ead832874dde8c45c3d4c8c704f2cd7ad6a328f
+Author: Kees Cook <keescook@chromium.org>
+Date:   Wed Aug 14 14:36:15 2013 -0700
+
+    HID: provide a helper for validating hid reports
+    
+    Many drivers need to validate the characteristics of their HID report
+    during initialization to avoid misusing the reports. This adds a common
+    helper to perform validation of the report, its field count, and the
+    value count within the fields.
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-core.c |   50 ++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/hid.h    |    4 +++
+ 2 files changed, 54 insertions(+), 0 deletions(-)
+
+commit 270ba9096ddecdc3cf6c4d76e6892184820116be
+Author: Kees Cook <keescook@chromium.org>
+Date:   Wed Aug 14 09:14:34 2013 -0700
+
+    HID: steelseries: validate output report details
+    
+    A HID device could send a malicious output report that would cause the
+    steelseries HID driver to write beyond the output report allocation
+    during initialization, causing a heap overflow:
+    
+    [  167.981534] usb 1-1: New USB device found, idVendor=1038, idProduct=1410
+    ...
+    [  182.050547] BUG kmalloc-256 (Tainted: G        W   ): Redzone overwritten
+    
+    CVE-2013-2891
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-steelseries.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 366e6cf394366e4bb2598e5d3763c6ca53fb7248
+Author: Kees Cook <keescook@chromium.org>
+Date:   Wed Aug 14 08:49:21 2013 -0700
+
+    HID: pantherlord: validate output report details
+    
+    A HID device could send a malicious output report that would cause the
+    pantherlord HID driver to write beyond the output report allocation
+    during initialization, causing a heap overflow:
+    
+    [  310.939483] usb 1-1: New USB device found, idVendor=0e8f, idProduct=0003
+    ...
+    [  315.980774] BUG kmalloc-192 (Tainted: G        W   ): Redzone overwritten
+    
+    CVE-2013-2892
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-pl.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 60115e8108e508060815bce5ef9504233c81898c
+Author: Kees Cook <keescook@chromium.org>
+Date:   Tue Aug 13 16:49:01 2013 -0700
+
+    HID: LG: validate HID output report details
+    
+    A HID device could send a malicious output report that would cause the
+    lg, lg3, and lg4 HID drivers to write beyond the output report allocation
+    during an event, causing a heap overflow:
+    
+    [  325.245240] usb 1-1: New USB device found, idVendor=046d, idProduct=c287
+    ...
+    [  414.518960] BUG kmalloc-4096 (Not tainted): Redzone overwritten
+    
+    Additionally, while lg2 did correctly validate the report details, it was
+    cleaned up and shortened.
+    
+    CVE-2013-2893
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-lg2ff.c |   19 +++----------------
+ drivers/hid/hid-lg3ff.c |   29 ++++++-----------------------
+ drivers/hid/hid-lg4ff.c |   20 +-------------------
+ drivers/hid/hid-lgff.c  |   17 ++---------------
+ 4 files changed, 12 insertions(+), 73 deletions(-)
+
+commit 1814f6ffbd0d5feccce1f03e8cc17882528e8a9f
+Author: Kees Cook <keescook@chromium.org>
+Date:   Thu Aug 15 23:21:23 2013 -0700
+
+    HID: lenovo-tpkbd: validate output report details
+    
+    A HID device could send a malicious output report that would cause the
+    lenovo-tpkbd HID driver to write just beyond the output report allocation
+    during initialization, causing a heap overflow:
+    
+    [   76.109807] usb 1-1: New USB device found, idVendor=17ef, idProduct=6009
+    ...
+    [   80.462540] BUG kmalloc-192 (Tainted: G        W   ): Redzone overwritten
+    
+    CVE-2013-2894
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-lenovo-tpkbd.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 38627769bb2b9a550e251b2caf1babda7566fb4a
+Author: Kees Cook <keescook@chromium.org>
+Date:   Thu Aug 15 23:45:03 2013 -0700
+
+    HID: logitech-dj: validate output report details
+    
+    A HID device could send a malicious output report that would cause the
+    logitech-dj HID driver to leak kernel memory contents to the device, or
+    trigger a NULL dereference during initialization:
+    
+    [  304.424553] usb 1-1: New USB device found, idVendor=046d, idProduct=c52b
+    ...
+    [  304.780467] BUG: unable to handle kernel NULL pointer dereference at 0000000000000028
+    [  304.781409] IP: [<ffffffff815d50aa>] logi_dj_recv_send_report.isra.11+0x1a/0x90
+    
+    CVE-2013-2895
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-logitech-dj.c |   12 ++++++++++--
+ 1 files changed, 10 insertions(+), 2 deletions(-)
+
+commit db334388c9d3f95aeb6aacdcec72169b6edd6f07
+Author: Kees Cook <keescook@chromium.org>
+Date:   Fri Aug 16 00:18:15 2013 -0700
+
+    HID: ntrig: validate feature report details
+    
+    A HID device could send a malicious feature report that would cause the
+    ntrig HID driver to trigger a NULL dereference during initialization:
+    
+    [57383.031190] usb 3-1: New USB device found, idVendor=1b96, idProduct=0001
+    ...
+    [57383.315193] BUG: unable to handle kernel NULL pointer dereference at 0000000000000030
+    [57383.315308] IP: [<ffffffffa08102de>] ntrig_probe+0x25e/0x420 [hid_ntrig]
+    
+    CVE-2013-2896
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-ntrig.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 86adcfe96ceefd7d64593a493abe07c155bb8f88
+Author: Kees Cook <keescook@chromium.org>
+Date:   Fri Aug 16 00:11:32 2013 -0700
+
+    HID: multitouch: validate feature report details
+    
+    When working on report indexes, always validate that they are in bounds.
+    Without this, a HID device could report a malicious feature report that
+    could trick the driver into a heap overflow:
+    
+    [  634.885003] usb 1-1: New USB device found, idVendor=0596, idProduct=0500
+    ...
+    [  676.469629] BUG kmalloc-192 (Tainted: G        W   ): Redzone overwritten
+    
+    CVE-2013-2897
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-multitouch.c |   25 ++++++++++++++++++++-----
+ 1 files changed, 20 insertions(+), 5 deletions(-)
+
+commit 813f51e0881e4ea6d221da828b1cced02ad9694d
+Author: Kees Cook <keescook@chromium.org>
+Date:   Fri Aug 16 08:12:45 2013 -0700
+
+    HID: sensor-hub: validate feature report details
+    
+    A HID device could send a malicious feature report that would cause the
+    sensor-hub HID driver to read past the end of heap allocation, leaking
+    kernel memory contents to the caller.
+    
+    CVE-2013-2898
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-sensor-hub.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 6ed7d602e322c67adcfa3ebe79ca2c4a3376330c
+Author: Kees Cook <keescook@chromium.org>
+Date:   Fri Aug 16 08:05:10 2013 -0700
+
+    HID: picolcd_core: validate output report details
+    
+    A HID device could send a malicious output report that would cause the
+    picolcd HID driver to trigger a NULL dereference during attr file writing.
+    
+    CVE-2013-2899
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-picolcd_core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 95e3cfb5a995dabe45b98cafb77e59d074de151f
+Author: Kees Cook <keescook@chromium.org>
+Date:   Fri Aug 16 08:09:54 2013 -0700
+
+    HID: check for NULL field when setting values
+    
+    Defensively check that the field to be worked on is not NULL.
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+
+ drivers/hid/hid-core.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit 96a55ce1b2f3af376c400a02059174e79ce4399c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 28 18:09:18 2013 -0400
+
+    http://marc.info/?l=linux-input&m=137772180514608&q=raw
+    
+    From: Kees Cook <keescook@chromium.org>
+    
+    The "Report ID" field of a HID report is used to build indexes of
+    reports. The kernel's index of these is limited to 256 entries, so any
+    malicious device that sets a Report ID greater than 255 will trigger
+    memory corruption on the host:
+    
+    [ 1347.156239] BUG: unable to handle kernel paging request at ffff88094958a878
+    [ 1347.156261] IP: [<ffffffff813e4da0>] hid_register_report+0x2a/0x8b
+    
+    CVE-2013-2888
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Cc: stable@kernel.org
+    ---
+     drivers/hid/hid-core.c |   10 +++++++---
+     include/linux/hid.h    |    4 +++-
+     2 files changed, 10 insertions(+), 4 deletions(-)
+
+ drivers/hid/hid-core.c |   10 +++++++---
+ include/linux/hid.h    |    4 +++-
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+commit eb1106eef5f17bfda833ca3cf89e315919173257
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Fri Aug 9 12:52:31 2013 +0300
+
+    Upstream commit: 909bd5926d474e275599094acad986af79671ac9
+    
+    Hostap: copying wrong data prism2_ioctl_giwaplist()
+    
+    We want the data stored in "addr" and "qual", but the extra ampersands
+    mean we are copying stack data instead.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: John W. Linville <linville@tuxdriver.com>
+
+ drivers/net/wireless/hostap/hostap_ioctl.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit b12fdddbc01b0d855dd56fa6fea6b4100aae7af4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 28 17:01:21 2013 -0400
+
+    fix typo in ipv6 backport
+
+ net/ipv6/addrconf.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b42367d45ce67de82c38c5c7cb6f4cf521cca2f4
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Thu Aug 22 11:39:15 2013 -0700
+
+    Upstream commit: d661684cf6820331feae71146c35da83d794467e
+    
+    net: Check the correct namespace when spoofing pid over SCM_RIGHTS
+    
+    This is a security bug.
+    
+    The follow-up will fix nsproxy to discourage this type of issue from
+    happening again.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Reviewed-by: "Eric W. Biederman" <ebiederm@xmission.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/scm.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 10b2e7e1f75d1da2e0bbe0bff04233ea2ec1bed9
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Fri Aug 16 13:02:27 2013 +0200
+
+    Upstream commit: 4b08a8f1bd8cb4541c93ec170027b4d0782dab52
+    
+    ipv6: remove max_addresses check from ipv6_create_tempaddr
+    
+    Because of the max_addresses check attackers were able to disable privacy
+    extensions on an interface by creating enough autoconfigured addresses:
+    
+    <http://seclists.org/oss-sec/2012/q4/292>
+    
+    But the check is not actually needed: max_addresses protects the
+    kernel to install too many ipv6 addresses on an interface and guards
+    addrconf_prefix_rcv to install further addresses as soon as this limit
+    is reached. We only generate temporary addresses in direct response of
+    a new address showing up. As soon as we filled up the maximum number of
+    addresses of an interface, we stop installing more addresses and thus
+    also stop generating more temp addresses.
+    
+    Even if the attacker tries to generate a lot of temporary addresses
+    by announcing a prefix and removing it again (lifetime == 0) we won't
+    install more temp addresses, because the temporary addresses do count
+    to the maximum number of addresses, thus we would stop installing new
+    autoconfigured addresses when the limit is reached.
+    
+    This patch fixes CVE-2013-0343 (but other layer-2 attacks are still
+    possible).
+    
+    Thanks to Ding Tianhong to bring this topic up again.
+    
+    Cc: Ding Tianhong <dingtianhong@huawei.com>
+    Cc: George Kargiotakis <kargig@void.gr>
+    Cc: P J P <ppandit@redhat.com>
+    Cc: YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Acked-by: Ding Tianhong <dingtianhong@huawei.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/ipv6/addrconf.c
+
+ net/ipv6/addrconf.c |   10 ++++------
+ 1 files changed, 4 insertions(+), 6 deletions(-)
+
+commit 8333e0981469a226a47d0142ff31090a48db95a4
+Author: David Vrabel <david.vrabel@citrix.com>
+Date:   Thu Aug 15 13:21:06 2013 +0100
+
+    Upstream commit: 84ca7a8e45dafb49cd5ca90a343ba033e2885c17
+    
+    xen/events: initialize local per-cpu mask for all possible events
+    
+    The sizeof() argument in init_evtchn_cpu_bindings() is incorrect
+    resulting in only the first 64 (or 32 in 32-bit guests) ports having
+    their bindings being initialized to VCPU 0.
+    
+    In most cases this does not cause a problem as request_irq() will set
+    the irq affinity which will set the correct local per-cpu mask.
+    However, if the request_irq() is called on a VCPU other than 0, there
+    is a window between the unmasking of the event and the affinity being
+    set were an event may be lost because it is not locally unmasked on
+    any VCPU. If request_irq() is called on VCPU 0 then local irqs are
+    disabled during the window and the race does not occur.
+    
+    Fix this by initializing all NR_EVENT_CHANNEL bits in the local
+    per-cpu masks.
+    
+    Signed-off-by: David Vrabel <david.vrabel@citrix.com>
+    Signed-off-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+    CC: stable@vger.kernel.org
+
+ drivers/xen/events.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2a9a83768433937a2b7a97001ba1627156c0efed
+Author: Roland Dreier <roland@purestorage.com>
+Date:   Mon Aug 5 17:55:01 2013 -0700
+
+    Upstream commit: 35dc248383bbab0a7203fca4d722875bc81ef091
+    
+    [SCSI] sg: Fix user memory corruption when SG_IO is interrupted by a signal
+    
+    There is a nasty bug in the SCSI SG_IO ioctl that in some circumstances
+    leads to one process writing data into the address space of some other
+    random unrelated process if the ioctl is interrupted by a signal.
+    What happens is the following:
+    
+     - A process issues an SG_IO ioctl with direction DXFER_FROM_DEV (ie the
+       underlying SCSI command will transfer data from the SCSI device to
+       the buffer provided in the ioctl)
+    
+     - Before the command finishes, a signal is sent to the process waiting
+       in the ioctl.  This will end up waking up the sg_ioctl() code:
+    
+    		result = wait_event_interruptible(sfp->read_wait,
+    			(srp_done(sfp, srp) || sdp->detached));
+    
+       but neither srp_done() nor sdp->detached is true, so we end up just
+       setting srp->orphan and returning to userspace:
+    
+    		srp->orphan = 1;
+    		write_unlock_irq(&sfp->rq_list_lock);
+    		return result;	/* -ERESTARTSYS because signal hit process */
+    
+       At this point the original process is done with the ioctl and
+       blithely goes ahead handling the signal, reissuing the ioctl, etc.
+    
+     - Eventually, the SCSI command issued by the first ioctl finishes and
+       ends up in sg_rq_end_io().  At the end of that function, we run through:
+    
+    	write_lock_irqsave(&sfp->rq_list_lock, iflags);
+    	if (unlikely(srp->orphan)) {
+    		if (sfp->keep_orphan)
+    			srp->sg_io_owned = 0;
+    		else
+    			done = 0;
+    	}
+    	srp->done = done;
+    	write_unlock_irqrestore(&sfp->rq_list_lock, iflags);
+    
+    	if (likely(done)) {
+    		/* Now wake up any sg_read() that is waiting for this
+    		 * packet.
+    		 */
+    		wake_up_interruptible(&sfp->read_wait);
+    		kill_fasync(&sfp->async_qp, SIGPOLL, POLL_IN);
+    		kref_put(&sfp->f_ref, sg_remove_sfp);
+    	} else {
+    		INIT_WORK(&srp->ew.work, sg_rq_end_io_usercontext);
+    		schedule_work(&srp->ew.work);
+    	}
+    
+       Since srp->orphan *is* set, we set done to 0 (assuming the
+       userspace app has not set keep_orphan via an SG_SET_KEEP_ORPHAN
+       ioctl), and therefore we end up scheduling sg_rq_end_io_usercontext()
+       to run in a workqueue.
+    
+     - In workqueue context we go through sg_rq_end_io_usercontext() ->
+       sg_finish_rem_req() -> blk_rq_unmap_user() -> ... ->
+       bio_uncopy_user() -> __bio_copy_iov() -> copy_to_user().
+    
+       The key point here is that we are doing copy_to_user() on a
+       workqueue -- that is, we're on a kernel thread with current->mm
+       equal to whatever random previous user process was scheduled before
+       this kernel thread.  So we end up copying whatever data the SCSI
+       command returned to the virtual address of the buffer passed into
+       the original ioctl, but it's quite likely we do this copying into a
+       different address space!
+    
+    As suggested by James Bottomley <James.Bottomley@hansenpartnership.com>,
+    add a check for current->mm (which is NULL if we're on a kernel thread
+    without a real userspace address space) in bio_uncopy_user(), and skip
+    the copy if we're on a kernel thread.
+    
+    There's no reason that I can think of for any caller of bio_uncopy_user()
+    to want to do copying on a kernel thread with a random active userspace
+    address space.
+    
+    Huge thanks to Costa Sapuntzakis <costa@purestorage.com> for the
+    original pointer to this bug in the sg code.
+    
+    Signed-off-by: Roland Dreier <roland@purestorage.com>
+    Tested-by: David Milburn <dmilburn@redhat.com>
+    Cc: Jens Axboe <axboe@kernel.dk>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: James Bottomley <JBottomley@Parallels.com>
+
+ fs/bio.c |   20 +++++++++++++++-----
+ 1 files changed, 15 insertions(+), 5 deletions(-)
+
+commit e6fe57dee152671afd618d6bc8cbf23155be6c34
+Merge: cdc8f7d f2095a4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 27 18:13:35 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/arm/mm/fault.c
+    	security/Kconfig
+
+commit f2095a4787f7d332e5919f0bd00f8de6021ad612
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 27 18:08:23 2013 -0400
+
+    Update to pax-linux-3.10.9-test20.patch:
+    - removed unnecessary mark_sym_for_renaming calls from the gcc plugins, reported by Emese Revfy
+    - made some KERNEXEC/UDEREF induced fault handling on arm more robust (IFAR isn't always set on v7), by Corey Minyard <cminyard@mvista.com>
+    - converted some mips atomic accessor macros to functions in preparation of REFCOUNT support, by Corey Minyard <cminyard@mvista.com>
+    - __copy_from_user_inatomic on amd64 will now return unsigned long like other userland accessors do
+    - added REFCOUNT support for mips, by Corey Minyard <cminyard@mvista.com>
+    - fixed arm compilation with UDEREF disabled, reported by fabled (http://forums.grsecurity.net/viewtopic.php?f=1&t=3720)
+    - fixed early boot panic due to a INVCPID/PCID mismatch, reported by Patrick McLean (https://bugs.gentoo.org/show_bug.cgi?id=482010)
+
+ arch/arm/mm/fault.c               |   11 +-
+ arch/mips/include/asm/atomic.h    |  722 +++++++++++++++++++++++++++++++++++--
+ arch/mips/kernel/traps.c          |   14 +-
+ arch/x86/include/asm/tlbflush.h   |    4 +
+ arch/x86/include/asm/uaccess_64.h |    2 +-
+ fs/ntfs/file.c                    |    2 +-
+ kernel/events/internal.h          |    4 +-
+ kernel/events/uprobes.c           |    2 +-
+ kernel/futex.c                    |    2 +-
+ mm/filemap.c                      |    8 +-
+ security/Kconfig                  |    2 +-
+ tools/gcc/kernexec_plugin.c       |   18 +-
+ tools/gcc/latent_entropy_plugin.c |   26 +-
+ tools/gcc/size_overflow_plugin.c  |    3 +-
+ 14 files changed, 750 insertions(+), 70 deletions(-)
+
+commit cdc8f7d7a0d09f5ccec1717d1378ac284b5bb4e9
+Merge: 5a9ae57 745975e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 26 20:27:33 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 745975e3b3b74b64e00e85778f9a22714d1274f2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 26 20:26:33 2013 -0400
+
+    Fix compilation when UDEREF is enabled and KERNEXEC is disabled,
+    as reported by fabled on the forums:
+    http://forums.grsecurity.net/viewtopic.php?f=1&t=3720
+
+ arch/arm/include/asm/pgtable.h |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
 commit 5a9ae577def10802fc8ad6957f05ce2a180dfa36
 Merge: 486ec00 f68df21
 Author: Brad Spengler <spender@grsecurity.net>
