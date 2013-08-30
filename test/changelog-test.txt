@@ -1,3 +1,27 @@
+commit 8ba1cc35ec5216383369ddf3ef2cde5e4aaacb57
+Merge: be2497c 1052971
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 29 20:44:29 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	include/linux/sched.h
+
+commit 10529710192fe7f7d42ad7bb1dfef2143cca8ad2
+Merge: e902dad 8bf3379
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 29 20:39:50 2013 -0400
+
+    Update to pax-linux-3.10.10-test21.patch
+    
+    Merge branch 'linux-3.10.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/sys_x86_64.c
+    	arch/x86/mm/mmap.c
+    	include/linux/sched.h
+
 commit be2497c1b629a5ad604a8b0ec265ef5d801c7de8
 Merge: 081c22b e902dad
 Author: Brad Spengler <spender@grsecurity.net>
