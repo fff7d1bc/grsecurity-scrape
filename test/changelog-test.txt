@@ -1,3 +1,40 @@
+commit 1bdf7ec39027ffd7c3099b78ff20c39295448b34
+Merge: 995a168 38ee86c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 30 19:23:36 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 38ee86c05df0f8db582df8776b9f23f317d42bbb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 30 19:23:11 2013 -0400
+
+    Update to pax-linux-3.10.10-test22.patch:
+    - fixed !REFCOUNT/mips compilation, by Corey Minyard <cminyard@mvista.com>
+    - fixed a few more format strings
+
+ arch/mips/include/asm/atomic.h          |   20 ++++++++++++++++----
+ drivers/md/bcache/super.c               |    2 +-
+ drivers/net/wireless/iwlwifi/dvm/main.c |    3 +--
+ drivers/pci/hotplug/pciehp_hpc.c        |    2 +-
+ drivers/platform/x86/wmi.c              |    2 +-
+ drivers/scsi/sd.c                       |    2 +-
+ drivers/vfio/vfio.c                     |    4 ++--
+ fs/ntfs/super.c                         |    6 +++---
+ include/linux/workqueue.h               |    6 +++---
+ net/mac80211/main.c                     |    2 +-
+ sound/pci/hda/hda_codec.c               |    8 ++------
+ 11 files changed, 32 insertions(+), 25 deletions(-)
+
+commit 995a16841e2097c3a9dfc652e856469679c4a0ba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 30 17:11:11 2013 -0400
+
+    fix compilation with GRKERNSEC_DENYUSB as reported by slashbeast
+
+ grsecurity/grsec_sysctl.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
 commit 8ba1cc35ec5216383369ddf3ef2cde5e4aaacb57
 Merge: be2497c 1052971
 Author: Brad Spengler <spender@grsecurity.net>
