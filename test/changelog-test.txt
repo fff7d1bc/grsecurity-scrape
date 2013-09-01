@@ -1,3 +1,112 @@
+commit 0d5ca3a057ae48b5fdccb2f0a7a841a5cc76d3dd
+Merge: 7ee3899 cf9c476
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 1 13:56:57 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit cf9c47690fa0f3da590de766ea8c6a543984ee3c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 1 13:56:16 2013 -0400
+
+    Update to pax-linux-3.10.10-test25.patch:
+    - fixed a few more REFCOUNT false positives, by Mathias Krause <minipli@googlemail.com>
+    - got inet_getid and ipv6_select_ident rid of the cmpxchg loop
+
+ block/blk-cgroup.c                |    4 ++--
+ drivers/video/hyperv_fb.c         |    4 ++--
+ fs/namespace.c                    |    4 ++--
+ include/net/inetpeer.h            |   13 +++++--------
+ kernel/trace/trace_clock.c        |    4 ++--
+ net/ipv6/output_core.c            |   15 ++++++---------
+ net/sunrpc/auth_gss/svcauth_gss.c |    4 ++--
+ 7 files changed, 21 insertions(+), 27 deletions(-)
+
+commit 7ee3899312d611b85cadd3eda173f7a3952bb8aa
+Merge: fd0338c 2bdeae7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 31 22:07:38 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2bdeae76eab5c34e4b88c7090a435b969037a3c1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 31 22:06:55 2013 -0400
+
+    Update to pax-linux-3.10.10-test24.patch:
+    - fixed a REFCOUNT false positive, by Mathias Krause <minipli@googlemail.com>
+    - fixed a bunch more after a quick audit of atomic_inc_return users
+
+ drivers/acpi/apei/ghes.c                      |    4 ++--
+ drivers/ata/libata-core.c                     |    4 ++--
+ drivers/ata/libata-scsi.c                     |    2 +-
+ drivers/ata/libata.h                          |    2 +-
+ drivers/block/drbd/drbd_nl.c                  |    4 ++--
+ drivers/crypto/hifn_795x.c                    |    4 ++--
+ drivers/edac/edac_device.c                    |    4 ++--
+ drivers/edac/edac_pci.c                       |    4 ++--
+ drivers/firewire/core-card.c                  |    4 ++--
+ drivers/hv/hv_balloon.c                       |   18 +++++++++---------
+ drivers/infiniband/hw/mlx4/mad.c              |    2 +-
+ drivers/infiniband/hw/mlx4/mlx4_ib.h          |    2 +-
+ drivers/input/misc/ims-pcu.c                  |    4 ++--
+ drivers/input/serio/serio_raw.c               |    4 ++--
+ drivers/media/pci/ivtv/ivtv-driver.c          |    2 +-
+ drivers/media/radio/radio-maxiradio.c         |    2 +-
+ drivers/media/radio/radio-shark.c             |    2 +-
+ drivers/media/radio/radio-shark2.c            |    2 +-
+ drivers/media/radio/radio-si476x.c            |    2 +-
+ drivers/media/rc/rc-main.c                    |    4 ++--
+ drivers/media/v4l2-core/v4l2-device.c         |    4 ++--
+ drivers/net/usb/sierra_net.c                  |    4 ++--
+ drivers/pci/hotplug/pciehp_hpc.c              |    4 +---
+ drivers/regulator/core.c                      |    4 ++--
+ drivers/scsi/fcoe/fcoe_sysfs.c                |   12 ++++++------
+ drivers/staging/android/timed_output.c        |    6 +++---
+ drivers/staging/media/solo6x10/solo6x10-p2m.c |    2 +-
+ drivers/staging/media/solo6x10/solo6x10.h     |    2 +-
+ drivers/target/sbp/sbp_target.c               |    4 ++--
+ drivers/tty/hvc/hvsi.c                        |   12 ++++++------
+ drivers/tty/hvc/hvsi_lib.c                    |    6 +++---
+ drivers/tty/serial/ioc4_serial.c              |    6 +++---
+ drivers/tty/serial/msm_serial.c               |    4 ++--
+ drivers/usb/misc/appledisplay.c               |    4 ++--
+ fs/afs/inode.c                                |    4 ++--
+ fs/btrfs/delayed-inode.c                      |    6 +++---
+ fs/btrfs/delayed-inode.h                      |    4 ++--
+ fs/fscache/cookie.c                           |    4 ++--
+ include/media/v4l2-device.h                   |    2 +-
+ net/ceph/messenger.c                          |    4 ++--
+ net/core/netpoll.c                            |    4 ++--
+ net/xfrm/xfrm_state.c                         |    4 ++--
+ security/selinux/avc.c                        |    6 +++---
+ 43 files changed, 93 insertions(+), 95 deletions(-)
+
+commit fd0338c8877c47789a9cc61f3a26c83e68aa3d37
+Merge: 1bdf7ec 85099d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 31 21:07:29 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 85099d220fb014b6e4c6ffe18a55b20c61f6daed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 31 21:06:55 2013 -0400
+
+    Update to pax-linux-3.10.10-test23.patch:
+    - added the necessary atomic_unchecked_t conversion for mips
+    - audited and fixed arm and sparc for proper atomic_unchecked_t usage
+
+ arch/arm/kvm/arm.c            |    8 ++++----
+ arch/arm/mm/context.c         |   10 +++++-----
+ arch/mips/kernel/irq.c        |    6 +++---
+ arch/mips/kernel/sync-r4k.c   |   24 ++++++++++++------------
+ arch/mips/sgi-ip27/ip27-nmi.c |    6 +++---
+ arch/sparc/kernel/smp_64.c    |   12 ++++++------
+ arch/sparc/kernel/traps_64.c  |   14 +++++++-------
+ arch/sparc/mm/init_64.c       |   10 +++++-----
+ 8 files changed, 45 insertions(+), 45 deletions(-)
+
 commit 1bdf7ec39027ffd7c3099b78ff20c39295448b34
 Merge: 995a168 38ee86c
 Author: Brad Spengler <spender@grsecurity.net>
