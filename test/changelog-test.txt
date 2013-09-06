@@ -1,3 +1,42 @@
+commit af7c2bc789c8fe5ef7474f22dacf212be22fd0af
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 5 19:36:23 2013 -0400
+
+    fix dependencies for GRKERNSEC_ROFS / GRKERNSEC_DENYUSB
+
+ grsecurity/Kconfig |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit da68dbcd96c617923a0aedb177d36b2701f9c858
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 5 19:17:02 2013 -0400
+
+    Allow the deny_new_usb sysctl to be toggled off by a user with
+    CAP_SYS_ADMIN.  This allows for more inventive uses of the feature
+    that would be impossible otherwise (like toggling it while the screen is
+    locked, etc)
+
+ grsecurity/grsec_sysctl.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit ce0e893adc830ee110f97071cc17e661fb35ae3d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 5 18:41:49 2013 -0400
+
+    Add a new GRKERNSEC_DENYUSB_FORCE option that achieves what
+    GRKERNSEC_DENYUSB does without the need for a sysctl toggle, for
+    users who know they want the functionality but don't want to bother
+    with modifying init scripts
+    
+    Also eliminate reset_security_ops() as a ROP target when
+    SECURITY_SELINUX_DISABLE is disabled as it's the only user
+
+ grsecurity/Kconfig        |   17 ++++++++++++++++-
+ grsecurity/grsec_init.c   |    3 +++
+ grsecurity/grsec_sysctl.c |    2 +-
+ security/security.c       |    4 ++++
+ 4 files changed, 24 insertions(+), 2 deletions(-)
+
 commit 0d5ca3a057ae48b5fdccb2f0a7a841a5cc76d3dd
 Merge: 7ee3899 cf9c476
 Author: Brad Spengler <spender@grsecurity.net>
