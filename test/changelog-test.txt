@@ -1,3 +1,72 @@
+commit c3ccfb29794a03413095422100ce90d40ef7df0f
+Author: Jakob Bornecrantz <jakob@vmware.com>
+Date:   Thu Aug 29 02:32:53 2013 +0200
+
+    Upstream commit: 6e4dcff3adbf25acb87e74500a58e3c07bdec40f
+    
+    drm/vmwgfx: Split GMR2_REMAP commands if they are to large
+    
+    This fixes the piglit test texturing/max-texture-size
+    causing the VM to die due to a too large SVGA command.
+    
+    Signed-off-by: Jakob Bornecrantz <jakob@vmware.com>
+    Reviewed-by: Biran Paul <brianp@vmware.com>
+    Reviewed-by: Zack Rusin <zackr@vmware.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Dave Airlie <airlied@gmail.com>
+
+ drivers/gpu/drm/vmwgfx/vmwgfx_gmr.c |   58 +++++++++++++++++++++++-----------
+ 1 files changed, 39 insertions(+), 19 deletions(-)
+
+commit d260badf708d6aa16c44f56f54727532dcae826e
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Tue Sep 3 19:29:12 2013 +0200
+
+    Upstream commit: 3a1c756590633c0e86df606e5c618c190926a0df
+    
+    net: ipv6: tcp: fix potential use after free in tcp_v6_do_rcv
+    
+    In tcp_v6_do_rcv() code, when processing pkt options, we soley work
+    on our skb clone opt_skb that we've created earlier before entering
+    tcp_rcv_established() on our way. However, only in condition ...
+    
+      if (np->rxopt.bits.rxtclass)
+        np->rcv_tclass = ipv6_get_dsfield(ipv6_hdr(skb));
+    
+    ... we work on skb itself. As we extract every other information out
+    of opt_skb in ipv6_pktoptions path, this seems wrong, since skb can
+    already be released by tcp_rcv_established() earlier on. When we try
+    to access it in ipv6_hdr(), we will dereference freed skb.
+    
+    [ Bug added by commit 4c507d2897bd9b ("net: implement IP_RECVTOS for
+      IP_PKTOPTIONS") ]
+    
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Acked-by: Jiri Benc <jbenc@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/tcp_ipv6.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ee3db7a4fb3619d70b8e0c1a8de07402a67e8d31
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Thu Aug 29 11:47:00 2013 +0300
+
+    Upstream commit: 0d63c27d9e879a0b54eb405636d60ab12040ca46
+    
+    mISDN: return -EINVAL on error in dsp_control_req()
+    
+    If skb->len is too short then we should return an error.  Otherwise we
+    read beyond the end of skb->data for several bytes.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/isdn/mISDN/dsp_core.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
 commit af7c2bc789c8fe5ef7474f22dacf212be22fd0af
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Sep 5 19:36:23 2013 -0400
