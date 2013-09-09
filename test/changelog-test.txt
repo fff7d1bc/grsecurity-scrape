@@ -1,3 +1,30 @@
+commit 4c61dba17c53d0a775c77aed0c0ddb15a12daa3c
+Merge: c3ccfb2 777e08c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 8 19:49:04 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 777e08c6a87ef43439f4431d8d458732ca5e17c6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 8 19:47:32 2013 -0400
+
+    Update to pax-linux-3.10.11-test26.patch:
+    - reworked __SC_LONG to care about only int and smaller types, this eliminates size overflow false positives reported by hunger
+    - fixed an uninitialized read in splice, reported by hunger
+
+ fs/splice.c                       |    1 +
+ include/linux/syscalls.h          |   14 +-
+ tools/gcc/size_overflow_hash.data |  426 +++++++++++++++++++++----------------
+ 3 files changed, 247 insertions(+), 194 deletions(-)
+
+commit 5c3161364270c842d901789faac731f79a9f9cd6
+Merge: cf9c476 85cdabb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 8 19:24:25 2013 -0400
+
+    Merge branch 'linux-3.10.y' into pax-test
+
 commit c3ccfb29794a03413095422100ce90d40ef7df0f
 Author: Jakob Bornecrantz <jakob@vmware.com>
 Date:   Thu Aug 29 02:32:53 2013 +0200
