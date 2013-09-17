@@ -1,3 +1,58 @@
+commit 456ca176141f10355c1569b29225c9ce4b7db18e
+Merge: b406eac 5df8f36
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 16 20:02:05 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5df8f36fbb39fbd47e04945001d11e52c16fc0b6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 16 20:01:38 2013 -0400
+
+    Update to pax-linux-3.11.1-test7.patch:
+    - fixed arm compile error, reported by Arnaud Ebalard
+    - fixed NULL deref due to some xfrm constification, reported by marcin1j (http://forums.grsecurity.net/viewtopic.php?f=3&t=3743)
+    - fixed od_ops constification, fixes cpufreq ondemand on AMD
+    - latent entropy will now be gathered from module init code as well (i.e., at module load/init time)
+    - __read_only will now be enforced in modules as well
+    - removed unneccessary __read_only from ntfs
+
+ arch/arm/lib/uaccess_with_memcpy.c |    2 +-
+ arch/x86/include/asm/cache.h       |    4 ++++
+ drivers/cpufreq/cpufreq_governor.h |    2 +-
+ drivers/cpufreq/cpufreq_ondemand.c |    2 +-
+ fs/ntfs/file.c                     |    4 ++--
+ include/linux/init.h               |    5 -----
+ include/net/xfrm.h                 |    5 ++++-
+ init/main.c                        |    9 +++------
+ mm/page_alloc.c                    |    1 +
+ net/ipv4/xfrm4_policy.c            |    4 ++--
+ net/ipv6/xfrm6_policy.c            |    4 ++--
+ net/xfrm/xfrm_policy.c             |   11 ++---------
+ 12 files changed, 23 insertions(+), 30 deletions(-)
+
+commit b406eac579bb3a5faa1c9d73b8af5530f942009a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 16 12:53:22 2013 -0400
+
+    Backport commit from https://git.kernel.org/cgit/linux/kernel/git/klassert/ipsec.git/commit/?h=testing&id=4479ff76c43607b680f9349128d8493228b49dce
+    
+    author	Steffen Klassert <steffen.klassert@secunet.com>	2013-09-09 07:39:01 (GMT)
+    committer	 Steffen Klassert <steffen.klassert@secunet.com>	2013-09-16 07:39:37 (GMT)
+    
+    xfrm: Fix replay size checking on async events
+    We pass the wrong netlink attribute to xfrm_replay_verify_len().
+    It should be XFRMA_REPLAY_ESN_VAL and not XFRMA_REPLAY_VAL as
+    we currently doing. This causes memory corruptions if the
+    replay esn attribute has incorrect length. Fix this by passing
+    the right attribute to xfrm_replay_verify_len().
+    
+    Reported-by: Michael Rossberg <michael.rossberg@tu-ilmenau.de>
+    Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+
+ net/xfrm/xfrm_user.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 9eeb1f53a99068a1f2a77e4d250e334165b789c9
 Merge: 84843a3 0a0ced6
 Author: Brad Spengler <spender@grsecurity.net>
