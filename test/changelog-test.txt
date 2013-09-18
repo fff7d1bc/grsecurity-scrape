@@ -1,3 +1,60 @@
+commit ca27c99c4f2df039e21ec15c52824d84e2cd2f35
+Merge: f1e4228 90db383
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 18 17:34:37 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 90db383fd7d650172d52229b0116ad7604c9bec1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 18 17:32:42 2013 -0400
+
+    Update to pax-linux-3.11.1-test9.patch:
+    - fixed some arm compile regressions, reported by Arnaud Ebalard and Michael Tremer
+    - better implementation of __read_only for modules
+    - fixed a regression and an apparently needed kuser emulation on arm, reported by Arnaud Ebalard
+
+ arch/arm/kernel/entry-common.S            |   12 ++++++------
+ arch/arm/mach-omap2/omap-mpuss-lowpower.c |    4 ++--
+ arch/arm/mm/fault.c                       |   26 +++++++++++++++++++++++++-
+ arch/x86/include/asm/cache.h              |    4 ----
+ drivers/bus/arm-cci.c                     |    2 +-
+ drivers/clk/socfpga/clk.c                 |    2 +-
+ drivers/mmc/host/mmci.c                   |    4 +++-
+ drivers/net/ethernet/chelsio/cxgb3/sge.c  |    2 +-
+ include/linux/cache.h                     |    4 ++++
+ net/netfilter/ipvs/ip_vs_lblc.c           |    2 +-
+ net/netfilter/ipvs/ip_vs_lblcr.c          |    2 +-
+ scripts/module-common.lds                 |    4 ++++
+ 12 files changed, 49 insertions(+), 19 deletions(-)
+
+commit 43fd6b476981f2b72f1fcb7dd4de6b04643e0810
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 18 17:32:25 2013 -0400
+
+    Revert "mark sctp_af_inet forward declaration as __read_only to fix compile error"
+    
+    This reverts commit 5e30989102e2d0df166ab6ff915b90f675f8786f.
+
+ net/sctp/protocol.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f1e42285e17479067b6cbcffc43916720e6dedd3
+Merge: 456ca17 5e30989
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 16 21:42:34 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5e30989102e2d0df166ab6ff915b90f675f8786f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 16 21:41:44 2013 -0400
+
+    mark sctp_af_inet forward declaration as __read_only to fix compile error
+
+ net/sctp/protocol.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 456ca176141f10355c1569b29225c9ce4b7db18e
 Merge: b406eac 5df8f36
 Author: Brad Spengler <spender@grsecurity.net>
