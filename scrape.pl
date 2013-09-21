@@ -9,7 +9,6 @@ use Cwd 'abs_path';
 
 my $script_dir = abs_path(dirname(__FILE__));
 
-print("Getting rss feed ...\n");
 my $feed_raw = get("https://grsecurity.net/testing_rss.php");
 
 my $feed = XMLin($feed_raw, ForceArray => ['item']);
