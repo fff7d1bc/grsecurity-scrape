@@ -1,3 +1,14 @@
+commit ba0ebdedeb2e128654dac48641bdc9d8b34530d6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 22 18:14:07 2013 -0400
+
+    Revert "Upstream commit: 58ad436fcf49810aa006016107f494c9ac9013db"
+    
+    This reverts commit 7a430f97a2f6538693cb8e354c67c874f24c5ebf.
+
+ net/netlink/genetlink.c |    7 -------
+ 1 files changed, 0 insertions(+), 7 deletions(-)
+
 commit ca27c99c4f2df039e21ec15c52824d84e2cd2f35
 Merge: f1e4228 90db383
 Author: Brad Spengler <spender@grsecurity.net>
