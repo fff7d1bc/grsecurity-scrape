@@ -1,3 +1,41 @@
+commit 2eac65435fdffca548a56e5187840908438fc95c
+Merge: ba0ebde 115bf6a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 26 20:00:00 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 115bf6af0083ea28c751d551a39cfdba1798e9dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 26 19:59:14 2013 -0400
+
+    Update to pax-linux-3.11.1-test10.patch:
+    - added missing exports for module_alloc_exec/module_free_exec on arm, by Arnaud Fontaine
+    - fixed potential .exit.text section reference problem with REFCOUNT on arm, reported by Corey Minyard
+    - fixed REFCOUNT false positive in the new percpu refcount code, reported by Alexander Tsoy (https://bugs.gentoo.org/show_bug.cgi?id=486040)
+    - fixed an integer overflow in the ELF loader that happens to be harmless due to another overflow, found by Emese Revfy's new size overflow plugin (not yet released)
+    - beefed up latent entropy extraction
+      - latent_entropy itself will be initialized to a compile-time random value (instead of 0)
+      - entropy will be collected from various irq and softirq handlers
+
+ arch/arm/kernel/module.c          |    2 ++
+ arch/arm/kernel/vmlinux.lds.S     |    2 +-
+ block/blk-iopoll.c                |    2 +-
+ block/blk-softirq.c               |    2 +-
+ fs/binfmt_elf.c                   |    8 +++++---
+ include/linux/genhd.h             |    2 +-
+ include/linux/random.h            |    4 ++--
+ kernel/hrtimer.c                  |    2 +-
+ kernel/rcutiny.c                  |    2 +-
+ kernel/rcutree.c                  |    2 +-
+ kernel/sched/fair.c               |    2 +-
+ kernel/softirq.c                  |    4 ++--
+ kernel/timer.c                    |    2 +-
+ lib/percpu-refcount.c             |    2 +-
+ net/core/dev.c                    |    4 ++--
+ tools/gcc/latent_entropy_plugin.c |    2 +-
+ 16 files changed, 24 insertions(+), 20 deletions(-)
+
 commit ba0ebdedeb2e128654dac48641bdc9d8b34530d6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Sep 22 18:14:07 2013 -0400
