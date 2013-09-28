@@ -1,3 +1,141 @@
+commit 64257ad95c51285d415f93ebdd486fae6bb9415d
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Sat Sep 21 06:27:00 2013 +0200
+
+    Upstream commit: 2811ebac2521ceac84f2bdae402455baa6a7fb47
+    
+    ipv6: udp packets following an UFO enqueued packet need also be handled by UFO
+    
+    In the following scenario the socket is corked:
+    If the first UDP packet is larger then the mtu we try to append it to the
+    write queue via ip6_ufo_append_data. A following packet, which is smaller
+    than the mtu would be appended to the already queued up gso-skb via
+    plain ip6_append_data. This causes random memory corruptions.
+    
+    In ip6_ufo_append_data we also have to be careful to not queue up the
+    same skb multiple times. So setup the gso frame only when no first skb
+    is available.
+    
+    This also fixes a shortcoming where we add the current packet's length to
+    cork->length but return early because of a packet > mtu with dontfrag set
+    (instead of sutracting it again).
+    
+    Found with trinity.
+    
+    Cc: YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_output.c |   53 ++++++++++++++++++++----------------------------
+ 1 files changed, 22 insertions(+), 31 deletions(-)
+
+commit ee4ab63f6dfd57e8c5d67e1e154b86d1139937f6
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Sep 24 15:27:45 2013 -0700
+
+    Just a whitespace fix to sync with upstream as we already applied this fix
+    via Vasiliy Kulikov in 2010.  It fell through the cracks upstream
+    
+    cciss: fix info leak in cciss_ioctl32_passthru()
+    
+    The arg64 struct has a hole after ->buf_size which isn't cleared.  Or if
+    any of the calls to copy_from_user() fail then that would cause an
+    information leak as well.
+    
+    This was assigned CVE-2013-2147.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Acked-by: Mike Miller <mike.miller@hp.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	drivers/block/cciss.c
+
+ drivers/block/cciss.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 2a5d630a83f5ddd2ab0ce9cb32a93ad3e1f6dc3e
+Author: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+Date:   Tue Sep 24 18:29:11 2013 -0700
+
+    Upstream commit: 22356f447ceb8d97a4885792e7d9e4607f712e1b
+    
+    mm: Place preemption point in do_mlockall() loop
+    
+    There is a loop in do_mlockall() that lacks a preemption point, which
+    means that the following can happen on non-preemptible builds of the
+    kernel. Dave Jones reports:
+    
+     "My fuzz tester keeps hitting this.  Every instance shows the non-irq
+      stack came in from mlockall.  I'm only seeing this on one box, but
+      that has more ram (8gb) than my other machines, which might explain
+      it.
+    
+        INFO: rcu_preempt self-detected stall on CPU { 3}  (t=6500 jiffies g=470344 c=470343 q=0)
+        sending NMI to all CPUs:
+        NMI backtrace for cpu 3
+        CPU: 3 PID: 29664 Comm: trinity-child2 Not tainted 3.11.0-rc1+ #32
+        Call Trace:
+          lru_add_drain_all+0x15/0x20
+          SyS_mlockall+0xa5/0x1a0
+          tracesys+0xdd/0xe2"
+    
+    This commit addresses this problem by inserting the required preemption
+    point.
+    
+    Reported-by: Dave Jones <davej@redhat.com>
+    Signed-off-by: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+    Cc: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
+    Cc: Michel Lespinasse <walken@google.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mlock.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 042ecff756f1246abb9c84dd20ad9f6e9c429ed9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 27 21:06:17 2013 -0400
+
+    Don't log attempts to create a socket with a family that the kernel doesn't
+    support
+    Further, if the kernel doesn't support the socket family, instead of returning
+    -EACCES, return -EAFNOSUPPORT -- should resolve the need to allow ipv6
+    sockets in RBAC policy despite a kernel that doesn't support ipv6
+    observed during a Debian userland update necessitating a policy change
+
+ grsecurity/gracl_ip.c |    7 +++----
+ net/socket.c          |   26 +++++++++++++++-----------
+ 2 files changed, 18 insertions(+), 15 deletions(-)
+
+commit 55f1e409275973513a3314fe5bfa76a4781c0db7
+Merge: 2eac654 c38c6b0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 27 20:35:04 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/hid/hid-picolcd_core.c
+
+commit c38c6b0bbbe53bd528aeeb4a059764abc028c276
+Merge: 115bf6a a3308b5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 27 20:34:15 2013 -0400
+
+    Merge branch 'linux-3.11.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/ia32/ia32_signal.c
+    	arch/x86/include/asm/checksum_32.h
+    	arch/x86/include/asm/mmu_context.h
+    	arch/x86/kernel/signal.c
+    	arch/x86/lib/csum-wrappers_64.c
+    	include/linux/compat.h
+
 commit 2eac65435fdffca548a56e5187840908438fc95c
 Merge: ba0ebde 115bf6a
 Author: Brad Spengler <spender@grsecurity.net>
