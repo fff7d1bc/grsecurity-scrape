@@ -1,3 +1,92 @@
+commit 837193210e4125fe4e9e554b28d7bc33985f3554
+Author: David S. Miller <davem@davemloft.net>
+Date:   Fri Sep 27 13:46:04 2013 -0700
+
+    Upstream commit: 2bd161a605f1f84a5fc8a4fe8410113a94f79355
+    
+    sparc64: Fix buggy strlcpy() conversion in ldom_reboot().
+    
+    Commit 117a0c5fc9c2d06045bd217385b2b39ea426b5a6 ("sparc: kernel: using
+    strlcpy() instead of strcpy()") added a bug to ldom_reboot in
+    arch/sparc/kernel/ds.c
+    
+    -		strcpy(full_boot_str + strlen("boot "), boot_command);
+    +				     strlcpy(full_boot_str + strlen("boot "), boot_command,
+    +				     			     sizeof(full_boot_str + strlen("boot ")));
+    
+    That last sizeof() expression evaluates to sizeof(size_t) which is
+    not what was intended.
+    
+    Also even the corrected:
+    
+         sizeof(full_boot_str) + strlen("boot ")
+    
+    is not right as the destination buffer length is just plain
+    "sizeof(full_boot_str)" and that's what the final argument
+    should be.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/kernel/ds.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit fc25f7a8bc9f268e659f0265bcdb4dcac648c249
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Sun Sep 29 05:40:50 2013 +0200
+
+    Upstream commit: 3da812d860755925da890e8c713f2d2e2d7b1bae
+    
+    ipv6: gre: correct calculation of max_headroom
+    
+    gre_hlen already accounts for sizeof(struct ipv6_hdr) + gre header,
+    so initialize max_headroom to zero. Otherwise the
+    
+    	if (encap_limit >= 0) {
+    		max_headroom += 8;
+    		mtu -= 8;
+    	}
+    
+    increments an uninitialized variable before max_headroom was reset.
+    
+    Found with coverity: 728539
+    
+    Cc: Dmitry Kozlov <xeb@mail.ru>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/ipv6/ip6_gre.c
+
+ net/ipv6/ip6_gre.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 0d68ac550952d0eaf60851497ceee68dbba24516
+Merge: 64257ad 740e5ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 1 18:11:52 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/hid/hid-core.c
+    	drivers/hid/hid-lg2ff.c
+    	drivers/hid/hid-lg3ff.c
+    	drivers/hid/hid-lg4ff.c
+    	drivers/hid/hid-lgff.c
+    	drivers/hid/hid-logitech-dj.c
+    	drivers/hid/hid-steelseries.c
+    	drivers/hid/hid-zpff.c
+    	include/linux/hid.h
+
+commit 740e5ec087969afd43ae0b552b4e05914437ed32
+Merge: c38c6b0 db20388
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 1 17:40:46 2013 -0400
+
+    Merge branch 'linux-3.11.y' into pax-test
+
 commit 64257ad95c51285d415f93ebdd486fae6bb9415d
 Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
 Date:   Sat Sep 21 06:27:00 2013 +0200
