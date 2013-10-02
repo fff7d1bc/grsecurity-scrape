@@ -1,3 +1,12 @@
+commit 28f9622091224541efadf3ae006f0e5651c7fa45
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 1 22:48:34 2013 -0400
+
+    Fix this strlcpy crap properly
+
+ arch/sparc/kernel/ds.c |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
+
 commit 837193210e4125fe4e9e554b28d7bc33985f3554
 Author: David S. Miller <davem@davemloft.net>
 Date:   Fri Sep 27 13:46:04 2013 -0700
