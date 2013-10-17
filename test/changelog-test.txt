@@ -1,3 +1,507 @@
+commit 7ca43282302f7777ca3ae48d2552dbd0a6cef525
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 16 18:35:00 2013 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: Evgeniy Polyakov <zbr@ioremap.net>
+    Cc: Mathias Krause <minipli@googlemail.com>, netdev@vger.kernel.org
+    Subject: [PATCH 2/4] connector: use nlmsg_len() to check message length
+    
+    The current code tests the length of the whole netlink message to be
+    at least as long to fit a cn_msg. This is wrong as nlmsg_len includes
+    the length of the netlink message header. Use nlmsg_len() instead to
+    fix this "off-by-NLMSG_HDRLEN" size check.
+    
+    Cc: stable@vger.kernel.org  # v2.6.14+
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ drivers/connector/connector.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
+commit 6c495f94e2f002ed19fb8e265e2746fd6ee08489
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 16 18:36:25 2013 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: linux-audit@redhat.com
+    Cc: Mathias Krause <minipli@googlemail.com>, Al Viro <viro@zeniv.linux.org.uk>, Eric Paris <eparis@redhat.com>
+    Subject: [PATCH 1/2] audit: fix info leak in AUDIT_GET requests
+    
+    We leak 4 bytes of kernel stack in response to an AUDIT_GET request as
+    we miss to initialize the mask member of status_set. Fix that.
+    
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Eric Paris <eparis@redhat.com>
+    Cc: stable@vger.kernel.org  # v2.6.6+
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ kernel/audit.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9557a8727fd46e68f092dec0830a982e85b231f7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 16 19:02:32 2013 -0400
+
+    add 2nd chunk of audit nlmsg_len() fix from minipli
+
+ kernel/audit.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ceb5f8bae05f3321af941eddb9d2bbe264e0d2cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 16 18:37:59 2013 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: linux-audit@redhat.com
+    Cc: Mathias Krause <minipli@googlemail.com>, Al Viro <viro@zeniv.linux.org.uk>, Eric Paris <eparis@redhat.com>
+    Subject: [PATCH 2/2] audit: use nlmsg_len() to get message payload length
+    
+    Using the nlmsg_len member of the netlink header to test if the message
+    is valid is wrong as it includes the size of the netlink header itself.
+    Thereby allowing to send short netlink messages that pass those checks.
+    
+    Use nlmsg_len() instead to test for the right message length. The result
+    of nlmsg_len() is guaranteed to be non-negative as the netlink message
+    already passed the checks of nlmsg_ok().
+    
+    Also switch to min_t() to please checkpatch.pl.
+    
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Eric Paris <eparis@redhat.com>
+    Cc: stable@vger.kernel.org  # v2.6.6+ for the 1st hunk, v2.6.23+ for the 2nd
+
+ kernel/audit.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7547b29750381c776dfd47f4b1277a492d5b0f72
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 16 18:41:01 2013 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: netfilter-devel@vger.kernel.org
+    Cc: Mathias Krause <minipli@googlemail.com>, Pablo Neira Ayuso <pablo@netfilter.org>, Patrick McHardy <kaber@trash.net>, Jozsef Kadlecsik
+            <kadlec@blackhole.kfki.hu>, Bart De Schuymer <bart.de.schuymer@pandora.be>
+    Subject: [PATCH 1/2] netfilter: ebt_ulog: fix info leaks
+    
+    The ulog messages leak heap bytes by the means of padding bytes and
+    incompletely filled string arrays. Fix those by memset(0)'ing the
+    whole struct before filling it.
+    
+    Cc: Bart De Schuymer <bart.de.schuymer@pandora.be>
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    
+    Conflicts:
+    
+    	net/bridge/netfilter/ebt_ulog.c
+
+ net/bridge/netfilter/ebt_ulog.c |    9 +++------
+ 1 files changed, 3 insertions(+), 6 deletions(-)
+
+commit c1da6a5ba1b529d70214142de4eaa7f1b9d62528
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 16 18:43:01 2013 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: netfilter-devel@vger.kernel.org
+    Cc: Mathias Krause <minipli@googlemail.com>, Pablo Neira Ayuso <pablo@netfilter.org>, Patrick McHardy <kaber@trash.net>, Jozsef Kadlecsik
+            <kadlec@blackhole.kfki.hu>
+    Subject: [PATCH 2/2] netfilter: ipt_ULOG: fix info leaks
+    
+    The ulog messages leak heap bytes by the means of padding bytes and
+    incompletely filled string arrays. Fix those by memset(0)'ing the
+    whole struct before filling it.
+    
+    Cc: Pablo Neira Ayuso <pablo@netfilter.org>
+    Cc: Patrick McHardy <kaber@trash.net>
+    Cc: Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    
+    Conflicts:
+    
+    	net/ipv4/netfilter/ipt_ULOG.c
+
+ net/ipv4/netfilter/ipt_ULOG.c |    7 +------
+ 1 files changed, 1 insertions(+), 6 deletions(-)
+
+commit 2965f6e6122325a18e69296ad3817c66ca59b7e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 16 18:49:45 2013 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: Mathias Krause <minipli@googlemail.com>, netdev@vger.kernel.org
+    Subject: [PATCH net] unix_diag: fix info leak
+    
+    When filling the netlink message we miss to wipe the pad field,
+    therefore leak one byte of heap memory to userland. Fix this by
+    setting pad to 0.
+    
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/unix/diag.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit c6bc48165dc213ad8b24fbd872d5c01deb4508bc
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Mon Sep 30 22:03:06 2013 +0200
+
+    Upstream commit: e727ca82e0e9616ab4844301e6bae60ca7327682
+    
+    proc connector: fix info leaks
+    
+    Initialize event_data for all possible message types to prevent leaking
+    kernel stack contents to userland (up to 20 bytes). Also set the flags
+    member of the connector message to 0 to prevent leaking two more stack
+    bytes this way.
+    
+    Cc: stable@vger.kernel.org  # v2.6.15+
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/connector/cn_proc.c |   18 ++++++++++++++++++
+ 1 files changed, 18 insertions(+), 0 deletions(-)
+
+commit 6398c8e93f1f8fcf80ae2f024a8cca9ea84ccd04
+Author: AKASHI Takahiro <takahiro.akashi@linaro.org>
+Date:   Wed Oct 9 15:58:29 2013 +0100
+
+    Upstream commit: 3c1532df5c1b54b5f6246cdef94eeb73a39fe43a
+    
+    ARM: 7851/1: check for number of arguments in syscall_get/set_arguments()
+    
+    In ftrace_syscall_enter(),
+        syscall_get_arguments(..., 0, n, ...)
+            if (i == 0) { <handle ORIG_r0> ...; n--;}
+            memcpy(..., n * sizeof(args[0]));
+    If 'number of arguments(n)' is zero and 'argument index(i)' is also zero in
+    syscall_get_arguments(), none of arguments should be copied by memcpy().
+    Otherwise 'n--' can be a big positive number and unexpected amount of data
+    will be copied. Tracing system calls which take no argument, say sync(void),
+    may hit this case and eventually make the system corrupted.
+    This patch fixes the issue both in syscall_get_arguments() and
+    syscall_set_arguments().
+    
+    Cc: <stable@vger.kernel.org>
+    Acked-by: Will Deacon <will.deacon@arm.com>
+    Signed-off-by: AKASHI Takahiro <takahiro.akashi@linaro.org>
+    Signed-off-by: Will Deacon <will.deacon@arm.com>
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+
+ arch/arm/include/asm/syscall.h |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit c062c6b6774efea3e8b21dc5262f8bf9b34609c2
+Author: Dave Jones <davej@redhat.com>
+Date:   Thu Oct 10 20:05:35 2013 -0400
+
+    Upstream commit: 6e4ea8e33b2057b85d75175dd89b93f5e26de3bc
+    
+    ext4: fix memory leak in xattr
+    
+    If we take the 2nd retry path in ext4_expand_extra_isize_ea, we
+    potentionally return from the function without having freed these
+    allocations.  If we don't do the return, we over-write the previous
+    allocation pointers, so we leak either way.
+    
+    Spotted with Coverity.
+    
+    [ Fixed by tytso to set is and bs to NULL after freeing these
+      pointers, in case in the retry loop we later end up triggering an
+      error causing a jump to cleanup, at which point we could have a double
+      free bug. -- Ted ]
+    
+    Signed-off-by: Dave Jones <davej@fedoraproject.org>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+    Cc: stable@vger.kernel.org
+
+ fs/ext4/xattr.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 224e55268fbd4f81fca479e315c9483df591411d
+Author: Salva Peiró <speiro@ai2.upv.es>
+Date:   Fri Oct 11 12:50:03 2013 +0300
+
+    Upstream commit: 96b340406724d87e4621284ebac5e059d67b2194
+    
+    farsync: fix info leak in ioctl
+    
+    The fst_get_iface() code fails to initialize the two padding bytes of
+    struct sync_serial_settings after the ->loopback member. Add an explicit
+    memset(0) before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/wan/farsync.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 2df2f7f9ca7c383331795980a56a2f47a0d0dfd9
+Author: James Hogan <james.hogan@imgtec.com>
+Date:   Mon Oct 7 12:14:26 2013 +0100
+
+    Upstream commit: 8b3c569a3999a8fd5a819f892525ab5520777c92
+    
+    MIPS: stack protector: Fix per-task canary switch
+    
+    Commit 1400eb6 (MIPS: r4k,octeon,r2300: stack protector: change canary
+    per task) was merged in v3.11 and introduced assembly in the MIPS resume
+    functions to update the value of the current canary in
+    __stack_chk_guard. However it used PTR_L resulting in a load of the
+    canary value, instead of PTR_LA to construct its address. The value is
+    intended to be random but is then treated as an address in the
+    subsequent LONG_S (store).
+    
+    This was observed to cause a fault and panic:
+    
+    CPU 0 Unable to handle kernel paging request at virtual address 139fea20, epc == 8000cc0c, ra == 8034f2a4
+    Oops[#1]:
+    ...
+    $24   : 139fea20 1e1f7cb6
+    ...
+    Call Trace:
+    [<8000cc0c>] resume+0xac/0x118
+    [<8034f2a4>] __schedule+0x5f8/0x78c
+    [<8034f4e0>] schedule_preempt_disabled+0x20/0x2c
+    [<80348eec>] rest_init+0x74/0x84
+    [<804dc990>] start_kernel+0x43c/0x454
+    Code: 3c18804b  8f184030  8cb901f8 <af190000> 00c0e021  8cb002f0 8cb102f4  8cb202f8  8cb302fc
+    
+    This can also be forced by modifying
+    arch/mips/include/asm/stackprotector.h so that the default
+    __stack_chk_guard value is more likely to be a bad (or unaligned)
+    pointer.
+    
+    Fix it to use PTR_LA instead, to load the address of the canary value,
+    which the LONG_S can then use to write into it.
+    
+    Reported-by: bobjones (via #mipslinux on IRC)
+    Signed-off-by: James Hogan <james.hogan@imgtec.com>
+    Cc: Ralf Baechle <ralf@linux-mips.org>
+    Cc: Gregory Fong <gregory.0xf0@gmail.com>
+    Cc: linux-mips@linux-mips.org
+    Cc: stable@vger.kernel.org
+    Patchwork: https://patchwork.linux-mips.org/patch/6026/
+    Signed-off-by: Ralf Baechle <ralf@linux-mips.org>
+
+ arch/mips/kernel/octeon_switch.S |    2 +-
+ arch/mips/kernel/r2300_switch.S  |    2 +-
+ arch/mips/kernel/r4k_switch.S    |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 4541f6c6871c1cffa3637ccbc817a37d6f093d1c
+Author: Fan Du <fan.du@windriver.com>
+Date:   Tue Sep 17 15:14:13 2013 +0800
+
+    Upstream commit: 33fce60d6a6e137035f8e23a89d7fd55f3a24cda
+    
+    xfrm: Guard IPsec anti replay window against replay bitmap
+    
+    For legacy IPsec anti replay mechanism:
+    
+    bitmap in struct xfrm_replay_state could only provide a 32 bits
+    window size limit in current design, thus user level parameter
+    sadb_sa_replay should honor this limit, otherwise misleading
+    outputs("replay=244") by setkey -D will be:
+    
+    192.168.25.2 192.168.22.2
+    	esp mode=transport spi=147561170(0x08cb9ad2) reqid=0(0x00000000)
+    	E: aes-cbc  9a8d7468 7655cf0b 719d27be b0ddaac2
+    	A: hmac-sha1  2d2115c2 ebf7c126 1c54f186 3b139b58 264a7331
+    	seq=0x00000000 replay=244 flags=0x00000000 state=mature
+    	created: Sep 17 14:00:00 2013	current: Sep 17 14:00:22 2013
+    	diff: 22(s)	hard: 30(s)	soft: 26(s)
+    	last: Sep 17 14:00:00 2013	hard: 0(s)	soft: 0(s)
+    	current: 1408(bytes)	hard: 0(bytes)	soft: 0(bytes)
+    	allocated: 22	hard: 0	soft: 0
+    	sadb_seq=1 pid=4854 refcnt=0
+    192.168.22.2 192.168.25.2
+    	esp mode=transport spi=255302123(0x0f3799eb) reqid=0(0x00000000)
+    	E: aes-cbc  6485d990 f61a6bd5 e5660252 608ad282
+    	A: hmac-sha1  0cca811a eb4fa893 c47ae56c 98f6e413 87379a88
+    	seq=0x00000000 replay=244 flags=0x00000000 state=mature
+    	created: Sep 17 14:00:00 2013	current: Sep 17 14:00:22 2013
+    	diff: 22(s)	hard: 30(s)	soft: 26(s)
+    	last: Sep 17 14:00:00 2013	hard: 0(s)	soft: 0(s)
+    	current: 1408(bytes)	hard: 0(bytes)	soft: 0(bytes)
+    	allocated: 22	hard: 0	soft: 0
+    	sadb_seq=0 pid=4854 refcnt=0
+    
+    And also, optimizing xfrm_replay_check window checking by setting the
+    desirable x->props.replay_window with only doing the comparison once
+    for all when xfrm_state is first born.
+    
+    Signed-off-by: Fan Du <fan.du@windriver.com>
+    Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+
+ net/key/af_key.c       |    3 ++-
+ net/xfrm/xfrm_replay.c |    3 +--
+ net/xfrm/xfrm_user.c   |    3 ++-
+ 3 files changed, 5 insertions(+), 4 deletions(-)
+
+commit 3853002f1fb21ca8e23784e9eaeb971eaebc7541
+Author: Thomas Egerer <thomas.egerer@secunet.com>
+Date:   Thu Sep 19 13:19:19 2013 +0200
+
+    Upstream commit: cd808fc9a6c7cd3a4311d9d2cffc4adbeaef5f6c
+    
+    xfrm: Fix aevent generation for each received packet
+    
+    If asynchronous events are enabled for a particular netlink socket,
+    the notify function is called by the advance function. The notify
+    function creates and dispatches a km_event if a replay timeout occurred,
+    or at least replay_maxdiff packets have been received since the last
+    asynchronous event has been sent. The function is supposed to return if
+    neither of the two events were detected for a state, or replay_maxdiff
+    is equal to zero.
+    Replay_maxdiff is initialized in xfrm_state_construct to the value of
+    the xfrm.sysctl_aevent_rseqth (2 by default), and updated if for a state
+    if the netlink attribute XFRMA_REPLAY_THRESH is set.
+    If, however, replay_maxdiff is set to zero, then all of the three notify
+    implementations perform a break from the switch statement instead of
+    checking whether a timeout occurred, and -- if not -- return.  As a
+    result an asynchronous event is generated for every replay update of a
+    state that has a zero replay_maxdiff value.
+    This patch modifies the notify functions such that they immediately
+    return if replay_maxdiff has the value zero, unless a timeout occurred.
+    
+    Signed-off-by: Thomas Egerer <thomas.egerer@secunet.com>
+    Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+
+ net/xfrm/xfrm_replay.c |   51 +++++++++++++++++++++++++----------------------
+ 1 files changed, 27 insertions(+), 24 deletions(-)
+
+commit dafbbf04fb91cc92c049dcf7cabcc92fd5d29cb8
+Author: Steffen Klassert <steffen.klassert@secunet.com>
+Date:   Tue Oct 8 10:49:45 2013 +0200
+
+    Upstream commit: e7d8f6cb2f8735693396872f4608bbe305e8baee
+    
+    xfrm: Add refcount handling to queued policies
+    
+    We need to ensure that policies can't go away as long as the hold timer
+    is armed, so take a refcont when we arm the timer and drop one if we
+    delete it.
+    
+    Bug was introduced with git commit a0073fe18 ("xfrm: Add a state
+    resolution packet queue")
+    
+    Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+
+ net/xfrm/xfrm_policy.c |   24 +++++++++++++++++-------
+ 1 files changed, 17 insertions(+), 7 deletions(-)
+
+commit b4948dc963442682534b3a039664b564c764e4f8
+Author: Steffen Klassert <steffen.klassert@secunet.com>
+Date:   Tue Oct 8 10:49:51 2013 +0200
+
+    Upstream commit: 2bb53e2557964c2c5368a0392cf3b3b63a288cd0
+    
+    xfrm: check for a vaild skb in xfrm_policy_queue_process
+    
+    We might dreference a NULL pointer if the hold_queue is empty,
+    so add a check to avoid this.
+    
+    Bug was introduced with git commit a0073fe18 ("xfrm: Add a state
+    resolution packet queue")
+    
+    Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+
+ net/xfrm/xfrm_policy.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit fad7f264b264b0b17a307aa16162cb43c7688a30
+Author: Marc Kleine-Budde <mkl@pengutronix.de>
+Date:   Mon Oct 7 23:19:58 2013 +0200
+
+    Upstream commit: c33a39c575068c2ea9bffb22fd6de2df19c74b89
+    
+    net: vlan: fix nlmsg size calculation in vlan_get_size()
+    
+    This patch fixes the calculation of the nlmsg size, by adding the missing
+    nla_total_size().
+    
+    Cc: Patrick McHardy <kaber@trash.net>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/8021q/vlan_netlink.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 675e5611464fe6b4d41e7d8ba56ed845286b28dd
+Author: François Cachereul <f.cachereul@alphalink.fr>
+Date:   Wed Oct 2 10:16:02 2013 +0200
+
+    Upstream commit: e18503f41f9b12132c95d7c31ca6ee5155e44e5c
+    
+    l2tp: fix kernel panic when using IPv4-mapped IPv6 addresses
+    
+    IPv4 mapped addresses cause kernel panic.
+    The patch juste check whether the IPv6 address is an IPv4 mapped
+    address. If so, use IPv4 API instead of IPv6.
+    
+    [  940.026915] general protection fault: 0000 [#1]
+    [  940.026915] Modules linked in: l2tp_ppp l2tp_netlink l2tp_core pppox ppp_generic slhc loop psmouse
+    [  940.026915] CPU: 0 PID: 3184 Comm: memcheck-amd64- Not tainted 3.11.0+ #1
+    [  940.026915] Hardware name: Bochs Bochs, BIOS Bochs 01/01/2007
+    [  940.026915] task: ffff880007130e20 ti: ffff88000737e000 task.ti: ffff88000737e000
+    [  940.026915] RIP: 0010:[<ffffffff81333780>]  [<ffffffff81333780>] ip6_xmit+0x276/0x326
+    [  940.026915] RSP: 0018:ffff88000737fd28  EFLAGS: 00010286
+    [  940.026915] RAX: c748521a75ceff48 RBX: ffff880000c30800 RCX: 0000000000000000
+    [  940.026915] RDX: ffff88000075cc4e RSI: 0000000000000028 RDI: ffff8800060e5a40
+    [  940.026915] RBP: ffff8800060e5a40 R08: 0000000000000000 R09: ffff88000075cc90
+    [  940.026915] R10: 0000000000000000 R11: 0000000000000000 R12: ffff88000737fda0
+    [  940.026915] R13: 0000000000000000 R14: 0000000000002000 R15: ffff880005d3b580
+    [  940.026915] FS:  00007f163dc5e800(0000) GS:ffffffff81623000(0000) knlGS:0000000000000000
+    [  940.026915] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+    [  940.026915] CR2: 00000004032dc940 CR3: 0000000005c25000 CR4: 00000000000006f0
+    [  940.026915] Stack:
+    [  940.026915]  ffff88000075cc4e ffffffff81694e90 ffff880000c30b38 0000000000000020
+    [  940.026915]  11000000523c4bac ffff88000737fdb4 0000000000000000 ffff880000c30800
+    [  940.026915]  ffff880005d3b580 ffff880000c30b38 ffff8800060e5a40 0000000000000020
+    [  940.026915] Call Trace:
+    [  940.026915]  [<ffffffff81356cc3>] ? inet6_csk_xmit+0xa4/0xc4
+    [  940.026915]  [<ffffffffa0038535>] ? l2tp_xmit_skb+0x503/0x55a [l2tp_core]
+    [  940.026915]  [<ffffffff812b8d3b>] ? pskb_expand_head+0x161/0x214
+    [  940.026915]  [<ffffffffa003e91d>] ? pppol2tp_xmit+0xf2/0x143 [l2tp_ppp]
+    [  940.026915]  [<ffffffffa00292e0>] ? ppp_channel_push+0x36/0x8b [ppp_generic]
+    [  940.026915]  [<ffffffffa00293fe>] ? ppp_write+0xaf/0xc5 [ppp_generic]
+    [  940.026915]  [<ffffffff8110ead4>] ? vfs_write+0xa2/0x106
+    [  940.026915]  [<ffffffff8110edd6>] ? SyS_write+0x56/0x8a
+    [  940.026915]  [<ffffffff81378ac0>] ? system_call_fastpath+0x16/0x1b
+    [  940.026915] Code: 00 49 8b 8f d8 00 00 00 66 83 7c 11 02 00 74 60 49
+    8b 47 58 48 83 e0 fe 48 8b 80 18 01 00 00 48 85 c0 74 13 48 8b 80 78 02
+    00 00 <48> ff 40 28 41 8b 57 68 48 01 50 30 48 8b 54 24 08 49 c7 c1 51
+    [  940.026915] RIP  [<ffffffff81333780>] ip6_xmit+0x276/0x326
+    [  940.026915]  RSP <ffff88000737fd28>
+    [  940.057945] ---[ end trace be8aba9a61c8b7f3 ]---
+    [  940.058583] Kernel panic - not syncing: Fatal exception in interrupt
+    
+    Signed-off-by: François CACHEREUL <f.cachereul@alphalink.fr>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/l2tp/l2tp_core.c |   27 +++++++++++++++++++++++----
+ net/l2tp/l2tp_core.h |    3 +++
+ 2 files changed, 26 insertions(+), 4 deletions(-)
+
+commit 2db6fe58460d400bc8b995fa2328be03e27e55e1
+Merge: 28f9622 e41125e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 15 10:00:52 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/sparc/kernel/ds.c
+    	net/sysctl_net.c
+
+commit e41125e4742f332cd8cd8cf0c00cb189dba0e037
+Merge: 740e5ec a145cb9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 15 09:58:29 2013 -0400
+
+    Merge branch 'linux-3.11.y' into pax-test
+
 commit 28f9622091224541efadf3ae006f0e5651c7fa45
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Oct 1 22:48:34 2013 -0400
