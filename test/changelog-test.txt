@@ -1,3 +1,174 @@
+commit 5cf8361c2a7762aa1cdd3d75655361058ad451ad
+Author: Johannes Weiner <hannes@cmpxchg.org>
+Date:   Wed Oct 16 13:47:00 2013 -0700
+
+    Upstream commit: 84235de394d9775bfaa7fa9762a59d91fef0c1fc
+    
+    fs: buffer: move allocation failure loop into the allocator
+    
+    Buffer allocation has a very crude indefinite loop around waking the
+    flusher threads and performing global NOFS direct reclaim because it can
+    not handle allocation failures.
+    
+    The most immediate problem with this is that the allocation may fail due
+    to a memory cgroup limit, where flushers + direct reclaim might not make
+    any progress towards resolving the situation at all.  Because unlike the
+    global case, a memory cgroup may not have any cache at all, only
+    anonymous pages but no swap.  This situation will lead to a reclaim
+    livelock with insane IO from waking the flushers and thrashing unrelated
+    filesystem cache in a tight loop.
+    
+    Use __GFP_NOFAIL allocations for buffers for now.  This makes sure that
+    any looping happens in the page allocator, which knows how to
+    orchestrate kswapd, direct reclaim, and the flushers sensibly.  It also
+    allows memory cgroups to detect allocations that can't handle failure
+    and will allow them to ultimately bypass the limit if reclaim can not
+    make progress.
+    
+    Reported-by: azurIt <azurit@pobox.sk>
+    Signed-off-by: Johannes Weiner <hannes@cmpxchg.org>
+    Cc: Michal Hocko <mhocko@suse.cz>
+    Cc: <stable@kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/buffer.c     |   14 ++++++++++++--
+ mm/memcontrol.c |    2 ++
+ 2 files changed, 14 insertions(+), 2 deletions(-)
+
+commit 799326c8683d8d70b2035b1e5ab913c159112b6b
+Author: Miklos Szeredi <mszeredi@suse.cz>
+Date:   Thu Oct 10 16:48:19 2013 +0200
+
+    Upstream commit: 43ae9e3fc70ca0057ae0a24ef5eedff05e3fae06
+    
+    ext[34]: fix double put in tmpfile
+    
+    d_tmpfile() already swallowed the inode ref.
+    
+    Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/ext3/namei.c |    5 ++---
+ fs/ext4/namei.c |    5 ++---
+ 2 files changed, 4 insertions(+), 6 deletions(-)
+
+commit 799651db9a3b5b08eac1de0ee05f406df7a9a2e3
+Author: Jan Klos <honza.klos@gmail.com>
+Date:   Sun Oct 6 21:08:20 2013 +0200
+
+    Upstream commit: 2f6c9479633780ba4a3484bba7eba5a721a5cf20
+    
+    cifs: Fix inability to write files >2GB to SMB2/3 shares
+    
+    When connecting to SMB2/3 shares, maximum file size is set to non-LFS maximum in superblock. This is due to cap_large_files bit being different for SMB1 and SMB2/3 (where it is just an internal flag that is not negotiated and the SMB1 one corresponds to multichannel capability, so maybe LFS works correctly if server sends 0x08 flag) while capabilities are checked always for the SMB1 bit in cifs_read_super().
+    
+    The patch fixes this by checking for the correct bit according to the protocol version.
+    
+    CC: Stable <stable@kernel.org>
+    Signed-off-by: Jan Klos <honza.klos@gmail.com>
+    Reviewed-by: Jeff Layton <jlayton@redhat.com>
+    Signed-off-by: Steve French <smfrench@gmail.com>
+
+ fs/cifs/cifsfs.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 549fe4c5bb5e67cb1351bb09455b1d77abe5ab22
+Author: Tim Gardner <tim.gardner@canonical.com>
+Date:   Sun Oct 13 13:29:03 2013 -0600
+
+    Upstream commit: 0c26606cbe4937f2228a27bb0c2cad19855be87a
+    
+    cifs: ntstatus_to_dos_map[] is not terminated
+    
+    Functions that walk the ntstatus_to_dos_map[] array could
+    run off the end. For example, ntstatus_to_dos() loops
+    while ntstatus_to_dos_map[].ntstatus is not 0. Granted,
+    this is mostly theoretical, but could be used as a DOS attack
+    if the error code in the SMB header is bogus.
+    
+    [Might consider adding to stable, as this patch is low risk - Steve]
+    
+    Reviewed-by: Jeff Layton <jlayton@redhat.com>
+    Signed-off-by: Tim Gardner <tim.gardner@canonical.com>
+    Signed-off-by: Steve French <smfrench@gmail.com>
+
+ fs/cifs/netmisc.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit ed8c09a96fa260e1864c632e1dd91b1320876305
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Tue Oct 15 11:54:30 2013 -0700
+
+    Upstream commit: c52e2421f7368fd36cbe330d2cf41b10452e39a9
+    
+    tcp: must unclone packets before mangling them
+    
+    TCP stack should make sure it owns skbs before mangling them.
+    
+    We had various crashes using bnx2x, and it turned out gso_size
+    was cleared right before bnx2x driver was populating TC descriptor
+    of the _previous_ packet send. TCP stack can sometime retransmit
+    packets that are still in Qdisc.
+    
+    Of course we could make bnx2x driver more robust (using
+    ACCESS_ONCE(shinfo->gso_size) for example), but the bug is TCP stack.
+    
+    We have identified two points where skb_unclone() was needed.
+    
+    This patch adds a WARN_ON_ONCE() to warn us if we missed another
+    fix of this kind.
+    
+    Kudos to Neal for finding the root cause of this bug. Its visible
+    using small MSS.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Neal Cardwell <ncardwell@google.com>
+    Cc: Yuchung Cheng <ycheng@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_output.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+commit e5dcf1772ca2a85952da10a21d0650507dc061d3
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Mon Oct 14 15:28:38 2013 +0300
+
+    Upstream commit: 9e5f1721907fcfbd4b575bcafa0314188f7330a5
+    
+    yam: integer underflow in yam_ioctl()
+    
+    We cap bitrate at YAM_MAXBITRATE in yam_ioctl(), but it could also be
+    negative.  I don't know the impact of using a negative bitrate but let's
+    prevent it.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/linux/yam.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1f5d72d633f317248bba25158c326a61394aebf2
+Merge: 7ca4328 4df1b96
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 18 19:36:17 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	ipc/shm.c
+
+commit 4df1b965687831808af2548487e0f35a2ccc5c29
+Merge: e41125e 5070441
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 18 19:35:31 2013 -0400
+
+    Merge branch 'linux-3.11.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/setup.c
+
 commit 7ca43282302f7777ca3ae48d2552dbd0a6cef525
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Oct 16 18:35:00 2013 -0400
