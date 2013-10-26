@@ -1,3 +1,24 @@
+commit aead8ff29424c6a5d25eb4614be91a01f9f6af00
+Merge: 5cf8361 ddadc82
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 26 08:42:26 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit ddadc822a1de40d3992a5c58ca2f970b5fee57ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 26 08:41:24 2013 -0400
+
+    - fixed miscompilation caused by a kernexec plugin related change in copy_user_generic, by Timo Teräs <timo.teras@iki.f> and Natanael Copa <ncopa@alpinelinux.org> (https://github.com/ncopa/linux-stable-grsec/commit/b8bf456d13988fb38cfe248676327f44a2d2ed2e)
+    - updated config help for latent entropy to reflect recent changes
+
+ arch/x86/include/asm/uaccess_64.h |    4 ++--
+ security/Kconfig                  |    6 +++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
 commit 5cf8361c2a7762aa1cdd3d75655361058ad451ad
 Author: Johannes Weiner <hannes@cmpxchg.org>
 Date:   Wed Oct 16 13:47:00 2013 -0700
