@@ -1,3 +1,210 @@
+commit e68e94ddd03cf81d875b30a5e7b0e1bb4682e61f
+Merge: 0970b16 e309bfb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 27 15:17:05 2013 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e309bfbf7b506b2294b30233f7a3299173a75cf7
+Author: Hugh Dickins <hughd@google.com>
+Date:   Wed Oct 16 13:47:09 2013 -0700
+
+    Upstream commit: 57a8f0cdb87da776bf0e4ce7554a9133854fa779
+    
+    mm: revert mremap pud_free anti-fix
+    
+    Revert commit 1ecfd533f4c5 ("mm/mremap.c: call pud_free() after fail
+    calling pmd_alloc()").
+    
+    The original code was correct: pud_alloc(), pmd_alloc(), pte_alloc_map()
+    ensure that the pud, pmd, pt is already allocated, and seldom do they
+    need to allocate; on failure, upper levels are freed if appropriate by
+    the subsequent do_munmap().  Whereas commit 1ecfd533f4c5 did an
+    unconditional pud_free() of a most-likely still-in-use pud: saved only
+    by the near-impossiblity of pmd_alloc() failing.
+    
+    Signed-off-by: Hugh Dickins <hughd@google.com>
+    Cc: Chen Gang <gang.chen@asianux.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mremap.c |    5 +----
+ 1 files changed, 1 insertions(+), 4 deletions(-)
+
+commit 0970b16a9df08b8cca6929b6443f67df432ac3e5
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Tue Oct 1 21:04:11 2013 -0700
+
+    Upstream commit: 80ad1d61e72d626e30ebe8529a0455e660ca4693
+    
+    net: do not call sock_put() on TIMEWAIT sockets
+    
+    commit 3ab5aee7fe84 ("net: Convert TCP & DCCP hash tables to use RCU /
+    hlist_nulls") incorrectly used sock_put() on TIMEWAIT sockets.
+    
+    We should instead use inet_twsk_put()
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/inet_hashtables.c  |    2 +-
+ net/ipv6/inet6_hashtables.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit ed0c9c47bc3468ad88b45b8ec55d0ad335214d28
+Author: Andi Kleen <ak@linux.intel.com>
+Date:   Mon Sep 30 13:29:08 2013 -0700
+
+    Upstream commit: 58e4e1f6cacddb7823c44bcfb272174553f6c645
+    
+    igb: Avoid uninitialized advertised variable in eee_set_cur
+    
+    eee_get_cur assumes that the output data is already zeroed. It can
+    read-modify-write the advertised field:
+    
+                  if (ipcnfg & E1000_IPCNFG_EEE_100M_AN)
+    2594			edata->advertised |= ADVERTISED_100baseT_Full;
+    
+    This is ok for the normal ethtool eee_get call, which always
+    zeroes the input data before.
+    
+    But eee_set_cur also calls eee_get_cur and it did not zero the input
+    field. Later on it then compares agsinst the field, which can contain partial
+    stack garbage.
+    
+    Zero the input field in eee_set_cur() too.
+    
+    Cc: jeffrey.t.kirsher@intel.com
+    Cc: netdev@vger.kernel.org
+    Signed-off-by: Andi Kleen <ak@linux.intel.com>
+    Acked-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/intel/igb/igb_ethtool.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 651730a8caabce37f78d8e6c84283b96e434d19f
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Thu Oct 3 00:27:20 2013 +0300
+
+    Upstream commit: 1661bf364ae9c506bc8795fef70d1532931be1e8
+    
+    net: heap overflow in __audit_sockaddr()
+    
+    We need to cap ->msg_namelen or it leads to a buffer overflow when we
+    to the memcpy() in __audit_sockaddr().  It requires CAP_AUDIT_CONTROL to
+    exploit this bug.
+    
+    The call tree is:
+    ___sys_recvmsg()
+      move_addr_to_user()
+        audit_sockaddr()
+          __audit_sockaddr()
+    
+    Reported-by: Jüri Aedla <juri.aedla@gmail.com>
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/compat.c
+
+ net/compat.c |    2 ++
+ net/socket.c |   24 ++++++++++++++++++++----
+ 2 files changed, 22 insertions(+), 4 deletions(-)
+
+commit b52e008aa27ecec1ca4a2d92ffe2fe874c47fcfc
+Author: Salva Peiró <speiro@ai2.upv.es>
+Date:   Wed Oct 16 12:46:50 2013 +0200
+
+    Upstream commit: 2b13d06c9584b4eb773f1e80bbaedab9a1c344e1
+    
+    wanxl: fix info leak in ioctl
+    
+    The wanxl_ioctl() code fails to initialize the two padding bytes of
+    struct sync_serial_settings after the ->loopback member. Add an explicit
+    memset(0) before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Salva Peiró <speiro@ai2.upv.es>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/wan/wanxl.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit d7e5b4f97fbdd06c03433939efe0e444d877ab4f
+Author: Geyslan G. Bem <geyslan@gmail.com>
+Date:   Fri Oct 11 16:49:16 2013 -0300
+
+    Upstream commit: 3edc8376c06133e3386265a824869cad03a4efd4
+    
+    ecryptfs: Fix memory leakage in keystore.c
+    
+    In 'decrypt_pki_encrypted_session_key' function:
+    
+    Initializes 'payload' pointer and releases it on exit.
+    
+    Signed-off-by: Geyslan G. Bem <geyslan@gmail.com>
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+    Cc: stable@vger.kernel.org # v2.6.28+
+
+ fs/ecryptfs/keystore.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 0ccb7b191245318a36bbd1f59a1846dda72cb738
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Thu Oct 24 14:08:07 2013 +0000
+
+    Upstream commit: 43b7c6c6a4e3916edd186ceb61be0c67d1e0969e
+    
+    eCryptfs: fix 32 bit corruption issue
+    
+    Shifting page->index on 32 bit systems was overflowing, causing
+    data corruption of > 4GB files. Fix this by casting it first.
+    
+    https://launchpad.net/bugs/1243636
+    
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Reported-by: Lars Duesing <lars.duesing@camelotsweb.de>
+    Cc: stable@vger.kernel.org # v3.11+
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+
+ fs/ecryptfs/crypto.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit eeb8d56181a3fa3cdfbc106156d4f60cf3a386d4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 27 13:29:49 2013 -0400
+
+    This is a replacement patch only for stable which does fix the problems
+    handled by the following two commits in -net:
+    
+    "ip_output: do skb ufo init for peeked non ufo skb as well" (e93b7d748be887cd7639b113ba7d7ef792a7efb9)
+    "ip6_output: do skb ufo init for peeked non ufo skb as well" (c547dbf55d5f8cf615ccc0e7265e98db27d3fb8b)
+    
+    Three frames are written on a corked udp socket for which the output
+    netdevice has UFO enabled.  If the first and third frame are smaller than
+    the mtu and the second one is bigger, we enqueue the second frame with
+    skb_append_datato_frags without initializing the gso fields. This leads
+    to the third frame appended regulary and thus constructing an invalid skb.
+    
+    This fixes the problem by always using skb_append_datato_frags as soon
+    as the first frag got enqueued to the skb without marking the packet
+    as SKB_GSO_UDP.
+    
+    The problem with only two frames for ipv6 was fixed by "ipv6: udp
+    packets following an UFO enqueued packet need also be handled by UFO"
+    (2811ebac2521ceac84f2bdae402455baa6a7fb47).
+    
+    Cc: Jiri Pirko <jiri@resnulli.us>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: David Miller <davem@davemloft.net>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+
+ include/linux/skbuff.h |    5 +++++
+ net/ipv4/ip_output.c   |    2 +-
+ net/ipv6/ip6_output.c  |    2 +-
+ 3 files changed, 7 insertions(+), 2 deletions(-)
+
 commit aead8ff29424c6a5d25eb4614be91a01f9f6af00
 Merge: 5cf8361 ddadc82
 Author: Brad Spengler <spender@grsecurity.net>
