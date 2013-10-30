@@ -1,3 +1,32 @@
+commit 4a907baeb462b7e0f50923be5a9d842aec93c97a
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Tue Oct 29 10:21:34 2013 -0700
+
+    Fixed a little differently than Linus...
+    
+    Obfuscated upstream security commit: 7314e613d5ff9f0934f7a0f74ed7973b903315d1
+    
+    Fix a few incorrectly checked [io_]remap_pfn_range() calls
+    
+    Nico Golde reports a few straggling uses of [io_]remap_pfn_range() that
+    really should use the vm_iomap_memory() helper.  This trivially converts
+    two of them to the helper, and comments about why the third one really
+    needs to continue to use remap_pfn_range(), and adds the missing size
+    check.
+    
+    Reported-by: Nico Golde <nico@ngolde.de>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org.
+    
+    Conflicts:
+    
+    	drivers/uio/uio.c
+
+ drivers/uio/uio.c        |   19 +++++++++++++++++--
+ drivers/video/au1100fb.c |   26 +-------------------------
+ drivers/video/au1200fb.c |   23 +----------------------
+ 3 files changed, 19 insertions(+), 49 deletions(-)
+
 commit e68e94ddd03cf81d875b30a5e7b0e1bb4682e61f
 Merge: 0970b16 e309bfb
 Author: Brad Spengler <spender@grsecurity.net>
