@@ -1,3 +1,158 @@
+commit 1285d10ec38f216f3c5de7ce085ce43447c78916
+Author: Jason Wang <jasowang@redhat.com>
+Date:   Fri Nov 1 15:01:10 2013 +0800
+
+    Upstream commit: 6f092343855a71e03b8d209815d8c45bf3a27fcd
+    
+    net: flow_dissector: fail on evil iph->ihl
+    
+    We don't validate iph->ihl which may lead a dead loop if we meet a IPIP
+    skb whose iph->ihl is zero. Fix this by failing immediately when iph->ihl
+    is evil (less than 5).
+    
+    This issue were introduced by commit ec5efe7946280d1e84603389a1030ccec0a767ae
+    (rps: support IPIP encapsulation).
+    
+    Cc: Eric Dumazet <edumazet@google.com>
+    Cc: Petr Matousek <pmatouse@redhat.com>
+    Cc: Michael S. Tsirkin <mst@redhat.com>
+    Cc: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: Jason Wang <jasowang@redhat.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/flow_dissector.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3afa8cd39a80620059d7de6c382c853afe1ab4cc
+Author: Ming Lei <ming.lei@canonical.com>
+Date:   Thu Oct 31 16:34:17 2013 -0700
+
+    Upstream commit: 3d77b50c5874b7e923be946ba793644f82336b75
+    
+    lib/scatterlist.c: don't flush_kernel_dcache_page on slab page
+    
+    Commit b1adaf65ba03 ("[SCSI] block: add sg buffer copy helper
+    functions") introduces two sg buffer copy helpers, and calls
+    flush_kernel_dcache_page() on pages in SG list after these pages are
+    written to.
+    
+    Unfortunately, the commit may introduce a potential bug:
+    
+     - Before sending some SCSI commands, kmalloc() buffer may be passed to
+       block layper, so flush_kernel_dcache_page() can see a slab page
+       finally
+    
+     - According to cachetlb.txt, flush_kernel_dcache_page() is only called
+       on "a user page", which surely can't be a slab page.
+    
+     - ARCH's implementation of flush_kernel_dcache_page() may use page
+       mapping information to do optimization so page_mapping() will see the
+       slab page, then VM_BUG_ON() is triggered.
+    
+    Aaro Koskinen reported the bug on ARM/kirkwood when DEBUG_VM is enabled,
+    and this patch fixes the bug by adding test of '!PageSlab(miter->page)'
+    before calling flush_kernel_dcache_page().
+    
+    Signed-off-by: Ming Lei <ming.lei@canonical.com>
+    Reported-by: Aaro Koskinen <aaro.koskinen@iki.fi>
+    Tested-by: Simon Baatz <gmbnomis@gmail.com>
+    Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>
+    Cc: Will Deacon <will.deacon@arm.com>
+    Cc: Aaro Koskinen <aaro.koskinen@iki.fi>
+    Acked-by: Catalin Marinas <catalin.marinas@arm.com>
+    Cc: FUJITA Tomonori <fujita.tomonori@lab.ntt.co.jp>
+    Cc: Tejun Heo <tj@kernel.org>
+    Cc: "James E.J. Bottomley" <JBottomley@parallels.com>
+    Cc: Jens Axboe <axboe@kernel.dk>
+    Cc: <stable@vger.kernel.org>	[3.2+]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ lib/scatterlist.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 54a2d1367d37e6ff23e91e81e8a293f6db3572c4
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Oct 29 23:01:11 2013 +0300
+
+    Upstream commit: 8d1e72250c847fa96498ec029891de4dc638a5ba
+    
+    Staging: bcm: info leak in ioctl
+    
+    The DevInfo.u32Reserved[] array isn't initialized so it leaks kernel
+    information to user space.
+    
+    Reported-by: Nico Golde <nico@ngolde.de>
+    Reported-by: Fabian Yamaguchi <fabs@goesec.de>
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/staging/bcm/Bcmchar.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit a2ab9d69265a08280241a2f2152e535316d02f53
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Oct 29 22:11:06 2013 +0300
+
+    Upstream commit: f856567b930dfcdbc3323261bf77240ccdde01f5
+    
+    aacraid: missing capable() check in compat ioctl
+    
+    In commit d496f94d22d1 ('[SCSI] aacraid: fix security weakness') we
+    added a check on CAP_SYS_RAWIO to the ioctl.  The compat ioctls need the
+    check as well.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/scsi/aacraid/linit.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 45be53b2583e3c3d9eb0bad55f22e03ad7943b3e
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Oct 29 23:00:15 2013 +0300
+
+    Upstream commit: b5e2f339865fb443107e5b10603e53bbc92dc054
+    
+    staging: wlags49_h2: buffer overflow setting station name
+    
+    We need to check the length parameter before doing the memcpy().  I've
+    actually changed it to strlcpy() as well so that it's NUL terminated.
+    
+    You need CAP_NET_ADMIN to trigger these so it's not the end of the
+    world.
+    
+    Reported-by: Nico Golde <nico@ngolde.de>
+    Reported-by: Fabian Yamaguchi <fabs@goesec.de>
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/staging/wlags49_h2/wl_priv.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+commit afd645c1684265260b64ec8189cbc2703b91f6ab
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Oct 29 22:07:47 2013 +0300
+
+    Upstream commit: c2c65cd2e14ada6de44cb527e7f1990bede24e15
+    
+    staging: ozwpan: prevent overflow in oz_cdev_write()
+    
+    We need to check "count" so we don't overflow the ei->data buffer.
+    
+    Reported-by: Nico Golde <nico@ngolde.de>
+    Reported-by: Fabian Yamaguchi <fabs@goesec.de>
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/staging/ozwpan/ozcdev.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
 commit 4a907baeb462b7e0f50923be5a9d842aec93c97a
 Author: Linus Torvalds <torvalds@linux-foundation.org>
 Date:   Tue Oct 29 10:21:34 2013 -0700
