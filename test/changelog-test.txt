@@ -1,3 +1,90 @@
+commit b374a895f9ecfccbf3c8536a5a1a51b359a66a20
+Merge: fb281bd 4e826ac
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 6 17:27:16 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	net/l2tp/l2tp_core.c
+
+commit 4e826ac763867707352d93b7d23ed86e4c6829cf
+Merge: e309bfb 39773be
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 6 17:26:23 2013 -0500
+
+    Merge branch 'linux-3.11.y' into pax-test
+    
+    Conflicts:
+    	net/compat.c
+
+commit fb281bdee5ccb76facfe1172318a867b624011f4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 6 16:23:36 2013 -0500
+
+    Force on DEBUG_LIST so all users can benefit from safe linking/unlinking
+    
+    Conflicts:
+    
+    	security/Kconfig
+
+ security/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit e249a2a0ee333a6ec0234de20d17670fe0d2b64a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 6 16:19:21 2013 -0500
+
+    change DEBUG_LIST WARNs back to BUGs so they can benefit from the kernel
+    bruteforce deterrence
+    
+    Conflicts:
+    
+    	lib/list_debug.c
+
+ lib/list_debug.c |   65 ++++++++++++++++++++++++++++++++++-------------------
+ 1 files changed, 42 insertions(+), 23 deletions(-)
+
+commit 61f8b4eb5c8b11ff11d28372a44d6e0f3b9b68ba
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Oct 29 23:01:43 2013 +0300
+
+    Upstream commit: a8b33654b1e3b0c74d4a1fed041c9aae50b3c427
+    
+    Staging: sb105x: info leak in mp_get_count()
+    
+    The icount.reserved[] array isn't initialized so it leaks stack
+    information to userspace.
+    
+    Reported-by: Nico Golde <nico@ngolde.de>
+    Reported-by: Fabian Yamaguchi <fabs@goesec.de>
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/staging/sb105x/sb_pci_mp.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 731cf7d12aa699cc30c18e5fe25b8c72b97df3de
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Oct 29 22:06:04 2013 +0300
+
+    Upstream commit: 201f99f170df14ba52ea4c52847779042b7a623b
+    
+    uml: check length in exitcode_proc_write()
+    
+    We don't cap the size of buffer from the user so we could write past the
+    end of the array here.  Only root can write to this file.
+    
+    Reported-by: Nico Golde <nico@ngolde.de>
+    Reported-by: Fabian Yamaguchi <fabs@goesec.de>
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/um/kernel/exitcode.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
 commit 1285d10ec38f216f3c5de7ce085ce43447c78916
 Author: Jason Wang <jasowang@redhat.com>
 Date:   Fri Nov 1 15:01:10 2013 +0800
