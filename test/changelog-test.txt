@@ -1,3 +1,55 @@
+commit 094c08532f9877a287ffac7a87b05841a56b4e5d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 10 22:01:33 2013 -0500
+
+    Add missing include
+
+ fs/proc/proc_sysctl.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit e383790f8252620f52895e202cc057c4318da3f4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 10 17:50:12 2013 -0500
+
+    add an option to handle old ARM userlands to properly toggle the KUSER_HELPERS
+    option: GRKERNSEC_OLD_ARM_USERLAND
+
+ arch/arm/mm/Kconfig |    2 +-
+ grsecurity/Kconfig  |   14 ++++++++++++++
+ 2 files changed, 15 insertions(+), 1 deletions(-)
+
+commit 9b2775742dbcfcc004f02e5cc6bed6dcd9d73d26
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 10 15:19:27 2013 -0500
+
+    On ARM (and other arches) we were defaulting mmap_min_addr to 64K if the LSM-based mmap_min_addr
+    was disabled in config.  This caused non-root execs to fail in some cases (via SIGKILL during ELF
+    loading).  Fix this by setting a proper default on these architectures like set on the LSM-based
+    mmap_min_addr.
+    
+    Thanks to acez from IRC for debugging.
+
+ mm/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 17f832897194f46c4759aa02e048ad5623a04eed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 10 13:54:25 2013 -0500
+
+    Compatibility fix for LXC:
+    Don't require CAP_SYS_ADMIN to modify our own net namespace's sysctl values,
+    use a CAP_NET_ADMIN check within the user namespace of the process performing the modification
+    CAP_SYS_ADMIN is still required for any other sysctl modification, including modification
+    of sysctls of a net namespace other than our own
+    
+    This allows for LXC containers to not need CAP_SYS_ADMIN to be able to set up their namespace's
+    networking
+    
+    Thanks to ncopa from IRC for testing
+
+ fs/proc/proc_sysctl.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
 commit b374a895f9ecfccbf3c8536a5a1a51b359a66a20
 Merge: fb281bd 4e826ac
 Author: Brad Spengler <spender@grsecurity.net>
