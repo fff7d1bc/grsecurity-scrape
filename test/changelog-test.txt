@@ -1,3 +1,235 @@
+commit 5a0b39755f07014ed0d34a432b89cfbb38b82e0b
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Nov 18 07:07:45 2013 +0100
+
+    Upstream commit: cf970c002d270c36202bd5b9c2804d3097a52da0
+    
+    ping: prevent NULL pointer dereference on write to msg_name
+    
+    A plain read() on a socket does set msg->msg_name to NULL. So check for
+    NULL pointer first.
+    
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ping.c |   34 +++++++++++++++++++---------------
+ 1 files changed, 19 insertions(+), 15 deletions(-)
+
+commit 8bb32f2682953e1b748a59c4a4363b237c3510df
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Nov 18 04:20:45 2013 +0100
+
+    Upstream commit: bceaa90240b6019ed73b49965eac7d167610be69
+    
+    inet: prevent leakage of uninitialized memory to user in recv syscalls
+    
+    Only update *addr_len when we actually fill in sockaddr, otherwise we
+    can return uninitialized memory from the stack to the caller in the
+    recvfrom, recvmmsg and recvmsg syscalls. Drop the the (addr_len == NULL)
+    checks because we only get called with a valid addr_len pointer either
+    from sock_common_recvmsg or inet_recvmsg.
+    
+    If a blocking read waits on a socket which is concurrently shut down we
+    now return zero and set msg_msgnamelen to 0.
+    
+    Reported-by: mpb <mpb.mail@gmail.com>
+    Suggested-by: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ieee802154/dgram.c |    3 +--
+ net/ipv4/ping.c        |   19 +++++++------------
+ net/ipv4/raw.c         |    4 +---
+ net/ipv4/udp.c         |    7 +------
+ net/ipv6/raw.c         |    4 +---
+ net/ipv6/udp.c         |    5 +----
+ net/l2tp/l2tp_ip.c     |    4 +---
+ net/phonet/datagram.c  |    9 ++++-----
+ 8 files changed, 17 insertions(+), 38 deletions(-)
+
+commit 642d754081c130a151e7df27e5c07edf2f368106
+Author: Jeff Layton <jlayton@redhat.com>
+Date:   Wed Nov 13 09:08:21 2013 -0500
+
+    Upstream commit: 6d769f1e1420179d1f83cf1a9cdc585b46c28545
+    
+    nfs: don't retry detect_trunking with RPC_AUTH_UNIX more than once
+    
+    Currently, when we try to mount and get back NFS4ERR_CLID_IN_USE or
+    NFS4ERR_WRONGSEC, we create a new rpc_clnt and then try the call again.
+    There is no guarantee that doing so will work however, so we can end up
+    retrying the call in an infinite loop.
+    
+    Worse yet, we create the new client using rpc_clone_client_set_auth,
+    which creates the new client as a child of the old one. Thus, we can end
+    up with a *very* long lineage of rpc_clnts. When we go to put all of the
+    references to them, we can end up with a long call chain that can smash
+    the stack as each rpc_free_client() call can recurse back into itself.
+    
+    This patch fixes this by simply ensuring that the SETCLIENTID call will
+    only be retried in this situation if the last attempt did not use
+    RPC_AUTH_UNIX.
+    
+    Note too that with this change, we don't need the (i > 2) check in the
+    -EACCES case since we now have a more reliable test as to whether we
+    should reattempt.
+    
+    Cc: stable@vger.kernel.org # v3.10+
+    Cc: Chuck Lever <chuck.lever@oracle.com>
+    Tested-by/Acked-by: Weston Andros Adamson <dros@netapp.com>
+    Signed-off-by: Jeff Layton <jlayton@redhat.com>
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+
+ fs/nfs/nfs4state.c |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit a96ee20d2e099c56fd89b91ee309551e7b50b8f2
+Author: Chuck Lever <chuck.lever@oracle.com>
+Date:   Wed Jul 24 12:28:28 2013 -0400
+
+    Upstream commit: d688f7b8f62857c252b886fa16e8b38b83cfaf7e
+    
+    NFS: Use root's credential for lease management when keytab is missing
+    
+    Commit 05f4c350 "NFS: Discover NFSv4 server trunking when mounting"
+    Fri Sep 14 17:24:32 2012 introduced Uniform Client String support,
+    which forces our NFS client to establish a client ID immediately
+    during a mount operation rather than waiting until a user wants to
+    open a file.
+    
+    Normally machine credentials (eg. from a keytab) are used to perform
+    a mount operation that is protected by Kerberos.  Before 05fc350,
+    SETCLIENTID used a machine credential, or fell back to a regular
+    user's credential if no keytab is available.
+    
+    On clients that don't have a keytab, performing SETCLIENTID early
+    means there's no user credential to fall back on, since no regular
+    user has kinit'd yet.  05f4c350 seems to have broken the ability
+    to mount with sec=krb5 on clients that don't have a keytab in
+    kernels 3.7 - 3.10.
+    
+    To address this regression, commit 4edaa308 (NFS: Use "krb5i" to
+    establish NFSv4 state whenever possible), Sat Mar 16 15:56:20 2013,
+    was merged in 3.10.  This commit forces the NFS client to fall back
+    to AUTH_SYS for lease management operations if no keytab is
+    available.
+    
+    Neil Brown noticed that, since root is required to kinit to do a
+    sec=krb5 mount when a client doesn't have a keytab, we can try to
+    use root's Kerberos credential before AUTH_SYS.
+    
+    Now, when determining a principal and flavor to use for lease
+    management, the NFS client tries in this order:
+    
+      1.  Flavor: AUTH_GSS, krb5i
+          Principal: service principal (via keytab)
+    
+      2.  Flavor: AUTH_GSS, krb5i
+          Principal: user principal established for UID 0 (via kinit)
+    
+      3.  Flavor: AUTH_SYS
+          Principal: UID 0 / GID 0
+    
+    Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+
+ fs/nfs/nfs4state.c |   19 ++++++++++++++++++-
+ 1 files changed, 18 insertions(+), 1 deletions(-)
+
+commit 6ebab64904f37af82e950b0c6d321437e810b248
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Tue Nov 12 17:24:36 2013 -0500
+
+    Upstream commit: d07ba8422f1e58be94cc98a1f475946dc1b89f1b
+    
+    SUNRPC: Avoid deep recursion in rpc_release_client
+    
+    In cases where an rpc client has a parent hierarchy, then
+    rpc_free_client may end up calling rpc_release_client() on the
+    parent, thus recursing back into rpc_free_client. If the hierarchy
+    is deep enough, then we can get into situations where the stack
+    simply overflows.
+    
+    The fix is to have rpc_release_client() loop so that it can take
+    care of the parent rpc client hierarchy without needing to
+    recurse.
+    
+    Reported-by: Jeff Layton <jlayton@redhat.com>
+    Reported-by: Weston Andros Adamson <dros@netapp.com>
+    Reported-by: Bruce Fields <bfields@fieldses.org>
+    Link: http://lkml.kernel.org/r/2C73011F-0939-434C-9E4D-13A1EB1403D7@netapp.com
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+
+ net/sunrpc/clnt.c |   29 +++++++++++++++++------------
+ 1 files changed, 17 insertions(+), 12 deletions(-)
+
+commit fcb4306973aed105cc6d042077bf31e21b812008
+Author: Trond Myklebust <Trond.Myklebust@netapp.com>
+Date:   Fri Nov 8 16:03:50 2013 -0500
+
+    Upstream commit: a6b31d18b02ff9d7915c5898c9b5ca41a798cd73
+    
+    SUNRPC: Fix a data corruption issue when retransmitting RPC calls
+    
+    The following scenario can cause silent data corruption when doing
+    NFS writes. It has mainly been observed when doing database writes
+    using O_DIRECT.
+    
+    1) The RPC client uses sendpage() to do zero-copy of the page data.
+    2) Due to networking issues, the reply from the server is delayed,
+       and so the RPC client times out.
+    
+    3) The client issues a second sendpage of the page data as part of
+       an RPC call retransmission.
+    
+    4) The reply to the first transmission arrives from the server
+       _before_ the client hardware has emptied the TCP socket send
+       buffer.
+    5) After processing the reply, the RPC state machine rules that
+       the call to be done, and triggers the completion callbacks.
+    6) The application notices the RPC call is done, and reuses the
+       pages to store something else (e.g. a new write).
+    
+    7) The client NIC drains the TCP socket send buffer. Since the
+       page data has now changed, it reads a corrupted version of the
+       initial RPC call, and puts it on the wire.
+    
+    This patch fixes the problem in the following manner:
+    
+    The ordering guarantees of TCP ensure that when the server sends a
+    reply, then we know that the _first_ transmission has completed. Using
+    zero-copy in that situation is therefore safe.
+    If a time out occurs, we then send the retransmission using sendmsg()
+    (i.e. no zero-copy), We then know that the socket contains a full copy of
+    the data, and so it will retransmit a faithful reproduction even if the
+    RPC call completes, and the application reuses the O_DIRECT buffer in
+    the meantime.
+    
+    Signed-off-by: Trond Myklebust <Trond.Myklebust@netapp.com>
+    Cc: stable@vger.kernel.org
+
+ net/sunrpc/xprtsock.c |   28 +++++++++++++++++++++-------
+ 1 files changed, 21 insertions(+), 7 deletions(-)
+
+commit 2c59d4080ae744532dbe595f6923dcba72279977
+Merge: b2b99c6 d52f291
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 18 19:07:55 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d52f291621da9227cda5fd647e82dfe9bfc11265
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 18 19:07:14 2013 -0500
+
+    Update to pax-linux-3.11.8-test14.patch:
+    - fixed a gcc-4.6 crash caused by a recent change in the latent entropy plugin, reported by Marko Randjelovic and mckinney (http://forums.grsecurity.net/viewtopic.php?f=3&t=3878)
+
+ mm/page_alloc.c                   |    2 +-
+ tools/gcc/latent_entropy_plugin.c |   34 ++++++++++++++++++++++++----------
+ 2 files changed, 25 insertions(+), 11 deletions(-)
+
 commit b2b99c6972e345565d561b722de210f071e5e259
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Nov 14 20:47:37 2013 -0500
