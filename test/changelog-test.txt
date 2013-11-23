@@ -1,3 +1,47 @@
+commit 7e0e0cf6d81af9c7901e16345737157fd563ccfb
+Merge: 2fcc3a5 2d1263b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Nov 22 21:11:44 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2d1263be436ef0c7c964a2028dec3fc7e90205a1
+Merge: d52f291 e0cd057
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Nov 22 21:11:33 2013 -0500
+
+    Merge branch 'linux-3.11.y' into pax-test
+    
+    Conflicts:
+    	drivers/net/ethernet/chelsio/cxgb3/sge.c
+
+commit 2fcc3a573d2b676c6cdb1aa0c9f61ce723189972
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Nov 22 20:31:37 2013 -0500
+
+    Revert "Upstream commit: bceaa90240b6019ed73b49965eac7d167610be69"
+    
+    This reverts commit 8bb32f2682953e1b748a59c4a4363b237c3510df.
+    
+    It caused errors with traceroute, reported to upstream and fixed with
+    http://patchwork.ozlabs.org/patch/293614/
+    But there's no reason for us to maintain this backport as we're
+    already impervious to recvmsg/msg_name infoleaks
+    
+    Conflicts:
+    
+    	net/ipv4/ping.c
+
+ net/ieee802154/dgram.c |    3 ++-
+ net/ipv4/ping.c        |   11 +++++++++--
+ net/ipv4/raw.c         |    4 +++-
+ net/ipv4/udp.c         |    7 ++++++-
+ net/ipv6/raw.c         |    4 +++-
+ net/ipv6/udp.c         |    5 ++++-
+ net/l2tp/l2tp_ip.c     |    4 +++-
+ net/phonet/datagram.c  |    9 +++++----
+ 8 files changed, 35 insertions(+), 12 deletions(-)
+
 commit 5a0b39755f07014ed0d34a432b89cfbb38b82e0b
 Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
 Date:   Mon Nov 18 07:07:45 2013 +0100
