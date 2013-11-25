@@ -1,3 +1,124 @@
+commit 9a7168e3d96ba81ab00bde22d38f7a035cc25466
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 24 17:50:21 2013 -0500
+
+    remove unnecessary code/comments after new reload method
+
+ grsecurity/gracl.c        |    4 ----
+ grsecurity/gracl_policy.c |   13 -------------
+ 2 files changed, 0 insertions(+), 17 deletions(-)
+
+commit 4e61142788b54cbbc4e0d3418987ee892b34ee7d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 24 16:05:01 2013 -0500
+
+    Version bumped to 3.0 (we'd been on 2.9.1 for way too long and numerous
+    features have been added since then)
+    
+    Introduce new atomic RBAC reload method, developed as part of sponsorship
+    by EIG
+    
+    This is accompanied by an updated 3.0 gradm which will use the new reload
+    method when -R is passed to gradm.  The old method will still be available
+    via gradm -r (which is what a 2.9.1 gradm will continue to use).
+    
+    The new RBAC reload method is atomic in the sense that at no point in the
+    reload process will the system not be covered by a coherent full policy.
+    In contrast to previous reload behavior, it also preserves inherited subjects
+    and special roles.
+    
+    The old RBAC reload method has also been made atomic.  Both methods have
+    been updated to perform role_allowed_ip checks only against the IP tagged
+    to the task at the time its role was first applied or changed.  This resolves
+    long-standing usability problems with the use of role_allowed_ip and matches
+    the policies created by learning.
+
+ grsecurity/Makefile         |    2 +-
+ grsecurity/gracl.c          | 3903 +++++++++++++------------------------------
+ grsecurity/gracl_alloc.c    |   42 +-
+ grsecurity/gracl_compat.c   |    3 +-
+ grsecurity/gracl_policy.c   | 1838 ++++++++++++++++++++
+ grsecurity/gracl_segv.c     |   12 +-
+ grsecurity/grsec_disabled.c |    7 -
+ grsecurity/grsec_init.c     |   15 -
+ include/linux/gracl.h       |   43 +-
+ include/linux/grinternal.h  |    1 -
+ include/linux/grsecurity.h  |    1 -
+ include/linux/sched.h       |    2 +
+ 12 files changed, 3082 insertions(+), 2787 deletions(-)
+
+commit d8981a4fd03025434a466fd87a0eaea93755bc70
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 24 15:08:28 2013 -0500
+
+    compile fix for recent GRKERNSEC_CHROOT_INITRD change
+
+ init/main.c |   12 +++---------
+ 1 files changed, 3 insertions(+), 9 deletions(-)
+
+commit c3f95fe9875bea3eeb61cad1586b3f9b6226a42f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 23 18:27:37 2013 -0500
+
+    Make the recent usermode_helper protection race-free as far as userland
+    is concerned by creating a copy of the path to be executed, then check against
+    that copied path instead of the still-mutable original path
+
+ include/linux/kmod.h |    3 +++
+ kernel/kmod.c        |   13 +++++++++++++
+ 2 files changed, 16 insertions(+), 0 deletions(-)
+
+commit ecdd0610bef058fd33fee50b489d949c1a0db07a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 23 17:20:15 2013 -0500
+
+    Produce a UDEREF message when faulting on kernel access to a non-present
+    page in the userland range.  This is purely for consistency of logs,
+    due to there being no domain present to fault based on.  An
+    "Unable to handle kernel fault.." oops would already (and still is)
+    generated for these cases, triggering grsec's bruteforce prevention.
+    
+    Reported by acez on IRC
+
+ arch/arm/mm/fault.c |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
+
+commit 3f4adfade80bba0d865b5c603bd58da555ca4553
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 23 16:56:46 2013 -0500
+
+    Make GRKERNSEC_CHROOT_INITRD depend on the correct initrd option,
+    Also make sure we mark init as run if no initrd was used. Though this
+    should already be enforced in grsec_chroot.c, this should future-proof
+    the feature a bit in case userland somehow changes drastically.
+    
+    Conflicts:
+    
+    	init/main.c
+
+ grsecurity/Kconfig        |    2 +-
+ grsecurity/grsec_chroot.c |    2 +-
+ init/main.c               |   15 +++++++++++++++
+ 3 files changed, 17 insertions(+), 2 deletions(-)
+
+commit d4a9bb63091852b5b49ebd216796b374e5c0dc71
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 23 16:33:20 2013 -0500
+
+    limit all usermode helper binaries to /sbin, all other attempts will be logged and rejected
+
+ kernel/kmod.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit e727db195f8bed17c65d050e1772643d730fe565
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 23 16:02:01 2013 -0500
+
+    perform USERCOPY kernel text checks against the linear mapping on amd64 as well
+
+ fs/exec.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
 commit 7e0e0cf6d81af9c7901e16345737157fd563ccfb
 Merge: 2fcc3a5 2d1263b
 Author: Brad Spengler <spender@grsecurity.net>
