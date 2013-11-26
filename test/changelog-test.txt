@@ -1,3 +1,13 @@
+commit 3f201fe9a368a4b0339a2f3cf1259b785ae8374c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 26 15:16:48 2013 -0500
+
+    Fix null deref on application of the shutdown role, reported by zakalwe
+
+ grsecurity/gracl.c        |   58 ++++++++++++++++++++++++++++++++++++++++++++-
+ grsecurity/gracl_policy.c |   58 ++++-----------------------------------------
+ 2 files changed, 62 insertions(+), 54 deletions(-)
+
 commit f5648d16a7cc79abe6de7ae62e284fa511bb750a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Nov 26 13:04:07 2013 -0500
