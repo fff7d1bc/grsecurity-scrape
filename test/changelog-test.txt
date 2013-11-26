@@ -1,3 +1,22 @@
+commit 4026c926f19d7642c1f89895b556fe2addaef239
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Wed Nov 13 07:45:40 2013 -0500
+
+    Upstream commit: ede4cebce16f5643c61aedd6d88d9070a1d23a68
+    
+    prepend_path() needs to reinitialize dentry/vfsmount/mnt on restarts
+    
+    ... and equivalent is needed in 3.12; it's broken there as well
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    
+    Conflicts:
+    
+    	fs/dcache.c
+
+ fs/dcache.c |   10 +++++++---
+ 1 files changed, 7 insertions(+), 3 deletions(-)
+
 commit c68d27fa66951166bff79a5c1bcc26985ac3f8bc
 Merge: 94b560b 1f411d7
 Author: Brad Spengler <spender@grsecurity.net>
