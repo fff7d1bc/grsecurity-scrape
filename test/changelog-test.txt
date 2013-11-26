@@ -1,3 +1,23 @@
+commit f5648d16a7cc79abe6de7ae62e284fa511bb750a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 26 13:04:07 2013 -0500
+
+    Add system library paths to allowed areas for usermode helper calls,
+    later we will also add checks to ensure the file is owned by root
+
+ kernel/kmod.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit c610c1f0f580069a1dc9d58c0eb0bddd33cbc25c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 26 12:59:00 2013 -0500
+
+    Fix gr_policy_state -> gr_reload_state typo that clobbered the oldalloc pointer
+    causing a NULL deref on RBAC reload, reported by zakalwe
+
+ grsecurity/gracl_policy.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 4026c926f19d7642c1f89895b556fe2addaef239
 Author: Al Viro <viro@zeniv.linux.org.uk>
 Date:   Wed Nov 13 07:45:40 2013 -0500
