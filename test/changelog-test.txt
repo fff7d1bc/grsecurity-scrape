@@ -1,3 +1,22 @@
+commit a72ed588cbbda00d356529507b6bdca56c19d4c3
+Merge: 3f201fe db6d69f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 30 10:46:15 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/dcache.c
+    	ipc/shm.c
+    	net/sunrpc/clnt.c
+
+commit db6d69f61412f929242423f92d52f4c2c74bab5d
+Merge: 1f411d7 050dcf4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 30 10:40:33 2013 -0500
+
+    Merge branch 'linux-3.12.y' into pax-test
+
 commit 3f201fe9a368a4b0339a2f3cf1259b785ae8374c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Nov 26 15:16:48 2013 -0500
