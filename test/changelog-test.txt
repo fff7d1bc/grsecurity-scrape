@@ -1,3 +1,170 @@
+commit b0be33b9efb31e2cb745d1b33eee4f89b315d5bf
+Merge: 4c60da7 7689612
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 8 17:07:04 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	net/ipv4/ping.c
+
+commit 7689612bef2f353f37a2fe94ff0ef8c72634b522
+Merge: 2f004b8 289b6c7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 8 17:05:58 2013 -0500
+
+    Merge branch 'linux-3.12.y' into pax-test
+    
+    Conflicts:
+    	net/compat.c
+    	net/ipv4/ping.c
+    	net/ipv6/sit.c
+    	net/socket.c
+
+commit 4c60da771d2fba442fe7831d590277e6fe80e908
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 8 16:12:01 2013 -0500
+
+    Backport of:
+    
+    If we allocate less than sizeof(struct attrlist) then we end up
+    corrupting memory or doing a ZERO_PTR_SIZE dereference.
+    
+    This can only be triggered with CAP_SYS_ADMIN.
+    
+    Reported-by: Nico Golde <nico@xxxxxxxxx>
+    Reported-by: Fabian Yamaguchi <fabs@xxxxxxxxx>
+    Signed-off-by: Dan Carpenter <dan.carpenter@xxxxxxxxxx>
+
+ fs/xfs/xfs_ioctl.c   |    3 ++-
+ fs/xfs/xfs_ioctl32.c |    3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+commit bd50af2c306bfe6287631e0e1745cc5d2fbad0c2
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Thu Dec 5 23:29:19 2013 +0100
+
+    Upstream commit: 239c78db9c41a8f524cce60507440d72229d73bc
+    
+    net: clear local_df when passing skb between namespaces
+    
+    We must clear local_df when passing the skb between namespaces as the
+    packet is not local to the new namespace any more and thus may not get
+    fragmented by local rules. Fred Templin noticed that other namespaces
+    do fragment IPv6 packets while forwarding. Instead they should have send
+    back a PTB.
+    
+    The same problem should be present when forwarding DF-IPv4 packets
+    between namespaces.
+    
+    Reported-by: Templin, Fred L <Fred.L.Templin@boeing.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/skbuff.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 7803212c99050491bd0a2618e039f62c825f82e5
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon Dec 2 11:50:37 2013 -0800
+
+    Upstream commit: b65502879556d041b45104c6a35abbbba28c8f2d
+    
+    uio: we cannot mmap unaligned page contents
+    
+    In commit 7314e613d5ff ("Fix a few incorrectly checked
+    [io_]remap_pfn_range() calls") the uio driver started more properly
+    checking the passed-in user mapping arguments against the size of the
+    actual uio driver data.
+    
+    That in turn exposed that some driver authors apparently didn't realize
+    that mmap can only work on a page granularity, and had tried to use it
+    with smaller mappings, with the new size check catching that out.
+    
+    So since it's not just the user mmap() arguments that can be confused,
+    make the uio mmap code also verify that the uio driver has the memory
+    allocated at page boundaries in order for mmap to work.  If the device
+    memory isn't properly aligned, we return
+    
+      [ENODEV]
+        The fildes argument refers to a file whose type is not supported by mmap().
+    
+    as per the open group documentation on mmap.
+    
+    Reported-by: Holger Brunck <holger.brunck@keymile.com>
+    Acked-by: Greg KH <gregkh@linuxfoundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/uio/uio.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e5fb91d26cb825c36042d62373c0a32a176cfe2d
+Merge: 6b9d9e2 2f004b8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 8 10:18:49 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	mm/mmap.c
+
+commit 2f004b87204d113e467ba360ac8b0a9cbfcf01cb
+Merge: c04a09b 81605d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 8 10:16:53 2013 -0500
+
+    Update to pax-linux-3.12.3-test2.patch:
+    - forward port to 3.12.3
+    - fixed incorrect ACCESS_ONCE accessors in rcutree, reported by mcp
+    - fixed the usual arm/CONSTIFY fallout, reported by Michael Tremer <michael.tremer@ipfire.org>
+    - changed the constify plugin to give better error messages
+    - worked around a gcc induced intentional integer overflow in usbdev_read, reported by quasar366 (http://forums.grsecurity.net/viewtopic.php?f=3&t=3889)
+    - better fix for http://forums.grsecurity.net/viewtopic.php?f=3&t=3885
+    - fixed crash under qemu when INVPCID was enabled (say, on -cpu Haswell) but PCID itself wasn't, reported by spender
+    - updated size overflow plugin from Emese, coverage will increase further
+    
+    Merge branch 'linux-3.12.y' into pax-test
+    
+    Conflicts:
+    	kernel/trace/ftrace.c
+    	mm/mmap.c
+
+commit 6b9d9e2fe7cd30598a4c22c159ff3b06339e23c8
+Author: David Herrmann <dh.herrmann@gmail.com>
+Date:   Tue Nov 26 13:58:18 2013 +0100
+
+    Upstream commit: 80897aa787ecd58eabb29deab7cbec9249c9b7e6
+    
+    HID: uhid: fix leak for 64/32 UHID_CREATE
+    
+    UHID allows short writes so user-space can omit unused fields. We
+    automatically set them to 0 in the kernel. However, the 64/32 bit
+    compat-handler didn't do that in the UHID_CREATE fallback. This will
+    reveal random kernel heap data (of random size, even) to user-space.
+    
+    Fixes: befde0226a59 ('HID: uhid: make creating devices work on 64/32 systems')
+    
+    Reported-by: Ben Hutchings <ben@decadent.org.uk>
+    Signed-off-by: David Herrmann <dh.herrmann@gmail.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+
+ drivers/hid/uhid.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a06981f0117d614ba4d30f6b5dd6eff7d418ffae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 4 18:15:02 2013 -0500
+
+    Don't duplicate __get_dumpable, also make sure we check against
+    SUID_DUMP_USER, otherwise we wouldn't trigger suid bruteforcing
+    detection when suid_dumpable was set to 2
+
+ fs/coredump.c              |    7 +++++--
+ grsecurity/grsec_sig.c     |   14 ++------------
+ include/linux/grsecurity.h |    2 +-
+ 3 files changed, 8 insertions(+), 15 deletions(-)
+
 commit fc706a922b49e3157cac848fb0c8d1dcf4f360bb
 Merge: 0f023d5 c04a09b
 Author: Brad Spengler <spender@grsecurity.net>
