@@ -1,3 +1,208 @@
+commit c2c9b35fca510f7e29f80efa2999695448083b52
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu Dec 12 09:38:42 2013 -0800
+
+    Upstream commit: f12d5bfceb7e1f9051563381ec047f7f13956c3c
+    
+    futex: fix handling of read-only-mapped hugepages
+    
+    The hugepage code had the exact same bug that regular pages had in
+    commit 7485d0d3758e ("futexes: Remove rw parameter from
+    get_futex_key()").
+    
+    The regular page case was fixed by commit 9ea71503a8ed ("futex: Fix
+    regression with read only mappings"), but the transparent hugepage case
+    (added in a5b338f2b0b1: "thp: update futex compound knowledge") case
+    remained broken.
+    
+    Found by Dave Jones and his trinity tool.
+    
+    Reported-and-tested-by: Dave Jones <davej@fedoraproject.org>
+    Cc: stable@kernel.org # v2.6.38+
+    Acked-by: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Mel Gorman <mgorman@suse.de>
+    Cc: Darren Hart <dvhart@linux.intel.com>
+    Cc: Andrea Arcangeli <aarcange@redhat.com>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/futex.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7fe4be2ce4c49484298f71455cdcac08149985cb
+Author: Andy Honig <ahonig@google.com>
+Date:   Mon Nov 18 16:09:22 2013 -0800
+
+    Upstream commit: 338c7dbadd2671189cec7faf64c84d01071b3f96
+    
+    KVM: Improve create VCPU parameter (CVE-2013-4587)
+    
+    In multiple functions the vcpu_id is used as an offset into a bitfield.  Ag
+    malicious user could specify a vcpu_id greater than 255 in order to set or
+    clear bits in kernel memory.  This could be used to elevate priveges in the
+    kernel.  This patch verifies that the vcpu_id provided is less than 255.
+    The api documentation already specifies that the vcpu_id must be less than
+    max_vcpus, but this is currently not checked.
+    
+    Reported-by: Andrew Honig <ahonig@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andrew Honig <ahonig@google.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ virt/kvm/kvm_main.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit e3a3b7a0010abaf6f28afb8521fcb29cee6b3c4c
+Author: Andy Honig <ahonig@google.com>
+Date:   Tue Nov 19 14:12:18 2013 -0800
+
+    Upstream commit: b963a22e6d1a266a67e9eecc88134713fd54775c
+    
+    KVM: x86: Fix potential divide by 0 in lapic (CVE-2013-6367)
+    
+    Under guest controllable circumstances apic_get_tmcct will execute a
+    divide by zero and cause a crash.  If the guest cpuid support
+    tsc deadline timers and performs the following sequence of requests
+    the host will crash.
+    - Set the mode to periodic
+    - Set the TMICT to 0
+    - Set the mode bits to 11 (neither periodic, nor one shot, nor tsc deadline)
+    - Set the TMICT to non-zero.
+    Then the lapic_timer.period will be 0, but the TMICT will not be.  If the
+    guest then reads from the TMCCT then the host will perform a divide by 0.
+    
+    This patch ensures that if the lapic_timer.period is 0, then the division
+    does not occur.
+    
+    Reported-by: Andrew Honig <ahonig@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andrew Honig <ahonig@google.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/lapic.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 2b8e6adf070a8938133e318e9a6e2f633095f038
+Author: Andy Honig <ahonig@google.com>
+Date:   Wed Nov 20 10:23:22 2013 -0800
+
+    Upstream commit: fda4e2e85589191b123d31cdc21fd33ee70f50fd
+    
+    KVM: x86: Convert vapic synchronization to _cached functions (CVE-2013-6368)
+    
+    In kvm_lapic_sync_from_vapic and kvm_lapic_sync_to_vapic there is the
+    potential to corrupt kernel memory if userspace provides an address that
+    is at the end of a page.  This patches concerts those functions to use
+    kvm_write_guest_cached and kvm_read_guest_cached.  It also checks the
+    vapic_address specified by userspace during ioctl processing and returns
+    an error to userspace if the address is not a valid GPA.
+    
+    This is generally not guest triggerable, because the required write is
+    done by firmware that runs before the guest.  Also, it only affects AMD
+    processors and oldish Intel that do not have the FlexPriority feature
+    (unless you disable FlexPriority, of course; then newer processors are
+    also affected).
+    
+    Fixes: b93463aa59d6 ('KVM: Accelerated apic support')
+    
+    Reported-by: Andrew Honig <ahonig@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andrew Honig <ahonig@google.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/lapic.c |   27 +++++++++++++++------------
+ arch/x86/kvm/lapic.h |    4 ++--
+ arch/x86/kvm/x86.c   |   40 +---------------------------------------
+ 3 files changed, 18 insertions(+), 53 deletions(-)
+
+commit 6261a034c2cc7f34b4c7663ace10d74f9c1fe479
+Author: Gleb Natapov <gleb@redhat.com>
+Date:   Thu Dec 12 21:20:08 2013 +0100
+
+    Upstream commit: 17d68b763f09a9ce824ae23eb62c9efc57b69271
+    
+    KVM: x86: fix guest-initiated crash with x2apic (CVE-2013-6376)
+    
+    A guest can cause a BUG_ON() leading to a host kernel crash.
+    When the guest writes to the ICR to request an IPI, while in x2apic
+    mode the following things happen, the destination is read from
+    ICR2, which is a register that the guest can control.
+    
+    kvm_irq_delivery_to_apic_fast uses the high 16 bits of ICR2 as the
+    cluster id.  A BUG_ON is triggered, which is a protection against
+    accessing map->logical_map with an out-of-bounds access and manages
+    to avoid that anything really unsafe occurs.
+    
+    The logic in the code is correct from real HW point of view. The problem
+    is that KVM supports only one cluster with ID 0 in clustered mode, but
+    the code that has the bug does not take this into account.
+    
+    Reported-by: Lars Bull <larsbull@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Gleb Natapov <gleb@redhat.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/lapic.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit beb27f127ef300b52f8c20402d053b05bab7f4e3
+Merge: 82c673f b8daf53
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 13 20:11:22 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/parisc/kernel/sys_parisc.c
+
+commit b8daf537ab923daf14f38d283ca5361424154fa8
+Merge: 7689612 156c758
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 13 20:07:08 2013 -0500
+
+    Update to pax-linux-3.12.5-test4.patch:
+    - fixed 32 bit apps executing certain 64 bit ones, reported by Ronny Meeus
+    - fixed underallocation in __d_alloc that would cause an out-of-bounds read later, reported by Dmitry Vyukov and Kees Cook, not understood by Al Viro
+      (http://lkml.org/lkml/2013/10/3/493 and http://lkml.org/lkml/2013/10/11/293)
+    - fixed use-after-free in sys_remap_file_pages, reported by Dmitry Vyukov (http://lkml.org/lkml/2013/9/17/30)
+    - updated size oveflow plugin from Emese, fixes some false positives reported by Tim Harman and Huub Reuver
+    - fixed a btrfs bug caught by the size overflow plugin, reported by Jens Binnewies (http://forums.grsecurity.net/viewtopic.php?f=1&t=3887)
+      turns out that it was fixed upstream already but never marked for stable backport:
+      - https://bugzilla.kernel.org/show_bug.cgi?id=66661
+      - https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/fs/btrfs/tree-log.c?id=ed9e8af88e2551aaa6bf51d8063a2493e2d71597
+    - fixed bad interactions between the KERNEXEC plugin and some gcc features, reported by Amadeusz SÅ‚awiÅ„ski (https://bugs.gentoo.org/show_bug.cgi?id=487938)
+      - the mask register has been changed from r10 (used by DRAP) to r12
+      - all kernel entry points now allocate a full pt_regs area (it required some non-trivial surgery, some fallout is possible)
+    
+    Merge branch 'linux-3.12.y' into pax-test
+    
+    Conflicts:
+    	arch/parisc/kernel/sys_parisc.c
+    	fs/pipe.c
+
+commit 82c673fdfd9925cda2e94b67f775be70b8ef4cca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 13 19:39:54 2013 -0500
+
+    Fix a use-after-free on fakefs_obj_rw/fakefs_obj_rwx introduced by the recent
+    atomic reload improvement.  These two objects are used only for "files" private
+    to the kernel which don't exist on any mounted filesystem and have no visible
+    path.  Only the mode field of these objects is ever used, and we would never
+    attempt to free these objects a second time (due to their being allocated
+    into the memory manager associated with the initial policy)
+    
+    In practice this causes bogus auditing messages for / and could potentially
+    cause a subject without executable shared memory support to permit executable
+    shared memory (if PaX is disabled on the binary).
+    
+    Instead just allocate these two special objects with kzalloc at enable time
+    and free them at disable time.
+    
+    Thanks to nyt@countercultured.net for the report
+
+ grsecurity/gracl_policy.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
 commit b0be33b9efb31e2cb745d1b33eee4f89b315d5bf
 Merge: 4c60da7 7689612
 Author: Brad Spengler <spender@grsecurity.net>
