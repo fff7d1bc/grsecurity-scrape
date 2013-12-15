@@ -1,3 +1,37 @@
+commit cc59b1fbe8989a6f99d229b34653e40a84d871f4
+Merge: 44842d2 6ffdbdf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 15 10:40:14 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6ffdbdf295f56e22ce8626b555a03e4d2b8c6a61
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 15 10:38:59 2013 -0500
+
+    Update to pax-linux-3.12.5-test6.patch:
+    - Emese fixed a bug in the size overflow plugin resulting in false positives on downcasts from 64 bit variables on i386, reported by Huub Reuver
+
+ tools/gcc/size_overflow_plugin.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit 44842d2f32b7fd6f325a90b15bd0a094f08feab9
+Merge: c2c9b35 f85d978
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 14 10:58:46 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f85d978a63b7388c6ab97b54808992fe2ee4ac8c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 14 10:58:14 2013 -0500
+
+    Update to pax-linux-3.12.5-test5.patch:
+    - properly fix the use-after-free in sys_remap_file_pages, by Rik van Riel (http://www.spinics.net/lists/linux-mm/msg66710.html)
+
+ mm/fremap.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
 commit c2c9b35fca510f7e29f80efa2999695448083b52
 Author: Linus Torvalds <torvalds@linux-foundation.org>
 Date:   Thu Dec 12 09:38:42 2013 -0800
