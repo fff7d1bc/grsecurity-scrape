@@ -1,3 +1,104 @@
+commit e45d1ddcd3c8005889acc55fbf9e57171339fbb4
+Merge: b5c87f6 6754393
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 21 07:53:42 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6754393ea42b9fb1d6d8e4635e8364674cee2bbd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 21 07:53:22 2013 -0500
+
+    Update size_overflow hash table
+
+ tools/gcc/size_overflow_hash.data |  119 +++++++++++++++++++------------------
+ 1 files changed, 60 insertions(+), 59 deletions(-)
+
+commit b5c87f632d1cf19639a94c36276f96955221c77a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 20 20:18:56 2013 -0500
+
+    compile fix
+
+ fs/stat.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 47618a93b003d648b5704040d1e502f76de07093
+Merge: ba0eeed 37eeb47
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 20 20:18:18 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 37eeb473486a08e3beae62841b19169aef36564d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 20 20:17:46 2013 -0500
+
+    Update to pax-linux-3.12.6-test8.patch:
+    - fixed an inconsistency in handling softmode and user.pax.flags, reported by jacekalex (http://forums.grsecurity.net/viewtopic.php?f=3&t=3877)
+    - updated size overflow hash table from spender
+
+ fs/binfmt_elf.c |   53 ++++++++++++++++++++++++++++++-----------------------
+ 1 files changed, 30 insertions(+), 23 deletions(-)
+
+commit ba0eeed0532b602905d87e9bf25aad3664c3f36b
+Merge: 453a7f1 9dda34c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 20 19:17:33 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9dda34cba200c6eadcbbbccbb4729627fd82e6be
+Merge: 63ebe2d2 d0266db
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 20 19:17:18 2013 -0500
+
+    Merge branch 'linux-3.12.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/boot/Makefile
+
+commit 453a7f1e18d89056fa27a9fdc777cea1a6fd7fe5
+Merge: bb777f5 63ebe2d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 19 22:48:02 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 63ebe2d2adf8f5ebc1639c1b8d8577fbe5813fcd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 19 22:47:35 2013 -0500
+
+    add 42 functions to the size_overflow hash table
+
+ tools/gcc/size_overflow_hash.data |   59 +++++++++++++++++++++++++++++-------
+ 1 files changed, 47 insertions(+), 12 deletions(-)
+
+commit bb777f517e6c2a53909351245d7d2009d8ad4c5b
+Merge: cc59b1f a03d29c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 19 17:12:01 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a03d29c1eead36d4f9eac27b3a5d4b4266360a81
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 19 17:11:19 2013 -0500
+
+    Update to pax-linux-3.12.5-test7.patch:
+    - fixed some more size overflow reports
+      - gratuitous int/uint conversion in expand_files and expand_fdtable, reported by wizeman (http://forums.grsecurity.net/viewtopic.php?f=3&t=3898)
+      - better fix for the gcc induced intentional overflow in usbdev_read
+
+ arch/x86/include/asm/atomic.h      |    6 +++---
+ arch/x86/include/asm/atomic64_32.h |    2 +-
+ arch/x86/include/asm/atomic64_64.h |    2 +-
+ drivers/usb/core/devio.c           |    2 +-
+ fs/file.c                          |    4 ++--
+ include/asm-generic/atomic-long.h  |    2 +-
+ tools/gcc/size_overflow_hash.data  |    3 ---
+ 7 files changed, 9 insertions(+), 12 deletions(-)
+
 commit cc59b1fbe8989a6f99d229b34653e40a84d871f4
 Merge: 44842d2 6ffdbdf
 Author: Brad Spengler <spender@grsecurity.net>
