@@ -1,3 +1,21 @@
+commit 848b9c1e52382f446a2db679d6ee68c0a8cbc52e
+Merge: e45d1dd 846d19a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 22 10:36:48 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 846d19aa4207282ce5ac54237517e54324eda092
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 22 10:35:16 2013 -0500
+
+    Update to pax-linux-3.12.6-test9.patch:
+    - updated size overflow hash table from spender
+    - fixed silly code in kvm_clear_guest_page detected by USERCOPY, reported by remnix (http://forums.grsecurity.net/viewtopic.php?f=3&t=3899)
+
+ virt/kvm/kvm_main.c |   13 +++++++++++--
+ 1 files changed, 11 insertions(+), 2 deletions(-)
+
 commit e45d1ddcd3c8005889acc55fbf9e57171339fbb4
 Merge: b5c87f6 6754393
 Author: Brad Spengler <spender@grsecurity.net>
