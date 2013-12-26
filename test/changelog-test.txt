@@ -1,3 +1,259 @@
+commit 4bbb922e6241dad03e37919f66e9f422743f5b5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 25 16:37:02 2013 -0500
+
+    Add some of the more obscure, config-dependent kernel modification
+    defenses to GRKERNSEC_KMEM, to be split out into a separate option
+    if this causes any compatibility problems.  From Matthew Garrett:
+    https://lkml.org/lkml/2013/9/9/532
+    
+    Also make make hibernation depend on !PAX_MEMORY_SANITIZE and not
+    the other way around (to produce more secure settings when distro
+    configs are used as a base)
+
+ drivers/acpi/custom_method.c    |    4 ++++
+ drivers/pci/pci-sysfs.c         |   12 ++++++++++++
+ drivers/pci/proc.c              |   12 ++++++++++++
+ drivers/pci/syscall.c           |    4 ++++
+ drivers/platform/x86/asus-wmi.c |   12 ++++++++++++
+ kernel/power/Kconfig            |    2 ++
+ security/Kconfig                |    1 -
+ 7 files changed, 46 insertions(+), 1 deletions(-)
+
+commit 3ae9170407e5782e6a7b2bd796b60149864e6c3e
+Author: Chad Hanson <chanson@trustedcs.com>
+Date:   Mon Dec 23 17:45:01 2013 -0500
+
+    Upstream commit: 46d01d63221c3508421dd72ff9c879f61053cffc
+    
+    selinux: fix broken peer recv check
+    
+    Fix a broken networking check. Return an error if peer recv fails.  If
+    secmark is active and the packet recv succeeds the peer recv error is
+    ignored.
+    
+    Signed-off-by: Chad Hanson <chanson@trustedcs.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Paul Moore <pmoore@redhat.com>
+
+ security/selinux/hooks.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit c870e769c2d34bff7a0eba239c092bb115bb9d71
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Mon Dec 23 17:45:01 2013 -0500
+
+    Upstream commit: c0c1439541f5305b57a83d599af32b74182933fe
+    
+    selinux: selinux_setprocattr()->ptrace_parent() needs rcu_read_lock()
+    
+    selinux_setprocattr() does ptrace_parent(p) under task_lock(p),
+    but task_struct->alloc_lock doesn't pin ->parent or ->ptrace,
+    this looks confusing and triggers the "suspicious RCU usage"
+    warning because ptrace_parent() does rcu_dereference_check().
+    
+    And in theory this is wrong, spin_lock()->preempt_disable()
+    doesn't necessarily imply rcu_read_lock() we need to access
+    the ->parent.
+    
+    Reported-by: Evan McNabb <emcnabb@redhat.com>
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Paul Moore <pmoore@redhat.com>
+
+ security/selinux/hooks.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 717544da98db68da8cf1b902e33eefc098170128
+Author: Benjamin LaHaise <bcrl@kvack.org>
+Date:   Sat Dec 21 15:49:28 2013 -0500
+
+    Upstream commit: 1881686f842065d2f92ec9c6424830ffc17d23b0
+    
+    aio: fix kioctx leak introduced by "aio: Fix a trinity splat"
+    
+    e34ecee2ae791df674dfb466ce40692ca6218e43 reworked the percpu reference
+    counting to correct a bug trinity found.  Unfortunately, the change lead
+    to kioctxes being leaked because there was no final reference count to
+    put.  Add that reference count back in to fix things.
+    
+    Signed-off-by: Benjamin LaHaise <bcrl@kvack.org>
+    Cc: stable@vger.kernel.org
+
+ fs/aio.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 21649f0e322166802adf5872f2affc38a0d6eb18
+Author: Jianguo Wu <wujianguo@huawei.com>
+Date:   Wed Dec 18 17:08:59 2013 -0800
+
+    Upstream commit: 98398c32f6687ee1e1f3ae084effb4b75adb0747
+    
+    mm/hugetlb: check for pte NULL pointer in __page_check_address()
+    
+    In __page_check_address(), if address's pud is not present,
+    huge_pte_offset() will return NULL, we should check the return value.
+    
+    Signed-off-by: Jianguo Wu <wujianguo@huawei.com>
+    Cc: Naoya Horiguchi <n-horiguchi@ah.jp.nec.com>
+    Cc: Mel Gorman <mgorman@suse.de>
+    Cc: qiuxishi <qiuxishi@huawei.com>
+    Cc: Hanjun Guo <guohanjun@huawei.com>
+    Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	mm/rmap.c
+
+ mm/rmap.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 184b047d4bc06f058aadb07393270e5d972af3aa
+Author: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+Date:   Fri Dec 20 15:10:03 2013 +0200
+
+    Upstream commit: ee53664bda169f519ce3c6a22d378f0b946c8178
+    
+    mm: Fix NULL pointer dereference in madvise(MADV_WILLNEED) support
+    
+    Sasha Levin found a NULL pointer dereference that is due to a missing
+    page table lock, which in turn is due to the pmd entry in question being
+    a transparent huge-table entry.
+    
+    The code - introduced in commit 1998cc048901 ("mm: make
+    madvise(MADV_WILLNEED) support swap file prefetch") - correctly checks
+    for this situation using pmd_none_or_trans_huge_or_clear_bad(), but it
+    turns out that that function doesn't work correctly.
+    
+    pmd_none_or_trans_huge_or_clear_bad() expected that pmd_bad() would
+    trigger if the transparent hugepage bit was set, but it doesn't do that
+    if pmd_numa() is also set. Note that the NUMA bit only gets set on real
+    NUMA machines, so people trying to reproduce this on most normal
+    development systems would never actually trigger this.
+    
+    Fix it by removing the very subtle (and subtly incorrect) expectation,
+    and instead just checking pmd_trans_huge() explicitly.
+    
+    Reported-by: Sasha Levin <sasha.levin@oracle.com>
+    Acked-by: Andrea Arcangeli <aarcange@redhat.com>
+    [ Additionally remove the now stale test for pmd_trans_huge() inside the
+      pmd_bad() case - Linus ]
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/asm-generic/pgtable.h |    5 ++---
+ 1 files changed, 2 insertions(+), 3 deletions(-)
+
+commit 1d769ef5d57f3bb616929c7e3c600852e20d575e
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Tue Dec 17 00:38:39 2013 +0100
+
+    Upstream commit: b1aac815c0891fe4a55a6b0b715910142227700f
+    
+    net: inet_diag: zero out uninitialized idiag_{src,dst} fields
+    
+    Jakub reported while working with nlmon netlink sniffer that parts of
+    the inet_diag_sockid are not initialized when r->idiag_family != AF_INET6.
+    That is, fields of r->id.idiag_src[1 ... 3], r->id.idiag_dst[1 ... 3].
+    
+    In fact, it seems that we can leak 6 * sizeof(u32) byte of kernel [slab]
+    memory through this. At least, in udp_dump_one(), we allocate a skb in ...
+    
+      rep = nlmsg_new(sizeof(struct inet_diag_msg) + ..., GFP_KERNEL);
+    
+    ... and then pass that to inet_sk_diag_fill() that puts the whole struct
+    inet_diag_msg into the skb, where we only fill out r->id.idiag_src[0],
+    r->id.idiag_dst[0] and leave the rest untouched:
+    
+      r->id.idiag_src[0] = inet->inet_rcv_saddr;
+      r->id.idiag_dst[0] = inet->inet_daddr;
+    
+    struct inet_diag_msg embeds struct inet_diag_sockid that is correctly /
+    fully filled out in IPv6 case, but for IPv4 not.
+    
+    So just zero them out by using plain memset (for this little amount of
+    bytes it's probably not worth the extra check for idiag_family == AF_INET).
+    
+    Similarly, fix also other places where we fill that out.
+    
+    Reported-by: Jakub Zawadzki <darkjames-ws@darkjames.pl>
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/ipv4/inet_diag.c
+
+ net/ipv4/inet_diag.c |   16 ++++++++++++++++
+ 1 files changed, 16 insertions(+), 0 deletions(-)
+
+commit 11093b2d02f7bba2c9085b2d2d020b9ee34f8737
+Author: Wenliang Fan <fanwlexca@gmail.com>
+Date:   Tue Dec 17 11:25:28 2013 +0800
+
+    Upstream commit: e9db5c21d3646a6454fcd04938dd215ac3ab620a
+    
+    drivers/net/hamradio: Integer overflow in hdlcdrv_ioctl()
+    
+    The local variable 'bi' comes from userspace. If userspace passed a
+    large number to 'bi.data.calibrate', there would be an integer overflow
+    in the following line:
+    	s->hdlctx.calibrate = bi.data.calibrate * s->par.bitrate / 16;
+    
+    Signed-off-by: Wenliang Fan <fanwlexca@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hamradio/hdlcdrv.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e162be84a9971452943c1d85a59c866a5486222b
+Author: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Mon Dec 23 18:49:30 2013 +0100
+
+    Upstream commit: f60900f2609e893c7f8d0bccc7ada4947dac4cd5
+    
+    auxvec.h: account for AT_HWCAP2 in AT_VECTOR_SIZE_BASE
+    
+    Commit 2171364d1a92 ("powerpc: Add HWCAP2 aux entry") introduced a new
+    AT_ auxv entry type AT_HWCAP2 but failed to update AT_VECTOR_SIZE_BASE
+    accordingly.
+    
+    Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+    Fixes: 2171364d1a92 (powerpc: Add HWCAP2 aux entry)
+    Cc: stable@vger.kernel.org
+    Acked-by: Michael Neuling <michael@neuling.org>
+    Cc: Nishanth Aravamudan <nacc@linux.vnet.ibm.com>
+    Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/auxvec.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a60029d4fb8d62b6dd3617a8ab4031fd79b89fe3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 25 15:11:51 2013 -0500
+
+    remove unused 'dentry' variable
+
+ fs/xattr.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit d6e290d23c8c47c19536ed84f403eb81f224ed67
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 25 15:03:13 2013 -0500
+
+    Add RBAC mediation of *removexattr(), as this has security implications
+    in the case of PaX with softmode enabled or the rare case of RBAC+SELinux
+    use.
+
+ fs/xattr.c                  |   18 +++++++++++-------
+ grsecurity/gracl_fs.c       |    6 ++++++
+ grsecurity/grsec_disabled.c |    6 ++++++
+ include/linux/grmsg.h       |    3 ++-
+ include/linux/grsecurity.h  |    2 ++
+ 5 files changed, 27 insertions(+), 8 deletions(-)
+
 commit 848b9c1e52382f446a2db679d6ee68c0a8cbc52e
 Merge: e45d1dd 846d19a
 Author: Brad Spengler <spender@grsecurity.net>
