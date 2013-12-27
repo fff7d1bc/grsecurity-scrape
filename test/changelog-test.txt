@@ -1,3 +1,53 @@
+commit a5a7395ebf9054496b21fd84978daba0a9bfde5d
+Merge: b07a1fc bfce0d4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 26 19:24:39 2013 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit bfce0d4c8f94977de165b9a559c531759d031b4b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 26 19:23:25 2013 -0500
+
+    Revert recent PaX marking change that broke a significant number
+    of existing systems.  The marking system will be revamped in a later
+    patch to fix softmode support while making XT markings more usable.
+
+ fs/binfmt_elf.c |   53 +++++++++++++++++++++++------------------------------
+ 1 files changed, 23 insertions(+), 30 deletions(-)
+
+commit b07a1fc3ab37cf27f8e7b56193a08adfadd569b6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 26 19:20:26 2013 -0500
+
+    add missing #include
+
+ grsecurity/grsec_mount.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 5fbe9de8e020fdf6b911a2368e41ba88df554343
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 26 15:51:51 2013 -0500
+
+    Update config help to reflect requirements for proper security, similar
+    to what we mention for GRKERNSEC_KMEM or GRKERNSEC_HIDESYM
+
+ grsecurity/Kconfig |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit d26ce94a15a14d44494fd3e307baebc2511a09b8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 26 15:35:31 2013 -0500
+
+    Whenever we perform checks against block devices we should also test for
+    raw character devices provided by CONFIG_RAW_DRIVER.  Unlike other OSes,
+    Linux's raw device support has been obsoleted many years ago and is unlikely
+    to be present in a given kernel config (modulo an allyesconfig).
+
+ grsecurity/gracl.c       |    2 +-
+ grsecurity/grsec_mount.c |    4 +++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
 commit 4bbb922e6241dad03e37919f66e9f422743f5b5e
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Dec 25 16:37:02 2013 -0500
