@@ -1,3 +1,28 @@
+commit fb5263307b4892bbaefc83427412b54c12a4e422
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 30 11:19:53 2013 -0500
+
+    Restrict access to /proc/interrupts and /proc/stat as suggested by Vasiliy
+    Kulikov:
+    http://www.openwall.com/lists/kernel-hardening/2011/11/07/1
+
+ fs/proc/interrupts.c |    4 ++++
+ fs/proc/stat.c       |    4 ++++
+ 2 files changed, 8 insertions(+), 0 deletions(-)
+
+commit e5f67af1a42dbde9aae812c25e2498b908919689
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 30 11:13:49 2013 -0500
+
+    Update to phase two of the IPC hardening.  I've heard no complaints about
+    the patch I released, but including it here will generate better information.
+
+ grsecurity/Kconfig     |   16 ++++++++++------
+ grsecurity/grsec_ipc.c |   32 +++++++++++++++++++++++++++++---
+ include/linux/grmsg.h  |    2 +-
+ ipc/util.c             |    3 ++-
+ 4 files changed, 42 insertions(+), 11 deletions(-)
+
 commit a5a7395ebf9054496b21fd84978daba0a9bfde5d
 Merge: b07a1fc bfce0d4
 Author: Brad Spengler <spender@grsecurity.net>
