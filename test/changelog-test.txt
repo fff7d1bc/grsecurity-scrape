@@ -1,3 +1,14 @@
+commit 5d6ce67e5ed3913c105cf2fc7c9db1d6e2a9f84a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 31 10:30:20 2013 -0500
+
+    Resolve compatibility with libgtop and recent restriction of
+    /proc/stat, reported by KacKurx.  We now provide a properly-formatted
+    but zeroed /proc/stat instead of denying unpriv access to the entry
+
+ fs/proc/stat.c |   34 ++++++++++++++++++++++++----------
+ 1 files changed, 24 insertions(+), 10 deletions(-)
+
 commit fb5263307b4892bbaefc83427412b54c12a4e422
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Dec 30 11:19:53 2013 -0500
