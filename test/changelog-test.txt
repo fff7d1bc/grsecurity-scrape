@@ -1,3 +1,27 @@
+commit 3b9532bcc2f2fda37c6316047764e65d05cfc0d7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 2 17:05:39 2014 -0500
+
+    add missing #include
+
+ fs/proc/stat.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 44c29b5b08a4475bcd7ca653abe5ed172fa1f8a0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 2 17:02:24 2014 -0500
+
+    Back off recent PCI BAR restrictions as they break various existing
+    necessary functionality (Xorg with VMware video driver, etc)
+    
+    Add CAP_SYS_RAWIO checks instead to code operating off just uid == 0
+    checks currently
+
+ drivers/pci/pci-sysfs.c |   17 +++++++----------
+ drivers/pci/proc.c      |   13 ++-----------
+ drivers/pci/syscall.c   |    4 ----
+ 3 files changed, 9 insertions(+), 25 deletions(-)
+
 commit 5d6ce67e5ed3913c105cf2fc7c9db1d6e2a9f84a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Dec 31 10:30:20 2013 -0500
