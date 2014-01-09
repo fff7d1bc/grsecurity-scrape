@@ -1,3 +1,57 @@
+commit a1c966be13a8cfa254a6814c8a79caed3b421f0a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 8 18:13:15 2014 -0500
+
+    fix typo
+
+ mm/vmstat.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f1b3c3eec89cd91474518f7fbd6ffe11c0cf22c7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 8 18:06:53 2014 -0500
+
+    provide a zeroed out /proc/vmstat to unprivileged users instead of
+    denied access, some poorly-written desktop apps bail out completely
+    when it can't be opened
+
+ mm/vmstat.c |   21 +++++++++++++++------
+ 1 files changed, 15 insertions(+), 6 deletions(-)
+
+commit 4e7ac33a7cf3cb6387d69a4d9ba248a2a2c95c52
+Merge: ecdc265 bccc569
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 8 17:55:50 2014 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit bccc5691fbe71245abd1e39c4387c1c0146bb3fd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 8 17:55:08 2014 -0500
+
+    Update to pax-linux-3.12.6-test10.patch:
+    - removed config reference to EXT4_FS_XATTR, reported by x14sg1 (http://forums.grsecurity.net/viewtopic.php?f=3&t=3904)
+    - Emese worked around a few intentional overflows that triggered the size overflow plugin
+      - in cpuset_common_file_read, reported by Alexander Tsoy (https://bugs.gentoo.org/show_bug.cgi?id=496490) and boris64 (http://forums.grsecurity.net/viewtopic.php?f=3&t=3907)
+      - in canon_copy_from_read_buf, reported by dwokfur (http://forums.grsecurity.net/viewtopic.php?f=3&t=3905)
+
+ drivers/tty/n_tty.c              |    2 +-
+ drivers/usb/core/devio.c         |    2 +-
+ security/Kconfig                 |    1 -
+ tools/gcc/size_overflow_plugin.c |  173 ++++++++++++++++++++++++++++++++------
+ 4 files changed, 150 insertions(+), 28 deletions(-)
+
+commit ecdc2658f89f545acbfddbcef93c04a5bd3c9ce2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 8 17:46:46 2014 -0500
+
+    back out recently-added capability checks to various pci write methods
+    as they break Xorg radeon drivers
+
+ drivers/pci/pci-sysfs.c |    9 ---------
+ drivers/pci/proc.c      |    3 ---
+ 2 files changed, 0 insertions(+), 12 deletions(-)
+
 commit 3b9532bcc2f2fda37c6316047764e65d05cfc0d7
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jan 2 17:05:39 2014 -0500
