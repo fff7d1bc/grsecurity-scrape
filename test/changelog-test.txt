@@ -1,3 +1,14 @@
+commit 41ac3ff0c57f5b8bc2e32fd6ee58d618a6c8feec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 8 20:24:27 2014 -0500
+
+    zeroing out btime from /proc/stat breaks ps aux, it's the seconds of
+    uptime for the system, information which is also available elsewhere
+    (/proc/uptime), so there's no reason to limit it
+
+ fs/proc/stat.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
 commit a1c966be13a8cfa254a6814c8a79caed3b421f0a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jan 8 18:13:15 2014 -0500
