@@ -1,3 +1,27 @@
+commit 93e7728fe0c37e00421e82cc43f8d467d5161751
+Merge: 41ac3ff eadfb9b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 9 17:47:29 2014 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit eadfb9b1066d32ee537369fd67683297eb791ed0
+Merge: bccc569 4301b7a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 9 17:46:48 2014 -0500
+
+    Update to pax-linux-3.12.7-test11.patch:
+    - fixed powerpc compilation, by Purushothama Siddaiah <psiddaiah@mvista.com>
+    - updated size overflow hash table from Emese, reported by Brian Haslett
+    
+    Merge branch 'linux-3.12.y' into pax-test
+    
+    Conflicts:
+    	include/linux/reboot.h
+    	mm/fremap.c
+    	mm/memory-failure.c
+    	scripts/link-vmlinux.sh
+
 commit 41ac3ff0c57f5b8bc2e32fd6ee58d618a6c8feec
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jan 8 20:24:27 2014 -0500
