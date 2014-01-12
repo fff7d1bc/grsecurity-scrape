@@ -1,3 +1,39 @@
+commit 528d5554e49536241bdf98c59ac3daedf2855a11
+Merge: f17b6ff 229fa99
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 12 07:56:10 2014 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 229fa990d096324284db79ed69b336d19df28afb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 12 07:55:36 2014 -0500
+
+    update to newer size_overflow hash table
+
+ tools/gcc/size_overflow_hash.data |  150 +++++++++++++++++++++----------------
+ 1 files changed, 84 insertions(+), 66 deletions(-)
+
+commit f17b6ff4817c57c0aaae76c2c1cf2ee759773292
+Merge: 93e7728 6e027b9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 11 17:38:57 2014 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6e027b9f1196ed76313c256f8f962afd334d999f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 11 17:38:28 2014 -0500
+
+    Update to pax-linux-3.12.7-test12.patch:
+    - new size overflow plugin and hash table from Emese, should really fix the canon_copy_from_read_buf problem
+    - fixed incorrent module parameter type in vivi, caught by the size overflow plugin
+
+ drivers/media/platform/vivi.c     |    4 +-
+ tools/gcc/size_overflow_hash.data |  120 ++++++++++++++++++------------------
+ tools/gcc/size_overflow_plugin.c  |   64 +++++++++++++-------
+ 3 files changed, 105 insertions(+), 83 deletions(-)
+
 commit 93e7728fe0c37e00421e82cc43f8d467d5161751
 Merge: 41ac3ff eadfb9b
 Author: Brad Spengler <spender@grsecurity.net>
