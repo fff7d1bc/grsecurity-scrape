@@ -1,3 +1,14 @@
+commit 59672b779a7ef3857bb9335c668f671ea04c8a19
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 26 19:23:25 2013 -0500
+
+    Revert recent PaX marking change that broke a significant number
+    of existing systems.  The marking system will be revamped in a later
+    patch to fix softmode support while making XT markings more usable.
+
+ fs/binfmt_elf.c |   53 +++++++++++++++++++++++------------------------------
+ 1 files changed, 23 insertions(+), 30 deletions(-)
+
 commit 528d5554e49536241bdf98c59ac3daedf2855a11
 Merge: f17b6ff 229fa99
 Author: Brad Spengler <spender@grsecurity.net>
