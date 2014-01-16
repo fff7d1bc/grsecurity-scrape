@@ -1,3 +1,24 @@
+commit 88474da15f3f3f5d93848102d03bb4983b9a0b78
+Merge: 59672b7 dbe1b0b28
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 16 07:00:51 2014 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit dbe1b0b28973953b8919fbfc479054d527066737
+Merge: 229fa99 97f15f1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 16 07:00:16 2014 -0500
+
+    Update to pax-linux-3.12.8-test14.patch:
+    - added a generated file to dontdiff, reported by Emese
+    - removed duplicated code due to a mismerge
+    
+    Merge branch 'linux-3.12.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/include/asm/fpu-internal.h
+
 commit 59672b779a7ef3857bb9335c668f671ea04c8a19
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Dec 26 19:23:25 2013 -0500
