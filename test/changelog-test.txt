@@ -1,3 +1,791 @@
+commit 44ebc77fd9886fdebf8e3942a935cbe2f3272c3d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 19 09:27:31 2014 -0500
+
+    add PRNG self-tests
+
+ lib/random32.c |  207 +++++++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 files changed, 197 insertions(+), 10 deletions(-)
+
+commit 7780c290ada57bac294c5a7e5b0286dd604920c5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 19 09:00:56 2014 -0500
+
+    compile fix
+
+ include/linux/random.h      |    4 ----
+ include/uapi/linux/random.h |    2 +-
+ 2 files changed, 1 insertions(+), 5 deletions(-)
+
+commit 4c4359a96c7b208513eb3563c90558cd5d2ca1a0
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Mon Nov 11 12:20:36 2013 +0100
+
+    Upstream commit: a98814cef87946d2708812ad9f8b1e03b8366b6f
+    
+    random32: upgrade taus88 generator to taus113 from errata paper
+    
+    Since we use prandom*() functions quite often in networking code
+    i.e. in UDP port selection, netfilter code, etc, upgrade the PRNG
+    from Pierre L'Ecuyer's original paper "Maximally Equidistributed
+    Combined Tausworthe Generators", Mathematics of Computation, 65,
+    213 (1996), 203--213 to the version published in his errata paper [1].
+    
+    The Tausworthe generator is a maximally-equidistributed generator,
+    that is fast and has good statistical properties [1].
+    
+    The version presented there upgrades the 3 state LFSR to a 4 state
+    LFSR with increased periodicity from about 2^88 to 2^113. The
+    algorithm is presented in [1] by the very same author who also
+    designed the original algorithm in [2].
+    
+    Also, by increasing the state, we make it a bit harder for attackers
+    to "guess" the PRNGs internal state. See also discussion in [3].
+    
+    Now, as we use this sort of weak initialization discussed in [3]
+    only between core_initcall() until late_initcall() time [*] for
+    prandom32*() users, namely in prandom_init(), it is less relevant
+    from late_initcall() onwards as we overwrite seeds through
+    prandom_reseed() anyways with a seed source of higher entropy, that
+    is, get_random_bytes(). In other words, a exhaustive keysearch of
+    96 bit would be needed. Now, with the help of this patch, this
+    state-search increases further to 128 bit. Initialization needs
+    to make sure that s1 > 1, s2 > 7, s3 > 15, s4 > 127.
+    
+    taus88 and taus113 algorithm is also part of GSL. I added a test
+    case in the next patch to verify internal behaviour of this patch
+    with GSL and ran tests with the dieharder 3.31.1 RNG test suite:
+    
+    $ dieharder -g 052 -a -m 10 -s 1 -S 4137730333 #taus88
+    $ dieharder -g 054 -a -m 10 -s 1 -S 4137730333 #taus113
+    
+    With this seed configuration, in order to compare both, we get
+    the following differences:
+    
+    algorithm                 taus88           taus113
+    rands/second [**]         1.61e+08         1.37e+08
+    sts_serial(4, 1st run)    WEAK             PASSED
+    sts_serial(9, 2nd run)    WEAK             PASSED
+    rgb_lagged_sum(31)        WEAK             PASSED
+    
+    We took out diehard_sums test as according to the authors it is
+    considered broken and unusable [4]. Despite that and the slight
+    decrease in performance (which is acceptable), taus113 here passes
+    all 113 tests (only rgb_minimum_distance_5 in WEAK, the rest PASSED).
+    In general, taus/taus113 is considered "very good" by the authors
+    of dieharder [5].
+    
+    The papers [1][2] states a single warm-up step is sufficient by
+    running quicktaus once on each state to ensure proper initialization
+    of ~s_{0}:
+    
+    Our selection of (s) according to Table 1 of [1] row 1 holds the
+    condition L - k <= r - s, that is,
+    
+      (32 32 32 32) - (31 29 28 25) <= (25 27 15 22) - (18 2 7 13)
+    
+    with r = k - q and q = (6 2 13 3) as also stated by the paper.
+    So according to [2] we are safe with one round of quicktaus for
+    initialization. However we decided to include the warm-up phase
+    of the PRNG as done in GSL in every case as a safety net. We also
+    use the warm up phase to make the output of the RNG easier to
+    verify by the GSL output.
+    
+    In prandom_init(), we also mix random_get_entropy() into it, just
+    like drivers/char/random.c does it, jiffies ^ random_get_entropy().
+    random-get_entropy() is get_cycles(). xor is entropy preserving so
+    it is fine if it is not implemented by some architectures.
+    
+    Note, this PRNG is *not* used for cryptography in the kernel, but
+    rather as a fast PRNG for various randomizations i.e. in the
+    networking code, or elsewhere for debugging purposes, for example.
+    
+    [*]: In order to generate some "sort of pseduo-randomness", since
+    get_random_bytes() is not yet available for us, we use jiffies and
+    initialize states s1 - s3 with a simple linear congruential generator
+    (LCG), that is x <- x * 69069; and derive s2, s3, from the 32bit
+    initialization from s1. So the above quote from [3] accounts only
+    for the time from core to late initcall, not afterwards.
+    [**] Single threaded run on MacBook Air w/ Intel Core i5-3317U
+    
+     [1] http://www.iro.umontreal.ca/~lecuyer/myftp/papers/tausme2.ps
+     [2] http://www.iro.umontreal.ca/~lecuyer/myftp/papers/tausme.ps
+     [3] http://thread.gmane.org/gmane.comp.encryption.general/12103/
+     [4] http://code.google.com/p/dieharder/source/browse/trunk/libdieharder/diehard_sums.c?spec=svn490&r=490#20
+     [5] http://www.phy.duke.edu/~rgb/General/dieharder.php
+    
+    Joint work with Hannes Frederic Sowa.
+    
+    Cc: Florian Weimer <fweimer@redhat.com>
+    Cc: Theodore Ts'o <tytso@mit.edu>
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	include/linux/random.h
+
+ include/linux/random.h |   13 +++++--
+ lib/random32.c         |   80 +++++++++++++++++++++++++++--------------------
+ 2 files changed, 55 insertions(+), 38 deletions(-)
+
+commit 53dd59a26859c9b98cadcad65791c951b162e91e
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Nov 11 12:20:33 2013 +0100
+
+    Upstream commit: 6d31920246a9fc80be4f16acd27c0bbe8d7b8494
+    
+    random32: add periodic reseeding
+    
+    The current Tausworthe PRNG is never reseeded with truly random data after
+    the first attempt in late_initcall. As this PRNG is used for some critical
+    random data as e.g. UDP port randomization we should try better and reseed
+    the PRNG once in a while with truly random data from get_random_bytes().
+    
+    When we reseed with prandom_seed we now make also sure to throw the first
+    output away. This suffices the reseeding procedure.
+    
+    The delay calculation is based on a proposal from Eric Dumazet.
+    
+    Joint work with Daniel Borkmann.
+    
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: Theodore Ts'o <tytso@mit.edu>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	lib/random32.c
+
+ lib/random32.c |   22 ++++++++++++++++++++++
+ 1 files changed, 22 insertions(+), 0 deletions(-)
+
+commit 9deef5d021000495e04a730ba1880fb4b8951d45
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Nov 11 12:20:34 2013 +0100
+
+    Upstream commit: 4af712e8df998475736f3e2727701bd31e3751a9
+    
+    random32: add prandom_reseed_late() and call when nonblocking pool becomes initialized
+    
+    The Tausworthe PRNG is initialized at late_initcall time. At that time the
+    entropy pool serving get_random_bytes is not filled sufficiently. This
+    patch adds an additional reseeding step as soon as the nonblocking pool
+    gets marked as initialized.
+    
+    On some machines it might be possible that late_initcall gets called after
+    the pool has been initialized. In this situation we won't reseed again.
+    
+    (A call to prandom_seed_late blocks later invocations of early reseed
+    attempts.)
+    
+    Joint work with Daniel Borkmann.
+    
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: Theodore Ts'o <tytso@mit.edu>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: "Theodore Ts'o" <tytso@mit.edu>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	lib/random32.c
+
+ drivers/char/random.c  |    5 ++++-
+ include/linux/random.h |    1 +
+ lib/random32.c         |   24 +++++++++++++++++++++++-
+ 3 files changed, 28 insertions(+), 2 deletions(-)
+
+commit 7445d45f81df0b84bbb7fc6cc598e6b70522c286
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 20:43:43 2014 -0500
+
+    Since the reworking of recvmsg handlers by Hannes Frederic Sowa,
+    it should be safe to revert our workaround for large number of
+    infoleaks the previous interface made possible, restoring some
+    performance to these syscalls
+
+ net/socket.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 2c18c01da2a59df2cdaa0d99e0ed2f781c3cbf4e
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Jan 15 06:50:07 2014 -0800
+
+    Upstream commit: aee636c4809fa54848ff07a899b326eb1f9987a2
+    
+    bpf: do not use reciprocal divide
+    
+    At first Jakub Zawadzki noticed that some divisions by reciprocal_divide
+    were not correct. (off by one in some cases)
+    http://www.wireshark.org/~darkjames/reciprocal-buggy.c
+    
+    He could also show this with BPF:
+    http://www.wireshark.org/~darkjames/set-and-dump-filter-k-bug.c
+    
+    The reciprocal divide in linux kernel is not generic enough,
+    lets remove its use in BPF, as it is not worth the pain with
+    current cpus.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Reported-by: Jakub Zawadzki <darkjames-ws@darkjames.pl>
+    Cc: Mircea Gherzan <mgherzan@gmail.com>
+    Cc: Daniel Borkmann <dxchgb@gmail.com>
+    Cc: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Cc: Matt Evans <matt@ozlabs.org>
+    Cc: Martin Schwidefsky <schwidefsky@de.ibm.com>
+    Cc: Heiko Carstens <heiko.carstens@de.ibm.com>
+    Cc: David S. Miller <davem@davemloft.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	arch/x86/net/bpf_jit_comp.c
+
+ arch/arm/net/bpf_jit_32.c       |    6 +++---
+ arch/powerpc/net/bpf_jit_comp.c |    7 ++++---
+ arch/s390/net/bpf_jit_comp.c    |   17 ++++++++++++-----
+ arch/sparc/net/bpf_jit_comp.c   |   17 ++++++++++++++---
+ arch/x86/net/bpf_jit_comp.c     |   16 ++++++++++------
+ net/core/filter.c               |   30 ++----------------------------
+ 6 files changed, 45 insertions(+), 48 deletions(-)
+
+commit 6986871c84f81084d5c8723538ccefc5c401b31c
+Author: Jie Liu <jeff.liu@oracle.com>
+Date:   Wed Jan 1 19:28:03 2014 +0800
+
+    Upstream commit: bba719b5004234e55737e7074b81b337210c511d
+    
+    xfs: fix off-by-one error in xfs_attr3_rmt_verify
+    
+    With CRC check is enabled, if trying to set an attributes value just
+    equal to the maximum size of XATTR_SIZE_MAX would cause the v3 remote
+    attr write verification procedure failure, which would yield the back
+    trace like below:
+    
+    <snip>
+    XFS (sda7): Internal error xfs_attr3_rmt_write_verify at line 191 of file fs/xfs/xfs_attr_remote.c
+    <snip>
+    Call Trace:
+    [<ffffffff816f0042>] dump_stack+0x45/0x56
+    [<ffffffffa0d99c8b>] xfs_error_report+0x3b/0x40 [xfs]
+    [<ffffffffa0d96edd>] ? _xfs_buf_ioapply+0x6d/0x390 [xfs]
+    [<ffffffffa0d99ce5>] xfs_corruption_error+0x55/0x80 [xfs]
+    [<ffffffffa0dbef6b>] xfs_attr3_rmt_write_verify+0x14b/0x1a0 [xfs]
+    [<ffffffffa0d96edd>] ? _xfs_buf_ioapply+0x6d/0x390 [xfs]
+    [<ffffffffa0d97315>] ? xfs_bdstrat_cb+0x55/0xb0 [xfs]
+    [<ffffffffa0d96edd>] _xfs_buf_ioapply+0x6d/0x390 [xfs]
+    [<ffffffff81184cda>] ? vm_map_ram+0x31a/0x460
+    [<ffffffff81097230>] ? wake_up_state+0x20/0x20
+    [<ffffffffa0d97315>] ? xfs_bdstrat_cb+0x55/0xb0 [xfs]
+    [<ffffffffa0d9726b>] xfs_buf_iorequest+0x6b/0xc0 [xfs]
+    [<ffffffffa0d97315>] xfs_bdstrat_cb+0x55/0xb0 [xfs]
+    [<ffffffffa0d97906>] xfs_bwrite+0x46/0x80 [xfs]
+    [<ffffffffa0dbfa94>] xfs_attr_rmtval_set+0x334/0x490 [xfs]
+    [<ffffffffa0db84aa>] xfs_attr_leaf_addname+0x24a/0x410 [xfs]
+    [<ffffffffa0db8893>] xfs_attr_set_int+0x223/0x470 [xfs]
+    [<ffffffffa0db8b76>] xfs_attr_set+0x96/0xb0 [xfs]
+    [<ffffffffa0db13b2>] xfs_xattr_set+0x42/0x70 [xfs]
+    [<ffffffff811df9b2>] generic_setxattr+0x62/0x80
+    [<ffffffff811e0213>] __vfs_setxattr_noperm+0x63/0x1b0
+    [<ffffffff81307afe>] ? evm_inode_setxattr+0xe/0x10
+    [<ffffffff811e0415>] vfs_setxattr+0xb5/0xc0
+    [<ffffffff811e054e>] setxattr+0x12e/0x1c0
+    [<ffffffff811c6e82>] ? final_putname+0x22/0x50
+    [<ffffffff811c708b>] ? putname+0x2b/0x40
+    [<ffffffff811cc4bf>] ? user_path_at_empty+0x5f/0x90
+    [<ffffffff811bdfd9>] ? __sb_start_write+0x49/0xe0
+    [<ffffffff81168589>] ? vm_mmap_pgoff+0x99/0xc0
+    [<ffffffff811e07df>] SyS_setxattr+0x8f/0xe0
+    [<ffffffff81700c2d>] system_call_fastpath+0x1a/0x1f
+    
+    Tests:
+        setfattr -n user.longxattr -v `perl -e 'print "A"x65536'` testfile
+    
+    This patch fix it to check the remote EA size is greater than the
+    XATTR_SIZE_MAX rather than more than or equal to it, because it's
+    valid if the specified EA value size is equal to the limitation as
+    per VFS setxattr interface.
+    
+    Signed-off-by: Jie Liu <jeff.liu@oracle.com>
+    Reviewed-by: Mark Tinguely <tinguely@sgi.com>
+    Signed-off-by: Ben Myers <bpm@sgi.com>
+    
+    (cherry picked from commit 85dd0707f0cad26d60f2dc574d17a5ab948d10f7)
+
+ fs/xfs/xfs_attr_remote.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit e8aa7f8223cf2bc0893c6bec7ada0b13edc07703
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Thu Jan 9 21:46:34 2014 -0500
+
+    Upstream commit: 3dc91d4338d698ce77832985f9cb183d8eeaf6be
+    
+    SELinux: Fix possible NULL pointer dereference in selinux_inode_permission()
+    
+    While running stress tests on adding and deleting ftrace instances I hit
+    this bug:
+    
+      BUG: unable to handle kernel NULL pointer dereference at 0000000000000020
+      IP: selinux_inode_permission+0x85/0x160
+      PGD 63681067 PUD 7ddbe067 PMD 0
+      Oops: 0000 [#1] PREEMPT
+      CPU: 0 PID: 5634 Comm: ftrace-test-mki Not tainted 3.13.0-rc4-test-00033-gd2a6dde-dirty #20
+      Hardware name:                  /DG965MQ, BIOS MQ96510J.86A.0372.2006.0605.1717 06/05/2006
+      task: ffff880078375800 ti: ffff88007ddb0000 task.ti: ffff88007ddb0000
+      RIP: 0010:[<ffffffff812d8bc5>]  [<ffffffff812d8bc5>] selinux_inode_permission+0x85/0x160
+      RSP: 0018:ffff88007ddb1c48  EFLAGS: 00010246
+      RAX: 0000000000000000 RBX: 0000000000800000 RCX: ffff88006dd43840
+      RDX: 0000000000000001 RSI: 0000000000000081 RDI: ffff88006ee46000
+      RBP: ffff88007ddb1c88 R08: 0000000000000000 R09: ffff88007ddb1c54
+      R10: 6e6576652f6f6f66 R11: 0000000000000003 R12: 0000000000000000
+      R13: 0000000000000081 R14: ffff88006ee46000 R15: 0000000000000000
+      FS:  00007f217b5b6700(0000) GS:ffffffff81e21000(0000) knlGS:0000000000000000
+      CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033^M
+      CR2: 0000000000000020 CR3: 000000006a0fe000 CR4: 00000000000007f0
+      Call Trace:
+        security_inode_permission+0x1c/0x30
+        __inode_permission+0x41/0xa0
+        inode_permission+0x18/0x50
+        link_path_walk+0x66/0x920
+        path_openat+0xa6/0x6c0
+        do_filp_open+0x43/0xa0
+        do_sys_open+0x146/0x240
+        SyS_open+0x1e/0x20
+        system_call_fastpath+0x16/0x1b
+      Code: 84 a1 00 00 00 81 e3 00 20 00 00 89 d8 83 c8 02 40 f6 c6 04 0f 45 d8 40 f6 c6 08 74 71 80 cf 02 49 8b 46 38 4c 8d 4d cc 45 31 c0 <0f> b7 50 20 8b 70 1c 48 8b 41 70 89 d9 8b 78 04 e8 36 cf ff ff
+      RIP  selinux_inode_permission+0x85/0x160
+      CR2: 0000000000000020
+    
+    Investigating, I found that the inode->i_security was NULL, and the
+    dereference of it caused the oops.
+    
+    in selinux_inode_permission():
+    
+    	isec = inode->i_security;
+    
+    	rc = avc_has_perm_noaudit(sid, isec->sid, isec->sclass, perms, 0, &avd);
+    
+    Note, the crash came from stressing the deletion and reading of debugfs
+    files.  I was not able to recreate this via normal files.  But I'm not
+    sure they are safe.  It may just be that the race window is much harder
+    to hit.
+    
+    What seems to have happened (and what I have traced), is the file is
+    being opened at the same time the file or directory is being deleted.
+    As the dentry and inode locks are not held during the path walk, nor is
+    the inodes ref counts being incremented, there is nothing saving these
+    structures from being discarded except for an rcu_read_lock().
+    
+    The rcu_read_lock() protects against freeing of the inode, but it does
+    not protect freeing of the inode_security_struct.  Now if the freeing of
+    the i_security happens with a call_rcu(), and the i_security field of
+    the inode is not changed (it gets freed as the inode gets freed) then
+    there will be no issue here.  (Linus Torvalds suggested not setting the
+    field to NULL such that we do not need to check if it is NULL in the
+    permission check).
+    
+    Note, this is a hack, but it fixes the problem at hand.  A real fix is
+    to restructure the destroy_inode() to call all the destructor handlers
+    from the RCU callback.  But that is a major job to do, and requires a
+    lot of work.  For now, we just band-aid this bug with this fix (it
+    works), and work on a more maintainable solution in the future.
+    
+    Link: http://lkml.kernel.org/r/20140109101932.0508dec7@gandalf.local.home
+    Link: http://lkml.kernel.org/r/20140109182756.17abaaa8@gandalf.local.home
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ security/selinux/hooks.c          |   20 ++++++++++++++++++--
+ security/selinux/include/objsec.h |    5 ++++-
+ 2 files changed, 22 insertions(+), 3 deletions(-)
+
+commit e19ed2ef10ac8fb5539ff49890f149230ba504a2
+Author: Hugh Dickins <hughd@google.com>
+Date:   Sun Jan 12 01:25:21 2014 -0800
+
+    Upstream commit: eecc1e426d681351a6026a7d3e7d225f38955b6c
+    
+    thp: fix copy_page_rep GPF by testing is_huge_zero_pmd once only
+    
+    We see General Protection Fault on RSI in copy_page_rep: that RSI is
+    what you get from a NULL struct page pointer.
+    
+      RIP: 0010:[<ffffffff81154955>]  [<ffffffff81154955>] copy_page_rep+0x5/0x10
+      RSP: 0000:ffff880136e15c00  EFLAGS: 00010286
+      RAX: ffff880000000000 RBX: ffff880136e14000 RCX: 0000000000000200
+      RDX: 6db6db6db6db6db7 RSI: db73880000000000 RDI: ffff880dd0c00000
+      RBP: ffff880136e15c18 R08: 0000000000000200 R09: 000000000005987c
+      R10: 000000000005987c R11: 0000000000000200 R12: 0000000000000001
+      R13: ffffea00305aa000 R14: 0000000000000000 R15: 0000000000000000
+      FS:  00007f195752f700(0000) GS:ffff880c7fc20000(0000) knlGS:0000000000000000
+      CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+      CR2: 0000000093010000 CR3: 00000001458e1000 CR4: 00000000000027e0
+      Call Trace:
+        copy_user_huge_page+0x93/0xab
+        do_huge_pmd_wp_page+0x710/0x815
+        handle_mm_fault+0x15d8/0x1d70
+        __do_page_fault+0x14d/0x840
+        do_page_fault+0x2f/0x90
+        page_fault+0x22/0x30
+    
+    do_huge_pmd_wp_page() tests is_huge_zero_pmd(orig_pmd) four times: but
+    since shrink_huge_zero_page() can free the huge_zero_page, and we have
+    no hold of our own on it here (except where the fourth test holds
+    page_table_lock and has checked pmd_same), it's possible for it to
+    answer yes the first time, but no to the second or third test.  Change
+    all those last three to tests for NULL page.
+    
+    (Note: this is not the same issue as trinity's DEBUG_PAGEALLOC BUG
+    in copy_page_rep with RSI: ffff88009c422000, reported by Sasha Levin
+    in https://lkml.org/lkml/2013/3/29/103.  I believe that one is due
+    to the source page being split, and a tail page freed, while copy
+    is in progress; and not a problem without DEBUG_PAGEALLOC, since
+    the pmd_same check will prevent a miscopy from being made visible.)
+    
+    Fixes: 97ae17497e99 ("thp: implement refcounting for huge zero page")
+    Signed-off-by: Hugh Dickins <hughd@google.com>
+    Cc: stable@vger.kernel.org # v3.10 v3.11 v3.12
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/huge_memory.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 49bf1cc12db4954afc0a3e9a4506325a53259c13
+Author: Christian Engelmayer <cengelma@gmx.at>
+Date:   Sat Jan 11 22:19:30 2014 +0100
+
+    Upstream commit: 267d29a69c6af39445f36102a832b25ed483f299
+    
+    ieee802154: Fix memory leak in ieee802154_add_iface()
+    
+    Fix a memory leak in the ieee802154_add_iface() error handling path.
+    Detected by Coverity: CID 710490.
+    
+    Signed-off-by: Christian Engelmayer <cengelma@gmx.at>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ieee802154/nl-phy.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 4e2493507f0d3a43a3c9562a4e75ae806f993d84
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Jan 13 02:45:22 2014 +0100
+
+    Upstream commit: 95f4a45de1a0f172b35451fc52283290adb21f6e
+    
+    net: avoid reference counter overflows on fib_rules in multicast forwarding
+    
+    Bob Falken reported that after 4G packets, multicast forwarding stopped
+    working. This was because of a rule reference counter overflow which
+    freed the rule as soon as the overflow happend.
+    
+    This patch solves this by adding the FIB_LOOKUP_NOREF flag to
+    fib_rules_lookup calls. This is safe even from non-rcu locked sections
+    as in this case the flag only implies not taking a reference to the rule,
+    which we don't need at all.
+    
+    Rules only hold references to the namespace, which are guaranteed to be
+    available during the call of the non-rcu protected function reg_vif_xmit
+    because of the interface reference which itself holds a reference to
+    the net namespace.
+    
+    Fixes: f0ad0860d01e47 ("ipv4: ipmr: support multiple tables")
+    Fixes: d1db275dd3f6e4 ("ipv6: ip6mr: support multiple tables")
+    Reported-by: Bob Falken <NetFestivalHaveFun@gmx.com>
+    Cc: Patrick McHardy <kaber@trash.net>
+    Cc: Thomas Graf <tgraf@suug.ch>
+    Cc: Julian Anastasov <ja@ssi.bg>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ipmr.c  |    7 +++++--
+ net/ipv6/ip6mr.c |    7 +++++--
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+commit 427e1a47ccd092da8d3834ec889bbf899bf02994
+Author: NeilBrown <neilb@suse.de>
+Date:   Mon Jan 6 10:35:34 2014 +1100
+
+    Upstream commit: e8b849158508565e0cd6bc80061124afc5879160
+    
+    md/raid10: fix bug when raid10 recovery fails to recover a block.
+    
+    commit e875ecea266a543e643b19e44cf472f1412708f9
+        md/raid10 record bad blocks as needed during recovery.
+    
+    added code to the "cannot recover this block" path to record a bad
+    block rather than fail the whole recovery.
+    Unfortunately this new case was placed *after* r10bio was freed rather
+    than *before*, yet it still uses r10bio.
+    This is will crash with a null dereference.
+    
+    So move the freeing of r10bio down where it is safe.
+    
+    Cc: stable@vger.kernel.org (v3.1+)
+    Fixes: e875ecea266a543e643b19e44cf472f1412708f9
+    Reported-by: Damian Nowak <spam@nowaker.net>
+    URL: https://bugzilla.kernel.org/show_bug.cgi?id=68181
+    Signed-off-by: NeilBrown <neilb@suse.de>
+
+ drivers/md/raid10.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 528bc79bf4b9414269c3468527a1fb93992888ec
+Author: NeilBrown <neilb@suse.de>
+Date:   Mon Jan 6 13:19:42 2014 +1100
+
+    Upstream commit: 1cc03eb93245e63b0b7a7832165efdc52e25b4e6
+    
+    md/raid5: Fix possible confusion when multiple write errors occur.
+    
+    commit 5d8c71f9e5fbdd95650be00294d238e27a363b5c
+        md: raid5 crash during degradation
+    
+    Fixed a crash in an overly simplistic way which could leave
+    R5_WriteError or R5_MadeGood set in the stripe cache for devices
+    for which it is no longer relevant.
+    When those devices are removed and spares added the flags are still
+    set and can cause incorrect behaviour.
+    
+    commit 14a75d3e07c784c004b4b44b34af996b8e4ac453
+        md/raid5: preferentially read from replacement device if possible.
+    
+    Fixed the same bug if a more effective way, so we can now revert
+    the original commit.
+    
+    Reported-and-tested-by: Alexander Lyakas <alex.bolshoy@gmail.com>
+    Cc: stable@vger.kernel.org (3.2+ - 3.2 will need a different fix though)
+    Fixes: 5d8c71f9e5fbdd95650be00294d238e27a363b5c
+    Signed-off-by: NeilBrown <neilb@suse.de>
+
+ drivers/md/raid5.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 65e365f661bcc034ce8da73be4521dde4088cbc6
+Author: NeilBrown <neilb@suse.de>
+Date:   Tue Jan 14 10:38:09 2014 +1100
+
+    Upstream commit: b50c259e25d9260b9108dc0c2964c26e5ecbe1c1
+    
+    md/raid10: fix two bugs in handling of known-bad-blocks.
+    
+    If we discover a bad block when reading we split the request and
+    potentially read some of it from a different device.
+    
+    The code path of this has two bugs in RAID10.
+    1/ we get a spin_lock with _irq, but unlock without _irq!!
+    2/ The calculation of 'sectors_handled' is wrong, as can be clearly
+       seen by comparison with raid1.c
+    
+    This leads to at least 2 warnings and a probable crash is a RAID10
+    ever had known bad blocks.
+    
+    Cc: stable@vger.kernel.org (v3.1+)
+    Fixes: 856e08e23762dfb92ffc68fd0a8d228f9e152160
+    Reported-by: Damian Nowak <spam@nowaker.net>
+    URL: https://bugzilla.kernel.org/show_bug.cgi?id=68181
+    Signed-off-by: NeilBrown <neilb@suse.de>
+
+ drivers/md/raid10.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 648634ea6eaa98407d5cee468eea365addf784d7
+Author: Andreas Rohner <andreas.rohner@gmx.net>
+Date:   Tue Jan 14 17:56:36 2014 -0800
+
+    Upstream commit: 70f2fe3a26248724d8a5019681a869abdaf3e89a
+    
+    nilfs2: fix segctor bug that causes file system corruption
+    
+    There is a bug in the function nilfs_segctor_collect, which results in
+    active data being written to a segment, that is marked as clean.  It is
+    possible, that this segment is selected for a later segment
+    construction, whereby the old data is overwritten.
+    
+    The problem shows itself with the following kernel log message:
+    
+      nilfs_sufile_do_cancel_free: segment 6533 must be clean
+    
+    Usually a few hours later the file system gets corrupted:
+    
+      NILFS: bad btree node (blocknr=8748107): level = 0, flags = 0x0, nchildren = 0
+      NILFS error (device sdc1): nilfs_bmap_last_key: broken bmap (inode number=114660)
+    
+    The issue can be reproduced with a file system that is nearly full and
+    with the cleaner running, while some IO intensive task is running.
+    Although it is quite hard to reproduce.
+    
+    This is what happens:
+    
+     1. The cleaner starts the segment construction
+     2. nilfs_segctor_collect is called
+     3. sc_stage is on NILFS_ST_SUFILE and segments are freed
+     4. sc_stage is on NILFS_ST_DAT current segment is full
+     5. nilfs_segctor_extend_segments is called, which
+        allocates a new segment
+     6. The new segment is one of the segments freed in step 3
+     7. nilfs_sufile_cancel_freev is called and produces an error message
+     8. Loop around and the collection starts again
+     9. sc_stage is on NILFS_ST_SUFILE and segments are freed
+        including the newly allocated segment, which will contain active
+        data and can be allocated at a later time
+    10. A few hours later another segment construction allocates the
+        segment and causes file system corruption
+    
+    This can be prevented by simply reordering the statements.  If
+    nilfs_sufile_cancel_freev is called before nilfs_segctor_extend_segments
+    the freed segments are marked as dirty and cannot be allocated any more.
+    
+    Signed-off-by: Andreas Rohner <andreas.rohner@gmx.net>
+    Reviewed-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+    Tested-by: Andreas Rohner <andreas.rohner@gmx.net>
+    Signed-off-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/nilfs2/segment.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
+
+commit 380b201967bbe5769291311e5195a603006d391c
+Author: Mikulas Patocka <mpatocka@redhat.com>
+Date:   Tue Jan 14 17:56:40 2014 -0800
+
+    Upstream commit: 03e5ac2fc3bf6f4140db0371e8bb4243b24e3e02
+    
+    mm: fix crash when using XFS on loopback
+    
+    Commit 8456a648cf44 ("slab: use struct page for slab management") causes
+    a crash in the LVM2 testsuite on PA-RISC (the crashing test is
+    fsadm.sh).  The testsuite doesn't crash on 3.12, crashes on 3.13-rc1 and
+    later.
+    
+     Bad Address (null pointer deref?): Code=15 regs=000000413edd89a0 (Addr=000006202224647d)
+     CPU: 3 PID: 24008 Comm: loop0 Not tainted 3.13.0-rc6 #5
+     task: 00000001bf3c0048 ti: 000000413edd8000 task.ti: 000000413edd8000
+    
+          YZrvWESTHLNXBCVMcbcbcbcbOGFRQPDI
+     PSW: 00001000000001101111100100001110 Not tainted
+     r00-03  000000ff0806f90e 00000000405c8de0 000000004013e6c0 000000413edd83f0
+     r04-07  00000000405a95e0 0000000000000200 00000001414735f0 00000001bf349e40
+     r08-11  0000000010fe3d10 0000000000000001 00000040829c7778 000000413efd9000
+     r12-15  0000000000000000 000000004060d800 0000000010fe3000 0000000010fe3000
+     r16-19  000000413edd82a0 00000041078ddbc0 0000000000000010 0000000000000001
+     r20-23  0008f3d0d83a8000 0000000000000000 00000040829c7778 0000000000000080
+     r24-27  00000001bf349e40 00000001bf349e40 202d66202224640d 00000000405a95e0
+     r28-31  202d662022246465 000000413edd88f0 000000413edd89a0 0000000000000001
+     sr00-03  000000000532c000 0000000000000000 0000000000000000 000000000532c000
+     sr04-07  0000000000000000 0000000000000000 0000000000000000 0000000000000000
+    
+     IASQ: 0000000000000000 0000000000000000 IAOQ: 00000000401fe42c 00000000401fe430
+      IIR: 539c0030    ISR: 00000000202d6000  IOR: 000006202224647d
+      CPU:        3   CR30: 000000413edd8000 CR31: 0000000000000000
+      ORIG_R28: 00000000405a95e0
+      IAOQ[0]: vma_interval_tree_iter_first+0x14/0x48
+      IAOQ[1]: vma_interval_tree_iter_first+0x18/0x48
+      RP(r2): flush_dcache_page+0x128/0x388
+     Backtrace:
+       flush_dcache_page+0x128/0x388
+       lo_splice_actor+0x90/0x148 [loop]
+       splice_from_pipe_feed+0xc0/0x1d0
+       __splice_from_pipe+0xac/0xc0
+       lo_direct_splice_actor+0x1c/0x70 [loop]
+       splice_direct_to_actor+0xec/0x228
+       lo_receive+0xe4/0x298 [loop]
+       loop_thread+0x478/0x640 [loop]
+       kthread+0x134/0x168
+       end_fault_vector+0x20/0x28
+       xfs_setsize_buftarg+0x0/0x90 [xfs]
+    
+     Kernel panic - not syncing: Bad Address (null pointer deref?)
+    
+    Commit 8456a648cf44 changes the page structure so that the slab
+    subsystem reuses the page->mapping field.
+    
+    The crash happens in the following way:
+     * XFS allocates some memory from slab and issues a bio to read data
+       into it.
+     * the bio is sent to the loopback device.
+     * lo_receive creates an actor and calls splice_direct_to_actor.
+     * lo_splice_actor copies data to the target page.
+     * lo_splice_actor calls flush_dcache_page because the page may be
+       mapped by userspace.  In that case we need to flush the kernel cache.
+     * flush_dcache_page asks for the list of userspace mappings, however
+       that page->mapping field is reused by the slab subsystem for a
+       different purpose.  This causes the crash.
+    
+    Note that other architectures without coherent caches (sparc, arm, mips)
+    also call page_mapping from flush_dcache_page, so they may crash in the
+    same way.
+    
+    This patch fixes this bug by testing if the page is a slab page in
+    page_mapping and returning NULL if it is.
+    
+    The patch also fixes VM_BUG_ON(PageSlab(page)) that could happen in
+    earlier kernels in the same scenario on architectures without cache
+    coherence when CONFIG_DEBUG_VM is enabled - so it should be backported
+    to stable kernels.
+    
+    In the old kernels, the function page_mapping is placed in
+    include/linux/mm.h, so you should modify the patch accordingly when
+    backporting it.
+    
+    Signed-off-by: Mikulas Patocka <mpatocka@redhat.com>
+    Cc: John David Anglin <dave.anglin@bell.net>]
+    Cc: Andi Kleen <ak@linux.intel.com>
+    Cc: Christoph Lameter <cl@linux.com>
+    Acked-by: Pekka Enberg <penberg@kernel.org>
+    Reviewed-by: Joonsoo Kim <iamjoonsoo.kim@lge.com>
+    Cc: Helge Deller <deller@gmx.de>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/util.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit e71bfbceaa0246366fe3753a893c660f22568bb9
+Merge: 83b84f4 e8219cf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 17:30:14 2014 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 83b84f4f7b950eeddc319df9dabeca8df99c19e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 17:30:05 2014 -0500
+
+    Revert "Revert recent PaX marking change that broke a significant number"
+    
+    This reverts commit 59672b779a7ef3857bb9335c668f671ea04c8a19.
+
+ fs/binfmt_elf.c |   53 ++++++++++++++++++++++++++++++-----------------------
+ 1 files changed, 30 insertions(+), 23 deletions(-)
+
+commit e8219cf65fbb6e3763c4298831239929d1c1f9fa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 17:29:19 2014 -0500
+
+    Update to pax-linux-3.12.8-test15.patch:
+    - reworked the interaction between the various PaX control flag mechanisms for better consistency
+    - fixed type attribute handling in the constify plugin, reported by spender
+
+ fs/binfmt_elf.c             |  144 +++++++++++++++++++++++-------------------
+ include/linux/sched.h       |    1 +
+ include/uapi/linux/sysctl.h |    6 --
+ tools/gcc/constify_plugin.c |   20 +++---
+ 4 files changed, 89 insertions(+), 82 deletions(-)
+
 commit 88474da15f3f3f5d93848102d03bb4983b9a0b78
 Merge: 59672b7 dbe1b0b28
 Author: Brad Spengler <spender@grsecurity.net>
