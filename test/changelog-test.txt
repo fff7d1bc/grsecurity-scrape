@@ -1,3 +1,155 @@
+commit 512ab625d6d34c2f8602a044454bb1366b80b98e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:54:11 2014 -0500
+
+    Fix another compiler error caught by RANDSTRUCT
+
+ sound/isa/sb/emu8000_synth.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 43bd0a97d977b78f2a54045bbf98ee967209c144
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:34:12 2014 -0500
+
+    Fix another compiler error caught by RANDSTRUCT
+
+ drivers/net/wan/z85230.c |   24 ++++++++++++------------
+ 1 files changed, 12 insertions(+), 12 deletions(-)
+
+commit e833f51aa919e2c94bb7ac6979a68cf3f4fcc131
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:30:46 2014 -0500
+
+    fix compilation with RANDSTRUCT plugin
+
+ sound/drivers/opl4/opl4_seq.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 743f2ccb4dc72e6366e0cf0b371d37951c67ce0d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:16:18 2014 -0500
+
+    avoid problems by just building our fake field decl node from scratch
+
+ tools/gcc/randomize_layout_plugin.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 9345145bb31148c2fb4918fe989d45bbf1219373
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 13:45:18 2014 -0500
+
+    while in non-debug mode, don't emit notes for non-randomized struct types
+    
+    clear all signs from our fake field decl of being a bitfield
+
+ tools/gcc/randomize_layout_plugin.c |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
+
+commit 946d2d5cafa4f123f6ee36596f67cf8571e461b4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 12:56:05 2014 -0500
+
+    revert change to read-only marking of fake struct field
+
+ tools/gcc/randomize_layout_plugin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c947104c6a4c0e05ed6440287ad8872e2cbdb2f3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 12:42:48 2014 -0500
+
+    Update RANDSTRUCT plugin help
+
+ tools/gcc/randomize_layout_plugin.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 3757914c9c5d2278f93a3a8dc7d19847c6ee8e3a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 12:25:43 2014 -0500
+
+    Introduce GRKERNSEC_RANDSTRUCT:
+    automatic structure layout randomization of pure ops structs
+    randomization of marked sensitive kernel structures
+    
+    automatically enabled by GRKERNSEC_CONFIG_AUTO
+    performance mode is activated if the config priority is set to performance
+
+ Documentation/dontdiff                          |    1 +
+ Makefile                                        |   12 +-
+ arch/x86/include/asm/floppy.h                   |   20 +-
+ arch/x86/include/asm/paravirt_types.h           |   23 +-
+ arch/x86/include/asm/processor.h                |    2 +-
+ drivers/acpi/acpica/hwxfsleep.c                 |   11 +-
+ drivers/block/cciss.h                           |   30 +-
+ drivers/block/drbd/drbd_interval.c              |    6 +-
+ drivers/block/smart1,2.h                        |   40 +-
+ drivers/gpu/drm/nouveau/nouveau_ttm.c           |   30 +-
+ drivers/gpu/drm/ttm/ttm_bo_manager.c            |   10 +-
+ drivers/gpu/drm/vmwgfx/vmwgfx_gmrid_manager.c   |   10 +-
+ drivers/infiniband/hw/ipath/ipath_dma.c         |   26 +-
+ drivers/infiniband/hw/nes/nes_cm.c              |   22 +-
+ drivers/isdn/gigaset/bas-gigaset.c              |   32 +-
+ drivers/isdn/gigaset/ser-gigaset.c              |   32 +-
+ drivers/isdn/gigaset/usb-gigaset.c              |   32 +-
+ drivers/isdn/i4l/isdn_concap.c                  |    6 +-
+ drivers/isdn/i4l/isdn_x25iface.c                |   16 +-
+ drivers/misc/sgi-xp/xp_main.c                   |   12 +-
+ drivers/net/ethernet/brocade/bna/bna_enet.c     |    8 +-
+ drivers/net/wan/lmc/lmc_media.c                 |   97 ++--
+ drivers/scsi/bfa/bfa_fcs.c                      |   19 +-
+ drivers/scsi/bfa/bfa_fcs_lport.c                |   29 +-
+ drivers/scsi/bfa/bfa_modules.h                  |   12 +-
+ drivers/scsi/hpsa.h                             |   20 +-
+ drivers/staging/lustre/lustre/ldlm/ldlm_flock.c |    2 +-
+ drivers/staging/lustre/lustre/libcfs/module.c   |   10 +-
+ drivers/staging/media/solo6x10/solo6x10-g723.c  |    2 +-
+ drivers/video/matrox/matroxfb_DAC1064.c         |   10 +-
+ drivers/video/matrox/matroxfb_Ti3026.c          |    5 +-
+ fs/mount.h                                      |    4 +-
+ fs/proc/internal.h                              |    4 +-
+ fs/reiserfs/item_ops.c                          |   24 +-
+ grsecurity/Kconfig                              |   31 +-
+ include/linux/compiler-gcc4.h                   |    5 +
+ include/linux/compiler.h                        |    8 +
+ include/linux/cred.h                            |    4 +-
+ include/linux/dcache.h                          |    2 +-
+ include/linux/fs.h                              |   14 +-
+ include/linux/fs_struct.h                       |    2 +-
+ include/linux/ipc_namespace.h                   |    2 +-
+ include/linux/kobject.h                         |    2 +-
+ include/linux/mm_types.h                        |    4 +-
+ include/linux/module.h                          |    4 +-
+ include/linux/mount.h                           |    2 +-
+ include/linux/pid_namespace.h                   |    2 +-
+ include/linux/proc_ns.h                         |    2 +-
+ include/linux/rbtree_augmented.h                |    4 +-
+ include/linux/sched.h                           |    6 +-
+ include/linux/sysctl.h                          |    2 +-
+ include/linux/tty.h                             |    2 +-
+ include/linux/tty_driver.h                      |    2 +-
+ include/linux/user_namespace.h                  |    2 +-
+ include/linux/utsname.h                         |    2 +-
+ include/net/neighbour.h                         |    2 +-
+ include/net/net_namespace.h                     |    2 +-
+ lib/rbtree.c                                    |    4 +-
+ net/atm/lec.c                                   |    6 +-
+ net/atm/mpoa_caches.c                           |   42 +-
+ net/decnet/dn_dev.c                             |    2 +-
+ net/vmw_vsock/vmci_transport_notify.c           |   30 +-
+ net/vmw_vsock/vmci_transport_notify_qstate.c    |   30 +-
+ net/x25/sysctl_net_x25.c                        |    2 +-
+ scripts/Makefile                                |    2 +
+ scripts/gen-random-seed.sh                      |    8 +
+ sound/core/seq/oss/seq_oss.c                    |    4 +-
+ sound/core/seq/seq_midi.c                       |    4 +-
+ sound/drivers/opl3/opl3_seq.c                   |    4 +-
+ sound/pci/emu10k1/emu10k1_synth.c               |    4 +-
+ sound/synth/emux/emux_seq.c                     |   14 +-
+ tools/gcc/.gitignore                            |    1 +
+ tools/gcc/Makefile                              |    2 +
+ tools/gcc/randomize_layout_plugin.c             |  726 +++++++++++++++++++++++
+ 74 files changed, 1222 insertions(+), 390 deletions(-)
+
 commit 44ebc77fd9886fdebf8e3942a935cbe2f3272c3d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jan 19 09:27:31 2014 -0500
