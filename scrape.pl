@@ -28,7 +28,7 @@ for(@{$feed->{channel}->{item}}) {
 }
 if ($new_patches) {
 	print("Downloading changelog-test.txt ...\n");
-	getstore("https://grsecurity.net/changelog-test.txt", $script_dir . "/test/changelog-test.txt");
+	getstore("http://grsecurity.net/changelog-test.txt", $script_dir . "/test/changelog-test.txt");
 	
 	system("git", "add", $script_dir . "/test/" . $filename, $script_dir . "/test/changelog-test.txt", $script_dir . "/test/" . $filename . ".sig");
 	system("git", "commit", "-a", "-m", "Auto commit, " . $new_patches . " new patch{es}.");
