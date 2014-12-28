@@ -1,3 +1,16 @@
+commit e1d90424b9df1471cbf16ca54d1877a22f7f35bb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 28 11:47:06 2014 -0500
+
+    Fix a direct userland dereference introduced in the 3.18 port due
+    to a variable changing behind the scenes to a userland pointer.
+    Caught by UDEREF, reported by slashbeast on IRC
+
+ fs/namespace.c             |    4 ++--
+ grsecurity/grsec_mount.c   |    4 ++--
+ include/linux/grsecurity.h |    2 +-
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
 commit 0b8c733a613966fc2eb68cbb21b0f1ab3d7c2109
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 28 08:27:25 2014 -0500
