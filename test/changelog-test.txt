@@ -1,3 +1,54 @@
+commit f7db3dfa3af9c1961edc38ad733be47ddeb50ced
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 31 00:05:28 2014 -0500
+
+    force kernfs to initialize the dentry before returning from mkdir
+    It's different behavior than every other filesystem in existence, I reported
+    it to upstream but they were uninterested in fixing it, even though the fsnotify
+    code uses the dentry struct that is improperly initialized immediately after
+    mkdir return.
+
+ fs/kernfs/dir.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 312541de06f54e26053a0e9464d79b90d46f545d
+Merge: e1d9042 b17fed7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 30 23:43:21 2014 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kernel/espfix_64.c
+    	arch/x86/kernel/paravirt_patch_64.c
+    	drivers/cpufreq/cpufreq-dt.c
+
+commit b17fed7d4c5657f71060a50f62169d9aadc8bf7e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 30 23:40:01 2014 -0500
+
+    Update to pax-linux-3.18.1-test4.patch:
+    - fixed REFCOUNT/arm compilation, by N8Fear
+    - fixed LOAD_ARGS on amd64 that broke seccomp, reported by many
+    - fixed BPF JIT regression under KERNEXEC
+    - spender finally figured out and fixed the UDEREF/PCID/PARAVIRT problem, reported by Marcin MirosÅ‚aw (https://bugs.gentoo.org/show_bug.cgi?id=522252)
+    - fixed wrong refcount operation in uart_open, by Rogelio M. Serrano Jr <rogelios664@gmail.com>
+    - fixed ESPFIX crash under per-cpu PGD configs (KERNEXEC/UDEREF on amd64), reported by Andy Lutomirski <luto@amacapital.net>
+    - spender fixed a KERNEXEC compile error in cpufreq-dt.c
+    - constified a few variables
+
+ arch/arm/include/asm/atomic.h       |   13 +++++++------
+ arch/x86/include/asm/calling.h      |    2 +-
+ arch/x86/kernel/entry_64.S          |   12 ++++++------
+ arch/x86/kernel/espfix_64.c         |   13 ++++++++-----
+ arch/x86/kernel/paravirt_patch_64.c |    8 ++++++++
+ arch/x86/kvm/emulate.c              |    2 +-
+ arch/x86/net/bpf_jit_comp.c         |    7 ++-----
+ drivers/cpufreq/cpufreq-dt.c        |    4 +++-
+ drivers/tty/serial/serial_core.c    |    2 +-
+ kernel/bpf/core.c                   |    3 +++
+ 10 files changed, 40 insertions(+), 26 deletions(-)
+
 commit e1d90424b9df1471cbf16ca54d1877a22f7f35bb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 28 11:47:06 2014 -0500
