@@ -1,3 +1,138 @@
+commit 8dd18fa6be65105a316f7987e45526470d8fcf60
+Author: Jan Kara <jack@suse.cz>
+Date:   Fri Dec 19 14:27:55 2014 +0100
+
+    udf: Check component length before reading it
+    
+    Check that length specified in a component of a symlink fits in the
+    input buffer we are reading. Also properly ignore component length for
+    component types that do not use it. Otherwise we read memory after end
+    of buffer for corrupted udf image.
+    
+    Reported-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/symlink.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit b6b13f2d5f4bcde6d9470866c94c7beaa54b1a91
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Dec 18 22:37:50 2014 +0100
+
+    udf: Check path length when reading symlink
+    
+    Symlink reading code does not check whether the resulting path fits into
+    the page provided by the generic code. This isn't as easy as just
+    checking the symlink size because of various encoding conversions we
+    perform on path. So we have to check whether there is still enough space
+    in the buffer on the fly.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/dir.c     |    3 ++-
+ fs/udf/namei.c   |    3 ++-
+ fs/udf/symlink.c |   31 ++++++++++++++++++++++++++-----
+ fs/udf/udfdecl.h |    3 ++-
+ fs/udf/unicode.c |   28 ++++++++++++++++------------
+ 5 files changed, 48 insertions(+), 20 deletions(-)
+
+commit 81525439cc99a2ee4d87cec702f619d294006212
+Author: Jan Kara <jack@suse.cz>
+Date:   Fri Dec 19 12:21:47 2014 +0100
+
+    udf: Verify symlink size before loading it
+    
+    UDF specification allows arbitrarily large symlinks. However we support
+    only symlinks at most one block large. Check the length of the symlink
+    so that we don't access memory beyond end of the symlink block.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Carl Henrik Lunde <chlunde@gmail.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/symlink.c |   17 +++++++++++++----
+ 1 files changed, 13 insertions(+), 4 deletions(-)
+
+commit 18cd73a23de8439773bc9c189507cba535a45700
+Author: Jan Kara <jack@suse.cz>
+Date:   Fri Dec 19 12:03:53 2014 +0100
+
+    udf: Verify i_size when loading inode
+    
+    Verify that inode size is sane when loading inode with data stored in
+    ICB. Otherwise we may get confused later when working with the inode and
+    inode size is too big.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/inode.c |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
+
+commit 4621a1d5804594d09381f21b05741803da6c647a
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Dec 18 17:26:10 2014 +0100
+
+    isofs: Fix unchecked printing of ER records
+    
+    We didn't check length of rock ridge ER records before printing them.
+    Thus corrupted isofs image can cause us to access and print some memory
+    behind the buffer with obvious consequences.
+    
+    Reported-and-tested-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/isofs/rock.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 2f5259e11c6ca4b1ec009fcbadd5425351422714
+Author: Sven Eckelmann <sven@narfation.org>
+Date:   Sat Dec 20 13:48:55 2014 +0100
+
+    batman-adv: Calculate extra tail size based on queued fragments
+    
+    The fragmentation code was replaced in 610bfc6bc99bc83680d190ebc69359a05fc7f605
+    ("batman-adv: Receive fragmented packets and merge"). The new code provided a
+    mostly unused parameter skb for the merging function. It is used inside the
+    function to calculate the additionally needed skb tailroom. But instead of
+    increasing its own tailroom, it is only increasing the tailroom of the first
+    queued skb. This is not correct in some situations because the first queued
+    entry can be a different one than the parameter.
+    
+    An observed problem was:
+    
+    1. packet with size 104, total_size 1464, fragno 1 was received
+       - packet is queued
+    2. packet with size 1400, total_size 1464, fragno 0 was received
+       - packet is queued at the end of the list
+    3. enough data was received and can be given to the merge function
+       (1464 == (1400 - 20) + (104 - 20))
+       - merge functions gets 1400 byte large packet as skb argument
+    4. merge function gets first entry in queue (104 byte)
+       - stored as skb_out
+    5. merge function calculates the required extra tail as total_size - skb->len
+       - pskb_expand_head tail of skb_out with 64 bytes
+    6. merge function tries to squeeze the extra 1380 bytes from the second queued
+       skb (1400 byte aka skb parameter) in the 64 extra tail bytes of skb_out
+    
+    Instead calculate the extra required tail bytes for skb_out also using skb_out
+    instead of using the parameter skb. The skb parameter is only used to get the
+    total_size from the last received packet. This is also the total_size used to
+    decide that all fragments were received.
+    
+    Reported-by: Philipp Psurek <philipp.psurek@gmail.com>
+    Signed-off-by: Sven Eckelmann <sven@narfation.org>
+    Acked-by: Martin Hundebøll <martin@hundeboll.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/batman-adv/fragmentation.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit f7db3dfa3af9c1961edc38ad733be47ddeb50ced
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Dec 31 00:05:28 2014 -0500
