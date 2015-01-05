@@ -1,3 +1,27 @@
+commit 3a3020372a34cad35de74c473129acd3a0cc5e79
+Merge: 8dd18fa 2c69335
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 4 18:51:47 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kernel/espfix_64.c
+
+commit 2c69335e1b38ad0070e30c8c44f2cc5e809b361e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 4 18:45:48 2015 -0500
+
+    Update to pax-linux-3.18.1-test5.patch:
+    - fixed compile regression on armv5, reported by iamb (http://forums.grsecurity.net/viewtopic.php?f=3&t=4112)
+    - fixed kernel stack corruption in iret fault handling under RANDKSTACK/amd64, triggered by Andy Lutomirski's linux-clock-tests suite (sigreturn_32)
+    - removed superfluous section attr on espfix_pud_page, reported by spender
+
+ arch/arm/include/asm/atomic.h |   16 +++++++++++-----
+ arch/x86/kernel/espfix_64.c   |    3 +--
+ arch/x86/kernel/traps.c       |    3 +++
+ 3 files changed, 15 insertions(+), 7 deletions(-)
+
 commit 8dd18fa6be65105a316f7987e45526470d8fcf60
 Author: Jan Kara <jack@suse.cz>
 Date:   Fri Dec 19 14:27:55 2014 +0100
