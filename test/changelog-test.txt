@@ -1,3 +1,49 @@
+commit 1c6b0f4b4d7b777e36ec7c8a951b89634bcef7df
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 11 13:52:30 2015 -0500
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit a39389bb3df907976655f63a5aae0514f4035515
+Merge: e49c726 1a560c4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 11 13:23:31 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1a560c4208f9be7c01fef67783ba6946150b439b
+Merge: 2c69335 e609d3f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 11 13:23:06 2015 -0500
+
+    Update to pax-linux-3.18.2-test5.patch
+    
+    Merge branch 'linux-3.18.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/process_64.c
+
+commit e49c72679aaa6d28e582f8f024b60c9c19873e14
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 11 09:46:33 2015 -0500
+
+    squelch a harmless compiler warning
+
+ drivers/iommu/amd_iommu.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2feaa349b30f65f6e13239347fed280d74313f3f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 11 09:36:06 2015 -0500
+
+    properly return zero if the kernfs lookup succeeded
+
+ fs/kernfs/dir.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
 commit 3a3020372a34cad35de74c473129acd3a0cc5e79
 Merge: 8dd18fa 2c69335
 Author: Brad Spengler <spender@grsecurity.net>
