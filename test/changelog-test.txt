@@ -1,3 +1,13 @@
+commit 7f3251a8864fdf56ff6491d8bf2e61e46a469e47
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 12 08:18:02 2015 -0500
+
+    don't shadow the 'dentry' variable and cause failures in the recent warning
+    fix, thanks to orfheo from the forums for the report
+
+ fs/kernfs/dir.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 1c6b0f4b4d7b777e36ec7c8a951b89634bcef7df
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jan 11 13:52:30 2015 -0500
