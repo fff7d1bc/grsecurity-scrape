@@ -1,3 +1,45 @@
+commit b7ced885089a10a753947796e99fa10954b83319
+Merge: 4b01fb5 211425e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 13 21:11:01 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 211425e153d85eb1cf55c34f55b247ac0c64fed2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 13 21:09:56 2015 -0500
+
+    Update to pax-linux-3.18.2-test7.patch:
+    - fixed STACKLEAK/SCHED_STACK_END_CHECK interference, reported by Toralf FÃ¶rster (https://bugs.gentoo.org/show_bug.cgi?id=536514) and KDE (http://forums.grsecurity.net/viewtopic.php?f=3&t=4121)
+
+ arch/x86/kernel/entry_32.S   |    1 +
+ arch/x86/kernel/entry_64.S   |    1 +
+ arch/x86/kernel/process_32.c |    2 +-
+ arch/x86/kernel/process_64.c |    2 +-
+ fs/exec.c                    |    2 +-
+ 5 files changed, 5 insertions(+), 3 deletions(-)
+
+commit 4b01fb58d70e5f540f06d567486bb7a93f50b02c
+Merge: 7f3251a fdecfb6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 12 18:46:19 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit fdecfb6eb46a64d2892df8d36ada0ef1128262bf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 12 18:45:45 2015 -0500
+
+    Update to pax-linux-3.18.2-test6.patch:
+    - fixed some more REFCOUNT/arm fallout, reported by Michael Tremer <michael.tremer@ipfire.org>
+    - fixed some CONSTIFY fallout triggered on arm
+
+ arch/arm/include/asm/atomic.h             |    2 +-
+ drivers/base/power/domain.c               |    4 +++-
+ drivers/gpio/gpio-omap.c                  |    2 +-
+ drivers/irqchip/irq-renesas-intc-irqpin.c |    2 +-
+ 4 files changed, 6 insertions(+), 4 deletions(-)
+
 commit 7f3251a8864fdf56ff6491d8bf2e61e46a469e47
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jan 12 08:18:02 2015 -0500
