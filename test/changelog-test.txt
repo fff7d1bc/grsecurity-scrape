@@ -1,3 +1,24 @@
+commit 6c35153995bdd60b32b70dcfeed600c74263dd2d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 14 22:48:11 2015 -0500
+
+    Allow the admin role and subjects with ptrace override ability to
+    view /proc/pid/mem, /proc/pid/fd, and /proc/pid/cmdline of tasks
+    with "d" in their subject mode.  Thanks to tjh for the report!
+
+ grsecurity/gracl_fs.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit c2583282e9d195cd171fc594ecc31efe4ef1b72c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 14 21:47:00 2015 -0500
+
+    Fix some instances of dma-on-stack reported by xxterry1xx on the forums
+
+ drivers/staging/line6/driver.c   |   16 ++++++++++++----
+ drivers/staging/line6/toneport.c |   13 ++++++++++---
+ 2 files changed, 22 insertions(+), 7 deletions(-)
+
 commit b7ced885089a10a753947796e99fa10954b83319
 Merge: 4b01fb5 211425e
 Author: Brad Spengler <spender@grsecurity.net>
