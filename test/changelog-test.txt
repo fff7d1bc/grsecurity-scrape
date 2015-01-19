@@ -1,3 +1,26 @@
+commit 6ce03791b81bc4ed4c91b46acaed045992ba07cb
+Merge: 6c35153 d347167
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 18 21:25:31 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	mm/mmap.c
+
+commit d347167f5cd3ff8035d860791b84bb879db48ce8
+Merge: 211425e 219b188
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 18 21:24:22 2015 -0500
+
+    Update to pax-linux-3.18.3-test8.patch:
+    - fixed early crash of Xen domU when SSP is enabled (e.g., the default Arch kernel), reported by badchemist
+    
+    Merge branch 'linux-3.18.y' into pax-test
+    
+    Conflicts:
+    	mm/memory.c
+
 commit 6c35153995bdd60b32b70dcfeed600c74263dd2d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jan 14 22:48:11 2015 -0500
