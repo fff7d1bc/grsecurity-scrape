@@ -1,3 +1,168 @@
+commit fb01fbebffb6d1f8210eaa6166edfca5bdde33bb
+Author: Rui Wang <rui.y.wang@intel.com>
+Date:   Mon Dec 15 11:28:26 2014 -0800
+
+    drm: fb helper should avoid sleeping in panic context
+    
+    There are still some places in the fb helper that need to avoid
+    sleeping in panic context. Here's an example:
+    
+    [   65.615496] bad: scheduling from the idle thread!
+    [   65.620747] CPU: 92 PID: 0 Comm: swapper/92 Tainted: G   M        E  3.18.0-rc4-7-default+ #20
+    
+    [   65.630364] Hardware name: Intel Corporation BRICKLAND/BRICKLAND, BIOS
+    BRHSXSD1.86B.0056.R01.1409242327 09/24/2014
+    [   65.641923]  ffff88087f693d80 ffff88087f689878 ffffffff81566db9 0000000000000000
+    [   65.650226]  ffff88087f693d80 ffff88087f689898 ffffffff810871ff ffff88046eb3e0d0
+    [   65.658527]  ffff88087f693d80 ffff88087f6898c8 ffffffff8107c1fa 000000017f6898b8
+    [   65.666830] Call Trace:
+    [   65.669557]  <#MC>  [<ffffffff81566db9>] dump_stack+0x46/0x58
+    [   65.675994]  [<ffffffff810871ff>] dequeue_task_idle+0x2f/0x40
+    [   65.682412]  [<ffffffff8107c1fa>] dequeue_task+0x5a/0x80
+    [   65.688345]  [<ffffffff810804f3>] deactivate_task+0x23/0x30
+    [   65.694569]  [<ffffffff81569050>] __schedule+0x580/0x7f0
+    [   65.700502]  [<ffffffff81569739>] schedule_preempt_disabled+0x29/0x70
+    [   65.707696]  [<ffffffff8156abb6>] __ww_mutex_lock_slowpath+0xb8/0x162
+    [   65.714891]  [<ffffffff8156acb3>] __ww_mutex_lock+0x53/0x85
+    [   65.721125]  [<ffffffffa00b3a5d>] drm_modeset_lock+0x3d/0x110 [drm]
+    [   65.728132]  [<ffffffffa00b3c2a>] __drm_modeset_lock_all+0x8a/0x120 [drm]
+    [   65.735721]  [<ffffffffa00b3cd0>] drm_modeset_lock_all+0x10/0x30 [drm]
+    [   65.743015]  [<ffffffffa01af8bf>] drm_fb_helper_pan_display+0x2f/0xf0 [drm_kms_helper]
+    [   65.751857]  [<ffffffff8132bd21>] fb_pan_display+0xd1/0x1a0
+    [   65.758081]  [<ffffffff81326010>] bit_update_start+0x20/0x50
+    [   65.764400]  [<ffffffff813259f2>] fbcon_switch+0x3a2/0x550
+    [   65.770528]  [<ffffffff813a01c9>] redraw_screen+0x189/0x240
+    [   65.776750]  [<ffffffff81322f8a>] fbcon_blank+0x20a/0x2d0
+    [   65.782778]  [<ffffffff8137d359>] ? erst_writer+0x209/0x330
+    [   65.789002]  [<ffffffff810ba2f3>] ? internal_add_timer+0x63/0x80
+    [   65.795710]  [<ffffffff810bc137>] ? mod_timer+0x127/0x1e0
+    [   65.801740]  [<ffffffff813a0cd8>] do_unblank_screen+0xa8/0x1d0
+    [   65.808255]  [<ffffffff813a0e10>] unblank_screen+0x10/0x20
+    [   65.814381]  [<ffffffff812ca0d9>] bust_spinlocks+0x19/0x40
+    [   65.820508]  [<ffffffff81561ca7>] panic+0x106/0x1f5
+    [   65.825955]  [<ffffffff8102336c>] mce_panic+0x2ac/0x2e0
+    [   65.831789]  [<ffffffff812c796a>] ? delay_tsc+0x4a/0x80
+    [   65.837625]  [<ffffffff81024e1f>] do_machine_check+0xbaf/0xbf0
+    [   65.844138]  [<ffffffff813365d7>] ? intel_idle+0xc7/0x150
+    [   65.850166]  [<ffffffff8156f03f>] machine_check+0x1f/0x30
+    [   65.856195]  [<ffffffff813365d7>] ? intel_idle+0xc7/0x150
+    [   65.862222]  <<EOE>>  [<ffffffff814283d5>] cpuidle_enter_state+0x55/0x170
+    [   65.869823]  [<ffffffff814285a7>] cpuidle_enter+0x17/0x20
+    [   65.875852]  [<ffffffff81097b08>] cpu_startup_entry+0x2d8/0x370
+    [   65.882467]  [<ffffffff8102fe29>] start_secondary+0x159/0x180
+    
+    There's __drm_modeset_lock_all() which Daniel Vetter introduced for this
+    purpose. We can leverage that without reinventing anything. This patch
+    works with the latest kernel.
+    
+    Reviewed-by: Rob Clark <robdclark@gmail.com>
+    Tested-by: Tony Luck <tony.luck@intel.com>
+    Signed-off-by: Rui Wang <rui.y.wang@intel.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+ drivers/gpu/drm/drm_fb_helper.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 0d88f3760b464fc528b59bf1a6fcf799bacd13c5
+Author: Louis Langholtz <lou_langholtz@me.com>
+Date:   Thu Jan 15 22:04:46 2015 -0700
+
+    kernel: avoid overflow in cmp_range
+    
+    Avoid overflow possibility.
+    
+    [ The overflow is purely theoretical, since this is used for memory
+      ranges that aren't even close to using the full 64 bits, but this is
+      the right thing to do regardless.  - Linus ]
+    
+    Signed-off-by: Louis Langholtz <lou_langholtz@me.com>
+    Cc: Yinghai Lu <yinghai@kernel.org>
+    Cc: Peter Anvin <hpa@linux.intel.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/range.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 11f40af0c88fe2d46f29b02ac434033147cfd7a6
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Mon Jan 19 22:34:51 2015 +0300
+
+    s2io: use snprintf() as a safety feature
+    
+    "sp->desc[i]" has 25 characters.  "dev->name" has 15 characters.  If we
+    used all 15 characters then the sprintf() would overflow.
+    
+    I changed the "sprintf(sp->name, "%s Neterion %s"" to snprintf(), as
+    well, even though it can't overflow just to be consistent.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/neterion/s2io.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit 539d1710f0ae193679e10ea7df5168db441f2f10
+Author: Willem de Bruijn <willemb@google.com>
+Date:   Thu Jan 15 13:18:40 2015 -0500
+
+    ip: zero sockaddr returned on error queue
+    
+    The sockaddr is returned in IP(V6)_RECVERR as part of errhdr. That
+    structure is defined and allocated on the stack as
+    
+        struct {
+                struct sock_extended_err ee;
+                struct sockaddr_in(6)    offender;
+        } errhdr;
+    
+    The second part is only initialized for certain SO_EE_ORIGIN values.
+    Always initialize it completely.
+    
+    An MTU exceeded error on a SOCK_RAW/IPPROTO_RAW is one example that
+    would return uninitialized bytes.
+    
+    Signed-off-by: Willem de Bruijn <willemb@google.com>
+    
+    ----
+    
+    Also verified that there is no padding between errhdr.ee and
+    errhdr.offender that could leak additional kernel data.
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/ipv4/ip_sockglue.c
+    	net/ipv6/datagram.c
+
+ net/ipv4/ip_sockglue.c |    9 +++------
+ net/ipv6/datagram.c    |   10 +++-------
+ 2 files changed, 6 insertions(+), 13 deletions(-)
+
+commit 56cfaa1524a3db4087952784fb2fdef7ef1132ca
+Author: Hagen Paul Pfeifer <hagen@jauu.net>
+Date:   Thu Jan 15 22:34:25 2015 +0100
+
+    ipv6: stop sending PTB packets for MTU < 1280
+    
+    Reduce the attack vector and stop generating IPv6 Fragment Header for
+    paths with an MTU smaller than the minimum required IPv6 MTU
+    size (1280 byte) - called atomic fragments.
+    
+    See IETF I-D "Deprecating the Generation of IPv6 Atomic Fragments" [1]
+    for more information and how this "feature" can be misused.
+    
+    [1] https://tools.ietf.org/html/draft-ietf-6man-deprecate-atomfrag-generation-00
+    
+    Signed-off-by: Fernando Gont <fgont@si6networks.com>
+    Signed-off-by: Hagen Paul Pfeifer <hagen@jauu.net>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/route.c |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
 commit 6ce03791b81bc4ed4c91b46acaed045992ba07cb
 Merge: 6c35153 d347167
 Author: Brad Spengler <spender@grsecurity.net>
