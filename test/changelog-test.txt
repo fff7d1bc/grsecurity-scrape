@@ -1,3 +1,1358 @@
+commit 8ed1da016608501181c2320773e5e6ab6f53d9d6
+Author: Roman Gushchin <klamm@yandex-team.ru>
+Date:   Wed Feb 11 15:28:42 2015 -0800
+
+    mm/nommu.c: fix arithmetic overflow in __vm_enough_memory()
+    
+    I noticed that "allowed" can easily overflow by falling below 0, because
+    (total_vm / 32) can be larger than "allowed".  The problem occurs in
+    OVERCOMMIT_NONE mode.
+    
+    In this case, a huge allocation can success and overcommit the system
+    (despite OVERCOMMIT_NONE mode).  All subsequent allocations will fall
+    (system-wide), so system become unusable.
+    
+    The problem was masked out by commit c9b1d0981fcc
+    ("mm: limit growth of 3% hardcoded other user reserve"),
+    but it's easy to reproduce it on older kernels:
+    1) set overcommit_memory sysctl to 2
+    2) mmap() large file multiple times (with VM_SHARED flag)
+    3) try to malloc() large amount of memory
+    
+    It also can be reproduced on newer kernels, but miss-configured
+    sysctl_user_reserve_kbytes is required.
+    
+    Fix this issue by switching to signed arithmetic here.
+    
+    Signed-off-by: Roman Gushchin <klamm@yandex-team.ru>
+    Cc: Andrew Shewmaker <agshew@gmail.com>
+    Cc: Rik van Riel <riel@redhat.com>
+    Cc: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/nommu.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 65d9652a7c79895b755abbbfecb2eef40012a4e6
+Author: Roman Gushchin <klamm@yandex-team.ru>
+Date:   Wed Feb 11 15:28:39 2015 -0800
+
+    mm/mmap.c: fix arithmetic overflow in __vm_enough_memory()
+    
+    I noticed, that "allowed" can easily overflow by falling below 0,
+    because (total_vm / 32) can be larger than "allowed".  The problem
+    occurs in OVERCOMMIT_NONE mode.
+    
+    In this case, a huge allocation can success and overcommit the system
+    (despite OVERCOMMIT_NONE mode).  All subsequent allocations will fall
+    (system-wide), so system become unusable.
+    
+    The problem was masked out by commit c9b1d0981fcc
+    ("mm: limit growth of 3% hardcoded other user reserve"),
+    but it's easy to reproduce it on older kernels:
+    1) set overcommit_memory sysctl to 2
+    2) mmap() large file multiple times (with VM_SHARED flag)
+    3) try to malloc() large amount of memory
+    
+    It also can be reproduced on newer kernels, but miss-configured
+    sysctl_user_reserve_kbytes is required.
+    
+    Fix this issue by switching to signed arithmetic here.
+    
+    [akpm@linux-foundation.org: use min_t]
+    Signed-off-by: Roman Gushchin <klamm@yandex-team.ru>
+    Cc: Andrew Shewmaker <agshew@gmail.com>
+    Cc: Rik van Riel <riel@redhat.com>
+    Cc: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+    Reviewed-by: Michal Hocko <mhocko@suse.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mmap.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 90a8f1514aad13a868230018296b1cef97aef33c
+Author: Kees Cook <keescook@chromium.org>
+Date:   Tue Feb 17 13:48:00 2015 -0800
+
+    seccomp: cap SECCOMP_RET_ERRNO data to MAX_ERRNO
+    
+    The value resulting from the SECCOMP_RET_DATA mask could exceed MAX_ERRNO
+    when setting errno during a SECCOMP_RET_ERRNO filter action.  This makes
+    sure we have a reliable value being set, so that an invalid errno will not
+    be ignored by userspace.
+    
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+    Reported-by: Dmitry V. Levin <ldv@altlinux.org>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Will Drewry <wad@chromium.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/seccomp.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 7f24d6ff32e75b09c566fd54f0f6b08767c0b9f1
+Author: David Jeffery <djeffery@redhat.com>
+Date:   Thu Feb 12 16:45:31 2015 +0000
+
+    Don't leak a key reference if request_key() tries to use a revoked keyring
+    
+    If a request_key() call to allocate and fill out a key attempts to insert the
+    key structure into a revoked keyring, the key will leak, using memory and part
+    of the user's key quota until the system reboots. This is from a failure of
+    construct_alloc_key() to decrement the key's reference count after the attempt
+    to insert into the requested keyring is rejected.
+    
+    key_put() needs to be called in the link_prealloc_failed callpath to ensure
+    the unused key is released.
+    
+    Signed-off-by: David Jeffery <djeffery@redhat.com>
+    Signed-off-by: David Howells <dhowells@redhat.com>
+    Signed-off-by: James Morris <james.l.morris@oracle.com>
+
+ security/keys/request_key.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 159f65e38a75d88dd25695c87ca978f56f9bfa67
+Merge: 9e43a96 641a86c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Feb 17 19:15:39 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 641a86cd237e6bd9c3e4d962f20f7b62f2628ff5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Feb 17 19:14:30 2015 -0500
+
+    Update to pax-linux-3.18.7-test14.patch:
+    - fixed kernel oops caused by accessing invalid virtual addresses via /dev/[k]mem under USERCOPY, reported by minipli
+    - added preliminary support for gcc-5 to gcc-common.h and the constify plugin
+    - fail gcc plugins a bit more gracefully on gcc-5
+    - fixed a few shellcheck.net warnings in gcc-plugin.sh
+    - fixed potential boot crash when applying alternatives under KERNEXEC/i386
+    - fixed potential integer truncation bug in xlate_dev_mem_ptr under PAE/i386
+
+ arch/x86/kernel/vmlinux.lds.S         |    2 +-
+ arch/x86/mm/ioremap.c                 |   13 +++----------
+ drivers/char/mem.c                    |   12 +++++++-----
+ drivers/regulator/mc13892-regulator.c |    2 +-
+ include/linux/compiler-gcc5.h         |   22 ++++++++++++++++++++++
+ scripts/gcc-plugin.sh                 |    4 ++--
+ tools/gcc/constify_plugin.c           |    7 ++++---
+ 7 files changed, 40 insertions(+), 22 deletions(-)
+
+commit 9e43a962805ac91b184a57232454fab6030fafde
+Merge: d019358 e29b022
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Feb 17 18:18:03 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e29b02219fae88b3a6833fe1b7e898b349bea63e
+Merge: 78ccded a17f9bf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Feb 17 18:18:00 2015 -0500
+
+    Merge branch 'linux-3.18.y' into pax-test
+
+commit d0193583d00c5ff55462144ded95d1259b6207cc
+Author: George Spelvin <linux@horizon.com>
+Date:   Sat Feb 7 00:32:06 2015 -0500
+
+    random: Fix fast_mix() function
+    
+    There was a bad typo in commit 43759d4f429c ("random: use an improved
+    fast_mix() function") and I didn't notice because it "looked right", so
+    I saw what I expected to see when I reviewed it.
+    
+    Only months later did I look and notice it's not the Threefish-inspired
+    mix function that I had designed and optimized.
+    
+    Mea Culpa.  Each input bit still has a chance to affect each output bit,
+    and the fast pool is spilled *long* before it fills, so it's not a total
+    disaster, but it's definitely not the intended great improvement.
+    
+    I'm still working on finding better rotation constants.  These are good
+    enough, but since it's unrolled twice, it's possible to get better
+    mixing for free by using eight different constants rather than repeating
+    the same four.
+    
+    Signed-off-by: George Spelvin <linux@horizon.com>
+    Cc: Theodore Ts'o <tytso@mit.edu>
+    Cc: stable@vger.kernel.org  # v3.16+
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/char/random.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit ef804f247116948e9bad7a78a6482813a7725b2a
+Author: Daniel Borkmann <daniel@iogearbox.net>
+Date:   Thu Feb 5 14:39:11 2015 +0100
+
+    ipv6: addrconf: add missing validate_link_af handler
+    
+    We still need a validate_link_af() handler with an appropriate nla policy,
+    similarly as we have in IPv4 case, otherwise size validations are not being
+    done properly in that case.
+    
+    Fixes: f53adae4eae5 ("net: ipv6: add tokenized interface identifier support")
+    Fixes: bc91b0f07ada ("ipv6: addrconf: implement address generation modes")
+    Cc: Jiri Pirko <jiri@resnulli.us>
+    Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+    Acked-by: Jiri Pirko <jiri@resnulli.us>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/addrconf.c |   17 +++++++++++++++++
+ 1 files changed, 17 insertions(+), 0 deletions(-)
+
+commit e475b0e0cd0cf6bd9cef21b431764ab4b92bc49a
+Merge: 9dafd8f 78ccded
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 6 18:41:48 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 78ccded8fb12823baffa8a5913f513a0dcfce561
+Merge: b9d251f 9960914
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 6 18:41:41 2015 -0500
+
+    Merge branch 'linux-3.18.y' into pax-test
+    
+    Conflicts:
+    	mm/memory.c
+
+commit 9dafd8fb1b8e54766396f7b451d349b8eb1f304b
+Merge: 089a1da b9d251f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 5 22:43:38 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b9d251f2b82e3c7e1a035ed5d61c9ad464344584
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 5 22:43:08 2015 -0500
+
+    Update to pax-linux-3.18.5-test10.patch:
+    - fixed regression on XEN/i386 caused by the previous fix meant for amd64 only, reported by timevers (https://forums.grsecurity.net/viewtopic.php?f=1&t=4138)
+    - bring is_valid_bugaddr on amd64 in line with the i386 version, should fix BUG() backtraces
+    - fixed incorrect structure field passed to container_of in flow_cache_flush_task resulting in all kinds of fun sideeffects,
+      especially under grsecurity's RANDSTRUCT as it's applied to struct net, a pointer to which type is derived from the buggy
+      container_of. the bug was introduced by commit ca925cf1534ebcec332c08719a7dee6ee1782ce4
+      reported and fixed by Jan Hejl <jh@excello.cz> and Miroslav Urbanek <mu@miroslavurbanek.com>
+
+ arch/x86/kernel/dumpstack_64.c |    2 +-
+ arch/x86/xen/enlighten.c       |    2 ++
+ net/core/flow.c                |    2 +-
+ 3 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 089a1dac032d6eb3e88c9215aeeccebd237dfb8a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 5 21:59:55 2015 -0500
+
+    Revert "vhost/net: fix up num_buffers endian-ness"
+    
+    This reverts commit e19b3d6da4fd42621e66a7189ba3b3b4b85b4d18.
+
+ drivers/vhost/net.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit 7e7f79348cc5bddeec87eba6ef48fade6f35d338
+Author: Sachin Prabhu <sprabhu@redhat.com>
+Date:   Thu Jan 15 12:22:04 2015 +0000
+
+    Complete oplock break jobs before closing file handle
+    
+    Commit
+    c11f1df5003d534fd067f0168bfad7befffb3b5c
+    requires writers to wait for any pending oplock break handler to
+    complete before proceeding to write. This is done by waiting on bit
+    CIFS_INODE_PENDING_OPLOCK_BREAK in cifsFileInfo->flags. This bit is
+    cleared by the oplock break handler job queued on the workqueue once it
+    has completed handling the oplock break allowing writers to proceed with
+    writing to the file.
+    
+    While testing, it was noticed that the filehandle could be closed while
+    there is a pending oplock break which results in the oplock break
+    handler on the cifsiod workqueue being cancelled before it has had a
+    chance to execute and clear the CIFS_INODE_PENDING_OPLOCK_BREAK bit.
+    Any subsequent attempt to write to this file hangs waiting for the
+    CIFS_INODE_PENDING_OPLOCK_BREAK bit to be cleared.
+    
+    We fix this by ensuring that we also clear the bit
+    CIFS_INODE_PENDING_OPLOCK_BREAK when we remove the oplock break handler
+    from the workqueue.
+    
+    The bug was found by Red Hat QA while testing using ltp's fsstress
+    command.
+    
+    Signed-off-by: Sachin Prabhu <sprabhu@redhat.com>
+    Acked-by: Shirish Pargaonkar <shirishpargaonkar@gmail.com>
+    Signed-off-by: Jeff Layton <jlayton@samba.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Steve French <steve.french@primarydata.com>
+
+ fs/cifs/file.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit a221e72e956f6c69278cc8843690156ff5b072b2
+Author: Niklas Cassel <niklas.cassel@axis.com>
+Date:   Thu Jan 22 14:16:34 2015 +0100
+
+    cifs: fix MUST SecurityFlags filtering
+    
+    If CONFIG_CIFS_WEAK_PW_HASH is not set, CIFSSEC_MUST_LANMAN
+    and CIFSSEC_MUST_PLNTXT is defined as 0.
+    
+    When setting new SecurityFlags without any MUST flags,
+    your flags would be overwritten with CIFSSEC_MUST_LANMAN (0).
+    
+    Signed-off-by: Niklas Cassel <niklass@axis.com>
+    Signed-off-by: Steve French <steve.french@primarydata.com>
+
+ fs/cifs/cifs_debug.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 1a1c15ccd6006d9de3939a1b40f295067c97524c
+Author: Giel van Schijndel <me@mortis.eu>
+Date:   Tue Jan 6 22:37:00 2015 +0100
+
+    cifs: use memzero_explicit to clear stack buffer
+    
+    When leaving a function use memzero_explicit instead of memset(0) to
+    clear stack allocated buffers. memset(0) may be optimized away.
+    
+    This particular buffer is highly likely to contain sensitive data which
+    we shouldn't leak (it's named 'passwd' after all).
+    
+    Signed-off-by: Giel van Schijndel <me@mortis.eu>
+    Acked-by: Herbert Xu <herbert@gondor.apana.org.au>
+    Reported-at: http://www.viva64.com/en/b/0299/
+    Reported-by: Andrey Karpov
+    Reported-by: Svyatoslav Razmyslov
+    Signed-off-by: Steve French <steve.french@primarydata.com>
+
+ fs/cifs/smbencrypt.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3c018f91503ff172863cddb9d4274a348e772ff5
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Thu Jan 15 16:34:35 2015 +0100
+
+    net: sctp: fix race for one-to-many sockets in sendmsg's auto associate
+    
+    I.e. one-to-many sockets in SCTP are not required to explicitly
+    call into connect(2) or sctp_connectx(2) prior to data exchange.
+    Instead, they can directly invoke sendmsg(2) and the SCTP stack
+    will automatically trigger connection establishment through 4WHS
+    via sctp_primitive_ASSOCIATE(). However, this in its current
+    implementation is racy: INIT is being sent out immediately (as
+    it cannot be bundled anyway) and the rest of the DATA chunks are
+    queued up for later xmit when connection is established, meaning
+    sendmsg(2) will return successfully. This behaviour can result
+    in an undesired side-effect that the kernel made the application
+    think the data has already been transmitted, although none of it
+    has actually left the machine, worst case even after close(2)'ing
+    the socket.
+    
+    Instead, when the association from client side has been shut down
+    e.g. first gracefully through SCTP_EOF and then close(2), the
+    client could afterwards still receive the server's INIT_ACK due
+    to a connection with higher latency. This INIT_ACK is then considered
+    out of the blue and hence responded with ABORT as there was no
+    alive assoc found anymore. This can be easily reproduced f.e.
+    with sctp_test application from lksctp. One way to fix this race
+    is to wait for the handshake to actually complete.
+    
+    The fix defers waiting after sctp_primitive_ASSOCIATE() and
+    sctp_primitive_SEND() succeeded, so that DATA chunks cooked up
+    from sctp_sendmsg() have already been placed into the output
+    queue through the side-effect interpreter, and therefore can then
+    be bundeled together with COOKIE_ECHO control chunks.
+    
+    strace from example application (shortened):
+    
+    socket(PF_INET, SOCK_SEQPACKET, IPPROTO_SCTP) = 3
+    sendmsg(3, {msg_name(28)={sa_family=AF_INET, sin_port=htons(8888), sin_addr=inet_addr("192.168.1.115")},
+               msg_iov(1)=[{"hello", 5}], msg_controllen=0, msg_flags=0}, 0) = 5
+    sendmsg(3, {msg_name(28)={sa_family=AF_INET, sin_port=htons(8888), sin_addr=inet_addr("192.168.1.115")},
+               msg_iov(1)=[{"hello", 5}], msg_controllen=0, msg_flags=0}, 0) = 5
+    sendmsg(3, {msg_name(28)={sa_family=AF_INET, sin_port=htons(8888), sin_addr=inet_addr("192.168.1.115")},
+               msg_iov(1)=[{"hello", 5}], msg_controllen=0, msg_flags=0}, 0) = 5
+    sendmsg(3, {msg_name(28)={sa_family=AF_INET, sin_port=htons(8888), sin_addr=inet_addr("192.168.1.115")},
+               msg_iov(1)=[{"hello", 5}], msg_controllen=0, msg_flags=0}, 0) = 5
+    sendmsg(3, {msg_name(28)={sa_family=AF_INET, sin_port=htons(8888), sin_addr=inet_addr("192.168.1.115")},
+               msg_iov(0)=[], msg_controllen=48, {cmsg_len=48, cmsg_level=0x84 /* SOL_??? */, cmsg_type=, ...},
+               msg_flags=0}, 0) = 0 // graceful shutdown for SOCK_SEQPACKET via SCTP_EOF
+    close(3) = 0
+    
+    tcpdump before patch (fooling the application):
+    
+    22:33:36.306142 IP 192.168.1.114.41462 > 192.168.1.115.8888: sctp (1) [INIT] [init tag: 3879023686] [rwnd: 106496] [OS: 10] [MIS: 65535] [init TSN: 3139201684]
+    22:33:36.316619 IP 192.168.1.115.8888 > 192.168.1.114.41462: sctp (1) [INIT ACK] [init tag: 3345394793] [rwnd: 106496] [OS: 10] [MIS: 10] [init TSN: 3380109591]
+    22:33:36.317600 IP 192.168.1.114.41462 > 192.168.1.115.8888: sctp (1) [ABORT]
+    
+    tcpdump after patch:
+    
+    14:28:58.884116 IP 192.168.1.114.35846 > 192.168.1.115.8888: sctp (1) [INIT] [init tag: 438593213] [rwnd: 106496] [OS: 10] [MIS: 65535] [init TSN: 3092969729]
+    14:28:58.888414 IP 192.168.1.115.8888 > 192.168.1.114.35846: sctp (1) [INIT ACK] [init tag: 381429855] [rwnd: 106496] [OS: 10] [MIS: 10] [init TSN: 2141904492]
+    14:28:58.888638 IP 192.168.1.114.35846 > 192.168.1.115.8888: sctp (1) [COOKIE ECHO] , (2) [DATA] (B)(E) [TSN: 3092969729] [...]
+    14:28:58.893278 IP 192.168.1.115.8888 > 192.168.1.114.35846: sctp (1) [COOKIE ACK] , (2) [SACK] [cum ack 3092969729] [a_rwnd 106491] [#gap acks 0] [#dup tsns 0]
+    14:28:58.893591 IP 192.168.1.114.35846 > 192.168.1.115.8888: sctp (1) [DATA] (B)(E) [TSN: 3092969730] [...]
+    14:28:59.096963 IP 192.168.1.115.8888 > 192.168.1.114.35846: sctp (1) [SACK] [cum ack 3092969730] [a_rwnd 106496] [#gap acks 0] [#dup tsns 0]
+    14:28:59.097086 IP 192.168.1.114.35846 > 192.168.1.115.8888: sctp (1) [DATA] (B)(E) [TSN: 3092969731] [...] , (2) [DATA] (B)(E) [TSN: 3092969732] [...]
+    14:28:59.103218 IP 192.168.1.115.8888 > 192.168.1.114.35846: sctp (1) [SACK] [cum ack 3092969732] [a_rwnd 106486] [#gap acks 0] [#dup tsns 0]
+    14:28:59.103330 IP 192.168.1.114.35846 > 192.168.1.115.8888: sctp (1) [SHUTDOWN]
+    14:28:59.107793 IP 192.168.1.115.8888 > 192.168.1.114.35846: sctp (1) [SHUTDOWN ACK]
+    14:28:59.107890 IP 192.168.1.114.35846 > 192.168.1.115.8888: sctp (1) [SHUTDOWN COMPLETE]
+    
+    Looks like this bug is from the pre-git history museum. ;)
+    
+    Fixes: 08707d5482df ("lksctp-2_5_31-0_5_1.patch")
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/socket.c |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+commit 78b6a4e0ddaa33e0483fc514a907630580fd8584
+Author: Pablo Neira Ayuso <pablo@netfilter.org>
+Date:   Wed Jan 21 18:04:18 2015 +0100
+
+    netfilter: nf_tables: disable preemption when restoring chain counters
+    
+    With CONFIG_DEBUG_PREEMPT=y
+    
+    [22144.496057] BUG: using smp_processor_id() in preemptible [00000000] code: iptables-compat/10406
+    [22144.496061] caller is debug_smp_processor_id+0x17/0x1b
+    [22144.496065] CPU: 2 PID: 10406 Comm: iptables-compat Not tainted 3.19.0-rc4+ #
+    [...]
+    [22144.496092] Call Trace:
+    [22144.496098]  [<ffffffff8145b9fa>] dump_stack+0x4f/0x7b
+    [22144.496104]  [<ffffffff81244f52>] check_preemption_disabled+0xd6/0xe8
+    [22144.496110]  [<ffffffff81244f90>] debug_smp_processor_id+0x17/0x1b
+    [22144.496120]  [<ffffffffa07c557e>] nft_stats_alloc+0x94/0xc7 [nf_tables]
+    [22144.496130]  [<ffffffffa07c73d2>] nf_tables_newchain+0x471/0x6d8 [nf_tables]
+    [22144.496140]  [<ffffffffa07c5ef6>] ? nft_trans_alloc+0x18/0x34 [nf_tables]
+    [22144.496154]  [<ffffffffa063c8da>] nfnetlink_rcv_batch+0x2b4/0x457 [nfnetlink]
+    
+    Reported-by: Andreas Schultz <aschultz@tpip.net>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/nf_tables_api.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit ee649be83117e42098ad0b33c1752225298ebb09
+Author: Jack Morgenstein <jackm@dev.mellanox.co.il>
+Date:   Mon Feb 2 15:18:42 2015 +0200
+
+    net/mlx4_core: Fix kernel Oops (mem corruption) when working with more than 80 VFs
+    
+    Commit de966c592802 (net/mlx4_core: Support more than 64 VFs) was meant to
+    allow up to 126 VFs.  However, due to leaving MLX4_MFUNC_MAX too low, using
+    more than 80 VFs resulted in memory corruptions (and Oopses) when more than
+    80 VFs were requested. In addition, the number of slaves was left too high.
+    
+    This commit fixes these issues.
+    
+    Fixes: de966c592802 ("net/mlx4_core: Support more than 64 VFs")
+    Signed-off-by: Jack Morgenstein <jackm@dev.mellanox.co.il>
+    Signed-off-by: Amir Vadai <amirv@mellanox.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/mellanox/mlx4/mlx4.h |    3 ++-
+ include/linux/mlx4/device.h               |    2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 13e7d2dd84a539e6ae18435ee838bd69bbd08758
+Author: David Vrabel <david.vrabel@citrix.com>
+Date:   Mon Feb 2 16:57:51 2015 +0000
+
+    xen-netback: stop the guest rx thread after a fatal error
+    
+    After commit e9d8b2c2968499c1f96563e6522c56958d5a1d0d (xen-netback:
+    disable rogue vif in kthread context), a fatal (protocol) error would
+    leave the guest Rx thread spinning, wasting CPU time.  Commit
+    ecf08d2dbb96d5a4b4bcc53a39e8d29cc8fef02e (xen-netback: reintroduce
+    guest Rx stall detection) made this even worse by removing a
+    cond_resched() from this path.
+    
+    Since a fatal error is non-recoverable, just allow the guest Rx thread
+    to exit.  This requires taking additional refs to the task so the
+    thread exiting early is handled safely.
+    
+    Signed-off-by: David Vrabel <david.vrabel@citrix.com>
+    Reported-by: Julien Grall <julien.grall@linaro.org>
+    Tested-by: Julien Grall <julien.grall@linaro.org>
+    Acked-by: Wei Liu <wei.liu2@citrix.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/xen-netback/interface.c |    2 ++
+ drivers/net/xen-netback/netback.c   |    3 +--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 92ff25a76b48e16582271587d72dc46b35d74b1d
+Author: Sanjeev Sharma <sanjeev_sharma@mentor.com>
+Date:   Tue Feb 3 13:02:02 2015 +0530
+
+    gianfar: correct the bad expression while writing bit-pattern
+    
+    This patch correct the bad expression while writing the
+    bit-pattern from software's buffer to hardware registers.
+    
+    Signed-off-by: Sanjeev Sharma <Sanjeev_Sharma@mentor.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/freescale/gianfar_ethtool.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 3988f5c5282f4543e6523226a3f2625a76995db6
+Author: Ignacy Gawędzki <ignacy.gawedzki@green-communications.fr>
+Date:   Tue Feb 3 19:05:18 2015 +0100
+
+    cls_api.c: Fix dumping of non-existing actions' stats.
+    
+    In tcf_exts_dump_stats(), ensure that exts->actions is not empty before
+    accessing the first element of that list and calling tcf_action_copy_stats()
+    on it.  This fixes some random segvs when adding filters of type "basic" with
+    no particular action.
+    
+    This also fixes the dumping of those "no-action" filters, which more often
+    than not made calls to tcf_action_copy_stats() fail and consequently netlink
+    attributes added by the caller to be removed by a call to nla_nest_cancel().
+    
+    Fixes: 33be62715991 ("net_sched: act: use standard struct list_head")
+    Signed-off-by: Ignacy Gawędzki <ignacy.gawedzki@green-communications.fr>
+    Acked-by: Cong Wang <cwang@twopensource.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sched/cls_api.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
+commit af1fedefe9e79f72288c4cd04b5f3af16f0f22a8
+Author: Sabrina Dubroca <sd@queasysnail.net>
+Date:   Wed Feb 4 15:25:09 2015 +0100
+
+    ip6_gre: fix endianness errors in ip6gre_err
+    
+    info is in network byte order, change it back to host byte order
+    before use. In particular, the current code sets the MTU of the tunnel
+    to a wrong (too big) value.
+    
+    Fixes: c12b395a4664 ("gre: Support GRE over IPv6")
+    Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_gre.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 12c0cbdb157661b483e4fa524d5f50464c8beeb8
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Feb 4 13:31:54 2015 -0800
+
+    flow_keys: n_proto type should be __be16
+    
+    (struct flow_keys)->n_proto is in network order, use
+    proper type for this.
+    
+    Fixes following sparse errors :
+    
+    net/core/flow_dissector.c:139:39: warning: incorrect type in assignment (different base types)
+    net/core/flow_dissector.c:139:39:    expected unsigned short [unsigned] [usertype] n_proto
+    net/core/flow_dissector.c:139:39:    got restricted __be16 [assigned] [usertype] proto
+    net/core/flow_dissector.c:237:23: warning: incorrect type in assignment (different base types)
+    net/core/flow_dissector.c:237:23:    expected unsigned short [unsigned] [usertype] n_proto
+    net/core/flow_dissector.c:237:23:    got restricted __be16 [assigned] [usertype] proto
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Fixes: e0f31d849867 ("flow_keys: Record IP layer protocol in skb_flow_dissect()")
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/flow_keys.h |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit c9221781db25364772c042edaeda335faa27beba
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Feb 4 13:37:44 2015 -0800
+
+    net: remove some sparse warnings
+    
+    netdev_adjacent_add_links() and netdev_adjacent_del_links()
+    are static.
+    
+    queue->qdisc has __rcu annotation, need to use RCU_INIT_POINTER()
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/dev.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit fbd476280855ebadf77f62d253bb85d4b544d2c1
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Feb 4 15:03:25 2015 -0800
+
+    ipv6: fix sparse errors in ip6_make_flowlabel()
+    
+    include/net/ipv6.h:713:22: warning: incorrect type in assignment (different base types)
+    include/net/ipv6.h:713:22:    expected restricted __be32 [usertype] hash
+    include/net/ipv6.h:713:22:    got unsigned int
+    include/net/ipv6.h:719:25: warning: restricted __be32 degrades to integer
+    include/net/ipv6.h:719:22: warning: invalid assignment: ^=
+    include/net/ipv6.h:719:22:    left side has type restricted __be32
+    include/net/ipv6.h:719:22:    right side has type unsigned int
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/ipv6.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 5f3a14f75628ed394691c4e5e086074d842d1ad3
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Feb 4 15:12:04 2015 -0800
+
+    sit: fix some __be16/u16 mismatches
+    
+    Fixes following sparse warnings :
+    
+    net/ipv6/sit.c:1509:32: warning: incorrect type in assignment (different base types)
+    net/ipv6/sit.c:1509:32:    expected restricted __be16 [usertype] sport
+    net/ipv6/sit.c:1509:32:    got unsigned short
+    net/ipv6/sit.c:1514:32: warning: incorrect type in assignment (different base types)
+    net/ipv6/sit.c:1514:32:    expected restricted __be16 [usertype] dport
+    net/ipv6/sit.c:1514:32:    got unsigned short
+    net/ipv6/sit.c:1711:38: warning: incorrect type in argument 3 (different base types)
+    net/ipv6/sit.c:1711:38:    expected unsigned short [unsigned] [usertype] value
+    net/ipv6/sit.c:1711:38:    got restricted __be16 [usertype] sport
+    net/ipv6/sit.c:1713:38: warning: incorrect type in argument 3 (different base types)
+    net/ipv6/sit.c:1713:38:    expected unsigned short [unsigned] [usertype] value
+    net/ipv6/sit.c:1713:38:    got restricted __be16 [usertype] dport
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/sit.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 41e4992995b18b1c6b3959b8e72dc78445d5e798
+Author: Brian King <brking@linux.vnet.ibm.com>
+Date:   Thu Jan 29 15:54:40 2015 -0600
+
+    sd: Fix max transfer length for 4k disks
+    
+    The following patch fixes an issue observed with 4k sector disks
+    where the max_hw_sectors attribute was getting set too large in
+    sd_revalidate_disk. Since sdkp->max_xfer_blocks is in units
+    of SCSI logical blocks and queue_max_hw_sectors is in units of
+    512 byte blocks, on a 4k sector disk, every time we went through
+    sd_revalidate_disk, we were taking the current value of
+    queue_max_hw_sectors and increasing it by a factor of 8. Fix
+    this by only shifting sdkp->max_xfer_blocks.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Brian King <brking@linux.vnet.ibm.com>
+    Reviewed-by: Paolo Bonzini <pbonzini@redhat.com>
+    Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
+    Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+ drivers/scsi/sd.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 383d832688e710b2d67cac210abf123fe788235c
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Tue Feb 3 08:55:58 2015 -0500
+
+    net: rds: use correct size for max unacked packets and bytes
+    
+    Max unacked packets/bytes is an int while sizeof(long) was used in the
+    sysctl table.
+    
+    This means that when they were getting read we'd also leak kernel memory
+    to userspace along with the timeout values.
+    
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/sysctl.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit e19b3d6da4fd42621e66a7189ba3b3b4b85b4d18
+Author: Michael S. Tsirkin <mst@redhat.com>
+Date:   Tue Feb 3 11:07:06 2015 +0200
+
+    vhost/net: fix up num_buffers endian-ness
+    
+    In virtio 1.0 mode, when mergeable buffers are enabled on a big-endian
+    host, num_buffers wasn't byte-swapped correctly, so large incoming
+    packets got corrupted.
+    
+    To fix, fill it in within hdr - this also makes sure it gets
+    the correct type.
+    
+    Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/vhost/net.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 4a75f5cd0e2bc8bc2fe97f386035ab44405c3630
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Sun Feb 1 23:54:25 2015 +0300
+
+    isdn: off by one in connect_res()
+    
+    The bug here is that we use "Reject" as the index into the cau_t[] array
+    in the else path.  Since the cau_t[] has 9 elements if Reject == 9 then
+    we are reading beyond the end of the array.
+    
+    My understanding of the code is that it's saying that if Reject is 1 or
+    too high then that's invalid and we should hang up.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/isdn/hardware/eicon/message.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 33863fea61d2d07681dbce632e8b387fc1ab45bc
+Author: Will Deacon <will.deacon@arm.com>
+Date:   Thu Jan 29 16:41:46 2015 +0100
+
+    ARM: 8299/1: mm: ensure local active ASID is marked as allocated on rollover
+    
+    Commit e1a5848e3398 ("ARM: 7924/1: mm: don't bother with reserved ttbr0
+    when running with LPAE") removed the use of the reserved TTBR0 value
+    for LPAE systems, since the ASID is held in the TTBR and can be updated
+    atomicly with the pgd of the next mm.
+    
+    Unfortunately, this patch forgot to update flush_context, which
+    deliberately avoids marking the local active ASID as allocated, since we
+    used to switch via ASID zero and didn't need to allocate the ASID of
+    the previous mm. The side-effect of this is that we can allocate the
+    same ASID to the next mm and, between flushing the local TLB and updating
+    TTBR0, we can perform speculative TLB fills for userspace nG mappings
+    using the page table of the previous mm.
+    
+    The consequence of this is that the next mm can erroneously hit some
+    mappings of the previous mm. Note that this was made significantly
+    harder to hit by a391263cd84e ("ARM: 8203/1: mm: try to re-use old ASID
+    assignments following a rollover") but is still theoretically possible.
+    
+    This patch fixes the problem by removing the code from flush_context
+    that forces the allocated ASID to zero for the local CPU. Many thanks
+    to the Broadcom guys for tracking this one down.
+    
+    Fixes: e1a5848e3398 ("ARM: 7924/1: mm: don't bother with reserved ttbr0 when running with LPAE")
+    
+    Cc: <stable@vger.kernel.org> # v3.14+
+    Reported-by: Raymond Ngun <rngun@broadcom.com>
+    Tested-by: Raymond Ngun <rngun@broadcom.com>
+    Reviewed-by: Gregory Fong <gregory.0xf0@gmail.com>
+    Signed-off-by: Will Deacon <will.deacon@arm.com>
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+
+ arch/arm/mm/context.c |   26 +++++++++++---------------
+ 1 files changed, 11 insertions(+), 15 deletions(-)
+
+commit 47e5bba4a692cd2d506f64c05cc20c015f438962
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 5 07:51:22 2015 -0500
+
+    Fix an upstream memory corruption bug likely introduced via copy+paste,
+    using the wrong field for a container_of to obtain a pointer to another
+    struct.  Thanks to Jan Hejl for debugging the issue and the fix.
+
+ net/core/flow.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit efdd8202f95d861bc69874124417ad1a3ede7896
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Jan 28 05:47:11 2015 -0800
+
+    tcp: ipv4: initialize unicast_sock sk_pacing_rate
+    
+    When I added sk_pacing_rate field, I forgot to initialize its value
+    in the per cpu unicast_sock used in ip_send_unicast_reply()
+    
+    This means that for sch_fq users, RST packets, or ACK packets sent
+    on behalf of TIME_WAIT sockets might be sent to slowly or even dropped
+    once we reach the per flow limit.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Fixes: 95bd09eb2750 ("tcp: TSO packets automatic sizing")
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ip_output.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit e293835041ed72f9fb4a171c695d451fe7e17b59
+Author: Florian Westphal <fw@strlen.de>
+Date:   Wed Jan 28 10:56:04 2015 +0100
+
+    ppp: deflate: never return len larger than output buffer
+    
+    When we've run out of space in the output buffer to store more data, we
+    will call zlib_deflate with a NULL output buffer until we've consumed
+    remaining input.
+    
+    When this happens, olen contains the size the output buffer would have
+    consumed iff we'd have had enough room.
+    
+    This can later cause skb_over_panic when ppp_generic skb_put()s
+    the returned length.
+    
+    Reported-by: Iain Douglas <centos@1n6.org.uk>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ppp/ppp_deflate.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 567436a11d1473ad14d50a2ff7a65d4422be2500
+Author: Haiyang Zhang <haiyangz@microsoft.com>
+Date:   Thu Jan 29 12:34:49 2015 -0800
+
+    hyperv: Fix the error processing in netvsc_send()
+    
+    The existing code frees the skb in EAGAIN case, in which the skb will be
+    retried from upper layer and used again.
+    Also, the existing code doesn't free send buffer slot in error case, because
+    there is no completion message for unsent packets.
+    This patch fixes these problems.
+    
+    (Please also include this patch for stable trees. Thanks!)
+    
+    Signed-off-by: Haiyang Zhang <haiyangz@microsoft.com>
+    Reviewed-by: K. Y. Srinivasan <kys@microsoft.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hyperv/netvsc.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit 666c3cec18e8b986267263ee8cfafcfbc99a2ad4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 2 17:43:03 2015 -0500
+
+    Backport fix for CVE-2015-1420:
+    http://marc.info/?l=linux-kernel&m=142247707318982&w=2
+    
+    Though it requires CAP_DAC_READ_SEARCH and (additionally in grsec)
+    cannot be performed in a chroot
+
+ fs/fhandle.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 2cf14890d0fa46c9b2c3519b3b72fb74fd285c37
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Fri Jan 23 12:01:26 2015 +0100
+
+    ipv4: try to cache dst_entries which would cause a redirect
+    
+    Not caching dst_entries which cause redirects could be exploited by hosts
+    on the same subnet, causing a severe DoS attack. This effect aggravated
+    since commit f88649721268999 ("ipv4: fix dst race in sk_dst_get()").
+    
+    Lookups causing redirects will be allocated with DST_NOCACHE set which
+    will force dst_release to free them via RCU.  Unfortunately waiting for
+    RCU grace period just takes too long, we can end up with >1M dst_entries
+    waiting to be released and the system will run OOM. rcuos threads cannot
+    catch up under high softirq load.
+    
+    Attaching the flag to emit a redirect later on to the specific skb allows
+    us to cache those dst_entries thus reducing the pressure on allocation
+    and deallocation.
+    
+    This issue was discovered by Marcelo Leitner.
+    
+    Cc: Julian Anastasov <ja@ssi.bg>
+    Signed-off-by: Marcelo Leitner <mleitner@redhat.com>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: Julian Anastasov <ja@ssi.bg>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/ip.h      |   11 ++++++-----
+ net/ipv4/ip_forward.c |    3 ++-
+ net/ipv4/route.c      |    9 +++++----
+ 3 files changed, 13 insertions(+), 10 deletions(-)
+
+commit 65b3676d626dfdf2312db9493ec60b72c5082623
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 2 16:57:54 2015 -0500
+
+    Backport from PaX patch:
+    - fixed cc-ldoption to work with the HJL fork of binutils, reported by Rogelio M. Serrano Jr.
+
+ scripts/Kbuild.include |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2d5f59e2bfd8d75e3cd8db0944a9b937c323183d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 2 16:50:13 2015 -0500
+
+    Apply fix for Xen regression reported by timevers on the forums:
+    https://forums.grsecurity.net/viewtopic.php?f=1&t=4138
+
+ arch/x86/xen/enlighten.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit ee03b60e67f96da829f00aefa14cb15c059fba7e
+Merge: 1f0cafd4 5be494c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 30 17:40:01 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5be494c6bc0fd0077e1b22f2d163866cc3945629
+Merge: 621e6e2 c2d6598
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 30 17:39:54 2015 -0500
+
+    Merge branch 'linux-3.18.y' into pax-test
+
+commit 1f0cafd4f167d4c6781a084a692c799533422047
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 28 17:58:00 2015 -0500
+
+    In a rare situation of RBAC being enabled, an mm_access call succeeding
+    but a gr_acl_handle_procpidmem() failing, a reference to the target's
+    mm struct would be leaked.  Fix this by apropriately calling mmput().
+
+ fs/proc/base.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 09130c100f9f3390384a01957c1ca1748adfdcd4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 22:20:23 2015 -0500
+
+    update size_overflow hash
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit ca8980e93124f0105d46651029741b9165bcd91e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 21:30:44 2015 -0500
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit c44a644a1df27475d8dd1a028d594a407f7da59e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 19:51:21 2015 -0500
+
+    compile fix for GRKERNSEC_CHROOT_RENAME
+
+ fs/dcache.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e19df3a208ec00e3c1a23b6412f417a03d99b87d
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Thu Jan 22 11:27:59 2015 -0800
+
+    x86, tls: Interpret an all-zero struct user_desc as "no segment"
+    
+    The Witcher 2 did something like this to allocate a TLS segment index:
+    
+            struct user_desc u_info;
+            bzero(&u_info, sizeof(u_info));
+            u_info.entry_number = (uint32_t)-1;
+    
+            syscall(SYS_set_thread_area, &u_info);
+    
+    Strictly speaking, this code was never correct.  It should have set
+    read_exec_only and seg_not_present to 1 to indicate that it wanted
+    to find a free slot without putting anything there, or it should
+    have put something sensible in the TLS slot if it wanted to allocate
+    a TLS entry for real.  The actual effect of this code was to
+    allocate a bogus segment that could be used to exploit espfix.
+    
+    The set_thread_area hardening patches changed the behavior, causing
+    set_thread_area to return -EINVAL and crashing the game.
+    
+    This changes set_thread_area to interpret this as a request to find
+    a free slot and to leave it empty, which isn't *quite* what the game
+    expects but should be close enough to keep it working.  In
+    particular, using the code above to allocate two segments will
+    allocate the same segment both times.
+    
+    According to FrostbittenKing on Github, this fixes The Witcher 2.
+    
+    If this somehow still causes problems, we could instead allocate
+    a limit==0 32-bit data segment, but that seems rather ugly to me.
+    
+    Fixes: 41bdc78544b8 x86/tls: Validate TLS entries to protect espfix
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Cc: stable@vger.kernel.org
+    Cc: torvalds@linux-foundation.org
+    Link: http://lkml.kernel.org/r/0cb251abe1ff0958b8e468a9a9a905b80ae3a746.1421954363.git.luto@amacapital.net
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/include/asm/desc.h |   13 +++++++++++++
+ arch/x86/kernel/tls.c       |   25 +++++++++++++++++++++++--
+ 2 files changed, 36 insertions(+), 2 deletions(-)
+
+commit efbd3af66e420b1c03e4e865c0058ba75f65efcd
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Thu Jan 22 11:27:58 2015 -0800
+
+    x86, tls, ldt: Stop checking lm in LDT_empty
+    
+    32-bit programs don't have an lm bit in their ABI, so they can't
+    reliably cause LDT_empty to return true without resorting to memset.
+    They shouldn't need to do this.
+    
+    This should fix a longstanding, if minor, issue in all 64-bit kernels
+    as well as a potential regression in the TLS hardening code.
+    
+    Fixes: 41bdc78544b8 x86/tls: Validate TLS entries to protect espfix
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Cc: torvalds@linux-foundation.org
+    Link: http://lkml.kernel.org/r/72a059de55e86ad5e2935c80aa91880ddf19d07c.1421954363.git.luto@amacapital.net
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/include/asm/desc.h |    9 ++-------
+ 1 files changed, 2 insertions(+), 7 deletions(-)
+
+commit 361acd8a1cebff04774445200497a7311c452264
+Author: Nadav Amit <nadav.amit@gmail.com>
+Date:   Thu Jan 8 11:59:03 2015 +0100
+
+    KVM: x86: Fix of previously incomplete fix for CVE-2014-8480
+    
+    STR and SLDT with rip-relative operand can cause a host kernel oops.
+    Mark them as DstMem as well.
+    
+    Cc: stable@vger.linux.org
+    Signed-off-by: Nadav Amit <namit@cs.technion.ac.il>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/emulate.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 22a87aeee86067478b9a60f6d83abee8854ff1e0
+Author: Nadav Amit <namit@cs.technion.ac.il>
+Date:   Thu Jan 1 23:11:11 2015 +0200
+
+    KVM: x86: SYSENTER emulation is broken
+    
+    SYSENTER emulation is broken in several ways:
+    1. It misses the case of 16-bit code segments completely (CVE-2015-0239).
+    2. MSR_IA32_SYSENTER_CS is checked in 64-bit mode incorrectly (bits 0 and 1 can
+       still be set without causing #GP).
+    3. MSR_IA32_SYSENTER_EIP and MSR_IA32_SYSENTER_ESP are not masked in
+       legacy-mode.
+    4. There is some unneeded code.
+    
+    Fix it.
+    
+    Cc: stable@vger.linux.org
+    Signed-off-by: Nadav Amit <namit@cs.technion.ac.il>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/emulate.c |   27 ++++++++-------------------
+ 1 files changed, 8 insertions(+), 19 deletions(-)
+
+commit 029240fb55d9fb4fc9da07b1329ce54c67624de2
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Thu Jan 22 10:41:01 2015 +0100
+
+    net: cls_bpf: fix size mismatch on filter preparation
+    
+    In cls_bpf_modify_existing(), we read out the number of filter blocks,
+    do some sanity checks, allocate a block on that size, and copy over the
+    BPF instruction blob from user space, then pass everything through the
+    classic BPF checker prior to installation of the classifier.
+    
+    We should reject mismatches here, there are 2 scenarios: the number of
+    filter blocks could be smaller than the provided instruction blob, so
+    we do a partial copy of the BPF program, and thus the instructions will
+    either be rejected from the verifier or a valid BPF program will be run;
+    in the other case, we'll end up copying more than we're supposed to,
+    and most likely the trailing garbage will be rejected by the verifier
+    as well (i.e. we need to fit instruction pattern, ret {A,K} needs to be
+    last instruction, load/stores must be correct, etc); in case not, we
+    would leak memory when dumping back instruction patterns. The code should
+    have only used nla_len() as Dave noted to avoid this from the beginning.
+    Anyway, lets fix it by rejecting such load attempts.
+    
+    Fixes: 7d1d65cb84e1 ("net: sched: cls_bpf: add BPF-based classifier")
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Jiri Pirko <jiri@resnulli.us>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sched/cls_bpf.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 005e2826e57faaf23764059d41178ec6a4c60a5a
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Thu Jan 22 10:41:02 2015 +0100
+
+    net: cls_bpf: fix auto generation of per list handles
+    
+    When creating a bpf classifier in tc with priority collisions and
+    invoking automatic unique handle assignment, cls_bpf_grab_new_handle()
+    will return a wrong handle id which in fact is non-unique. Usually
+    altering of specific filters is being addressed over major id, but
+    in case of collisions we result in a filter chain, where handle ids
+    address individual cls_bpf_progs inside the classifier.
+    
+    Issue is, in cls_bpf_grab_new_handle() we probe for head->hgen handle
+    in cls_bpf_get() and in case we found a free handle, we're supposed
+    to use exactly head->hgen. In case of insufficient numbers of handles,
+    we bail out later as handle id 0 is not allowed.
+    
+    Fixes: 7d1d65cb84e1 ("net: sched: cls_bpf: add BPF-based classifier")
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Jiri Pirko <jiri@resnulli.us>
+    Acked-by: Alexei Starovoitov <ast@plumgrid.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sched/cls_bpf.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 9cd66ef6b07cddee4270e161bf4200c5a71deb5a
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Thu Jan 22 18:26:54 2015 +0100
+
+    net: sctp: fix slab corruption from use after free on INIT collisions
+    
+    When hitting an INIT collision case during the 4WHS with AUTH enabled, as
+    already described in detail in commit 1be9a950c646 ("net: sctp: inherit
+    auth_capable on INIT collisions"), it can happen that we occasionally
+    still remotely trigger the following panic on server side which seems to
+    have been uncovered after the fix from commit 1be9a950c646 ...
+    
+    [  533.876389] BUG: unable to handle kernel paging request at 00000000ffffffff
+    [  533.913657] IP: [<ffffffff811ac385>] __kmalloc+0x95/0x230
+    [  533.940559] PGD 5030f2067 PUD 0
+    [  533.957104] Oops: 0000 [#1] SMP
+    [  533.974283] Modules linked in: sctp mlx4_en [...]
+    [  534.939704] Call Trace:
+    [  534.951833]  [<ffffffff81294e30>] ? crypto_init_shash_ops+0x60/0xf0
+    [  534.984213]  [<ffffffff81294e30>] crypto_init_shash_ops+0x60/0xf0
+    [  535.015025]  [<ffffffff8128c8ed>] __crypto_alloc_tfm+0x6d/0x170
+    [  535.045661]  [<ffffffff8128d12c>] crypto_alloc_base+0x4c/0xb0
+    [  535.074593]  [<ffffffff8160bd42>] ? _raw_spin_lock_bh+0x12/0x50
+    [  535.105239]  [<ffffffffa0418c11>] sctp_inet_listen+0x161/0x1e0 [sctp]
+    [  535.138606]  [<ffffffff814e43bd>] SyS_listen+0x9d/0xb0
+    [  535.166848]  [<ffffffff816149a9>] system_call_fastpath+0x16/0x1b
+    
+    ... or depending on the the application, for example this one:
+    
+    [ 1370.026490] BUG: unable to handle kernel paging request at 00000000ffffffff
+    [ 1370.026506] IP: [<ffffffff811ab455>] kmem_cache_alloc+0x75/0x1d0
+    [ 1370.054568] PGD 633c94067 PUD 0
+    [ 1370.070446] Oops: 0000 [#1] SMP
+    [ 1370.085010] Modules linked in: sctp kvm_amd kvm [...]
+    [ 1370.963431] Call Trace:
+    [ 1370.974632]  [<ffffffff8120f7cf>] ? SyS_epoll_ctl+0x53f/0x960
+    [ 1371.000863]  [<ffffffff8120f7cf>] SyS_epoll_ctl+0x53f/0x960
+    [ 1371.027154]  [<ffffffff812100d3>] ? anon_inode_getfile+0xd3/0x170
+    [ 1371.054679]  [<ffffffff811e3d67>] ? __alloc_fd+0xa7/0x130
+    [ 1371.080183]  [<ffffffff816149a9>] system_call_fastpath+0x16/0x1b
+    
+    With slab debugging enabled, we can see that the poison has been overwritten:
+    
+    [  669.826368] BUG kmalloc-128 (Tainted: G        W     ): Poison overwritten
+    [  669.826385] INFO: 0xffff880228b32e50-0xffff880228b32e50. First byte 0x6a instead of 0x6b
+    [  669.826414] INFO: Allocated in sctp_auth_create_key+0x23/0x50 [sctp] age=3 cpu=0 pid=18494
+    [  669.826424]  __slab_alloc+0x4bf/0x566
+    [  669.826433]  __kmalloc+0x280/0x310
+    [  669.826453]  sctp_auth_create_key+0x23/0x50 [sctp]
+    [  669.826471]  sctp_auth_asoc_create_secret+0xcb/0x1e0 [sctp]
+    [  669.826488]  sctp_auth_asoc_init_active_key+0x68/0xa0 [sctp]
+    [  669.826505]  sctp_do_sm+0x29d/0x17c0 [sctp] [...]
+    [  669.826629] INFO: Freed in kzfree+0x31/0x40 age=1 cpu=0 pid=18494
+    [  669.826635]  __slab_free+0x39/0x2a8
+    [  669.826643]  kfree+0x1d6/0x230
+    [  669.826650]  kzfree+0x31/0x40
+    [  669.826666]  sctp_auth_key_put+0x19/0x20 [sctp]
+    [  669.826681]  sctp_assoc_update+0x1ee/0x2d0 [sctp]
+    [  669.826695]  sctp_do_sm+0x674/0x17c0 [sctp]
+    
+    Since this only triggers in some collision-cases with AUTH, the problem at
+    heart is that sctp_auth_key_put() on asoc->asoc_shared_key is called twice
+    when having refcnt 1, once directly in sctp_assoc_update() and yet again
+    from within sctp_auth_asoc_init_active_key() via sctp_assoc_update() on
+    the already kzfree'd memory, which is also consistent with the observation
+    of the poison decrease from 0x6b to 0x6a (note: the overwrite is detected
+    at a later point in time when poison is checked on new allocation).
+    
+    Reference counting of auth keys revisited:
+    
+    Shared keys for AUTH chunks are being stored in endpoints and associations
+    in endpoint_shared_keys list. On endpoint creation, a null key is being
+    added; on association creation, all endpoint shared keys are being cached
+    and thus cloned over to the association. struct sctp_shared_key only holds
+    a pointer to the actual key bytes, that is, struct sctp_auth_bytes which
+    keeps track of users internally through refcounting. Naturally, on assoc
+    or enpoint destruction, sctp_shared_key are being destroyed directly and
+    the reference on sctp_auth_bytes dropped.
+    
+    User space can add keys to either list via setsockopt(2) through struct
+    sctp_authkey and by passing that to sctp_auth_set_key() which replaces or
+    adds a new auth key. There, sctp_auth_create_key() creates a new sctp_auth_bytes
+    with refcount 1 and in case of replacement drops the reference on the old
+    sctp_auth_bytes. A key can be set active from user space through setsockopt()
+    on the id via sctp_auth_set_active_key(), which iterates through either
+    endpoint_shared_keys and in case of an assoc, invokes (one of various places)
+    sctp_auth_asoc_init_active_key().
+    
+    sctp_auth_asoc_init_active_key() computes the actual secret from local's
+    and peer's random, hmac and shared key parameters and returns a new key
+    directly as sctp_auth_bytes, that is asoc->asoc_shared_key, plus drops
+    the reference if there was a previous one. The secret, which where we
+    eventually double drop the ref comes from sctp_auth_asoc_set_secret() with
+    intitial refcount of 1, which also stays unchanged eventually in
+    sctp_assoc_update(). This key is later being used for crypto layer to
+    set the key for the hash in crypto_hash_setkey() from sctp_auth_calculate_hmac().
+    
+    To close the loop: asoc->asoc_shared_key is freshly allocated secret
+    material and independant of the sctp_shared_key management keeping track
+    of only shared keys in endpoints and assocs. Hence, also commit 4184b2a79a76
+    ("net: sctp: fix memory leak in auth key management") is independant of
+    this bug here since it concerns a different layer (though same structures
+    being used eventually). asoc->asoc_shared_key is reference dropped correctly
+    on assoc destruction in sctp_association_free() and when active keys are
+    being replaced in sctp_auth_asoc_init_active_key(), it always has a refcount
+    of 1. Hence, it's freed prematurely in sctp_assoc_update(). Simple fix is
+    to remove that sctp_auth_key_put() from there which fixes these panics.
+    
+    Fixes: 730fc3d05cd4 ("[SCTP]: Implete SCTP-AUTH parameter processing")
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/associola.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 7dea6cf6da49821812849919ea5fee6664adc033
+Author: subashab@codeaurora.org <subashab@codeaurora.org>
+Date:   Fri Jan 23 22:26:02 2015 +0000
+
+    ping: Fix race in free in receive path
+    
+    An exception is seen in ICMP ping receive path where the skb
+    destructor sock_rfree() tries to access a freed socket. This happens
+    because ping_rcv() releases socket reference with sock_put() and this
+    internally frees up the socket. Later icmp_rcv() will try to free the
+    skb and as part of this, skb destructor is called and which leads
+    to a kernel panic as the socket is freed already in ping_rcv().
+    
+    -->|exception
+    -007|sk_mem_uncharge
+    -007|sock_rfree
+    -008|skb_release_head_state
+    -009|skb_release_all
+    -009|__kfree_skb
+    -010|kfree_skb
+    -011|icmp_rcv
+    -012|ip_local_deliver_finish
+    
+    Fix this incorrect free by cloning this skb and processing this cloned
+    skb instead.
+    
+    This patch was suggested by Eric Dumazet
+    
+    Signed-off-by: Subash Abhinov Kasiviswanathan <subashab@codeaurora.org>
+    Cc: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ping.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 588d52c4912cef596b15e813b7154f1ed12880f9
+Author: Steffen Klassert <steffen.klassert@secunet.com>
+Date:   Mon Dec 8 07:56:18 2014 +0100
+
+    xfrm6: Fix the nexthdr offset in _decode_session6.
+    
+    xfrm_decode_session() was originally designed for the
+    usage in the receive path where the correct nexthdr offset
+    is stored in IP6CB(skb)->nhoff. Over time this function
+    spread to code that is used in the output path (netfilter,
+    vti) where IP6CB(skb)->nhoff is not set. As a result, we
+    get a wrong nexthdr and the upper layer flow informations
+    are wrong. This can leed to incorrect policy lookups.
+    
+    Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+
+ net/ipv6/xfrm6_policy.c |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+commit 3ac303c259c67ef0a0164bcf55eb4f7752f6cbec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 18:31:25 2015 -0500
+
+    Make it easier to work with inherited subjects that change roles.
+    If a subject of the same name of the current inherited subject
+    exists in the role being changed to with a similar object
+    in it that would trigger inheritance on execution of the current process'
+    binary, then we'll use that subject instead of the normal one obtained
+    through lookup.
+    
+    See:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4129
+
+ grsecurity/gracl.c        |   42 ++++++++++++++++++++++++++++++------------
+ grsecurity/gracl_policy.c |   10 +++++-----
+ 2 files changed, 35 insertions(+), 17 deletions(-)
+
+commit 17ab82d4c821151ad3883b8e487ab6b966fc6a76
+Merge: 20505d4 621e6e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 18:22:24 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/proc/stat.c
+    	net/ipv6/tcp_ipv6.c
+
+commit 621e6e2654934836d95c66ade21c826d98f7e815
+Merge: d347167 71745ce
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 18:21:12 2015 -0500
+
+    Merge branch 'linux-3.18.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/ttm/ttm_page_alloc.c
+    	drivers/gpu/drm/ttm/ttm_page_alloc_dma.c
+
+commit 20505d42b02c90edb163078962bf4d6dfc12242f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 17:44:11 2015 -0500
+
+    Add GRKERNSEC_CHROOT_RENAME -- no one reported any problems with my posted
+    patch, so let's introduce the more secure version
+
+ fs/dcache.c                |    1 +
+ fs/fs_struct.c             |    6 +++-
+ fs/namei.c                 |    8 ++++
+ grsecurity/Kconfig         |   16 ++++++++
+ grsecurity/grsec_chroot.c  |   82 ++++++++++++++++++++++++++++++++++++++++++++
+ grsecurity/grsec_init.c    |    4 ++
+ grsecurity/grsec_sysctl.c  |    9 +++++
+ include/linux/dcache.h     |    3 ++
+ include/linux/grinternal.h |    1 +
+ include/linux/grmsg.h      |    1 +
+ include/linux/grsecurity.h |    5 +++
+ 11 files changed, 135 insertions(+), 1 deletions(-)
+
 commit fb01fbebffb6d1f8210eaa6166edfca5bdde33bb
 Author: Rui Wang <rui.y.wang@intel.com>
 Date:   Mon Dec 15 11:28:26 2014 -0800
