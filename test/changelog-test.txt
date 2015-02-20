@@ -1,3 +1,12 @@
+commit c994fb9f087e00ede2ff91ebf1c7c6f051d0835f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 19 20:06:46 2015 -0500
+
+    we should decrement the refcounts when we put the old root for GRKERNSEC_CHROOT_RENAME
+
+ fs/fs_struct.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 8ed1da016608501181c2320773e5e6ab6f53d9d6
 Author: Roman Gushchin <klamm@yandex-team.ru>
 Date:   Wed Feb 11 15:28:42 2015 -0800
