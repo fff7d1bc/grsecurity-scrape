@@ -1,3 +1,134 @@
+commit 83752c6c03592e57b7885f8ba59b1b3f3ed1b63f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 27 08:18:24 2015 -0500
+
+    Fix a PAX_REFCOUNT false positive on the threads_handled statistic field
+
+ include/linux/irqdesc.h |    2 +-
+ kernel/irq/manage.c     |    2 +-
+ kernel/irq/spurious.c   |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit c61a9792f897916dea3ddbc612a6c19ec0821531
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sat Feb 21 22:05:11 2015 -0500
+
+    debugfs: leave freeing a symlink body until inode eviction
+    
+    As it is, we have debugfs_remove() racing with symlink traversals.
+    Supply ->evict_inode() and do freeing there - inode will remain
+    pinned until we are done with the symlink body.
+    
+    And rip the idiocy with checking if dentry is positive right after
+    we'd verified debugfs_positive(), which is a stronger check...
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/debugfs/inode.c |   34 +++++++++++++++++-----------------
+ 1 files changed, 17 insertions(+), 17 deletions(-)
+
+commit c7c30ebf631a4c5df84ae25904df71fcff163e1a
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sat Feb 21 22:19:57 2015 -0500
+
+    autofs4 copy_dev_ioctl(): keep the value of ->size we'd used for allocation
+    
+    X-Coverup: just ask spender
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/autofs4/dev-ioctl.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit abcacf2514e8f4d697648271e78357607d35f7a3
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Fri Jan 23 20:47:00 2015 -0500
+
+    net: llc: use correct size for sysctl timeout entries
+    
+    The timeout entries are sizeof(int) rather than sizeof(long), which
+    means that when they were getting read we'd also leak kernel memory
+    to userspace along with the timeout values.
+    
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/llc/sysctl_net_llc.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit c27310e3b613776a09f6ddf3d53006139a84f186
+Author: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+Date:   Tue Feb 3 13:00:24 2015 +0100
+
+    x86/microcode/intel: Handle truncated microcode images more robustly
+    
+    We do not check the input data bounds containing the microcode before
+    copying a struct microcode_intel_header from it. A specially crafted
+    microcode could cause the kernel to read invalid memory and lead to a
+    denial-of-service.
+    
+    Signed-off-by: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+    Cc: "H. Peter Anvin" <hpa@zytor.com>
+    Cc: Fenghua Yu <fenghua.yu@intel.com>
+    Link: http://lkml.kernel.org/r/1422964824-22056-3-git-send-email-quentin.casasnovas@oracle.com
+    [ Made error message differ from the next one and flipped comparison. ]
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+
+ arch/x86/kernel/cpu/microcode/intel.c       |    5 +++++
+ arch/x86/kernel/cpu/microcode/intel_early.c |    4 ++++
+ 2 files changed, 9 insertions(+), 0 deletions(-)
+
+commit 5d07529f24b468f5b393012a917a249aa4861341
+Author: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+Date:   Tue Feb 3 13:00:22 2015 +0100
+
+    x86/microcode/intel: Guard against stack overflow in the loader
+    
+    mc_saved_tmp is a static array allocated on the stack, we need to make
+    sure mc_saved_count stays within its bounds, otherwise we're overflowing
+    the stack in _save_mc(). A specially crafted microcode header could lead
+    to a kernel crash or potentially kernel execution.
+    
+    Signed-off-by: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+    Cc: "H. Peter Anvin" <hpa@zytor.com>
+    Cc: Fenghua Yu <fenghua.yu@intel.com>
+    Link: http://lkml.kernel.org/r/1422964824-22056-1-git-send-email-quentin.casasnovas@oracle.com
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+
+ arch/x86/kernel/cpu/microcode/intel_early.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 542eae62db24c18401968b9fa0440750282440cb
+Merge: 2e80e96 226f034
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 27 06:27:26 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	net/ipv4/ip_output.c
+    	net/ipv4/ip_sockglue.c
+
+commit 226f03436a5f9e1b78d033794984ad831f02b73f
+Merge: 641a86c e5c9f0b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 27 06:25:03 2015 -0500
+
+    Merge branch 'linux-3.18.y' into pax-test
+
+commit 2e80e96c05d83d3d37b1c855cd6e980b74e6e40f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 25 18:07:08 2015 -0500
+
+    Disable a near-stack-overflow BUG() on x64 where we have
+    GRKERNSEC_KSTACKOVERFLOW to use instead.  Works around a rarely reported issue
+    where it seems for some driver we're executing a copy_*_user on a debug
+    stack instead of on the process stack.
+
+ fs/exec.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 01bf72f22dc1910b6402293771b42b46d48f7144
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Feb 22 11:36:26 2015 -0500
