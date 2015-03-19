@@ -1,3 +1,248 @@
+commit 98399b6d44c4d4ef984b4f00f4cf1926a48728e4
+Merge: 2b322d8 45fce33
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 18 21:10:43 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	tools/gcc/size_overflow_plugin/size_overflow_hash.data
+
+commit 45fce33b1193db854cf35c70a0c737c2ab245158
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 18 21:09:47 2015 -0400
+
+    Update to pax-linux-3.19.2-test11.patch
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 2b322d8b6b7db6bafe8e5ae7ba64664ede510204
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 18 20:40:07 2015 -0400
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 2c2ab6d2b4c3f341c450c6adbcb573c734b6e950
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 18 19:54:15 2015 -0400
+
+    From: Shachar Raindel <raindel () mellanox com>
+    Date: Sun, 04 Jan 2015 18:30:32 +0200
+    Subject: [PATCH] IB/core: Prevent integer overflow in ib_umem_get address arithmetic
+    
+    Properly verify that the resulting page aligned end address is larger
+    than both the start address and the length of the memory area
+    requested.
+    
+    Both the start and length arguments for ib_umem_get are controlled by
+    the user. A misbehaving user can provide values which will cause an
+    integer overflow when calculating the page aligned end address.
+    
+    This overflow can cause also miscalculation of the number of pages
+    mapped, and additional logic issues.
+    
+    Signed-off-by: Shachar Raindel <raindel () mellanox com>
+    Signed-off-by: Jack Morgenstein <jackm () mellanox com>
+    Signed-off-by: Or Gerlitz <ogerlitz () mellanox com>
+
+ drivers/infiniband/core/umem.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 75e97c11e86afb0a2f30a98e21c365c35d2383f8
+Author: Oliver Hartkopp <socketcan@hartkopp.net>
+Date:   Mon Feb 23 20:37:54 2015 +0100
+
+    can: add missing initialisations in CAN related skbuffs
+    
+    When accessing CAN network interfaces with AF_PACKET sockets e.g. by dhclient
+    this can lead to a skb_under_panic due to missing skb initialisations.
+    
+    Add the missing initialisations at the CAN skbuff creation times on driver
+    level (rx path) and in the network layer (tx path).
+    
+    Reported-by: Austin Schuh <austin@peloton-tech.com>
+    Reported-by: Daniel Steer <daniel.steer@mclaren.com>
+    Signed-off-by: Oliver Hartkopp <socketcan@hartkopp.net>
+    Cc: linux-stable <stable@vger.kernel.org>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+
+ drivers/net/can/dev.c |    8 ++++++++
+ net/can/af_can.c      |    3 +++
+ 2 files changed, 11 insertions(+), 0 deletions(-)
+
+commit 5aa58ea29056fd17fe74f498ede17386d39fbe7d
+Author: Alexey Kodanev <alexey.kodanev@oracle.com>
+Date:   Wed Mar 11 14:29:17 2015 +0300
+
+    net: sysctl_net_core: check SNDBUF and RCVBUF for min length
+    
+    sysctl has sysctl.net.core.rmem_*/wmem_* parameters which can be
+    set to incorrect values. Given that 'struct sk_buff' allocates from
+    rcvbuf, incorrectly set buffer length could result to memory
+    allocation failures. For example, set them as follows:
+    
+        # sysctl net.core.rmem_default=64
+          net.core.wmem_default = 64
+        # sysctl net.core.wmem_default=64
+          net.core.wmem_default = 64
+        # ping localhost -s 1024 -i 0 > /dev/null
+    
+    This could result to the following failure:
+    
+    skbuff: skb_over_panic: text:ffffffff81628db4 len:-32 put:-32
+    head:ffff88003a1cc200 data:ffff88003a1cc200 tail:0xffffffe0 end:0xc0 dev:<NULL>
+    kernel BUG at net/core/skbuff.c:102!
+    invalid opcode: 0000 [#1] SMP
+    ...
+    task: ffff88003b7f5550 ti: ffff88003ae88000 task.ti: ffff88003ae88000
+    RIP: 0010:[<ffffffff8155fbd1>]  [<ffffffff8155fbd1>] skb_put+0xa1/0xb0
+    RSP: 0018:ffff88003ae8bc68  EFLAGS: 00010296
+    RAX: 000000000000008d RBX: 00000000ffffffe0 RCX: 0000000000000000
+    RDX: ffff88003fdcf598 RSI: ffff88003fdcd9c8 RDI: ffff88003fdcd9c8
+    RBP: ffff88003ae8bc88 R08: 0000000000000001 R09: 0000000000000000
+    R10: 0000000000000001 R11: 00000000000002b2 R12: 0000000000000000
+    R13: 0000000000000000 R14: ffff88003d3f7300 R15: ffff88000012a900
+    FS:  00007fa0e2b4a840(0000) GS:ffff88003fc00000(0000) knlGS:0000000000000000
+    CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+    CR2: 0000000000d0f7e0 CR3: 000000003b8fb000 CR4: 00000000000006f0
+    Stack:
+     ffff88003a1cc200 00000000ffffffe0 00000000000000c0 ffffffff818cab1d
+     ffff88003ae8bd68 ffffffff81628db4 ffff88003ae8bd48 ffff88003b7f5550
+     ffff880031a09408 ffff88003b7f5550 ffff88000012aa48 ffff88000012ab00
+    Call Trace:
+     [<ffffffff81628db4>] unix_stream_sendmsg+0x2c4/0x470
+     [<ffffffff81556f56>] sock_write_iter+0x146/0x160
+     [<ffffffff811d9612>] new_sync_write+0x92/0xd0
+     [<ffffffff811d9cd6>] vfs_write+0xd6/0x180
+     [<ffffffff811da499>] SyS_write+0x59/0xd0
+     [<ffffffff81651532>] system_call_fastpath+0x12/0x17
+    Code: 00 00 48 89 44 24 10 8b 87 c8 00 00 00 48 89 44 24 08 48 8b 87 d8 00
+          00 00 48 c7 c7 30 db 91 81 48 89 04 24 31 c0 e8 4f a8 0e 00 <0f> 0b
+          eb fe 66 66 2e 0f 1f 84 00 00 00 00 00 55 48 89 e5 48 83
+    RIP  [<ffffffff8155fbd1>] skb_put+0xa1/0xb0
+    RSP <ffff88003ae8bc68>
+    Kernel panic - not syncing: Fatal exception
+    
+    Moreover, the possible minimum is 1, so we can get another kernel panic:
+    ...
+    BUG: unable to handle kernel paging request at ffff88013caee5c0
+    IP: [<ffffffff815604cf>] __alloc_skb+0x12f/0x1f0
+    ...
+    
+    Signed-off-by: Alexey Kodanev <alexey.kodanev@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/sysctl_net_core.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
+
+commit 5b9ecb5f6bcd7b85cc8b76164719123f8c64da8f
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Sun Mar 15 13:48:03 2015 +0300
+
+    isdn: icn: use strlcpy() when parsing setup options
+    
+    If you pass an invalid string here then you probably deserve the memory
+    corruption, but it annoys static analysis tools so lets fix it.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/isdn/icn/icn.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ede54a5201fcf67ffa2ebfd2e82cc56ee8e337ea
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Fri Mar 13 09:49:59 2015 -0700
+
+    inet_diag: fix possible overflow in inet_diag_dump_one_icsk()
+    
+    inet_diag_dump_one_icsk() allocates too small skb.
+    
+    Add inet_sk_attr_size() helper right before inet_sk_diag_fill()
+    so that it can be updated if/when new attributes are added.
+    
+    iproute2/ss currently does not use this dump_one() interface,
+    this might explain nobody noticed this problem yet.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/inet_diag.c |   18 +++++++++++++++---
+ 1 files changed, 15 insertions(+), 3 deletions(-)
+
+commit e2ec5b7531eb5f4f3d4da424e67eca6f4cc89fff
+Author: Arnd Bergmann <arnd@arndb.de>
+Date:   Wed Mar 11 22:46:59 2015 +0100
+
+    rds: avoid potential stack overflow
+    
+    The rds_iw_update_cm_id function stores a large 'struct rds_sock' object
+    on the stack in order to pass a pair of addresses. This happens to just
+    fit withint the 1024 byte stack size warning limit on x86, but just
+    exceed that limit on ARM, which gives us this warning:
+    
+    net/rds/iw_rdma.c:200:1: warning: the frame size of 1056 bytes is larger than 1024 bytes [-Wframe-larger-than=]
+    
+    As the use of this large variable is basically bogus, we can rearrange
+    the code to not do that. Instead of passing an rds socket into
+    rds_iw_get_device, we now just pass the two addresses that we have
+    available in rds_iw_update_cm_id, and we change rds_iw_get_mr accordingly,
+    to create two address structures on the stack there.
+    
+    Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+    Acked-by: Sowmini Varadhan <sowmini.varadhan@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/iw_rdma.c |   40 ++++++++++++++++++++++------------------
+ 1 files changed, 22 insertions(+), 18 deletions(-)
+
+commit 1677f6c0fb75090ade7f6a112e59dbadeb6d3408
+Merge: 257f3c5 67c007c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 18 17:54:21 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/proc/inode.c
+
+commit 67c007c5973ecc721098eacec609e658ebeaef02
+Merge: b92787a 660613d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 18 17:51:15 2015 -0400
+
+    Merge branch 'linux-3.19.y' into pax-test
+
+commit 257f3c5bfec90810079bb7d9d7dea8d7d2500d35
+Merge: 8d02e6e b92787a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 16 17:47:23 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b92787ab69f95b55ba4a941838f8b39e94dc37f7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 16 17:46:58 2015 -0400
+
+    Update to pax-linux-3.19.1-test11.patch:
+    - fixed a false positive size overflow report that triggered while resizing an ext4 file system, reported by Mathias Krause <minipli@googlemail.com>
+
+ fs/ext4/resize.c |   16 +++++++++-------
+ 1 files changed, 9 insertions(+), 7 deletions(-)
+
+commit 8d02e6e58dec394dda0c922709e1d1c096b4a2b6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 13 07:36:16 2015 -0400
+
+    Add CAP_AUDIT_READ, as reported by Sverd Johnsen
+
+ grsecurity/grsec_exec.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit fe273ddc232e8deb8be979eaa952bbe92724faf7
 Merge: 696b99c 52c4efc
 Author: Brad Spengler <spender@grsecurity.net>
