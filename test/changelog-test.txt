@@ -1,3 +1,23 @@
+commit 3be3bc0f3a7b5164cd3c53a3999d8c3ef3dd1137
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Fri Mar 20 17:41:43 2015 +0000
+
+    Yet another upstream vulnerablity cover-up.  While it seems some sendmsg
+    handlers will end up in memcpy_iovec which will perform the access_ok()
+    Al has added, clearly Al is aware of at least one path where that doesn't
+    happen and this becomes an easy arbitrary kernel read/write.  One would think
+    this would warrant more than a single-line commit message, but apparently this
+    is just business as usual in Linux kernel development.
+    
+    net: validate the range we feed to iov_iter_init() in sys_sendto/sys_recvfrom
+    
+    Cc: stable@vger.kernel.org # v3.19
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/socket.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
 commit 98399b6d44c4d4ef984b4f00f4cf1926a48728e4
 Merge: 2b322d8 45fce33
 Author: Brad Spengler <spender@grsecurity.net>
