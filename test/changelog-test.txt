@@ -1,3 +1,80 @@
+commit 1958c233d3e3df6586fdfe94019fa4062084a823
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 23:48:50 2015 -0400
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+commit d5df331952493e7c7d2aa5c26d741a185efe20f4
+Merge: e0ddfa7 204bcdf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 23:17:36 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 204bcdfb687a52171995a5c7c2f341ff230c89dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 23:17:17 2015 -0400
+
+    Update to pax-linux-3.19.3-test12.patch
+
+ arch/x86/kernel/traps.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit e0ddfa741a2b78764a198789be39c803b5c24463
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 23:12:00 2015 -0400
+
+    forward-port reverse dependency on PAX_MEMORY_SANITIZE for DEBUG_PAGEALLOC
+
+ mm/Kconfig.debug |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 3b2c818b9b665709555cae0f0693f2cef40aa375
+Merge: bfdd23a e3ebb7d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 23:11:06 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/Kconfig
+
+commit e3ebb7d8202b84ee559e25a98625bec01ac0f7c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 23:10:48 2015 -0400
+
+    Update to pax-linux-3.19.3-test12.patch:
+    - worked around incompatibility between SANITIZE and DEBUG_PAGEALLOC, reported by metarox (https://forums.grsecurity.net/viewtopic.php?f=3&t=4176)
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit bfdd23a014859d876f220ebb1713490096b4067e
+Merge: b8052c5 b69a0b9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 22:54:39 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b69a0b94ab1a34d99546869acb1273848feed5cf
+Merge: 45fce33 d8cf08a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 26 22:54:34 2015 -0400
+
+    Merge branch 'linux-3.19.y' into pax-test
+
+commit b8052c5d57cae3bdbf3afd953f342cd1fb9a8293
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 25 18:40:53 2015 -0400
+
+    Add allowance for /usr/libexec/abrt-hook-cpp to be executed as a usermode helper, as observed on some cPanel systems
+
+ kernel/kmod.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 323e853b010020af6d7442472facb29ecf098fca
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Mar 25 16:53:50 2015 -0400
