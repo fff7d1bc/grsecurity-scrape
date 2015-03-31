@@ -1,3 +1,28 @@
+commit d2cab3830f9e041873272fd072725b9bf646cde3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 30 20:57:48 2015 -0400
+
+    compile fix
+
+ init/main.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2826d291e310b3168cc6671fba6e211cf69b4c03
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 30 23:28:01 2015 -0400
+
+    Add a boot-time parameter to disable GRKERNSEC_SYSFS_RESTRICT.
+    
+    To disable it at boot time (when compiled into the kernel), use
+    grsec_sysfs_restrict=0
+    on the kernel commandline
+
+ Documentation/kernel-parameters.txt |    3 +++
+ fs/debugfs/inode.c                  |   14 ++++++++++----
+ fs/sysfs/dir.c                      |    6 ++++++
+ init/main.c                         |   10 ++++++++++
+ 4 files changed, 29 insertions(+), 4 deletions(-)
+
 commit 1958c233d3e3df6586fdfe94019fa4062084a823
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Mar 26 23:48:50 2015 -0400
