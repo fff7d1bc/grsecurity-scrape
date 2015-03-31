@@ -1,3 +1,33 @@
+commit 1d52b29be8ddbed363e933472fe6fb0cd9ce2c2d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 31 17:14:21 2015 -0400
+
+    add an additional guard against negative copy lengths on nla_memcpy as
+    signed integers are being used with the expectation that they will always
+    be positive.
+
+ lib/nlattr.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 75a7ccebaed2b26b8e8e42bc4ca1f9b27229cc0a
+Author: Jiri Benc <jbenc@redhat.com>
+Date:   Sun Mar 29 16:05:28 2015 +0200
+
+    netlink: pad nla_memcpy dest buffer with zeroes
+    
+    This is especially important in cases where the kernel allocs a new
+    structure and expects a field to be set from a netlink attribute. If such
+    attribute is shorter than expected, the rest of the field is left containing
+    previous data. When such field is read back by the user space, kernel memory
+    content is leaked.
+    
+    Signed-off-by: Jiri Benc <jbenc@redhat.com>
+    Acked-by: Thomas Graf <tgraf@suug.ch>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ lib/nlattr.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
 commit d2cab3830f9e041873272fd072725b9bf646cde3
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Mar 30 20:57:48 2015 -0400
