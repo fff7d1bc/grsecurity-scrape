@@ -1,3 +1,54 @@
+commit 175edf3b3e54a00cfba26491eb7b3a6a41ae98fd
+Merge: 194b06c 04f2cc3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 17:21:20 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 04f2cc3fa4d696a1be01944a814934902ed4682c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 17:20:57 2015 -0400
+
+    Update to pax-linux-3.19.3-test15.patch:
+    - fixed some REFCOUNT false positives in the tracing ring buffer code, reported by metarox (https://forums.grsecurity.net/viewtopic.php?f=3&t=4186)
+
+ kernel/trace/ring_buffer.c |   20 ++++++++++----------
+ 1 files changed, 10 insertions(+), 10 deletions(-)
+
+commit 194b06c2a8d37a22e038f998c5edc509e8a98634
+Merge: 1d52b29 0f6528e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 08:10:40 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0f6528e15bff64e44b3aadda5c67285eacfa738c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 08:09:38 2015 -0400
+
+    Update to pax-linux-3.19.3-test14.patch:
+    - fixed early boot crash due to some misplaced STACs on i386, reported by Arnaud Fontaine <arnaud@drno.eu>
+    - properly fixed CVE-2014-8159, http://seclists.org/oss-sec/2015/q1/886 and http://seclists.org/oss-sec/2015/q2/10
+    - preliminary arm64 compilation support, by Michael Tremer <michael.tremer@ipfire.org>
+    - fixed a crash bug with the old PAGEEXEC method and PSE, reported by Merlin
+    - added some more gcc-5 support for plugins
+
+ arch/arm64/include/asm/atomic.h                    |   10 ++
+ arch/arm64/include/asm/pgalloc.h                   |    5 +
+ arch/arm64/mm/dma-mapping.c                        |    2 +-
+ arch/sparc/include/asm/uaccess_32.h                |    1 +
+ arch/sparc/include/asm/uaccess_64.h                |    5 +
+ arch/x86/kernel/cpu/common.c                       |   14 ++-
+ arch/x86/lib/getuser.S                             |    6 +-
+ arch/x86/lib/putuser.S                             |    8 +-
+ drivers/infiniband/core/uverbs_cmd.c               |    3 +
+ tools/gcc/gcc-common.h                             |  149 +++++++++++++++++++-
+ tools/gcc/latent_entropy_plugin.c                  |    3 +-
+ tools/gcc/size_overflow_plugin/size_overflow.h     |   10 +-
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 +-
+ tools/gcc/stackleak_plugin.c                       |    3 +-
+ 14 files changed, 200 insertions(+), 22 deletions(-)
+
 commit 1d52b29be8ddbed363e933472fe6fb0cd9ce2c2d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Mar 31 17:14:21 2015 -0400
