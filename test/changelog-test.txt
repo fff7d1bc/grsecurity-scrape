@@ -1,3 +1,364 @@
+commit 5ecab7eff0d91d4f37f06c4203ab1a993069aec9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 19 07:15:46 2015 -0400
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 2116385c3d8fefcbf3d172c2c65ebfc80a4fa414
+Merge: a0b5356 ecca093
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 19 06:51:08 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ecca093cd2918140f42ded699338c8c85863e57e
+Merge: 83e90c4 a96a030
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 19 06:51:04 2015 -0400
+
+    Merge branch 'linux-3.19.y' into pax-test
+
+commit a0b53563efc8ea170bbdfbc44ac67e105deb4b60
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 22:56:35 2015 -0400
+
+    fix escaping of unix domain paths added in previous patch
+
+ net/unix/af_unix.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 43885ab66fc0f49395bd7d3209f8891d3ee6a438
+Author: Mike Christie <michaelc@cs.wisc.edu>
+Date:   Fri Apr 10 02:47:27 2015 -0500
+
+    iscsi target: fix oops when adding reject pdu
+    
+    This fixes a oops due to a double list add when adding a reject PDU for
+    iscsit_allocate_iovecs allocation failures. The cmd has already been
+    added to the conn_cmd_list in iscsit_setup_scsi_cmd, so this has us call
+    iscsit_reject_cmd.
+    
+    Note that for ERL0 the reject PDU is not actually sent, so this patch
+    is not completely tested. Just verified we do not oops. The problem is the
+    add reject functions return -1 which is returned all the way up to
+    iscsi_target_rx_thread which for ERL0 will drop the connection.
+    
+    Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
+    Cc: <stable@vger.kernel.org> # v3.10+
+    Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
+
+ drivers/target/iscsi/iscsi_target.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 25252bcd57228dbf97fb66d9b7c22b082111f621
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Thu Apr 9 13:31:56 2015 -0700
+
+    tcp: tcp_make_synack() should clear skb->tstamp
+    
+    I noticed tcpdump was giving funky timestamps for locally
+    generated SYNACK messages on loopback interface.
+    
+    11:42:46.938990 IP 127.0.0.1.48245 > 127.0.0.2.23850: S
+    945476042:945476042(0) win 43690 <mss 65495,nop,nop,sackOK,nop,wscale 7>
+    
+    20:28:58.502209 IP 127.0.0.2.23850 > 127.0.0.1.48245: S
+    3160535375:3160535375(0) ack 945476043 win 43690 <mss
+    65495,nop,nop,sackOK,nop,wscale 7>
+    
+    This is because we need to clear skb->tstamp before
+    entering lower stack, otherwise net_timestamp_check()
+    does not set skb->tstamp.
+    
+    Fixes: 7faee5c0d514 ("tcp: remove TCP_SKB_CB(skb)->when")
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_output.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 18a9b135a1992988ee19b80a73a0888acbbc6fd3
+Author: Andi Kleen <ak@linux.intel.com>
+Date:   Wed Apr 8 06:04:31 2015 -0700
+
+    fou: Don't use const __read_mostly
+    
+    const __read_mostly is a senseless combination. If something
+    is already const it cannot be __read_mostly. Remove the bogus
+    __read_mostly in the fou driver.
+    
+    This fixes section conflicts with LTO.
+    
+    Signed-off-by: Andi Kleen <ak@linux.intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/fou.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d12befb1883b964592232859047ed79c9d360c66
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu Apr 9 14:12:22 2015 -0700
+
+    blk-mq: initialize 'struct request' and associated data to zero
+    
+    Jan Engelhardt reports a strange oops with an invalid ->sense_buffer
+    pointer in scsi_init_cmd_errh() with the blk-mq code.
+    
+    The sense_buffer pointer should have been initialized by the call to
+    scsi_init_request() from blk_mq_init_rq_map(), but there seems to be
+    some non-repeatable memory corruptor.
+    
+    This patch makes sure we initialize the whole struct request allocation
+    (and the associated 'struct scsi_cmnd' for the SCSI case) to zero, by
+    using __GFP_ZERO in the allocation.  The old code initialized a couple
+    of individual fields, leaving the rest undefined (although many of them
+    are then initialized in later phases, like blk_mq_rq_ctx_init() etc.
+    
+    It's not entirely clear why this matters, but it's the rigth thing to do
+    regardless, and with 4.0 imminent this is the defensive "let's just make
+    sure everything is initialized properly" patch.
+    
+    Tested-by: Jan Engelhardt <jengelh@inai.de>
+    Acked-by: Jens Axboe <axboe@kernel.dk>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ block/blk-mq.c |    4 +---
+ 1 files changed, 1 insertions(+), 3 deletions(-)
+
+commit 99cef7243b7ff3764346615779cb3dcbe59a061a
+Author: Sowmini Varadhan <sowmini.varadhan@oracle.com>
+Date:   Wed Apr 8 12:33:47 2015 -0400
+
+    RDS: make sure not to loop forever inside rds_send_xmit
+    
+    If a determined set of concurrent senders keep the send queue full,
+    we can loop forever inside rds_send_xmit.  This fix has two parts.
+    
+    First we are dropping out of the while(1) loop after we've processed a
+    large batch of messages.
+    
+    Second we add a generation number that gets bumped each time the
+    xmit bit lock is acquired.  If someone else has jumped in and
+    made progress in the queue, we skip our goto restart.
+    
+    Original patch by Chris Mason.
+    
+    Signed-off-by: Sowmini Varadhan <sowmini.varadhan@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/connection.c |    1 +
+ net/rds/rds.h        |    1 +
+ net/rds/send.c       |   33 +++++++++++++++++++++++++++++++--
+ 3 files changed, 33 insertions(+), 2 deletions(-)
+
+commit 8a416255861f144a59bdb469e6f242c006f5eccf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:52:49 2015 -0400
+
+    Revert "Modify the resource handling of RBAC so that it doesn't actually"
+    
+    This reverts commit 10c5c69146f60c89edee4d4041b613c4889ac00f.
+
+ fs/exec.c                      |    9 ++++++-
+ fs/proc/array.c                |    2 +-
+ grsecurity/gracl.c             |   44 ++++++++++++++++++++++++++++++++++++++
+ grsecurity/gracl_res.c         |   46 ----------------------------------------
+ grsecurity/grsec_disabled.c    |   20 -----------------
+ include/linux/sched.h          |    7 +----
+ kernel/acct.c                  |    3 --
+ kernel/fork.c                  |    2 +-
+ kernel/time/posix-cpu-timers.c |   10 +++++---
+ mm/mmap.c                      |    5 ++-
+ 10 files changed, 64 insertions(+), 84 deletions(-)
+
+commit f2a689d24b15c55c3b2d6e0904e1bd9a2d4a2502
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:52:41 2015 -0400
+
+    Revert "compile fix"
+    
+    This reverts commit d8d1519e32ce40be94ca68845de212883b0d0ba6.
+
+ kernel/time/posix-cpu-timers.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0a56c19dd62dfb7be0a71254cd495f0c360b3c96
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:44:48 2015 -0400
+
+    make the usermodehelper message more generic about paths
+
+ kernel/kmod.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 56436c56acdc0dcce2658d574d54f93c44e5b759
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:34:32 2015 -0400
+
+    Prevent /proc/net/unix from containing newlines or tabs in filenames
+    as used in:
+    http://seclists.org/oss-sec/2015/q2/143
+
+ net/unix/af_unix.c |   19 +++++++++++++++++--
+ 1 files changed, 17 insertions(+), 2 deletions(-)
+
+commit cc95164c1bdb30b954202d7d6de8249394a31d45
+Merge: d8d1519 83e90c4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:08:30 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 83e90c44a7140e902b80df77942e5199a82c5e6d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:07:00 2015 -0400
+
+    Update to pax-linux-3.19.3-test16.patch:
+    - fixed the colorize plugin for gcc-5
+    - fixed a false positive size overflow bug in raid5, reported by jack mort (https://bugs.gentoo.org/show_bug.cgi?id=545492)
+    - the overflow plugin caught an incorrect sign conversion in zlib, reported by Attila TÃ³th (https://bugs.gentoo.org/show_bug.cgi?id=545776)
+    - the overflow plugin caught an incorrect sign conversion in get_user on x86, reported by GÃ¡bor Hasenfrasz (https://forums.grsecurity.net/viewtopic.php?f=3&t=4188)
+
+ arch/x86/include/asm/page_64.h                     |    4 ++--
+ arch/x86/include/asm/uaccess.h                     |    8 +++++---
+ arch/x86/mm/pgtable.c                              |    2 +-
+ crypto/zlib.c                                      |    4 ++--
+ drivers/md/raid5.c                                 |   12 ++++++------
+ include/linux/compiler.h                           |    2 ++
+ include/linux/syscalls.h                           |    5 ++---
+ mm/madvise.c                                       |    4 ++--
+ scripts/gcc-plugin.sh                              |    2 +-
+ security/Kconfig                                   |    2 +-
+ tools/gcc/colorize_plugin.c                        |    7 ++++++-
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 +
+ 12 files changed, 31 insertions(+), 22 deletions(-)
+
+commit d8d1519e32ce40be94ca68845de212883b0d0ba6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 21:52:34 2015 -0400
+
+    compile fix
+
+ kernel/time/posix-cpu-timers.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 10c5c69146f60c89edee4d4041b613c4889ac00f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 20:19:30 2015 -0400
+
+    Modify the resource handling of RBAC so that it doesn't actually
+    modify the user-visible resource limits.  We now won't have to
+    copy the entire rlimit array on each exec or have any special
+    handing for setting rlimits via a subject.  Since most kernel
+    code is now using rlimit() and variants, we place ourselves
+    there to provide a minimum of the process' original limit
+    and RBAC's mandatory limits.  This also removes the exception
+    of RBAC's resource handling being capable of providing higher
+    resource limits than normally possible for a given process.
+    
+    Conflicts:
+    
+    	kernel/acct.c
+    	kernel/posix-cpu-timers.c
+
+ fs/exec.c                      |    9 +------
+ fs/proc/array.c                |    2 +-
+ grsecurity/gracl.c             |   44 --------------------------------------
+ grsecurity/gracl_res.c         |   46 ++++++++++++++++++++++++++++++++++++++++
+ grsecurity/grsec_disabled.c    |   20 +++++++++++++++++
+ include/linux/sched.h          |    7 ++++-
+ kernel/acct.c                  |    3 ++
+ kernel/fork.c                  |    2 +-
+ kernel/time/posix-cpu-timers.c |   10 +++-----
+ mm/mmap.c                      |    5 +--
+ 10 files changed, 84 insertions(+), 64 deletions(-)
+
+commit f434ff372f918d540ddb9902f9421c57beba074f
+Author: Joe Perches <joe@perches.com>
+Date:   Mon Mar 23 18:01:35 2015 -0700
+
+    selinux: fix sel_write_enforce broken return value
+    
+    Return a negative error value like the rest of the entries in this function.
+    
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Acked-by:  Stephen Smalley <sds@tycho.nsa.gov>
+    [PM: tweaked subject line]
+    Signed-off-by: Paul Moore <pmoore@redhat.com>
+
+ security/selinux/selinuxfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2c13c96fcd80174bf6899b9c709b390708168abf
+Author: Leon Yu <chianglungyu@gmail.com>
+Date:   Wed Mar 25 15:55:11 2015 -0700
+
+    mm: fix anon_vma->degree underflow in anon_vma endless growing prevention
+    
+    I have constantly stumbled upon "kernel BUG at mm/rmap.c:399!" after
+    upgrading to 3.19 and had no luck with 4.0-rc1 neither.
+    
+    So, after looking into new logic introduced by commit 7a3ef208e662 ("mm:
+    prevent endless growth of anon_vma hierarchy"), I found chances are that
+    unlink_anon_vmas() is called without incrementing dst->anon_vma->degree
+    in anon_vma_clone() due to allocation failure.  If dst->anon_vma is not
+    NULL in error path, its degree will be incorrectly decremented in
+    unlink_anon_vmas() and eventually underflow when exiting as a result of
+    another call to unlink_anon_vmas().  That's how "kernel BUG at
+    mm/rmap.c:399!" is triggered for me.
+    
+    This patch fixes the underflow by dropping dst->anon_vma when allocation
+    fails.  It's safe to do so regardless of original value of dst->anon_vma
+    because dst->anon_vma doesn't have valid meaning if anon_vma_clone()
+    fails.  Besides, callers don't care dst->anon_vma in such case neither.
+    
+    Also suggested by Michal Hocko, we can clean up vma_adjust() a bit as
+    anon_vma_clone() now does the work.
+    
+    [akpm@linux-foundation.org: tweak comment]
+    Fixes: 7a3ef208e662 ("mm: prevent endless growth of anon_vma hierarchy")
+    Signed-off-by: Leon Yu <chianglungyu@gmail.com>
+    Signed-off-by: Konstantin Khlebnikov <koct9i@gmail.com>
+    Reviewed-by: Michal Hocko <mhocko@suse.cz>
+    Acked-by: Rik van Riel <riel@redhat.com>
+    Acked-by: David Rientjes <rientjes@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/mmap.c |    4 +---
+ mm/rmap.c |    7 +++++++
+ 2 files changed, 8 insertions(+), 3 deletions(-)
+
+commit 5f692c69f6cb8411363cebb59183b1a5620309f2
+Merge: 989a60e 1a1eefb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 08:37:20 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1a1eefb2f81e6ddb502e8721bc8eb06eede36bd0
+Merge: 04f2cc3 31ad7cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 08:37:14 2015 -0400
+
+    Merge branch 'linux-3.19.y' into pax-test
+
+commit 989a60e5efcc1929e16355b3ff1e3a016293a16e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 07:43:01 2015 -0400
+
+    Allow usermodehelper executions from /usr/bin/ for distros plagued
+    by Lennart's bikeshedding, as reported in
+    https://bugs.archlinux.org/task/44568
+
+ kernel/kmod.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 175edf3b3e54a00cfba26491eb7b3a6a41ae98fd
 Merge: 194b06c 04f2cc3
 Author: Brad Spengler <spender@grsecurity.net>
