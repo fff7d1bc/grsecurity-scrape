@@ -1,3 +1,274 @@
+commit 878630c725390cc4ffad38677b103d4247d05559
+Merge: e577d41 3c3e77a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 26 17:01:48 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3c3e77ada13dab3c98395ee64de6bc631c29b98a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 26 17:01:19 2015 -0400
+
+    Update to pax-linux-3.19.5-test19.patch:
+    - reverted some unfinished changes to the overflow plugin that caused compile errors, reported by spender
+
+ .../insert_size_overflow_asm.c                     |   15 ++++--------
+ .../size_overflow_plugin/intentional_overflow.c    |   25 ++++++++++++--------
+ tools/gcc/size_overflow_plugin/size_overflow.h     |    6 ++--
+ 3 files changed, 23 insertions(+), 23 deletions(-)
+
+commit e577d41e33f5c47391575be33dad76fd6d107d58
+Author: jbaron@akamai.com <jbaron@akamai.com>
+Date:   Mon Apr 20 20:05:07 2015 +0000
+
+    tcp: add memory barriers to write space paths
+    
+    Ensure that we either see that the buffer has write space
+    in tcp_poll() or that we perform a wakeup from the input
+    side. Did not run into any actual problem here, but thought
+    that we should make things explicit.
+    
+    Signed-off-by: Jason Baron <jbaron@akamai.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp.c       |    4 +++-
+ net/ipv4/tcp_input.c |    2 ++
+ 2 files changed, 5 insertions(+), 1 deletions(-)
+
+commit dc709d4dfa278135c7f7ab76c2064bb8735961f2
+Author: Jann Horn <jann@thejh.net>
+Date:   Sun Apr 19 02:48:39 2015 +0200
+
+    fs: take i_mutex during prepare_binprm for set[ug]id executables
+    
+    This prevents a race between chown() and execve(), where chowning a
+    setuid-user binary to root would momentarily make the binary setuid
+    root.
+    
+    This patch was mostly written by Linus Torvalds.
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/exec.c |   76 ++++++++++++++++++++++++++++++++++++++----------------------
+ 1 files changed, 48 insertions(+), 28 deletions(-)
+
+commit 5be54059dcad39acf083b0bb89e735dc7a615217
+Author: David S. Miller <davem@davemloft.net>
+Date:   Fri Apr 17 15:15:40 2015 -0400
+
+    sfc: Fix memcpy() with const destination compiler warning.
+    
+    drivers/net/ethernet/sfc/selftest.c: In function ‘efx_iterate_state’:
+    drivers/net/ethernet/sfc/selftest.c:388:9: warning: passing argument 1 of ‘memcpy’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-array-qualifiers]
+    
+    This is because the msg[] member of struct efx_loopback_payload
+    is marked as 'const'.  Remove that.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/sfc/selftest.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit cf61da2b7d8acbb0caebbdfc99255b67666223f3
+Author: Herbert Xu <herbert@gondor.apana.org.au>
+Date:   Thu Apr 16 09:03:27 2015 +0800
+
+    skbuff: Do not scrub skb mark within the same name space
+    
+    On Wed, Apr 15, 2015 at 05:41:26PM +0200, Nicolas Dichtel wrote:
+    > Le 15/04/2015 15:57, Herbert Xu a écrit :
+    > >On Wed, Apr 15, 2015 at 06:22:29PM +0800, Herbert Xu wrote:
+    > [snip]
+    > >Subject: skbuff: Do not scrub skb mark within the same name space
+    > >
+    > >The commit ea23192e8e577dfc51e0f4fc5ca113af334edff9 ("tunnels:
+    > Maybe add a Fixes tag?
+    > Fixes: ea23192e8e57 ("tunnels: harmonize cleanup done on skb on rx path")
+    >
+    > >harmonize cleanup done on skb on rx path") broke anyone trying to
+    > >use netfilter marking across IPv4 tunnels.  While most of the
+    > >fields that are cleared by skb_scrub_packet don't matter, the
+    > >netfilter mark must be preserved.
+    > >
+    > >This patch rearranges skb_scurb_packet to preserve the mark field.
+    > nit: s/scurb/scrub
+    >
+    > Else it's fine for me.
+    
+    Sure.
+    
+    PS I used the wrong email for James the first time around.  So
+    let me repeat the question here.  Should secmark be preserved
+    or cleared across tunnels within the same name space? In fact,
+    do our security models even support name spaces?
+    
+    ---8<---
+    The commit ea23192e8e577dfc51e0f4fc5ca113af334edff9 ("tunnels:
+    harmonize cleanup done on skb on rx path") broke anyone trying to
+    use netfilter marking across IPv4 tunnels.  While most of the
+    fields that are cleared by skb_scrub_packet don't matter, the
+    netfilter mark must be preserved.
+    
+    This patch rearranges skb_scrub_packet to preserve the mark field.
+    
+    Fixes: ea23192e8e57 ("tunnels: harmonize cleanup done on skb on rx path")
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+    Acked-by: Thomas Graf <tgraf@suug.ch>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/core/skbuff.c
+
+ net/core/skbuff.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+commit 5a0e11ebe9176d727f6bbe0f71fd508c602a22d4
+Author: Herbert Xu <herbert@gondor.apana.org.au>
+Date:   Thu Apr 16 16:12:53 2015 +0800
+
+    Revert "net: Reset secmark when scrubbing packet"
+    
+    This patch reverts commit b8fb4e0648a2ab3734140342002f68fb0c7d1602
+    because the secmark must be preserved even when a packet crosses
+    namespace boundaries.  The reason is that security labels apply to
+    the system as a whole and is not per-namespace.
+    
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/core/skbuff.c
+
+ net/core/skbuff.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 166dc8453e963b06535138ec0e4b377bd3767b35
+Author: Alexei Starovoitov <ast@plumgrid.com>
+Date:   Tue Apr 14 15:57:13 2015 -0700
+
+    bpf: fix verifier memory corruption
+    
+    Due to missing bounds check the DAG pass of the BPF verifier can corrupt
+    the memory which can cause random crashes during program loading:
+    
+    [8.449451] BUG: unable to handle kernel paging request at ffffffffffffffff
+    [8.451293] IP: [<ffffffff811de33d>] kmem_cache_alloc_trace+0x8d/0x2f0
+    [8.452329] Oops: 0000 [#1] SMP
+    [8.452329] Call Trace:
+    [8.452329]  [<ffffffff8116cc82>] bpf_check+0x852/0x2000
+    [8.452329]  [<ffffffff8116b7e4>] bpf_prog_load+0x1e4/0x310
+    [8.452329]  [<ffffffff811b190f>] ? might_fault+0x5f/0xb0
+    [8.452329]  [<ffffffff8116c206>] SyS_bpf+0x806/0xa30
+    
+    Fixes: f1bca824dabb ("bpf: add search pruning optimization to verifier")
+    Signed-off-by: Alexei Starovoitov <ast@plumgrid.com>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ kernel/bpf/verifier.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 4094359aa29c064b846bccfe0245ecbe2dccb766
+Author: Kirill Tkhai <ktkhai@parallels.com>
+Date:   Thu Apr 16 12:48:01 2015 -0700
+
+    fs/exec.c:de_thread: move notify_count write under lock
+    
+    We set sig->notify_count = -1 between RELEASE and ACQUIRE operations:
+    
+    	spin_unlock_irq(lock);
+    	...
+    	if (!thread_group_leader(tsk)) {
+    		...
+                    for (;;) {
+    			sig->notify_count = -1;
+                            write_lock_irq(&tasklist_lock);
+    
+    There are no restriction on it so other processors may see this STORE
+    mixed with other STOREs in both areas limited by the spinlocks.
+    
+    Probably, it may be reordered with the above
+    
+    	sig->group_exit_task = tsk;
+    	sig->notify_count = zap_other_threads(tsk);
+    
+    in some way.
+    
+    Set it under tasklist_lock locked to be sure nothing will be reordered.
+    
+    Signed-off-by: Kirill Tkhai <ktkhai@parallels.com>
+    Acked-by: Oleg Nesterov <oleg@redhat.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/exec.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit e8be4c67ee97c57233ef34b52403c32d92a99b82
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Tue Apr 14 15:43:19 2015 -0700
+
+    ocfs2: dereferencing freed pointers in ocfs2_reflink()
+    
+    The code at the "out" label assumes that "default_acl" and "acl" are NULL,
+    but actually the pointers can be NULL, unitialized, or freed.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Reviewed-by: Mark Fasheh <mfasheh@suse.de>
+    Cc: Joel Becker <jlbec@evilplan.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/ocfs2/refcounttree.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0848231d4e7e7d130d07614a8be7750053b9f33d
+Merge: f99770d e58c33d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 25 21:43:44 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e58c33da4e2ce636359937920b9531bafd09b021
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 25 21:42:33 2015 -0400
+
+    Update to pax-linux-3.19.5-test18.patch:
+    - ported all plugins to gcc-5 except size overflow
+    - fixed integer signedness mixup in mmc error code handling, caught by the size overflow plugin, reported by Tom Seewald
+    - fixed REFCOUNT atomic accessor mixup on arm and mips, reported by fabled (https://forums.grsecurity.net/viewtopic.php?f=3&t=4194)
+
+ arch/arm/include/asm/atomic.h                      |   16 +++---
+ arch/mips/include/asm/atomic.h                     |   16 +++---
+ include/linux/compiler-gcc5.h                      |    2 -
+ include/linux/mmc/core.h                           |    2 +-
+ net/netfilter/nft_compat.c                         |    9 +---
+ tools/gcc/colorize_plugin.c                        |    4 +-
+ tools/gcc/constify_plugin.c                        |   11 +++-
+ tools/gcc/gcc-common.h                             |   24 +++++++-
+ tools/gcc/kallocstat_plugin.c                      |   11 +++-
+ tools/gcc/kernexec_plugin.c                        |   59 ++++++++++++++------
+ tools/gcc/latent_entropy_plugin.c                  |   12 +++-
+ .../insert_size_overflow_asm.c                     |   15 +++--
+ .../size_overflow_plugin/intentional_overflow.c    |   25 +++-----
+ tools/gcc/size_overflow_plugin/size_overflow.h     |    6 +-
+ tools/gcc/stackleak_plugin.c                       |   22 ++++++--
+ tools/gcc/structleak_plugin.c                      |   25 ++++++--
+ 16 files changed, 168 insertions(+), 91 deletions(-)
+
+commit f99770dd539b7e2e3482e57489322e036e8590d5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 25 21:37:30 2015 -0400
+
+    Update RANDSTRUCT plugin to support GCC 5.1
+
+ tools/gcc/randomize_layout_plugin.c |   12 +++++++-----
+ 1 files changed, 7 insertions(+), 5 deletions(-)
+
 commit 5ecab7eff0d91d4f37f06c4203ab1a993069aec9
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Apr 19 07:15:46 2015 -0400
