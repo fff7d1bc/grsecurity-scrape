@@ -1,3 +1,127 @@
+commit 893ffa9fb68825100f8bf47591bf9331d4a1ca35
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 19:40:23 2015 -0400
+
+    Fix a refcount underflow reported by Jan Hejl caused by GRKERNSEC_CHROOT_RENAME
+    We failed to increment the tree in copy_fs_struct, so users of clone with
+    CLONE_FS who then exited caused a decrement of the refcounts with no associated
+    increment.  This would generally occur on / and took at least a month on
+    a heavily-loaded system to trigger.  It shouldn't cause any security problems
+    as no freeing is associated with the refcount, and the only interesting value
+    is 0, which permits renames in that tree.  I've tested this fixed implementation
+    to ensure the refcounts are under control in both directions.
+
+ fs/fs_struct.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 774f34dce402eb5557b63d649313a5cf4e055abb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 08:34:14 2015 -0400
+
+    compile fix
+
+ arch/x86/kernel/apic/io_apic.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ab6e3547f11173ff7dbb38e7a19f99adbbeea93e
+Merge: 6ecebd3 94ec8da
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 08:33:16 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 94ec8da04694935cb4d40b652c51f9450f8ac308
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 08:32:42 2015 -0400
+
+    Update to pax-linux-3.19.6-test21.patch:
+    - fixed compilation errors due to some overzealous constification of irq_chip variables, reported by spender
+
+ arch/x86/kernel/apic/io_apic.c   |    4 ++--
+ drivers/xen/events/events_base.c |    6 +++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 6ecebd32eefb37628e12cd3510565853897c4381
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 29 22:34:18 2015 -0400
+
+    compile fix
+
+ arch/x86/kernel/apic/io_apic.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8a4738c528aa0d4be40ca7152d59c840f16ba1b3
+Merge: 0634e18 d394e02
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 29 19:50:58 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d394e02fa2b755e5a2ab866b4f49c820f9f93040
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 29 19:50:28 2015 -0400
+
+    Update to pax-linux-3.19.6-test20.patch:
+    - Emese fixed the size overflow plugin for gcc-5
+    - fixed a few section conflicts exposed by LTO
+    - fixed the latent entropy plugin for LTO
+    - fixed the stackleak plugin for LTO
+
+ arch/x86/kernel/apic/io_apic.c                     |    4 +-
+ arch/x86/kernel/apm_32.c                           |    2 +-
+ arch/x86/kernel/reboot.c                           |    2 +-
+ drivers/acpi/bus.c                                 |    4 +-
+ drivers/acpi/ec.c                                  |    2 +-
+ drivers/acpi/pci_slot.c                            |    2 +-
+ drivers/acpi/processor_driver.c                    |    2 +-
+ drivers/acpi/processor_pdc.c                       |    2 +-
+ drivers/acpi/sleep.c                               |    2 +-
+ drivers/acpi/thermal.c                             |    2 +-
+ drivers/acpi/video.c                               |    2 +-
+ drivers/char/i8k.c                                 |    2 +-
+ drivers/char/sonypi.c                              |    2 +-
+ drivers/firmware/efi/runtime-map.c                 |    2 +-
+ drivers/firmware/google/gsmi.c                     |    2 +-
+ drivers/firmware/google/memconsole.c               |    2 +-
+ drivers/firmware/memmap.c                          |    2 +-
+ drivers/hwmon/acpi_power_meter.c                   |    2 +-
+ drivers/input/touchscreen/htcpen.c                 |    2 +-
+ drivers/mfd/kempld-core.c                          |    2 +-
+ drivers/net/ethernet/via/via-rhine.c               |    2 +-
+ drivers/pci/pcie/portdrv_pci.c                     |    2 +-
+ drivers/platform/chrome/chromeos_pstore.c          |    2 +-
+ drivers/platform/x86/compal-laptop.c               |    2 +-
+ drivers/platform/x86/hdaps.c                       |    2 +-
+ drivers/platform/x86/ibm_rtl.c                     |    2 +-
+ drivers/platform/x86/intel_oaktrail.c              |    2 +-
+ drivers/platform/x86/msi-laptop.c                  |    2 +-
+ drivers/platform/x86/samsung-laptop.c              |    2 +-
+ drivers/platform/x86/samsung-q10.c                 |    2 +-
+ drivers/platform/x86/sony-laptop.c                 |    2 +-
+ drivers/pnp/pnpbios/core.c                         |    2 +-
+ drivers/thermal/x86_pkg_temp_thermal.c             |    2 +-
+ drivers/xen/events/events_base.c                   |    6 +-
+ include/linux/compiler-gcc5.h                      |    1 -
+ net/ipv4/fou.c                                     |    4 +-
+ net/l2tp/l2tp_ip.c                                 |    2 +-
+ net/l2tp/l2tp_ip6.c                                |    2 +-
+ tools/gcc/Makefile                                 |    2 +-
+ tools/gcc/gcc-common.h                             |  144 ++++++++++++++++++--
+ tools/gcc/kernexec_plugin.c                        |    4 +-
+ tools/gcc/latent_entropy_plugin.c                  |    9 +-
+ .../insert_size_overflow_asm.c                     |   25 ++--
+ .../size_overflow_plugin/intentional_overflow.c    |  110 ++++++++-------
+ tools/gcc/size_overflow_plugin/misc.c              |   21 +++-
+ .../size_overflow_plugin/remove_unnecessary_dup.c  |   16 +-
+ tools/gcc/size_overflow_plugin/size_overflow.h     |  105 +++++++++++----
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |   37 +++--
+ .../size_overflow_plugin/size_overflow_plugin.c    |   39 +++++-
+ .../size_overflow_plugin_hash.c                    |    2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |   35 +++---
+ .../size_overflow_transform_core.c                 |   85 +++++-------
+ tools/gcc/stackleak_plugin.c                       |   30 ++++-
+ 53 files changed, 497 insertions(+), 252 deletions(-)
+
 commit 0634e189772e5ceb52ef736ecc20af86d6c929cd
 Merge: 878630c 86d8763
 Author: Brad Spengler <spender@grsecurity.net>
