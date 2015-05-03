@@ -1,1604 +1,74 @@
-commit 991deaea269d0a20a709ba8b370512fdb00b35ed
-Author: David S. Miller <davem@davemloft.net>
-Date:   Fri May 1 22:02:47 2015 -0400
-
-    ipv4: Missing sk_nulls_node_init() in ping_unhash().
-    
-    If we don't do that, then the poison value is left in the ->pprev
-    backlink.
-    
-    This can cause crashes if we do a disconnect, followed by a connect().
-    
-    Tested-by: Linus Torvalds <torvalds@linux-foundation.org>
-    Reported-by: Wen Xu <hotdog3645@gmail.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/ipv4/ping.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-commit 4b045d9f907b7bec88b3bf1aff453963d327ce15
+commit 314b16217423b8e732f3dcb1e04a9daee66b06ea
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri May 1 08:01:51 2015 -0400
+Date:   Sun May 3 14:21:56 2015 -0400
 
-    Remove a harmless duplicated hunk in hid-logitech-dj.c, reported by
-    Lionel Debroux
+    Update size_overflow hash table
 
- drivers/hid/hid-logitech-dj.c |    6 ------
- 1 files changed, 0 insertions(+), 6 deletions(-)
+ .../size_overflow_plugin/size_overflow_hash.data   |  510 +++++++++++++++-----
+ 1 files changed, 401 insertions(+), 109 deletions(-)
 
-commit 893ffa9fb68825100f8bf47591bf9331d4a1ca35
+commit ec7e8a8c3309e0036d4c5361a66caac880418347
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 30 19:40:23 2015 -0400
+Date:   Sun May 3 08:50:17 2015 -0400
 
-    Fix a refcount underflow reported by Jan Hejl caused by GRKERNSEC_CHROOT_RENAME
-    We failed to increment the tree in copy_fs_struct, so users of clone with
-    CLONE_FS who then exited caused a decrement of the refcounts with no associated
-    increment.  This would generally occur on / and took at least a month on
-    a heavily-loaded system to trigger.  It shouldn't cause any security problems
-    as no freeing is associated with the refcount, and the only interesting value
-    is 0, which permits renames in that tree.  I've tested this fixed implementation
-    to ensure the refcounts are under control in both directions.
+    constify compile fix
 
- fs/fs_struct.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-commit 774f34dce402eb5557b63d649313a5cf4e055abb
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 30 08:34:14 2015 -0400
-
-    compile fix
-
- arch/x86/kernel/apic/io_apic.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit ab6e3547f11173ff7dbb38e7a19f99adbbeea93e
-Merge: 6ecebd3 94ec8da
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 30 08:33:16 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 94ec8da04694935cb4d40b652c51f9450f8ac308
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 30 08:32:42 2015 -0400
-
-    Update to pax-linux-3.19.6-test21.patch:
-    - fixed compilation errors due to some overzealous constification of irq_chip variables, reported by spender
-
- arch/x86/kernel/apic/io_apic.c   |    4 ++--
- drivers/xen/events/events_base.c |    6 +++---
- 2 files changed, 5 insertions(+), 5 deletions(-)
-
-commit 6ecebd32eefb37628e12cd3510565853897c4381
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Apr 29 22:34:18 2015 -0400
-
-    compile fix
-
- arch/x86/kernel/apic/io_apic.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 8a4738c528aa0d4be40ca7152d59c840f16ba1b3
-Merge: 0634e18 d394e02
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Apr 29 19:50:58 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit d394e02fa2b755e5a2ab866b4f49c820f9f93040
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Apr 29 19:50:28 2015 -0400
-
-    Update to pax-linux-3.19.6-test20.patch:
-    - Emese fixed the size overflow plugin for gcc-5
-    - fixed a few section conflicts exposed by LTO
-    - fixed the latent entropy plugin for LTO
-    - fixed the stackleak plugin for LTO
-
- arch/x86/kernel/apic/io_apic.c                     |    4 +-
- arch/x86/kernel/apm_32.c                           |    2 +-
- arch/x86/kernel/reboot.c                           |    2 +-
- drivers/acpi/bus.c                                 |    4 +-
- drivers/acpi/ec.c                                  |    2 +-
- drivers/acpi/pci_slot.c                            |    2 +-
- drivers/acpi/processor_driver.c                    |    2 +-
- drivers/acpi/processor_pdc.c                       |    2 +-
- drivers/acpi/sleep.c                               |    2 +-
- drivers/acpi/thermal.c                             |    2 +-
- drivers/acpi/video.c                               |    2 +-
- drivers/char/i8k.c                                 |    2 +-
- drivers/char/sonypi.c                              |    2 +-
- drivers/firmware/efi/runtime-map.c                 |    2 +-
- drivers/firmware/google/gsmi.c                     |    2 +-
- drivers/firmware/google/memconsole.c               |    2 +-
- drivers/firmware/memmap.c                          |    2 +-
- drivers/hwmon/acpi_power_meter.c                   |    2 +-
- drivers/input/touchscreen/htcpen.c                 |    2 +-
- drivers/mfd/kempld-core.c                          |    2 +-
- drivers/net/ethernet/via/via-rhine.c               |    2 +-
- drivers/pci/pcie/portdrv_pci.c                     |    2 +-
- drivers/platform/chrome/chromeos_pstore.c          |    2 +-
- drivers/platform/x86/compal-laptop.c               |    2 +-
- drivers/platform/x86/hdaps.c                       |    2 +-
- drivers/platform/x86/ibm_rtl.c                     |    2 +-
- drivers/platform/x86/intel_oaktrail.c              |    2 +-
- drivers/platform/x86/msi-laptop.c                  |    2 +-
- drivers/platform/x86/samsung-laptop.c              |    2 +-
- drivers/platform/x86/samsung-q10.c                 |    2 +-
- drivers/platform/x86/sony-laptop.c                 |    2 +-
- drivers/pnp/pnpbios/core.c                         |    2 +-
- drivers/thermal/x86_pkg_temp_thermal.c             |    2 +-
- drivers/xen/events/events_base.c                   |    6 +-
- include/linux/compiler-gcc5.h                      |    1 -
- net/ipv4/fou.c                                     |    4 +-
- net/l2tp/l2tp_ip.c                                 |    2 +-
- net/l2tp/l2tp_ip6.c                                |    2 +-
- tools/gcc/Makefile                                 |    2 +-
- tools/gcc/gcc-common.h                             |  144 ++++++++++++++++++--
- tools/gcc/kernexec_plugin.c                        |    4 +-
- tools/gcc/latent_entropy_plugin.c                  |    9 +-
- .../insert_size_overflow_asm.c                     |   25 ++--
- .../size_overflow_plugin/intentional_overflow.c    |  110 ++++++++-------
- tools/gcc/size_overflow_plugin/misc.c              |   21 +++-
- .../size_overflow_plugin/remove_unnecessary_dup.c  |   16 +-
- tools/gcc/size_overflow_plugin/size_overflow.h     |  105 +++++++++++----
- tools/gcc/size_overflow_plugin/size_overflow_ipa.c |   37 +++--
- .../size_overflow_plugin/size_overflow_plugin.c    |   39 +++++-
- .../size_overflow_plugin_hash.c                    |    2 +-
- .../size_overflow_plugin/size_overflow_transform.c |   35 +++---
- .../size_overflow_transform_core.c                 |   85 +++++-------
- tools/gcc/stackleak_plugin.c                       |   30 ++++-
- 53 files changed, 497 insertions(+), 252 deletions(-)
-
-commit 0634e189772e5ceb52ef736ecc20af86d6c929cd
-Merge: 878630c 86d8763
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Apr 29 07:34:20 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 86d8763e9eb53a6e4036ea659f2d58a90e680fec
-Merge: 3c3e77a 3c464c7
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Apr 29 07:34:13 2015 -0400
-
-    Merge branch 'linux-3.19.y' into pax-test
-
-commit 878630c725390cc4ffad38677b103d4247d05559
-Merge: e577d41 3c3e77a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 26 17:01:48 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 3c3e77ada13dab3c98395ee64de6bc631c29b98a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 26 17:01:19 2015 -0400
-
-    Update to pax-linux-3.19.5-test19.patch:
-    - reverted some unfinished changes to the overflow plugin that caused compile errors, reported by spender
-
- .../insert_size_overflow_asm.c                     |   15 ++++--------
- .../size_overflow_plugin/intentional_overflow.c    |   25 ++++++++++++--------
- tools/gcc/size_overflow_plugin/size_overflow.h     |    6 ++--
- 3 files changed, 23 insertions(+), 23 deletions(-)
-
-commit e577d41e33f5c47391575be33dad76fd6d107d58
-Author: jbaron@akamai.com <jbaron@akamai.com>
-Date:   Mon Apr 20 20:05:07 2015 +0000
-
-    tcp: add memory barriers to write space paths
-    
-    Ensure that we either see that the buffer has write space
-    in tcp_poll() or that we perform a wakeup from the input
-    side. Did not run into any actual problem here, but thought
-    that we should make things explicit.
-    
-    Signed-off-by: Jason Baron <jbaron@akamai.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/ipv4/tcp.c       |    4 +++-
- net/ipv4/tcp_input.c |    2 ++
- 2 files changed, 5 insertions(+), 1 deletions(-)
-
-commit dc709d4dfa278135c7f7ab76c2064bb8735961f2
-Author: Jann Horn <jann@thejh.net>
-Date:   Sun Apr 19 02:48:39 2015 +0200
-
-    fs: take i_mutex during prepare_binprm for set[ug]id executables
-    
-    This prevents a race between chown() and execve(), where chowning a
-    setuid-user binary to root would momentarily make the binary setuid
-    root.
-    
-    This patch was mostly written by Linus Torvalds.
-    
-    Signed-off-by: Jann Horn <jann@thejh.net>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- fs/exec.c |   76 ++++++++++++++++++++++++++++++++++++++----------------------
- 1 files changed, 48 insertions(+), 28 deletions(-)
-
-commit 5be54059dcad39acf083b0bb89e735dc7a615217
-Author: David S. Miller <davem@davemloft.net>
-Date:   Fri Apr 17 15:15:40 2015 -0400
-
-    sfc: Fix memcpy() with const destination compiler warning.
-    
-    drivers/net/ethernet/sfc/selftest.c: In function ‘efx_iterate_state’:
-    drivers/net/ethernet/sfc/selftest.c:388:9: warning: passing argument 1 of ‘memcpy’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-array-qualifiers]
-    
-    This is because the msg[] member of struct efx_loopback_payload
-    is marked as 'const'.  Remove that.
-    
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- drivers/net/ethernet/sfc/selftest.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit cf61da2b7d8acbb0caebbdfc99255b67666223f3
-Author: Herbert Xu <herbert@gondor.apana.org.au>
-Date:   Thu Apr 16 09:03:27 2015 +0800
-
-    skbuff: Do not scrub skb mark within the same name space
-    
-    On Wed, Apr 15, 2015 at 05:41:26PM +0200, Nicolas Dichtel wrote:
-    > Le 15/04/2015 15:57, Herbert Xu a écrit :
-    > >On Wed, Apr 15, 2015 at 06:22:29PM +0800, Herbert Xu wrote:
-    > [snip]
-    > >Subject: skbuff: Do not scrub skb mark within the same name space
-    > >
-    > >The commit ea23192e8e577dfc51e0f4fc5ca113af334edff9 ("tunnels:
-    > Maybe add a Fixes tag?
-    > Fixes: ea23192e8e57 ("tunnels: harmonize cleanup done on skb on rx path")
-    >
-    > >harmonize cleanup done on skb on rx path") broke anyone trying to
-    > >use netfilter marking across IPv4 tunnels.  While most of the
-    > >fields that are cleared by skb_scrub_packet don't matter, the
-    > >netfilter mark must be preserved.
-    > >
-    > >This patch rearranges skb_scurb_packet to preserve the mark field.
-    > nit: s/scurb/scrub
-    >
-    > Else it's fine for me.
-    
-    Sure.
-    
-    PS I used the wrong email for James the first time around.  So
-    let me repeat the question here.  Should secmark be preserved
-    or cleared across tunnels within the same name space? In fact,
-    do our security models even support name spaces?
-    
-    ---8<---
-    The commit ea23192e8e577dfc51e0f4fc5ca113af334edff9 ("tunnels:
-    harmonize cleanup done on skb on rx path") broke anyone trying to
-    use netfilter marking across IPv4 tunnels.  While most of the
-    fields that are cleared by skb_scrub_packet don't matter, the
-    netfilter mark must be preserved.
-    
-    This patch rearranges skb_scrub_packet to preserve the mark field.
-    
-    Fixes: ea23192e8e57 ("tunnels: harmonize cleanup done on skb on rx path")
-    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
-    Acked-by: Thomas Graf <tgraf@suug.ch>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-    
-    Conflicts:
-    
-    	net/core/skbuff.c
-
- net/core/skbuff.c |    9 ++++++---
- 1 files changed, 6 insertions(+), 3 deletions(-)
-
-commit 5a0e11ebe9176d727f6bbe0f71fd508c602a22d4
-Author: Herbert Xu <herbert@gondor.apana.org.au>
-Date:   Thu Apr 16 16:12:53 2015 +0800
-
-    Revert "net: Reset secmark when scrubbing packet"
-    
-    This patch reverts commit b8fb4e0648a2ab3734140342002f68fb0c7d1602
-    because the secmark must be preserved even when a packet crosses
-    namespace boundaries.  The reason is that security labels apply to
-    the system as a whole and is not per-namespace.
-    
-    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-    
-    Conflicts:
-    
-    	net/core/skbuff.c
-
- net/core/skbuff.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-commit 166dc8453e963b06535138ec0e4b377bd3767b35
-Author: Alexei Starovoitov <ast@plumgrid.com>
-Date:   Tue Apr 14 15:57:13 2015 -0700
-
-    bpf: fix verifier memory corruption
-    
-    Due to missing bounds check the DAG pass of the BPF verifier can corrupt
-    the memory which can cause random crashes during program loading:
-    
-    [8.449451] BUG: unable to handle kernel paging request at ffffffffffffffff
-    [8.451293] IP: [<ffffffff811de33d>] kmem_cache_alloc_trace+0x8d/0x2f0
-    [8.452329] Oops: 0000 [#1] SMP
-    [8.452329] Call Trace:
-    [8.452329]  [<ffffffff8116cc82>] bpf_check+0x852/0x2000
-    [8.452329]  [<ffffffff8116b7e4>] bpf_prog_load+0x1e4/0x310
-    [8.452329]  [<ffffffff811b190f>] ? might_fault+0x5f/0xb0
-    [8.452329]  [<ffffffff8116c206>] SyS_bpf+0x806/0xa30
-    
-    Fixes: f1bca824dabb ("bpf: add search pruning optimization to verifier")
-    Signed-off-by: Alexei Starovoitov <ast@plumgrid.com>
-    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
-    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- kernel/bpf/verifier.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-commit 4094359aa29c064b846bccfe0245ecbe2dccb766
-Author: Kirill Tkhai <ktkhai@parallels.com>
-Date:   Thu Apr 16 12:48:01 2015 -0700
-
-    fs/exec.c:de_thread: move notify_count write under lock
-    
-    We set sig->notify_count = -1 between RELEASE and ACQUIRE operations:
-    
-    	spin_unlock_irq(lock);
-    	...
-    	if (!thread_group_leader(tsk)) {
-    		...
-                    for (;;) {
-    			sig->notify_count = -1;
-                            write_lock_irq(&tasklist_lock);
-    
-    There are no restriction on it so other processors may see this STORE
-    mixed with other STOREs in both areas limited by the spinlocks.
-    
-    Probably, it may be reordered with the above
-    
-    	sig->group_exit_task = tsk;
-    	sig->notify_count = zap_other_threads(tsk);
-    
-    in some way.
-    
-    Set it under tasklist_lock locked to be sure nothing will be reordered.
-    
-    Signed-off-by: Kirill Tkhai <ktkhai@parallels.com>
-    Acked-by: Oleg Nesterov <oleg@redhat.com>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- fs/exec.c |    6 +++++-
- 1 files changed, 5 insertions(+), 1 deletions(-)
-
-commit e8be4c67ee97c57233ef34b52403c32d92a99b82
-Author: Dan Carpenter <dan.carpenter@oracle.com>
-Date:   Tue Apr 14 15:43:19 2015 -0700
-
-    ocfs2: dereferencing freed pointers in ocfs2_reflink()
-    
-    The code at the "out" label assumes that "default_acl" and "acl" are NULL,
-    but actually the pointers can be NULL, unitialized, or freed.
-    
-    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-    Reviewed-by: Mark Fasheh <mfasheh@suse.de>
-    Cc: Joel Becker <jlbec@evilplan.org>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- fs/ocfs2/refcounttree.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 0848231d4e7e7d130d07614a8be7750053b9f33d
-Merge: f99770d e58c33d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Apr 25 21:43:44 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit e58c33da4e2ce636359937920b9531bafd09b021
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Apr 25 21:42:33 2015 -0400
-
-    Update to pax-linux-3.19.5-test18.patch:
-    - ported all plugins to gcc-5 except size overflow
-    - fixed integer signedness mixup in mmc error code handling, caught by the size overflow plugin, reported by Tom Seewald
-    - fixed REFCOUNT atomic accessor mixup on arm and mips, reported by fabled (https://forums.grsecurity.net/viewtopic.php?f=3&t=4194)
-
- arch/arm/include/asm/atomic.h                      |   16 +++---
- arch/mips/include/asm/atomic.h                     |   16 +++---
- include/linux/compiler-gcc5.h                      |    2 -
- include/linux/mmc/core.h                           |    2 +-
- net/netfilter/nft_compat.c                         |    9 +---
- tools/gcc/colorize_plugin.c                        |    4 +-
- tools/gcc/constify_plugin.c                        |   11 +++-
- tools/gcc/gcc-common.h                             |   24 +++++++-
- tools/gcc/kallocstat_plugin.c                      |   11 +++-
- tools/gcc/kernexec_plugin.c                        |   59 ++++++++++++++------
- tools/gcc/latent_entropy_plugin.c                  |   12 +++-
- .../insert_size_overflow_asm.c                     |   15 +++--
- .../size_overflow_plugin/intentional_overflow.c    |   25 +++-----
- tools/gcc/size_overflow_plugin/size_overflow.h     |    6 +-
- tools/gcc/stackleak_plugin.c                       |   22 ++++++--
- tools/gcc/structleak_plugin.c                      |   25 ++++++--
- 16 files changed, 168 insertions(+), 91 deletions(-)
-
-commit f99770dd539b7e2e3482e57489322e036e8590d5
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sat Apr 25 21:37:30 2015 -0400
-
-    Update RANDSTRUCT plugin to support GCC 5.1
-
- tools/gcc/randomize_layout_plugin.c |   12 +++++++-----
- 1 files changed, 7 insertions(+), 5 deletions(-)
-
-commit 5ecab7eff0d91d4f37f06c4203ab1a993069aec9
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 19 07:15:46 2015 -0400
-
-    update size_overflow hash table
-
- .../size_overflow_plugin/size_overflow_hash.data   |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
-
-commit 2116385c3d8fefcbf3d172c2c65ebfc80a4fa414
-Merge: a0b5356 ecca093
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 19 06:51:08 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit ecca093cd2918140f42ded699338c8c85863e57e
-Merge: 83e90c4 a96a030
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Apr 19 06:51:04 2015 -0400
-
-    Merge branch 'linux-3.19.y' into pax-test
-
-commit a0b53563efc8ea170bbdfbc44ac67e105deb4b60
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Apr 14 22:56:35 2015 -0400
-
-    fix escaping of unix domain paths added in previous patch
-
- net/unix/af_unix.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit 43885ab66fc0f49395bd7d3209f8891d3ee6a438
-Author: Mike Christie <michaelc@cs.wisc.edu>
-Date:   Fri Apr 10 02:47:27 2015 -0500
-
-    iscsi target: fix oops when adding reject pdu
-    
-    This fixes a oops due to a double list add when adding a reject PDU for
-    iscsit_allocate_iovecs allocation failures. The cmd has already been
-    added to the conn_cmd_list in iscsit_setup_scsi_cmd, so this has us call
-    iscsit_reject_cmd.
-    
-    Note that for ERL0 the reject PDU is not actually sent, so this patch
-    is not completely tested. Just verified we do not oops. The problem is the
-    add reject functions return -1 which is returned all the way up to
-    iscsi_target_rx_thread which for ERL0 will drop the connection.
-    
-    Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
-    Cc: <stable@vger.kernel.org> # v3.10+
-    Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
-
- drivers/target/iscsi/iscsi_target.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 25252bcd57228dbf97fb66d9b7c22b082111f621
-Author: Eric Dumazet <edumazet@google.com>
-Date:   Thu Apr 9 13:31:56 2015 -0700
-
-    tcp: tcp_make_synack() should clear skb->tstamp
-    
-    I noticed tcpdump was giving funky timestamps for locally
-    generated SYNACK messages on loopback interface.
-    
-    11:42:46.938990 IP 127.0.0.1.48245 > 127.0.0.2.23850: S
-    945476042:945476042(0) win 43690 <mss 65495,nop,nop,sackOK,nop,wscale 7>
-    
-    20:28:58.502209 IP 127.0.0.2.23850 > 127.0.0.1.48245: S
-    3160535375:3160535375(0) ack 945476043 win 43690 <mss
-    65495,nop,nop,sackOK,nop,wscale 7>
-    
-    This is because we need to clear skb->tstamp before
-    entering lower stack, otherwise net_timestamp_check()
-    does not set skb->tstamp.
-    
-    Fixes: 7faee5c0d514 ("tcp: remove TCP_SKB_CB(skb)->when")
-    Signed-off-by: Eric Dumazet <edumazet@google.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/ipv4/tcp_output.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit 18a9b135a1992988ee19b80a73a0888acbbc6fd3
-Author: Andi Kleen <ak@linux.intel.com>
-Date:   Wed Apr 8 06:04:31 2015 -0700
-
-    fou: Don't use const __read_mostly
-    
-    const __read_mostly is a senseless combination. If something
-    is already const it cannot be __read_mostly. Remove the bogus
-    __read_mostly in the fou driver.
-    
-    This fixes section conflicts with LTO.
-    
-    Signed-off-by: Andi Kleen <ak@linux.intel.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/ipv4/fou.c |    4 ++--
+ drivers/net/ethernet/amd/xgbe/xgbe.h |    4 ++--
  1 files changed, 2 insertions(+), 2 deletions(-)
 
-commit d12befb1883b964592232859047ed79c9d360c66
-Author: Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Thu Apr 9 14:12:22 2015 -0700
-
-    blk-mq: initialize 'struct request' and associated data to zero
-    
-    Jan Engelhardt reports a strange oops with an invalid ->sense_buffer
-    pointer in scsi_init_cmd_errh() with the blk-mq code.
-    
-    The sense_buffer pointer should have been initialized by the call to
-    scsi_init_request() from blk_mq_init_rq_map(), but there seems to be
-    some non-repeatable memory corruptor.
-    
-    This patch makes sure we initialize the whole struct request allocation
-    (and the associated 'struct scsi_cmnd' for the SCSI case) to zero, by
-    using __GFP_ZERO in the allocation.  The old code initialized a couple
-    of individual fields, leaving the rest undefined (although many of them
-    are then initialized in later phases, like blk_mq_rq_ctx_init() etc.
-    
-    It's not entirely clear why this matters, but it's the rigth thing to do
-    regardless, and with 4.0 imminent this is the defensive "let's just make
-    sure everything is initialized properly" patch.
-    
-    Tested-by: Jan Engelhardt <jengelh@inai.de>
-    Acked-by: Jens Axboe <axboe@kernel.dk>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- block/blk-mq.c |    4 +---
- 1 files changed, 1 insertions(+), 3 deletions(-)
-
-commit 99cef7243b7ff3764346615779cb3dcbe59a061a
-Author: Sowmini Varadhan <sowmini.varadhan@oracle.com>
-Date:   Wed Apr 8 12:33:47 2015 -0400
-
-    RDS: make sure not to loop forever inside rds_send_xmit
-    
-    If a determined set of concurrent senders keep the send queue full,
-    we can loop forever inside rds_send_xmit.  This fix has two parts.
-    
-    First we are dropping out of the while(1) loop after we've processed a
-    large batch of messages.
-    
-    Second we add a generation number that gets bumped each time the
-    xmit bit lock is acquired.  If someone else has jumped in and
-    made progress in the queue, we skip our goto restart.
-    
-    Original patch by Chris Mason.
-    
-    Signed-off-by: Sowmini Varadhan <sowmini.varadhan@oracle.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/rds/connection.c |    1 +
- net/rds/rds.h        |    1 +
- net/rds/send.c       |   33 +++++++++++++++++++++++++++++++--
- 3 files changed, 33 insertions(+), 2 deletions(-)
-
-commit 8a416255861f144a59bdb469e6f242c006f5eccf
+commit e98198e8f9aa0b17be2727731390268c02a6afe4
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Apr 14 17:52:49 2015 -0400
+Date:   Sun May 3 08:28:00 2015 -0400
 
-    Revert "Modify the resource handling of RBAC so that it doesn't actually"
-    
-    This reverts commit 10c5c69146f60c89edee4d4041b613c4889ac00f.
+    RANDSTRUCT compile fix
 
- fs/exec.c                      |    9 ++++++-
- fs/proc/array.c                |    2 +-
- grsecurity/gracl.c             |   44 ++++++++++++++++++++++++++++++++++++++
- grsecurity/gracl_res.c         |   46 ----------------------------------------
- grsecurity/grsec_disabled.c    |   20 -----------------
- include/linux/sched.h          |    7 +----
- kernel/acct.c                  |    3 --
- kernel/fork.c                  |    2 +-
- kernel/time/posix-cpu-timers.c |   10 +++++---
- mm/mmap.c                      |    5 ++-
- 10 files changed, 64 insertions(+), 84 deletions(-)
-
-commit f2a689d24b15c55c3b2d6e0904e1bd9a2d4a2502
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Apr 14 17:52:41 2015 -0400
-
-    Revert "compile fix"
-    
-    This reverts commit d8d1519e32ce40be94ca68845de212883b0d0ba6.
-
- kernel/time/posix-cpu-timers.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 0a56c19dd62dfb7be0a71254cd495f0c360b3c96
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Apr 14 17:44:48 2015 -0400
-
-    make the usermodehelper message more generic about paths
-
- kernel/kmod.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 56436c56acdc0dcce2658d574d54f93c44e5b759
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Apr 14 17:34:32 2015 -0400
-
-    Prevent /proc/net/unix from containing newlines or tabs in filenames
-    as used in:
-    http://seclists.org/oss-sec/2015/q2/143
-
- net/unix/af_unix.c |   19 +++++++++++++++++--
- 1 files changed, 17 insertions(+), 2 deletions(-)
-
-commit cc95164c1bdb30b954202d7d6de8249394a31d45
-Merge: d8d1519 83e90c4
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Apr 14 17:08:30 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 83e90c44a7140e902b80df77942e5199a82c5e6d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Apr 14 17:07:00 2015 -0400
-
-    Update to pax-linux-3.19.3-test16.patch:
-    - fixed the colorize plugin for gcc-5
-    - fixed a false positive size overflow bug in raid5, reported by jack mort (https://bugs.gentoo.org/show_bug.cgi?id=545492)
-    - the overflow plugin caught an incorrect sign conversion in zlib, reported by Attila TÃ³th (https://bugs.gentoo.org/show_bug.cgi?id=545776)
-    - the overflow plugin caught an incorrect sign conversion in get_user on x86, reported by GÃ¡bor Hasenfrasz (https://forums.grsecurity.net/viewtopic.php?f=3&t=4188)
-
- arch/x86/include/asm/page_64.h                     |    4 ++--
- arch/x86/include/asm/uaccess.h                     |    8 +++++---
- arch/x86/mm/pgtable.c                              |    2 +-
- crypto/zlib.c                                      |    4 ++--
- drivers/md/raid5.c                                 |   12 ++++++------
- include/linux/compiler.h                           |    2 ++
- include/linux/syscalls.h                           |    5 ++---
- mm/madvise.c                                       |    4 ++--
- scripts/gcc-plugin.sh                              |    2 +-
- security/Kconfig                                   |    2 +-
- tools/gcc/colorize_plugin.c                        |    7 ++++++-
- .../size_overflow_plugin/size_overflow_hash.data   |    1 +
- 12 files changed, 31 insertions(+), 22 deletions(-)
-
-commit d8d1519e32ce40be94ca68845de212883b0d0ba6
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 13 21:52:34 2015 -0400
-
-    compile fix
-
- kernel/time/posix-cpu-timers.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 10c5c69146f60c89edee4d4041b613c4889ac00f
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 13 20:19:30 2015 -0400
-
-    Modify the resource handling of RBAC so that it doesn't actually
-    modify the user-visible resource limits.  We now won't have to
-    copy the entire rlimit array on each exec or have any special
-    handing for setting rlimits via a subject.  Since most kernel
-    code is now using rlimit() and variants, we place ourselves
-    there to provide a minimum of the process' original limit
-    and RBAC's mandatory limits.  This also removes the exception
-    of RBAC's resource handling being capable of providing higher
-    resource limits than normally possible for a given process.
-    
-    Conflicts:
-    
-    	kernel/acct.c
-    	kernel/posix-cpu-timers.c
-
- fs/exec.c                      |    9 +------
- fs/proc/array.c                |    2 +-
- grsecurity/gracl.c             |   44 --------------------------------------
- grsecurity/gracl_res.c         |   46 ++++++++++++++++++++++++++++++++++++++++
- grsecurity/grsec_disabled.c    |   20 +++++++++++++++++
- include/linux/sched.h          |    7 ++++-
- kernel/acct.c                  |    3 ++
- kernel/fork.c                  |    2 +-
- kernel/time/posix-cpu-timers.c |   10 +++-----
- mm/mmap.c                      |    5 +--
- 10 files changed, 84 insertions(+), 64 deletions(-)
-
-commit f434ff372f918d540ddb9902f9421c57beba074f
-Author: Joe Perches <joe@perches.com>
-Date:   Mon Mar 23 18:01:35 2015 -0700
-
-    selinux: fix sel_write_enforce broken return value
-    
-    Return a negative error value like the rest of the entries in this function.
-    
-    Cc: <stable@vger.kernel.org>
-    Signed-off-by: Joe Perches <joe@perches.com>
-    Acked-by:  Stephen Smalley <sds@tycho.nsa.gov>
-    [PM: tweaked subject line]
-    Signed-off-by: Paul Moore <pmoore@redhat.com>
-
- security/selinux/selinuxfs.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 2c13c96fcd80174bf6899b9c709b390708168abf
-Author: Leon Yu <chianglungyu@gmail.com>
-Date:   Wed Mar 25 15:55:11 2015 -0700
-
-    mm: fix anon_vma->degree underflow in anon_vma endless growing prevention
-    
-    I have constantly stumbled upon "kernel BUG at mm/rmap.c:399!" after
-    upgrading to 3.19 and had no luck with 4.0-rc1 neither.
-    
-    So, after looking into new logic introduced by commit 7a3ef208e662 ("mm:
-    prevent endless growth of anon_vma hierarchy"), I found chances are that
-    unlink_anon_vmas() is called without incrementing dst->anon_vma->degree
-    in anon_vma_clone() due to allocation failure.  If dst->anon_vma is not
-    NULL in error path, its degree will be incorrectly decremented in
-    unlink_anon_vmas() and eventually underflow when exiting as a result of
-    another call to unlink_anon_vmas().  That's how "kernel BUG at
-    mm/rmap.c:399!" is triggered for me.
-    
-    This patch fixes the underflow by dropping dst->anon_vma when allocation
-    fails.  It's safe to do so regardless of original value of dst->anon_vma
-    because dst->anon_vma doesn't have valid meaning if anon_vma_clone()
-    fails.  Besides, callers don't care dst->anon_vma in such case neither.
-    
-    Also suggested by Michal Hocko, we can clean up vma_adjust() a bit as
-    anon_vma_clone() now does the work.
-    
-    [akpm@linux-foundation.org: tweak comment]
-    Fixes: 7a3ef208e662 ("mm: prevent endless growth of anon_vma hierarchy")
-    Signed-off-by: Leon Yu <chianglungyu@gmail.com>
-    Signed-off-by: Konstantin Khlebnikov <koct9i@gmail.com>
-    Reviewed-by: Michal Hocko <mhocko@suse.cz>
-    Acked-by: Rik van Riel <riel@redhat.com>
-    Acked-by: David Rientjes <rientjes@google.com>
-    Cc: <stable@vger.kernel.org>
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- mm/mmap.c |    4 +---
- mm/rmap.c |    7 +++++++
- 2 files changed, 8 insertions(+), 3 deletions(-)
-
-commit 5f692c69f6cb8411363cebb59183b1a5620309f2
-Merge: 989a60e 1a1eefb
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 13 08:37:20 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 1a1eefb2f81e6ddb502e8721bc8eb06eede36bd0
-Merge: 04f2cc3 31ad7cd
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 13 08:37:14 2015 -0400
-
-    Merge branch 'linux-3.19.y' into pax-test
-
-commit 989a60e5efcc1929e16355b3ff1e3a016293a16e
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Apr 13 07:43:01 2015 -0400
-
-    Allow usermodehelper executions from /usr/bin/ for distros plagued
-    by Lennart's bikeshedding, as reported in
-    https://bugs.archlinux.org/task/44568
-
- kernel/kmod.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 175edf3b3e54a00cfba26491eb7b3a6a41ae98fd
-Merge: 194b06c 04f2cc3
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 2 17:21:20 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 04f2cc3fa4d696a1be01944a814934902ed4682c
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 2 17:20:57 2015 -0400
-
-    Update to pax-linux-3.19.3-test15.patch:
-    - fixed some REFCOUNT false positives in the tracing ring buffer code, reported by metarox (https://forums.grsecurity.net/viewtopic.php?f=3&t=4186)
-
- kernel/trace/ring_buffer.c |   20 ++++++++++----------
- 1 files changed, 10 insertions(+), 10 deletions(-)
-
-commit 194b06c2a8d37a22e038f998c5edc509e8a98634
-Merge: 1d52b29 0f6528e
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 2 08:10:40 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 0f6528e15bff64e44b3aadda5c67285eacfa738c
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Apr 2 08:09:38 2015 -0400
-
-    Update to pax-linux-3.19.3-test14.patch:
-    - fixed early boot crash due to some misplaced STACs on i386, reported by Arnaud Fontaine <arnaud@drno.eu>
-    - properly fixed CVE-2014-8159, http://seclists.org/oss-sec/2015/q1/886 and http://seclists.org/oss-sec/2015/q2/10
-    - preliminary arm64 compilation support, by Michael Tremer <michael.tremer@ipfire.org>
-    - fixed a crash bug with the old PAGEEXEC method and PSE, reported by Merlin
-    - added some more gcc-5 support for plugins
-
- arch/arm64/include/asm/atomic.h                    |   10 ++
- arch/arm64/include/asm/pgalloc.h                   |    5 +
- arch/arm64/mm/dma-mapping.c                        |    2 +-
- arch/sparc/include/asm/uaccess_32.h                |    1 +
- arch/sparc/include/asm/uaccess_64.h                |    5 +
- arch/x86/kernel/cpu/common.c                       |   14 ++-
- arch/x86/lib/getuser.S                             |    6 +-
- arch/x86/lib/putuser.S                             |    8 +-
- drivers/infiniband/core/uverbs_cmd.c               |    3 +
- tools/gcc/gcc-common.h                             |  149 +++++++++++++++++++-
- tools/gcc/latent_entropy_plugin.c                  |    3 +-
- tools/gcc/size_overflow_plugin/size_overflow.h     |   10 +-
- .../size_overflow_plugin/size_overflow_hash.data   |    3 +-
- tools/gcc/stackleak_plugin.c                       |    3 +-
- 14 files changed, 200 insertions(+), 22 deletions(-)
-
-commit 1d52b29be8ddbed363e933472fe6fb0cd9ce2c2d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Mar 31 17:14:21 2015 -0400
-
-    add an additional guard against negative copy lengths on nla_memcpy as
-    signed integers are being used with the expectation that they will always
-    be positive.
-
- lib/nlattr.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit 75a7ccebaed2b26b8e8e42bc4ca1f9b27229cc0a
-Author: Jiri Benc <jbenc@redhat.com>
-Date:   Sun Mar 29 16:05:28 2015 +0200
-
-    netlink: pad nla_memcpy dest buffer with zeroes
-    
-    This is especially important in cases where the kernel allocs a new
-    structure and expects a field to be set from a netlink attribute. If such
-    attribute is shorter than expected, the rest of the field is left containing
-    previous data. When such field is read back by the user space, kernel memory
-    content is leaked.
-    
-    Signed-off-by: Jiri Benc <jbenc@redhat.com>
-    Acked-by: Thomas Graf <tgraf@suug.ch>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- lib/nlattr.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit d2cab3830f9e041873272fd072725b9bf646cde3
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 30 20:57:48 2015 -0400
-
-    compile fix
-
- init/main.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 2826d291e310b3168cc6671fba6e211cf69b4c03
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 30 23:28:01 2015 -0400
-
-    Add a boot-time parameter to disable GRKERNSEC_SYSFS_RESTRICT.
-    
-    To disable it at boot time (when compiled into the kernel), use
-    grsec_sysfs_restrict=0
-    on the kernel commandline
-
- Documentation/kernel-parameters.txt |    3 +++
- fs/debugfs/inode.c                  |   14 ++++++++++----
- fs/sysfs/dir.c                      |    6 ++++++
- init/main.c                         |   10 ++++++++++
- 4 files changed, 29 insertions(+), 4 deletions(-)
-
-commit 1958c233d3e3df6586fdfe94019fa4062084a823
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 23:48:50 2015 -0400
-
-    update size_overflow hash table
-
- .../size_overflow_plugin/size_overflow_hash.data   |    9 ++++++---
- 1 files changed, 6 insertions(+), 3 deletions(-)
-
-commit d5df331952493e7c7d2aa5c26d741a185efe20f4
-Merge: e0ddfa7 204bcdf
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 23:17:36 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit 204bcdfb687a52171995a5c7c2f341ff230c89dc
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 23:17:17 2015 -0400
-
-    Update to pax-linux-3.19.3-test12.patch
-
- arch/x86/kernel/traps.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
-
-commit e0ddfa741a2b78764a198789be39c803b5c24463
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 23:12:00 2015 -0400
-
-    forward-port reverse dependency on PAX_MEMORY_SANITIZE for DEBUG_PAGEALLOC
-
- mm/Kconfig.debug |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-commit 3b2c818b9b665709555cae0f0693f2cef40aa375
-Merge: bfdd23a e3ebb7d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 23:11:06 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	security/Kconfig
-
-commit e3ebb7d8202b84ee559e25a98625bec01ac0f7c0
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 23:10:48 2015 -0400
-
-    Update to pax-linux-3.19.3-test12.patch:
-    - worked around incompatibility between SANITIZE and DEBUG_PAGEALLOC, reported by metarox (https://forums.grsecurity.net/viewtopic.php?f=3&t=4176)
-
- security/Kconfig |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit bfdd23a014859d876f220ebb1713490096b4067e
-Merge: b8052c5 b69a0b9
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 22:54:39 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit b69a0b94ab1a34d99546869acb1273848feed5cf
-Merge: 45fce33 d8cf08a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 26 22:54:34 2015 -0400
-
-    Merge branch 'linux-3.19.y' into pax-test
-
-commit b8052c5d57cae3bdbf3afd953f342cd1fb9a8293
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 25 18:40:53 2015 -0400
-
-    Add allowance for /usr/libexec/abrt-hook-cpp to be executed as a usermode helper, as observed on some cPanel systems
-
- kernel/kmod.c |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
-
-commit 323e853b010020af6d7442472facb29ecf098fca
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 25 16:53:50 2015 -0400
-
-    Revert an incorrect fix from Dan Rosenberg for a btrfs heap overflow which
-    preserved the vulnerability in some cases.
-    https://lkml.org/lkml/2011/2/9/147
-    
-    Thanks to eswierk from the forums for spotting this!
-
- fs/btrfs/ioctl.c |    6 +++---
+ fs/overlayfs/super.c |    6 +++---
  1 files changed, 3 insertions(+), 3 deletions(-)
 
-commit 3be3bc0f3a7b5164cd3c53a3999d8c3ef3dd1137
-Author: Al Viro <viro@ZenIV.linux.org.uk>
-Date:   Fri Mar 20 17:41:43 2015 +0000
-
-    Yet another upstream vulnerablity cover-up.  While it seems some sendmsg
-    handlers will end up in memcpy_iovec which will perform the access_ok()
-    Al has added, clearly Al is aware of at least one path where that doesn't
-    happen and this becomes an easy arbitrary kernel read/write.  One would think
-    this would warrant more than a single-line commit message, but apparently this
-    is just business as usual in Linux kernel development.
-    
-    net: validate the range we feed to iov_iter_init() in sys_sendto/sys_recvfrom
-    
-    Cc: stable@vger.kernel.org # v3.19
-    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/socket.c |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
-
-commit 98399b6d44c4d4ef984b4f00f4cf1926a48728e4
-Merge: 2b322d8 45fce33
+commit 61e19c8623ec094d5cbf811938691ca7b4066713
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 18 21:10:43 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	tools/gcc/size_overflow_plugin/size_overflow_hash.data
-
-commit 45fce33b1193db854cf35c70a0c737c2ab245158
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 18 21:09:47 2015 -0400
-
-    Update to pax-linux-3.19.2-test11.patch
-
- .../size_overflow_plugin/size_overflow_hash.data   |    5 ++++-
- 1 files changed, 4 insertions(+), 1 deletions(-)
-
-commit 2b322d8b6b7db6bafe8e5ae7ba64664ede510204
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 18 20:40:07 2015 -0400
-
-    update size_overflow hash table
-
- .../size_overflow_plugin/size_overflow_hash.data   |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-commit 2c2ab6d2b4c3f341c450c6adbcb573c734b6e950
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 18 19:54:15 2015 -0400
-
-    From: Shachar Raindel <raindel () mellanox com>
-    Date: Sun, 04 Jan 2015 18:30:32 +0200
-    Subject: [PATCH] IB/core: Prevent integer overflow in ib_umem_get address arithmetic
-    
-    Properly verify that the resulting page aligned end address is larger
-    than both the start address and the length of the memory area
-    requested.
-    
-    Both the start and length arguments for ib_umem_get are controlled by
-    the user. A misbehaving user can provide values which will cause an
-    integer overflow when calculating the page aligned end address.
-    
-    This overflow can cause also miscalculation of the number of pages
-    mapped, and additional logic issues.
-    
-    Signed-off-by: Shachar Raindel <raindel () mellanox com>
-    Signed-off-by: Jack Morgenstein <jackm () mellanox com>
-    Signed-off-by: Or Gerlitz <ogerlitz () mellanox com>
-
- drivers/infiniband/core/umem.c |    8 ++++++++
- 1 files changed, 8 insertions(+), 0 deletions(-)
-
-commit 75e97c11e86afb0a2f30a98e21c365c35d2383f8
-Author: Oliver Hartkopp <socketcan@hartkopp.net>
-Date:   Mon Feb 23 20:37:54 2015 +0100
-
-    can: add missing initialisations in CAN related skbuffs
-    
-    When accessing CAN network interfaces with AF_PACKET sockets e.g. by dhclient
-    this can lead to a skb_under_panic due to missing skb initialisations.
-    
-    Add the missing initialisations at the CAN skbuff creation times on driver
-    level (rx path) and in the network layer (tx path).
-    
-    Reported-by: Austin Schuh <austin@peloton-tech.com>
-    Reported-by: Daniel Steer <daniel.steer@mclaren.com>
-    Signed-off-by: Oliver Hartkopp <socketcan@hartkopp.net>
-    Cc: linux-stable <stable@vger.kernel.org>
-    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
-
- drivers/net/can/dev.c |    8 ++++++++
- net/can/af_can.c      |    3 +++
- 2 files changed, 11 insertions(+), 0 deletions(-)
-
-commit 5aa58ea29056fd17fe74f498ede17386d39fbe7d
-Author: Alexey Kodanev <alexey.kodanev@oracle.com>
-Date:   Wed Mar 11 14:29:17 2015 +0300
-
-    net: sysctl_net_core: check SNDBUF and RCVBUF for min length
-    
-    sysctl has sysctl.net.core.rmem_*/wmem_* parameters which can be
-    set to incorrect values. Given that 'struct sk_buff' allocates from
-    rcvbuf, incorrectly set buffer length could result to memory
-    allocation failures. For example, set them as follows:
-    
-        # sysctl net.core.rmem_default=64
-          net.core.wmem_default = 64
-        # sysctl net.core.wmem_default=64
-          net.core.wmem_default = 64
-        # ping localhost -s 1024 -i 0 > /dev/null
-    
-    This could result to the following failure:
-    
-    skbuff: skb_over_panic: text:ffffffff81628db4 len:-32 put:-32
-    head:ffff88003a1cc200 data:ffff88003a1cc200 tail:0xffffffe0 end:0xc0 dev:<NULL>
-    kernel BUG at net/core/skbuff.c:102!
-    invalid opcode: 0000 [#1] SMP
-    ...
-    task: ffff88003b7f5550 ti: ffff88003ae88000 task.ti: ffff88003ae88000
-    RIP: 0010:[<ffffffff8155fbd1>]  [<ffffffff8155fbd1>] skb_put+0xa1/0xb0
-    RSP: 0018:ffff88003ae8bc68  EFLAGS: 00010296
-    RAX: 000000000000008d RBX: 00000000ffffffe0 RCX: 0000000000000000
-    RDX: ffff88003fdcf598 RSI: ffff88003fdcd9c8 RDI: ffff88003fdcd9c8
-    RBP: ffff88003ae8bc88 R08: 0000000000000001 R09: 0000000000000000
-    R10: 0000000000000001 R11: 00000000000002b2 R12: 0000000000000000
-    R13: 0000000000000000 R14: ffff88003d3f7300 R15: ffff88000012a900
-    FS:  00007fa0e2b4a840(0000) GS:ffff88003fc00000(0000) knlGS:0000000000000000
-    CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-    CR2: 0000000000d0f7e0 CR3: 000000003b8fb000 CR4: 00000000000006f0
-    Stack:
-     ffff88003a1cc200 00000000ffffffe0 00000000000000c0 ffffffff818cab1d
-     ffff88003ae8bd68 ffffffff81628db4 ffff88003ae8bd48 ffff88003b7f5550
-     ffff880031a09408 ffff88003b7f5550 ffff88000012aa48 ffff88000012ab00
-    Call Trace:
-     [<ffffffff81628db4>] unix_stream_sendmsg+0x2c4/0x470
-     [<ffffffff81556f56>] sock_write_iter+0x146/0x160
-     [<ffffffff811d9612>] new_sync_write+0x92/0xd0
-     [<ffffffff811d9cd6>] vfs_write+0xd6/0x180
-     [<ffffffff811da499>] SyS_write+0x59/0xd0
-     [<ffffffff81651532>] system_call_fastpath+0x12/0x17
-    Code: 00 00 48 89 44 24 10 8b 87 c8 00 00 00 48 89 44 24 08 48 8b 87 d8 00
-          00 00 48 c7 c7 30 db 91 81 48 89 04 24 31 c0 e8 4f a8 0e 00 <0f> 0b
-          eb fe 66 66 2e 0f 1f 84 00 00 00 00 00 55 48 89 e5 48 83
-    RIP  [<ffffffff8155fbd1>] skb_put+0xa1/0xb0
-    RSP <ffff88003ae8bc68>
-    Kernel panic - not syncing: Fatal exception
-    
-    Moreover, the possible minimum is 1, so we can get another kernel panic:
-    ...
-    BUG: unable to handle kernel paging request at ffff88013caee5c0
-    IP: [<ffffffff815604cf>] __alloc_skb+0x12f/0x1f0
-    ...
-    
-    Signed-off-by: Alexey Kodanev <alexey.kodanev@oracle.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/core/sysctl_net_core.c |   10 ++++++----
- 1 files changed, 6 insertions(+), 4 deletions(-)
-
-commit 5b9ecb5f6bcd7b85cc8b76164719123f8c64da8f
-Author: Dan Carpenter <dan.carpenter@oracle.com>
-Date:   Sun Mar 15 13:48:03 2015 +0300
-
-    isdn: icn: use strlcpy() when parsing setup options
-    
-    If you pass an invalid string here then you probably deserve the memory
-    corruption, but it annoys static analysis tools so lets fix it.
-    
-    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- drivers/isdn/icn/icn.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit ede54a5201fcf67ffa2ebfd2e82cc56ee8e337ea
-Author: Eric Dumazet <edumazet@google.com>
-Date:   Fri Mar 13 09:49:59 2015 -0700
-
-    inet_diag: fix possible overflow in inet_diag_dump_one_icsk()
-    
-    inet_diag_dump_one_icsk() allocates too small skb.
-    
-    Add inet_sk_attr_size() helper right before inet_sk_diag_fill()
-    so that it can be updated if/when new attributes are added.
-    
-    iproute2/ss currently does not use this dump_one() interface,
-    this might explain nobody noticed this problem yet.
-    
-    Signed-off-by: Eric Dumazet <edumazet@google.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/ipv4/inet_diag.c |   18 +++++++++++++++---
- 1 files changed, 15 insertions(+), 3 deletions(-)
-
-commit e2ec5b7531eb5f4f3d4da424e67eca6f4cc89fff
-Author: Arnd Bergmann <arnd@arndb.de>
-Date:   Wed Mar 11 22:46:59 2015 +0100
-
-    rds: avoid potential stack overflow
-    
-    The rds_iw_update_cm_id function stores a large 'struct rds_sock' object
-    on the stack in order to pass a pair of addresses. This happens to just
-    fit withint the 1024 byte stack size warning limit on x86, but just
-    exceed that limit on ARM, which gives us this warning:
-    
-    net/rds/iw_rdma.c:200:1: warning: the frame size of 1056 bytes is larger than 1024 bytes [-Wframe-larger-than=]
-    
-    As the use of this large variable is basically bogus, we can rearrange
-    the code to not do that. Instead of passing an rds socket into
-    rds_iw_get_device, we now just pass the two addresses that we have
-    available in rds_iw_update_cm_id, and we change rds_iw_get_mr accordingly,
-    to create two address structures on the stack there.
-    
-    Signed-off-by: Arnd Bergmann <arnd@arndb.de>
-    Acked-by: Sowmini Varadhan <sowmini.varadhan@oracle.com>
-    Signed-off-by: David S. Miller <davem@davemloft.net>
-
- net/rds/iw_rdma.c |   40 ++++++++++++++++++++++------------------
- 1 files changed, 22 insertions(+), 18 deletions(-)
-
-commit 1677f6c0fb75090ade7f6a112e59dbadeb6d3408
-Merge: 257f3c5 67c007c
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 18 17:54:21 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	fs/proc/inode.c
-
-commit 67c007c5973ecc721098eacec609e658ebeaef02
-Merge: b92787a 660613d
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Wed Mar 18 17:51:15 2015 -0400
-
-    Merge branch 'linux-3.19.y' into pax-test
-
-commit 257f3c5bfec90810079bb7d9d7dea8d7d2500d35
-Merge: 8d02e6e b92787a
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 16 17:47:23 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit b92787ab69f95b55ba4a941838f8b39e94dc37f7
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 16 17:46:58 2015 -0400
-
-    Update to pax-linux-3.19.1-test11.patch:
-    - fixed a false positive size overflow report that triggered while resizing an ext4 file system, reported by Mathias Krause <minipli@googlemail.com>
-
- fs/ext4/resize.c |   16 +++++++++-------
- 1 files changed, 9 insertions(+), 7 deletions(-)
-
-commit 8d02e6e58dec394dda0c922709e1d1c096b4a2b6
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Fri Mar 13 07:36:16 2015 -0400
-
-    Add CAP_AUDIT_READ, as reported by Sverd Johnsen
-
- grsecurity/grsec_exec.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
-
-commit fe273ddc232e8deb8be979eaa952bbe92724faf7
-Merge: 696b99c 52c4efc
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 12 19:27:04 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-    
-    Conflicts:
-    	mm/vmalloc.c
-
-commit 52c4efc327661a90e10d7e54faeb8b9998e27179
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Thu Mar 12 19:23:05 2015 -0400
-
-    Update to pax-linux-3.19.1-test10.patch:
-    -  the new size overflow plugin caught kernfs_fop_write incorrectly using an error return value to adjust a file position, reported by jww
-    - fixed some compile regressions on arm, reported by Michael Tremer <michael.tremer@ipfire.org>
-    - fixed module unload regression under KERNEXEC/i386, reported by x14sg1 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4162)
-    - Emese made the handling of cloned functions a bit more robust
-
- arch/arm/mach-exynos/suspend.c                     |    7 +++-
- arch/arm/mach-omap2/omap-smp.c                     |    1 +
- arch/arm/mach-tegra/irq.c                          |    1 +
- arch/arm/mach-ux500/pm.c                           |    1 +
- arch/arm/mach-zynq/platsmp.c                       |    1 +
- drivers/of/fdt.c                                   |    4 ++-
- fs/kernfs/file.c                                   |    2 +-
- mm/vmalloc.c                                       |   34 +++++++++++++++++---
- tools/gcc/size_overflow_plugin/misc.c              |    4 +-
- .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
- 10 files changed, 45 insertions(+), 12 deletions(-)
-
-commit 696b99cacf606e736e59af8de87a071a3f435184
-Merge: f1c8c97 b741487
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Mar 10 22:19:50 2015 -0400
-
-    Merge branch 'pax-test' into grsec-test
-
-commit b741487c0b303a2d72c1439c24d91060b42c5ba2
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Mar 10 22:19:32 2015 -0400
-
-    Update to pax-linux-3.19.1-test7.patch:
-    - small cleanup/speedup to the size overflow plugin from Emese
-    - updated size overflow hash table from Emese and spender
-    - fixed a compile regression in gcc plugins under gcc 4.6, reported by Kamil Kaczkowski and spender
-    - fixed a compile regression in the amd xgbe driver, reported by spender
-
- drivers/net/ethernet/amd/xgbe/xgbe-drv.c           |    2 +-
- tools/gcc/gcc-common.h                             |    2 +-
- tools/gcc/size_overflow_plugin/misc.c              |    9 +-
- .../size_overflow_plugin/size_overflow_hash.data   | 1779 +++++++++++++++-----
- .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
- 5 files changed, 1407 insertions(+), 387 deletions(-)
-
-commit f1c8c9705fb0badde64ae9490529983f37caba81
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Tue Mar 10 22:17:16 2015 -0400
-
-    Fix module unloading, reported by x14sg1 on the forums:
-    https://forums.grsecurity.net/viewtopic.php?t=4162&p=15072#p15072
-    patch is from the PaX Team
-
- mm/vmalloc.c |   32 +++++++++++++++++++++++++++-----
- 1 files changed, 27 insertions(+), 5 deletions(-)
-
-commit 502394d685898a6103d7e6b1f534ea97484738af
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 9 21:31:02 2015 -0400
-
-    update size_overflow hash table
-
- .../size_overflow_plugin/size_overflow_hash.data   |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit fb49b8a14b89d7bb0fb56c25caf819ecee9c84db
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 9 20:40:34 2015 -0400
-
-    update size_overflow hash
-
- .../size_overflow_plugin/size_overflow_hash.data   |    9 ++++++++-
- 1 files changed, 8 insertions(+), 1 deletions(-)
-
-commit 250eebbb55183ace7d6583ddf05623a8a19a8460
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 9 19:54:36 2015 -0400
+Date:   Sat May 2 23:26:32 2015 -0400
 
     compile fix
 
- drivers/net/ethernet/amd/xgbe/xgbe-drv.c |    2 +-
+ fs/proc/generic.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-commit dc55425f835591e5c498c5209bac3d235e3c7db6
+commit 88e4f3ecfbc91dea85862629fb79f8ede5d7c689
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 9 18:44:26 2015 -0400
+Date:   Sat May 2 23:18:10 2015 -0400
 
-    disable SO_ATTACH_BPF, not that it's likely usable anyway since the bpf syscall is disabled under GRKERNSEC_BPF_HARDEN
+    compile fix
 
- net/core/sock.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+ fs/debugfs/inode.c |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
 
-commit 4e110acc5e0ed434171d2bb3d5b11a11f3aac138
+commit c207fa7156db513835c1d2848eb710a48a9dabcf
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 9 18:26:00 2015 -0400
+Date:   Sat May 2 23:15:53 2015 -0400
 
-    Fix compilation with plugins, reported by Kamil Kaczkowski.  Apparently the version
-    of gcc 4.6.4 being shipped with some distros is different from that produced by
-    source builds in that it places the c-common.h header file in a different directory.
-    We'll now choose the path used by distros for compatibility reasons.
+    fix gcc warning
 
- tools/gcc/gcc-common.h |    2 +-
+ drivers/char/mem.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-commit 6ed2b5850b009bbd58cbc44865698a473ebcadab
-Author: Johan Hovold <johan@kernel.org>
-Date:   Wed Mar 4 10:39:05 2015 +0100
+commit ee428a73671f9d2cb4256f24abc417c7c8b8c356
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 2 23:03:56 2015 -0400
 
-    USB: serial: fix infinite wait_until_sent timeout
-    
-    Make sure to handle an infinite timeout (0).
-    
-    Note that wait_until_sent is currently never called with a 0-timeout
-    argument due to a bug in tty_wait_until_sent.
-    
-    Fixes: dcf010503966 ("USB: serial: add generic wait_until_sent
-    implementation")
-    Cc: stable <stable@vger.kernel.org>	# v3.10
-    
-    Signed-off-by: Johan Hovold <johan@kernel.org>
-    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    compile fix
 
- drivers/usb/serial/generic.c |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
-
-commit f2ef089fa057449882dcd5a507b11f7d2660a54f
-Author: Johan Hovold <johan@kernel.org>
-Date:   Wed Mar 4 10:39:06 2015 +0100
-
-    TTY: fix tty_wait_until_sent on 64-bit machines
-    
-    Fix overflow bug in tty_wait_until_sent on 64-bit machines, where an
-    infinite timeout (0) would be passed to the underlying tty-driver's
-    wait_until_sent-operation as a negative timeout (-1), causing it to
-    return immediately.
-    
-    This manifests itself for example as tcdrain() returning immediately,
-    drivers not honouring the drain flags when setting terminal attributes,
-    or even dropped data on close as a requested infinite closing-wait
-    timeout would be ignored.
-    
-    The first symptom  was reported by Asier LLANO who noted that tcdrain()
-    returned prematurely when using the ftdi_sio usb-serial driver.
-    
-    Fix this by passing 0 rather than MAX_SCHEDULE_TIMEOUT (LONG_MAX) to the
-    underlying tty driver.
-    
-    Note that the serial-core wait_until_sent-implementation is not affected
-    by this bug due to a lucky chance (comparison to an unsigned maximum
-    timeout), and neither is the cyclades one that had an explicit check for
-    negative timeouts, but all other tty drivers appear to be affected.
-    
-    Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
-    Cc: stable <stable@vger.kernel.org>	# v2.6.12
-    Reported-by: ZIV-Asier Llano Palacios <asier.llano@cgglobal.com>
-    Signed-off-by: Johan Hovold <johan@kernel.org>
-    Reviewed-by: Peter Hurley <peter@hurleysoftware.com>
-    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
- drivers/tty/tty_ioctl.c |   12 +++++++++---
- 1 files changed, 9 insertions(+), 3 deletions(-)
-
-commit e6f835d291e717ea23201cbccbd5d5e4506aa5b5
-Author: Al Viro <viro@ZenIV.linux.org.uk>
-Date:   Sat Mar 7 21:08:46 2015 +0000
-
-    sunrpc: fix braino in ->poll()
-    
-    POLL_OUT isn't what callers of ->poll() are expecting to see; it's
-    actually __SI_POLL | 2 and it's a siginfo code, not a poll bitmap
-    bit...
-    
-    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
-    Cc: stable@vger.kernel.org
-    Cc: Bruce Fields <bfields@fieldses.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- net/sunrpc/cache.c |    2 +-
+ fs/debugfs/inode.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
 
-commit d4d03577179f074f2ed88c2fe9651c5eea081dce
-Author: Quentin Casasnovas <quentin.casasnovas@oracle.com>
-Date:   Tue Mar 3 16:31:38 2015 +0100
-
-    Btrfs:__add_inode_ref: out of bounds memory read when looking for extended ref.
-    
-    Improper arithmetics when calculting the address of the extended ref could
-    lead to an out of bounds memory read and kernel panic.
-    
-    Signed-off-by: Quentin Casasnovas <quentin.casasnovas@oracle.com>
-    Reviewed-by: David Sterba <dsterba@suse.cz>
-    cc: stable@vger.kernel.org # v3.7+
-    Signed-off-by: Chris Mason <clm@fb.com>
-
- fs/btrfs/tree-log.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 68f8b48ca82d9d9c0b52c6cb5c72da684264e42f
-Author: Jiri Slaby <jslaby@suse.cz>
-Date:   Fri Feb 27 18:40:31 2015 +0100
-
-    tty: fix up atime/mtime mess, take four
-    
-    This problem was taken care of three times already in
-    * b0de59b5733d18b0d1974a060860a8b5c1b36a2e (TTY: do not update
-      atime/mtime on read/write),
-    * 37b7f3c76595e23257f61bd80b223de8658617ee (TTY: fix atime/mtime
-      regression), and
-    * b0b885657b6c8ef63a46bc9299b2a7715d19acde (tty: fix up atime/mtime
-      mess, take three)
-    
-    But it still misses one point. As John Paul correctly points out, we
-    do not care about setting date. If somebody ever changes wall
-    time backwards (by mistake for example), tty timestamps are never
-    updated until the original wall time passes.
-    
-    So check the absolute difference of times and if it large than "8
-    seconds or so", always update the time. That means we will update
-    immediatelly when changing time. Ergo, CAP_SYS_TIME can foul the
-    check, but it was always that way.
-    
-    Thanks John for serving me this so nicely debugged.
-    
-    Signed-off-by: Jiri Slaby <jslaby@suse.cz>
-    Reported-by: John Paul Perry <john_paul.perry@alcatel-lucent.com>
-    Cc: <stable@vger.kernel.org> # all, as b0b885657 was backported
-    Acked-by: Linus Torvalds <torvalds@linux-foundation.org>
-    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
- drivers/tty/tty_io.c |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
-
-commit 1c6f718f3b8e462897f316ac167e31e9d6843a19
-Author: Peter Hurley <peter@hurleysoftware.com>
-Date:   Sun Mar 1 10:11:05 2015 -0500
-
-    console: Fix console name size mismatch
-    
-    commit 6ae9200f2cab7 ("enlarge console.name") increased the storage
-    for the console name to 16 bytes, but not the corresponding
-    struct console_cmdline::name storage. Console names longer than
-    8 bytes cause read beyond end-of-string and failure to match
-    console; I'm not sure if there are other unexpected consequences.
-    
-    Cc: <stable@vger.kernel.org> # 2.6.22+
-    Signed-off-by: Peter Hurley <peter@hurleysoftware.com>
-    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-
- kernel/printk/console_cmdline.h |    2 +-
- kernel/printk/printk.c          |    1 +
- 2 files changed, 2 insertions(+), 1 deletions(-)
-
-commit 005e4f9bd0c38d00fdd1b33fbb75f1919c2840d8
+commit 2de93b3f9e3c8346e2b39d8370cce9dd87f5c0d2
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Mon Mar 9 17:10:45 2015 -0400
+Date:   Sat May 2 22:56:36 2015 -0400
 
-    update size_overflow hash table
-
- .../size_overflow_plugin/size_overflow_hash.data   | 1770 +++++++++++++++-----
- 1 files changed, 1392 insertions(+), 378 deletions(-)
-
-commit f6264b28f27df3b10c90a5949f105a9bd21c6e94
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Mar 8 21:11:47 2015 -0400
-
-    fix typo
-
- mm/vmalloc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 64d2ad17cbb21f643d7061cd150feb9895a771ac
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Mar 8 21:06:55 2015 -0400
-
-    fix KSTACKOVERFLOW compile error
-
- mm/vmalloc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 7a94802d193b97df8184c2b3847376c8c21dc925
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Mar 8 20:58:49 2015 -0400
-
-    fix compilation error under RANDSTRUCT
-
- mm/page_alloc.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-commit 919cdaba24b7efeaf4da14a09a14eff3f643efa3
-Author: Johannes Weiner <hannes@cmpxchg.org>
-Date:   Fri Feb 27 15:52:09 2015 -0800
-
-    mm: page_alloc: revert inadvertent !__GFP_FS retry behavior change
-    
-    Historically, !__GFP_FS allocations were not allowed to invoke the OOM
-    killer once reclaim had failed, but nevertheless kept looping in the
-    allocator.
-    
-    Commit 9879de7373fc ("mm: page_alloc: embed OOM killing naturally into
-    allocation slowpath"), which should have been a simple cleanup patch,
-    accidentally changed the behavior to aborting the allocation at that
-    point.  This creates problems with filesystem callers (?) that currently
-    rely on the allocator waiting for other tasks to intervene.
-    
-    Revert the behavior as it shouldn't have been changed as part of a
-    cleanup patch.
-    
-    Fixes: 9879de7373fc ("mm: page_alloc: embed OOM killing naturally into allocation slowpath")
-    Signed-off-by: Johannes Weiner <hannes@cmpxchg.org>
-    Acked-by: Michal Hocko <mhocko@suse.cz>
-    Reported-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
-    Cc: Theodore Ts'o <tytso@mit.edu>
-    Cc: Dave Chinner <david@fromorbit.com>
-    Acked-by: David Rientjes <rientjes@google.com>
-    Cc: Oleg Nesterov <oleg@redhat.com>
-    Cc: Mel Gorman <mgorman@suse.de>
-    Cc: <stable@vger.kernel.org>	[3.19.x]
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-
- mm/page_alloc.c |    9 ++++++++-
- 1 files changed, 8 insertions(+), 1 deletions(-)
-
-commit f919bc076b7cb55755ea2c6463bc4ae07b34605c
-Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Mar 8 20:54:46 2015 -0400
-
-    Initial import of grsecurity 3.1 for 3.19.1
+    Initial import of grsecurity 3.1 for Linux 4.0.1
 
  Documentation/dontdiff                             |    2 +
- Documentation/kernel-parameters.txt                |    4 +
+ Documentation/kernel-parameters.txt                |    7 +
  Makefile                                           |   18 +-
  arch/alpha/include/asm/cache.h                     |    4 +-
  arch/alpha/kernel/osf_sys.c                        |   12 +-
@@ -1646,7 +116,6 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  arch/powerpc/kernel/ptrace.c                       |   14 +
  arch/powerpc/kernel/traps.c                        |    5 +
  arch/powerpc/mm/slice.c                            |    2 +-
- arch/powerpc/platforms/cell/celleb_scc_pciex.c     |    4 +-
  arch/s390/include/asm/cache.h                      |    4 +-
  arch/score/include/asm/cache.h                     |    4 +-
  arch/sh/include/asm/cache.h                        |    3 +-
@@ -1677,13 +146,11 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  arch/x86/include/asm/paravirt_types.h              |   23 +-
  arch/x86/include/asm/processor.h                   |    2 +-
  arch/x86/include/asm/thread_info.h                 |    8 +-
- arch/x86/kernel/cpu/microcode/intel.c              |    5 +
- arch/x86/kernel/cpu/microcode/intel_early.c        |    6 +-
  arch/x86/kernel/dumpstack.c                        |   10 +-
  arch/x86/kernel/dumpstack_32.c                     |    2 +-
  arch/x86/kernel/dumpstack_64.c                     |    2 +-
  arch/x86/kernel/entry_32.S                         |    2 +-
- arch/x86/kernel/entry_64.S                         |   15 +-
+ arch/x86/kernel/entry_64.S                         |    2 +-
  arch/x86/kernel/espfix_64.c                        |    2 +-
  arch/x86/kernel/ioport.c                           |   13 +
  arch/x86/kernel/irq_32.c                           |    3 +
@@ -1719,7 +186,6 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  drivers/gpu/drm/nouveau/nouveau_ttm.c              |   30 +-
  drivers/gpu/drm/ttm/ttm_bo_manager.c               |   10 +-
  drivers/gpu/drm/vmwgfx/vmwgfx_gmrid_manager.c      |   10 +-
- drivers/hid/hid-logitech-dj.c                      |    6 +
  drivers/hid/hid-wiimote-debug.c                    |    2 +-
  drivers/infiniband/hw/nes/nes_cm.c                 |   22 +-
  drivers/iommu/amd_iommu.c                          |   14 +-
@@ -1738,7 +204,7 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  drivers/message/fusion/mptbase.c                   |    9 +
  drivers/misc/sgi-xp/xp_main.c                      |   12 +-
  drivers/net/ethernet/brocade/bna/bna_enet.c        |    8 +-
- drivers/net/macvtap.c                              |    7 +-
+ drivers/net/ethernet/sfc/selftest.c                |    2 +-
  drivers/net/wan/lmc/lmc_media.c                    |   97 +-
  drivers/net/wan/z85230.c                           |   24 +-
  drivers/net/wireless/zd1211rw/zd_usb.c             |    2 +-
@@ -1748,9 +214,7 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  drivers/scsi/bfa/bfa_fcs.c                         |   19 +-
  drivers/scsi/bfa/bfa_fcs_lport.c                   |   29 +-
  drivers/scsi/bfa/bfa_modules.h                     |   12 +-
- drivers/scsi/hpsa.h                                |   50 +-
- drivers/staging/line6/driver.c                     |   33 +-
- drivers/staging/line6/toneport.c                   |   13 +-
+ drivers/scsi/hpsa.h                                |   40 +-
  drivers/staging/lustre/lustre/ldlm/ldlm_flock.c    |    2 +-
  drivers/staging/lustre/lustre/libcfs/module.c      |   10 +-
  drivers/tty/sysrq.c                                |    2 +-
@@ -1760,7 +224,6 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  drivers/usb/gadget/function/f_uac1.c               |    1 +
  drivers/usb/gadget/function/u_uac1.c               |    1 +
  drivers/usb/host/hwa-hc.c                          |    9 +-
- drivers/vhost/net.c                                |    4 +-
  drivers/video/fbdev/arcfb.c                        |    2 +-
  drivers/video/fbdev/matrox/matroxfb_DAC1064.c      |   10 +-
  drivers/video/fbdev/matrox/matroxfb_Ti3026.c       |    5 +-
@@ -1768,16 +231,14 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  drivers/video/logo/logo_linux_clut224.ppm          | 2720 ++++++++------------
  drivers/xen/xenfs/xenstored.c                      |    5 +
  fs/attr.c                                          |    1 +
- fs/autofs4/dev-ioctl.c                             |    8 +-
  fs/autofs4/waitq.c                                 |    9 +
  fs/binfmt_aout.c                                   |    7 +
  fs/binfmt_elf.c                                    |   40 +-
- fs/btrfs/ioctl.c                                   |    6 +-
  fs/compat.c                                        |   20 +-
  fs/coredump.c                                      |   17 +-
  fs/dcache.c                                        |    3 +
- fs/debugfs/inode.c                                 |   38 +-
- fs/exec.c                                          |  218 ++-
+ fs/debugfs/inode.c                                 |   27 +-
+ fs/exec.c                                          |  224 ++-
  fs/ext2/balloc.c                                   |    4 +-
  fs/ext2/super.c                                    |    8 +-
  fs/ext3/balloc.c                                   |    4 +-
@@ -1787,7 +248,7 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  fs/fhandle.c                                       |    8 +-
  fs/file.c                                          |    4 +
  fs/filesystems.c                                   |    4 +
- fs/fs_struct.c                                     |   19 +-
+ fs/fs_struct.c                                     |   20 +-
  fs/hugetlbfs/inode.c                               |    5 +-
  fs/inode.c                                         |    6 +-
  fs/kernfs/dir.c                                    |    6 +
@@ -1795,6 +256,7 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  fs/namei.c                                         |  243 ++-
  fs/namespace.c                                     |   24 +
  fs/nfsd/nfscache.c                                 |    2 +-
+ fs/ocfs2/refcounttree.c                            |    2 +-
  fs/open.c                                          |   38 +
  fs/pipe.c                                          |    2 +-
  fs/posix_acl.c                                     |   15 +-
@@ -1804,7 +266,7 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  fs/proc/cmdline.c                                  |    4 +
  fs/proc/devices.c                                  |    4 +
  fs/proc/fd.c                                       |   17 +-
- fs/proc/generic.c                                  |   69 +-
+ fs/proc/generic.c                                  |   64 +
  fs/proc/inode.c                                    |   17 +
  fs/proc/internal.h                                 |   11 +-
  fs/proc/interrupts.c                               |    4 +
@@ -1813,14 +275,14 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  fs/proc/proc_sysctl.c                              |   52 +-
  fs/proc/root.c                                     |    8 +
  fs/proc/stat.c                                     |   69 +-
- fs/proc/task_mmu.c                                 |   74 +-
+ fs/proc/task_mmu.c                                 |   66 +-
  fs/readdir.c                                       |   19 +
  fs/reiserfs/item_ops.c                             |   24 +-
  fs/reiserfs/super.c                                |    4 +
  fs/select.c                                        |    2 +
  fs/seq_file.c                                      |   37 +-
  fs/stat.c                                          |   20 +-
- fs/sysfs/dir.c                                     |   24 +-
+ fs/sysfs/dir.c                                     |   30 +-
  fs/utimes.c                                        |    7 +
  fs/xattr.c                                         |   26 +-
  grsecurity/Kconfig                                 | 1182 +++++++++
@@ -1839,7 +301,7 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  grsecurity/grsec_chdir.c                           |   19 +
  grsecurity/grsec_chroot.c                          |  467 ++++
  grsecurity/grsec_disabled.c                        |  445 ++++
- grsecurity/grsec_exec.c                            |  188 ++
+ grsecurity/grsec_exec.c                            |  189 ++
  grsecurity/grsec_fifo.c                            |   24 +
  grsecurity/grsec_fork.c                            |   23 +
  grsecurity/grsec_init.c                            |  290 ++
@@ -1912,11 +374,11 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  include/net/ip.h                                   |    2 +-
  include/net/neighbour.h                            |    2 +-
  include/net/net_namespace.h                        |    2 +-
- include/net/sock.h                                 |    4 +-
+ include/net/sock.h                                 |    2 +-
  include/trace/events/fs.h                          |   53 +
  include/uapi/linux/personality.h                   |    1 +
  init/Kconfig                                       |    3 +-
- init/main.c                                        |   25 +-
+ init/main.c                                        |   35 +-
  ipc/mqueue.c                                       |    1 +
  ipc/shm.c                                          |   23 +
  ipc/util.c                                         |    6 +
@@ -1932,7 +394,7 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  kernel/futex.c                                     |    4 +-
  kernel/kallsyms.c                                  |    9 +
  kernel/kcmp.c                                      |    4 +
- kernel/kmod.c                                      |   94 +-
+ kernel/kmod.c                                      |   95 +-
  kernel/kprobes.c                                   |    7 +-
  kernel/ksysfs.c                                    |    2 +
  kernel/locking/lockdep_proc.c                      |   10 +-
@@ -1944,7 +406,6 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  kernel/ptrace.c                                    |   20 +-
  kernel/resource.c                                  |   10 +
  kernel/sched/core.c                                |   11 +-
- kernel/seccomp.c                                   |    4 +-
  kernel/signal.c                                    |   37 +-
  kernel/sys.c                                       |   64 +-
  kernel/sysctl.c                                    |   71 +-
@@ -1959,38 +420,39 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  lib/Kconfig.debug                                  |    7 +-
  lib/is_single_threaded.c                           |    3 +
  lib/list_debug.c                                   |   65 +-
+ lib/nlattr.c                                       |    2 +
  lib/rbtree.c                                       |    4 +-
  lib/vsprintf.c                                     |   37 +-
  localversion-grsec                                 |    1 +
  mm/Kconfig                                         |    5 +-
+ mm/Kconfig.debug                                   |    1 +
  mm/filemap.c                                       |    1 +
  mm/kmemleak.c                                      |    4 +-
  mm/memory.c                                        |    4 +-
  mm/mempolicy.c                                     |   12 +-
  mm/migrate.c                                       |    3 +-
  mm/mlock.c                                         |    6 +-
- mm/mmap.c                                          |   97 +-
+ mm/mmap.c                                          |   93 +-
  mm/mprotect.c                                      |    8 +
- mm/nommu.c                                         |    4 +-
+ mm/page_alloc.c                                    |    2 +-
  mm/process_vm_access.c                             |    6 +
  mm/shmem.c                                         |    2 +-
  mm/slab.c                                          |    2 +-
  mm/slab_common.c                                   |    2 +-
  mm/slub.c                                          |   22 +-
  mm/util.c                                          |    3 +
- mm/vmalloc.c                                       |   68 +-
+ mm/vmalloc.c                                       |   72 +-
  mm/vmstat.c                                        |   29 +-
  net/appletalk/atalk_proc.c                         |    2 +-
  net/atm/lec.c                                      |    6 +-
  net/atm/mpoa_caches.c                              |   42 +-
- net/bridge/br.c                                    |    2 +
  net/can/bcm.c                                      |    2 +-
  net/can/proc.c                                     |    2 +-
  net/core/dev_ioctl.c                               |    7 +-
  net/core/filter.c                                  |    8 +-
  net/core/net-procfs.c                              |   17 +-
  net/core/pktgen.c                                  |    2 +-
- net/core/rtnetlink.c                               |    4 +
+ net/core/sock.c                                    |    3 +-
  net/core/sock_diag.c                               |    7 +
  net/core/sysctl_net_core.c                         |    2 +-
  net/decnet/dn_dev.c                                |    2 +-
@@ -1999,33 +461,35 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  net/ipv4/ip_input.c                                |    7 +
  net/ipv4/ip_sockglue.c                             |    3 +-
  net/ipv4/netfilter/ipt_CLUSTERIP.c                 |    2 +-
- net/ipv4/ping.c                                    |   12 +-
+ net/ipv4/ping.c                                    |    1 +
  net/ipv4/route.c                                   |    6 +-
- net/ipv4/tcp_input.c                               |    4 +-
+ net/ipv4/tcp.c                                     |    4 +-
+ net/ipv4/tcp_input.c                               |    6 +-
  net/ipv4/tcp_ipv4.c                                |   24 +-
  net/ipv4/tcp_minisocks.c                           |    9 +-
  net/ipv4/tcp_timer.c                               |   11 +
  net/ipv4/udp.c                                     |   24 +
- net/ipv6/addrconf.c                                |   30 +-
- net/ipv6/ping.c                                    |    5 +-
+ net/ipv6/addrconf.c                                |   13 +-
  net/ipv6/proc.c                                    |    2 +-
  net/ipv6/tcp_ipv6.c                                |   23 +-
  net/ipv6/udp.c                                     |    7 +
  net/ipx/ipx_proc.c                                 |    2 +-
  net/irda/irproc.c                                  |    2 +-
  net/llc/llc_proc.c                                 |    2 +-
- net/mac80211/tx.c                                  |    1 +
  net/netfilter/Kconfig                              |   10 +
  net/netfilter/Makefile                             |    1 +
  net/netfilter/nf_conntrack_core.c                  |    8 +
  net/netfilter/xt_gradm.c                           |   51 +
  net/netfilter/xt_hashlimit.c                       |    4 +-
  net/netfilter/xt_recent.c                          |    2 +-
+ net/rds/connection.c                               |    1 +
+ net/rds/rds.h                                      |    1 +
+ net/rds/send.c                                     |   33 +-
  net/socket.c                                       |   71 +-
  net/sunrpc/cache.c                                 |    2 +-
  net/sunrpc/stats.c                                 |    2 +-
  net/sysctl_net.c                                   |    2 +-
- net/unix/af_unix.c                                 |   31 +-
+ net/unix/af_unix.c                                 |   52 +-
  net/vmw_vsock/vmci_transport_notify.c              |   30 +-
  net/vmw_vsock/vmci_transport_notify_qstate.c       |   30 +-
  net/x25/sysctl_net_x25.c                           |    2 +-
@@ -2036,7 +500,6 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  security/apparmor/file.c                           |    4 +-
  security/apparmor/lsm.c                            |    8 +-
  security/commoncap.c                               |   29 +
- security/keys/request_key.c                        |    1 +
  security/min_addr.c                                |    2 +
  security/tomoyo/file.c                             |   12 +-
  security/tomoyo/mount.c                            |    4 +
@@ -2049,18 +512,20 @@ Date:   Sun Mar 8 20:54:46 2015 -0400
  sound/isa/sb/emu8000_synth.c                       |    4 +-
  sound/pci/emu10k1/emu10k1_synth.c                  |    4 +-
  sound/synth/emux/emux_seq.c                        |   14 +-
+ sound/usb/line6/driver.c                           |   40 +-
+ sound/usb/line6/toneport.c                         |   12 +-
  tools/gcc/.gitignore                               |    1 +
  tools/gcc/Makefile                                 |   12 +
  tools/gcc/gen-random-seed.sh                       |    8 +
- tools/gcc/randomize_layout_plugin.c                |  915 +++++++
+ tools/gcc/randomize_layout_plugin.c                |  917 +++++++
  tools/gcc/size_overflow_plugin/.gitignore          |    2 +
- 457 files changed, 19347 insertions(+), 2802 deletions(-)
+ 452 files changed, 19340 insertions(+), 2775 deletions(-)
 
-commit 1581aba992dd565de5ddc87c87477b4da9883a84
+commit bb1459423dd1d228fcbd17812a82a2d05ad9577b
 Author: Brad Spengler <spender@grsecurity.net>
-Date:   Sun Mar 8 19:57:15 2015 -0400
+Date:   Sat May 2 21:53:15 2015 -0400
 
-    Initial import of pax-linux-3.19.1-test6.patch
+    Initial import of pax-linux-4.0.1-test6.patch
 
  Documentation/dontdiff                             |   47 +-
  Documentation/kbuild/makefiles.txt                 |   39 +-
@@ -2124,11 +589,12 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/arm/lib/csumpartialcopyuser.S                 |    4 +-
  arch/arm/lib/delay.c                               |    2 +-
  arch/arm/lib/uaccess_with_memcpy.c                 |    4 +-
- arch/arm/mach-at91/setup.c                         |    2 +-
+ arch/arm/mach-exynos/suspend.c                     |    7 +-
  arch/arm/mach-keystone/keystone.c                  |    2 +-
  arch/arm/mach-mvebu/coherency.c                    |    4 +-
  arch/arm/mach-omap2/board-n8x0.c                   |    2 +-
  arch/arm/mach-omap2/omap-mpuss-lowpower.c          |    4 +-
+ arch/arm/mach-omap2/omap-smp.c                     |    1 +
  arch/arm/mach-omap2/omap-wakeupgen.c               |    2 +-
  arch/arm/mach-omap2/omap_device.c                  |    4 +-
  arch/arm/mach-omap2/omap_device.h                  |    4 +-
@@ -2136,7 +602,10 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/arm/mach-omap2/powerdomains43xx_data.c        |    5 +-
  arch/arm/mach-omap2/wd_timer.c                     |    6 +-
  arch/arm/mach-tegra/cpuidle-tegra20.c              |    2 +-
+ arch/arm/mach-tegra/irq.c                          |    1 +
+ arch/arm/mach-ux500/pm.c                           |    1 +
  arch/arm/mach-ux500/setup.h                        |    7 -
+ arch/arm/mach-zynq/platsmp.c                       |    1 +
  arch/arm/mm/Kconfig                                |    6 +-
  arch/arm/mm/alignment.c                            |    8 +
  arch/arm/mm/cache-l2x0.c                           |    2 +-
@@ -2150,10 +619,12 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/arm/net/bpf_jit_32.c                          |    3 +
  arch/arm/plat-iop/setup.c                          |    2 +-
  arch/arm/plat-omap/sram.c                          |    2 +
- arch/arm/plat-samsung/include/plat/dma-ops.h       |    2 +-
+ arch/arm64/include/asm/atomic.h                    |   10 +
  arch/arm64/include/asm/barrier.h                   |    2 +-
  arch/arm64/include/asm/percpu.h                    |    8 +-
+ arch/arm64/include/asm/pgalloc.h                   |    5 +
  arch/arm64/include/asm/uaccess.h                   |    1 +
+ arch/arm64/mm/dma-mapping.c                        |    2 +-
  arch/avr32/include/asm/elf.h                       |    8 +-
  arch/avr32/include/asm/kmap_types.h                |    4 +-
  arch/avr32/mm/fault.c                              |   27 +
@@ -2177,7 +648,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/m32r/lib/usercopy.c                           |    6 +
  arch/metag/include/asm/barrier.h                   |    2 +-
  arch/mips/cavium-octeon/dma-octeon.c               |    2 +-
- arch/mips/include/asm/atomic.h                     |  351 +-
+ arch/mips/include/asm/atomic.h                     |  355 +-
  arch/mips/include/asm/barrier.h                    |    2 +-
  arch/mips/include/asm/elf.h                        |   11 +-
  arch/mips/include/asm/exec.h                       |    2 +-
@@ -2200,8 +671,6 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/mips/kvm/mips.c                               |    2 +-
  arch/mips/mm/fault.c                               |   25 +
  arch/mips/mm/mmap.c                                |   51 +-
- arch/mips/pci/pci-octeon.c                         |    4 +-
- arch/mips/pci/pcie-octeon.c                        |   12 +-
  arch/mips/sgi-ip27/ip27-nmi.c                      |    6 +-
  arch/mips/sni/rm200.c                              |    2 +-
  arch/mips/vr41xx/common/icu.c                      |    2 +-
@@ -2242,7 +711,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/powerpc/kernel/vdso.c                         |    5 +-
  arch/powerpc/kvm/powerpc.c                         |    2 +-
  arch/powerpc/lib/usercopy_64.c                     |   18 -
- arch/powerpc/mm/fault.c                            |   54 +-
+ arch/powerpc/mm/fault.c                            |   56 +-
  arch/powerpc/mm/mmap.c                             |   24 +-
  arch/powerpc/mm/slice.c                            |   13 +-
  arch/powerpc/platforms/cell/spufs/file.c           |    4 +-
@@ -2252,7 +721,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/s390/include/asm/exec.h                       |    2 +-
  arch/s390/include/asm/uaccess.h                    |   13 +-
  arch/s390/kernel/module.c                          |   22 +-
- arch/s390/kernel/process.c                         |   34 -
+ arch/s390/kernel/process.c                         |   24 -
  arch/s390/mm/mmap.c                                |   24 +
  arch/score/include/asm/exec.h                      |    2 +-
  arch/score/kernel/process.c                        |    5 -
@@ -2269,11 +738,11 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/sparc/include/asm/pgtsrmmu.h                  |    5 +
  arch/sparc/include/asm/setup.h                     |    4 +-
  arch/sparc/include/asm/spinlock_64.h               |   35 +-
- arch/sparc/include/asm/thread_info_32.h            |    2 +
+ arch/sparc/include/asm/thread_info_32.h            |    1 +
  arch/sparc/include/asm/thread_info_64.h            |    2 +
  arch/sparc/include/asm/uaccess.h                   |    1 +
- arch/sparc/include/asm/uaccess_32.h                |   27 +-
- arch/sparc/include/asm/uaccess_64.h                |   19 +-
+ arch/sparc/include/asm/uaccess_32.h                |   28 +-
+ arch/sparc/include/asm/uaccess_64.h                |   24 +-
  arch/sparc/kernel/Makefile                         |    2 +-
  arch/sparc/kernel/prom_common.c                    |    2 +-
  arch/sparc/kernel/smp_64.c                         |    8 +-
@@ -2338,7 +807,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/crypto/twofish-x86_64-asm_64-3way.S       |    4 +
  arch/x86/crypto/twofish-x86_64-asm_64.S            |    3 +
  arch/x86/ia32/ia32_signal.c                        |   23 +-
- arch/x86/ia32/ia32entry.S                          |  172 +-
+ arch/x86/ia32/ia32entry.S                          |  170 +-
  arch/x86/ia32/sys_ia32.c                           |    4 +-
  arch/x86/include/asm/alternative-asm.h             |   39 +
  arch/x86/include/asm/alternative.h                 |    4 +-
@@ -2351,7 +820,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/include/asm/bitops.h                      |   18 +-
  arch/x86/include/asm/boot.h                        |    7 +-
  arch/x86/include/asm/cache.h                       |    5 +-
- arch/x86/include/asm/calling.h                     |  120 +-
+ arch/x86/include/asm/calling.h                     |  119 +-
  arch/x86/include/asm/checksum_32.h                 |   12 +-
  arch/x86/include/asm/cmpxchg.h                     |   39 +
  arch/x86/include/asm/compat.h                      |    2 +-
@@ -2368,7 +837,6 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/include/asm/io.h                          |   21 +-
  arch/x86/include/asm/irqflags.h                    |    5 +
  arch/x86/include/asm/kprobes.h                     |    9 +-
- arch/x86/include/asm/kvm_host.h                    |    2 +-
  arch/x86/include/asm/local.h                       |  106 +-
  arch/x86/include/asm/mman.h                        |   15 +
  arch/x86/include/asm/mmu.h                         |   16 +-
@@ -2376,7 +844,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/include/asm/module.h                      |   17 +-
  arch/x86/include/asm/nmi.h                         |   19 +-
  arch/x86/include/asm/page.h                        |    1 +
- arch/x86/include/asm/page_64.h                     |    4 +-
+ arch/x86/include/asm/page_64.h                     |    8 +-
  arch/x86/include/asm/paravirt.h                    |   46 +-
  arch/x86/include/asm/paravirt_types.h              |   15 +-
  arch/x86/include/asm/pgalloc.h                     |   23 +
@@ -2389,7 +857,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/include/asm/pgtable_64_types.h            |    5 +
  arch/x86/include/asm/pgtable_types.h               |   26 +-
  arch/x86/include/asm/preempt.h                     |    2 +-
- arch/x86/include/asm/processor.h                   |   79 +-
+ arch/x86/include/asm/processor.h                   |   54 +-
  arch/x86/include/asm/ptrace.h                      |   26 +-
  arch/x86/include/asm/qrwlock.h                     |    4 +-
  arch/x86/include/asm/realmode.h                    |    4 +-
@@ -2403,8 +871,8 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/include/asm/stacktrace.h                  |   32 +-
  arch/x86/include/asm/switch_to.h                   |    4 +-
  arch/x86/include/asm/thread_info.h                 |   31 +-
- arch/x86/include/asm/tlbflush.h                    |   73 +-
- arch/x86/include/asm/uaccess.h                     |  184 +-
+ arch/x86/include/asm/tlbflush.h                    |   75 +-
+ arch/x86/include/asm/uaccess.h                     |  192 +-
  arch/x86/include/asm/uaccess_32.h                  |   28 +-
  arch/x86/include/asm/uaccess_64.h                  |  169 +-
  arch/x86/include/asm/word-at-a-time.h              |    2 +-
@@ -2422,18 +890,18 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/kernel/apic/apic_flat_64.c                |    4 +-
  arch/x86/kernel/apic/apic_noop.c                   |    2 +-
  arch/x86/kernel/apic/bigsmp_32.c                   |    2 +-
- arch/x86/kernel/apic/io_apic.c                     |    4 +-
+ arch/x86/kernel/apic/io_apic.c                     |    8 +-
  arch/x86/kernel/apic/probe_32.c                    |    2 +-
  arch/x86/kernel/apic/vector.c                      |    4 +-
  arch/x86/kernel/apic/x2apic_cluster.c              |    4 +-
  arch/x86/kernel/apic/x2apic_phys.c                 |    2 +-
  arch/x86/kernel/apic/x2apic_uv_x.c                 |    2 +-
- arch/x86/kernel/apm_32.c                           |   19 +-
+ arch/x86/kernel/apm_32.c                           |   21 +-
  arch/x86/kernel/asm-offsets.c                      |   20 +
  arch/x86/kernel/asm-offsets_64.c                   |    1 +
  arch/x86/kernel/cpu/Makefile                       |    4 -
  arch/x86/kernel/cpu/amd.c                          |    2 +-
- arch/x86/kernel/cpu/common.c                       |  134 +-
+ arch/x86/kernel/cpu/common.c                       |  140 +-
  arch/x86/kernel/cpu/intel_cacheinfo.c              |   48 +-
  arch/x86/kernel/cpu/mcheck/mce.c                   |   31 +-
  arch/x86/kernel/cpu/mcheck/p5.c                    |    3 +
@@ -2458,7 +926,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/kernel/e820.c                             |    4 +-
  arch/x86/kernel/early_printk.c                     |    1 +
  arch/x86/kernel/entry_32.S                         |  359 +-
- arch/x86/kernel/entry_64.S                         |  748 +-
+ arch/x86/kernel/entry_64.S                         |  714 +-
  arch/x86/kernel/espfix_64.c                        |   13 +-
  arch/x86/kernel/ftrace.c                           |    8 +-
  arch/x86/kernel/head64.c                           |   13 +-
@@ -2478,6 +946,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/kernel/kprobes/opt.c                      |   16 +-
  arch/x86/kernel/ksysfs.c                           |    2 +-
  arch/x86/kernel/ldt.c                              |   31 +-
+ arch/x86/kernel/livepatch.c                        |   12 +-
  arch/x86/kernel/machine_kexec_32.c                 |    6 +-
  arch/x86/kernel/mcount_64.S                        |   19 +-
  arch/x86/kernel/module.c                           |   78 +-
@@ -2495,10 +964,10 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/kernel/process_64.c                       |   21 +-
  arch/x86/kernel/ptrace.c                           |   20 +-
  arch/x86/kernel/pvclock.c                          |    8 +-
- arch/x86/kernel/reboot.c                           |   42 +-
+ arch/x86/kernel/reboot.c                           |   44 +-
  arch/x86/kernel/reboot_fixups_32.c                 |    2 +-
  arch/x86/kernel/relocate_kernel_64.S               |    3 +-
- arch/x86/kernel/setup.c                            |   63 +-
+ arch/x86/kernel/setup.c                            |   27 +-
  arch/x86/kernel/setup_percpu.c                     |   29 +-
  arch/x86/kernel/signal.c                           |   17 +-
  arch/x86/kernel/smp.c                              |    2 +-
@@ -2510,7 +979,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/kernel/time.c                             |   10 +-
  arch/x86/kernel/tls.c                              |    7 +-
  arch/x86/kernel/tracepoint.c                       |    4 +-
- arch/x86/kernel/traps.c                            |   67 +-
+ arch/x86/kernel/traps.c                            |   79 +-
  arch/x86/kernel/tsc.c                              |    2 +-
  arch/x86/kernel/uprobes.c                          |    4 +-
  arch/x86/kernel/vm86_32.c                          |    6 +-
@@ -2524,7 +993,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/kvm/lapic.c                               |    2 +-
  arch/x86/kvm/paging_tmpl.h                         |    2 +-
  arch/x86/kvm/svm.c                                 |    8 +
- arch/x86/kvm/vmx.c                                 |   67 +-
+ arch/x86/kvm/vmx.c                                 |   82 +-
  arch/x86/kvm/x86.c                                 |    8 +-
  arch/x86/lguest/boot.c                             |    3 +-
  arch/x86/lib/atomic64_386_32.S                     |  164 +
@@ -2569,7 +1038,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/mm/pat.c                                  |   20 +-
  arch/x86/mm/pat_rbtree.c                           |    2 +-
  arch/x86/mm/pf_in.c                                |   10 +-
- arch/x86/mm/pgtable.c                              |  151 +-
+ arch/x86/mm/pgtable.c                              |  162 +-
  arch/x86/mm/pgtable_32.c                           |    3 +
  arch/x86/mm/physaddr.c                             |    4 +-
  arch/x86/mm/setup_nx.c                             |    7 +
@@ -2589,10 +1058,11 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/platform/efi/efi_64.c                     |   27 +-
  arch/x86/platform/efi/efi_stub_32.S                |   64 +-
  arch/x86/platform/efi/efi_stub_64.S                |    2 +
- arch/x86/platform/intel-mid/intel-mid.c            |    3 +-
+ arch/x86/platform/intel-mid/intel-mid.c            |    5 +-
  arch/x86/platform/intel-mid/intel_mid_weak_decls.h |    6 +-
  arch/x86/platform/intel-mid/mfld.c                 |    4 +-
  arch/x86/platform/intel-mid/mrfl.c                 |    2 +-
+ arch/x86/platform/intel-quark/imr_selftest.c       |    2 +-
  arch/x86/platform/olpc/olpc_dt.c                   |    2 +-
  arch/x86/power/cpu.c                               |   11 +-
  arch/x86/realmode/init.c                           |   10 +-
@@ -2615,7 +1085,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  arch/x86/xen/xen-asm_32.S                          |    2 +-
  arch/x86/xen/xen-head.S                            |   11 +
  arch/x86/xen/xen-ops.h                             |    2 -
- block/bio.c                                        |    6 +-
+ block/bio.c                                        |    4 +-
  block/blk-iopoll.c                                 |    2 +-
  block/blk-map.c                                    |    2 +-
  block/blk-softirq.c                                |    2 +-
@@ -2626,13 +1096,22 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  block/scsi_ioctl.c                                 |   29 +-
  crypto/cryptd.c                                    |    4 +-
  crypto/pcrypt.c                                    |    2 +-
+ crypto/zlib.c                                      |    4 +-
  drivers/acpi/apei/apei-internal.h                  |    2 +-
  drivers/acpi/apei/ghes.c                           |    4 +-
  drivers/acpi/bgrt.c                                |    6 +-
  drivers/acpi/blacklist.c                           |    4 +-
+ drivers/acpi/bus.c                                 |    4 +-
  drivers/acpi/device_pm.c                           |    4 +-
+ drivers/acpi/ec.c                                  |    2 +-
+ drivers/acpi/pci_slot.c                            |    2 +-
+ drivers/acpi/processor_driver.c                    |    2 +-
  drivers/acpi/processor_idle.c                      |    2 +-
+ drivers/acpi/processor_pdc.c                       |    2 +-
+ drivers/acpi/sleep.c                               |    2 +-
  drivers/acpi/sysfs.c                               |    4 +-
+ drivers/acpi/thermal.c                             |    2 +-
+ drivers/acpi/video.c                               |    2 +-
  drivers/ata/libahci.c                              |    2 +-
  drivers/ata/libata-core.c                          |   12 +-
  drivers/ata/libata-scsi.c                          |    2 +-
@@ -2672,7 +1151,6 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/block/drbd/drbd_receiver.c                 |   34 +-
  drivers/block/drbd/drbd_worker.c                   |    8 +-
  drivers/block/loop.c                               |    2 +-
- drivers/block/nvme-core.c                          |    2 -
  drivers/block/pktcdvd.c                            |    4 +-
  drivers/block/rbd.c                                |    2 +-
  drivers/bluetooth/btwilink.c                       |    2 +-
@@ -2681,13 +1159,14 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/char/agp/compat_ioctl.c                    |    2 +-
  drivers/char/agp/frontend.c                        |    4 +-
  drivers/char/hpet.c                                |    2 +-
+ drivers/char/i8k.c                                 |    2 +-
  drivers/char/ipmi/ipmi_msghandler.c                |    8 +-
  drivers/char/ipmi/ipmi_si_intf.c                   |    8 +-
  drivers/char/mem.c                                 |   47 +-
  drivers/char/nvram.c                               |    2 +-
  drivers/char/pcmcia/synclink_cs.c                  |   16 +-
  drivers/char/random.c                              |   12 +-
- drivers/char/sonypi.c                              |    9 +-
+ drivers/char/sonypi.c                              |   11 +-
  drivers/char/tpm/tpm_acpi.c                        |    3 +-
  drivers/char/tpm/tpm_eventlog.c                    |    7 +-
  drivers/char/virtio_console.c                      |    4 +-
@@ -2725,13 +1204,18 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/firmware/efi/cper.c                        |    8 +-
  drivers/firmware/efi/efi.c                         |   12 +-
  drivers/firmware/efi/efivars.c                     |    2 +-
- drivers/firmware/google/memconsole.c               |    5 +-
+ drivers/firmware/efi/runtime-map.c                 |    2 +-
+ drivers/firmware/google/gsmi.c                     |    2 +-
+ drivers/firmware/google/memconsole.c               |    7 +-
+ drivers/firmware/memmap.c                          |    2 +-
  drivers/gpio/gpio-em.c                             |    2 +-
  drivers/gpio/gpio-ich.c                            |    2 +-
  drivers/gpio/gpio-omap.c                           |    2 +-
  drivers/gpio/gpio-rcar.c                           |    2 +-
  drivers/gpio/gpio-vr41xx.c                         |    2 +-
  drivers/gpio/gpiolib.c                             |   13 +-
+ .../gpu/drm/amd/amdkfd/kfd_device_queue_manager.h  |    2 +-
+ drivers/gpu/drm/amd/amdkfd/kfd_kernel_queue.h      |    2 +-
  drivers/gpu/drm/drm_crtc.c                         |    2 +-
  drivers/gpu/drm/drm_drv.c                          |    2 +-
  drivers/gpu/drm/drm_fops.c                         |   12 +-
@@ -2739,6 +1223,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/gpu/drm/drm_info.c                         |   13 +-
  drivers/gpu/drm/drm_ioc32.c                        |   13 +-
  drivers/gpu/drm/drm_ioctl.c                        |    2 +-
+ drivers/gpu/drm/gma500/mdfld_dsi_dpi.c             |   10 +-
  drivers/gpu/drm/i810/i810_drv.h                    |    4 +-
  drivers/gpu/drm/i915/i915_dma.c                    |    2 +-
  drivers/gpu/drm/i915/i915_gem_execbuffer.c         |    4 +-
@@ -2786,12 +1271,12 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/gpu/drm/vmwgfx/vmwgfx_marker.c             |    2 +-
  drivers/gpu/vga/vga_switcheroo.c                   |    4 +-
  drivers/hid/hid-core.c                             |    4 +-
- drivers/hv/channel.c                               |    4 +-
+ drivers/hv/channel.c                               |    2 +-
  drivers/hv/hv.c                                    |    4 +-
  drivers/hv/hv_balloon.c                            |   18 +-
  drivers/hv/hyperv_vmbus.h                          |    2 +-
  drivers/hv/vmbus_drv.c                             |    4 +-
- drivers/hwmon/acpi_power_meter.c                   |    4 +-
+ drivers/hwmon/acpi_power_meter.c                   |    6 +-
  drivers/hwmon/applesmc.c                           |    2 +-
  drivers/hwmon/asus_atk0110.c                       |   10 +-
  drivers/hwmon/coretemp.c                           |    2 +-
@@ -2810,6 +1295,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/iio/industrialio-core.c                    |    2 +-
  drivers/infiniband/core/cm.c                       |   32 +-
  drivers/infiniband/core/fmr_pool.c                 |   20 +-
+ drivers/infiniband/core/uverbs_cmd.c               |    3 +
  drivers/infiniband/hw/cxgb4/mem.c                  |    4 +-
  drivers/infiniband/hw/ipath/ipath_rc.c             |    6 +-
  drivers/infiniband/hw/ipath/ipath_ruc.c            |    6 +-
@@ -2837,7 +1323,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/input/mousedev.c                           |    2 +-
  drivers/input/serio/serio.c                        |    4 +-
  drivers/input/serio/serio_raw.c                    |    4 +-
- drivers/iommu/arm-smmu.c                           |    2 +-
+ drivers/input/touchscreen/htcpen.c                 |    2 +-
  drivers/iommu/iommu.c                              |    2 +-
  drivers/iommu/irq_remapping.c                      |   12 +-
  drivers/irqchip/irq-gic.c                          |    4 +-
@@ -2872,7 +1358,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/md/persistent-data/dm-space-map.h          |    1 +
  drivers/md/raid1.c                                 |    4 +-
  drivers/md/raid10.c                                |   16 +-
- drivers/md/raid5.c                                 |   10 +-
+ drivers/md/raid5.c                                 |   22 +-
  drivers/media/dvb-core/dvbdev.c                    |    2 +-
  drivers/media/dvb-frontends/af9033.h               |    2 +-
  drivers/media/dvb-frontends/dib3000.h              |    2 +-
@@ -2902,9 +1388,8 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/media/v4l2-core/v4l2-ioctl.c               |   13 +-
  drivers/memory/omap-gpmc.c                         |   21 +-
  drivers/message/fusion/mptsas.c                    |   34 +-
- drivers/message/i2o/i2o_proc.c                     |   67 +-
- drivers/message/i2o/iop.c                          |    8 +-
  drivers/mfd/ab8500-debugfs.c                       |    2 +-
+ drivers/mfd/kempld-core.c                          |    2 +-
  drivers/mfd/max8925-i2c.c                          |    2 +-
  drivers/mfd/tps65910.c                             |    2 +-
  drivers/mfd/twl4030-irq.c                          |    9 +-
@@ -2940,10 +1425,10 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/net/ethernet/altera/altera_tse_main.c      |    4 +-
  drivers/net/ethernet/amd/xgbe/xgbe-common.h        |    4 +-
  drivers/net/ethernet/amd/xgbe/xgbe-dcb.c           |    4 +-
- drivers/net/ethernet/amd/xgbe/xgbe-desc.c          |   29 +-
+ drivers/net/ethernet/amd/xgbe/xgbe-desc.c          |   27 +-
  drivers/net/ethernet/amd/xgbe/xgbe-dev.c           |  147 +-
- drivers/net/ethernet/amd/xgbe/xgbe-drv.c           |   60 +-
- drivers/net/ethernet/amd/xgbe/xgbe-ethtool.c       |    6 +-
+ drivers/net/ethernet/amd/xgbe/xgbe-drv.c           |   58 +-
+ drivers/net/ethernet/amd/xgbe/xgbe-ethtool.c       |    8 +-
  drivers/net/ethernet/amd/xgbe/xgbe-main.c          |   11 +-
  drivers/net/ethernet/amd/xgbe/xgbe-mdio.c          |    4 +-
  drivers/net/ethernet/amd/xgbe/xgbe-ptp.c           |    4 +-
@@ -2968,6 +1453,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/net/ethernet/realtek/r8169.c               |    8 +-
  drivers/net/ethernet/sfc/ptp.c                     |    2 +-
  drivers/net/ethernet/stmicro/stmmac/mmc_core.c     |    4 +-
+ drivers/net/ethernet/via/via-rhine.c               |    2 +-
  drivers/net/hyperv/hyperv_net.h                    |    2 +-
  drivers/net/hyperv/rndis_filter.c                  |    4 +-
  drivers/net/ifb.c                                  |    2 +-
@@ -3006,6 +1492,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/net/wireless/ti/wl18xx/main.c              |    6 +-
  drivers/nfc/nfcwilink.c                            |    2 +-
  drivers/nfc/st21nfca/st21nfca.c                    |    2 +-
+ drivers/of/fdt.c                                   |    4 +-
  drivers/oprofile/buffer_sync.c                     |    8 +-
  drivers/oprofile/event_buffer.c                    |    2 +-
  drivers/oprofile/oprof.c                           |    2 +-
@@ -3015,6 +1502,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/oprofile/oprofilefs.c                      |    6 +-
  drivers/oprofile/timer_int.c                       |    2 +-
  drivers/parport/procfs.c                           |    4 +-
+ drivers/pci/host/pci-host-generic.c                |   24 +-
  drivers/pci/hotplug/acpiphp_ibm.c                  |    4 +-
  drivers/pci/hotplug/cpcihp_generic.c               |    6 +-
  drivers/pci/hotplug/cpcihp_zt5550.c                |   14 +-
@@ -3025,14 +1513,23 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/pci/pci-sysfs.c                            |    6 +-
  drivers/pci/pci.h                                  |    2 +-
  drivers/pci/pcie/aspm.c                            |    6 +-
+ drivers/pci/pcie/portdrv_pci.c                     |    2 +-
  drivers/pci/probe.c                                |    2 +-
  drivers/platform/chrome/chromeos_laptop.c          |    2 +-
+ drivers/platform/chrome/chromeos_pstore.c          |    2 +-
  drivers/platform/x86/alienware-wmi.c               |    4 +-
- drivers/platform/x86/msi-laptop.c                  |   14 +-
+ drivers/platform/x86/compal-laptop.c               |    2 +-
+ drivers/platform/x86/hdaps.c                       |    2 +-
+ drivers/platform/x86/ibm_rtl.c                     |    2 +-
+ drivers/platform/x86/intel_oaktrail.c              |    2 +-
+ drivers/platform/x86/msi-laptop.c                  |   16 +-
  drivers/platform/x86/msi-wmi.c                     |    2 +-
- drivers/platform/x86/sony-laptop.c                 |   12 +-
+ drivers/platform/x86/samsung-laptop.c              |    2 +-
+ drivers/platform/x86/samsung-q10.c                 |    2 +-
+ drivers/platform/x86/sony-laptop.c                 |   14 +-
  drivers/platform/x86/thinkpad_acpi.c               |    4 +-
  drivers/pnp/pnpbios/bioscalls.c                    |   14 +-
+ drivers/pnp/pnpbios/core.c                         |    2 +-
  drivers/power/pda_power.c                          |    7 +-
  drivers/power/power_supply.h                       |    4 +-
  drivers/power/power_supply_core.c                  |    7 +-
@@ -3051,7 +1548,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/scsi/bfa/bfa_ioc.h                         |    4 +-
  drivers/scsi/fcoe/fcoe_sysfs.c                     |   12 +-
  drivers/scsi/hosts.c                               |    4 +-
- drivers/scsi/hpsa.c                                |   38 +-
+ drivers/scsi/hpsa.c                                |   36 +-
  drivers/scsi/hpsa.h                                |    2 +-
  drivers/scsi/libfc/fc_exch.c                       |   50 +-
  drivers/scsi/libsas/sas_ata.c                      |    2 +-
@@ -3078,7 +1575,12 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/spi/spi.c                                  |    2 +-
  drivers/staging/android/timed_output.c             |    6 +-
  drivers/staging/comedi/comedi_fops.c               |    8 +-
+ drivers/staging/fbtft/fbtft-core.c                 |    2 +-
+ drivers/staging/fbtft/fbtft.h                      |    2 +-
  drivers/staging/gdm724x/gdm_tty.c                  |    2 +-
+ drivers/staging/i2o/i2o.h                          |    2 +-
+ drivers/staging/i2o/i2o_proc.c                     |   67 +-
+ drivers/staging/i2o/iop.c                          |    8 +-
  drivers/staging/lustre/lnet/selftest/brw_test.c    |   12 +-
  drivers/staging/lustre/lnet/selftest/framework.c   |    4 -
  drivers/staging/lustre/lnet/selftest/ping_test.c   |   14 +-
@@ -3095,6 +1597,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/target/target_core_transport.c             |    2 +-
  drivers/thermal/int340x_thermal/int3400_thermal.c  |    6 +-
  drivers/thermal/of-thermal.c                       |   17 +-
+ drivers/thermal/x86_pkg_temp_thermal.c             |    2 +-
  drivers/tty/cyclades.c                             |    6 +-
  drivers/tty/hvc/hvc_console.c                      |   14 +-
  drivers/tty/hvc/hvcs.c                             |   21 +-
@@ -3157,6 +1660,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  drivers/video/fbdev/uvesafb.c                      |   52 +-
  drivers/video/fbdev/vesafb.c                       |   58 +-
  drivers/video/fbdev/via/via_clock.h                |    2 +-
+ drivers/xen/events/events_base.c                   |    6 +-
  fs/9p/vfs_addr.c                                   |    2 +-
  fs/9p/vfs_inode.c                                  |    2 +-
  fs/Kconfig.binfmt                                  |    2 +-
@@ -3196,7 +1700,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  fs/compat_ioctl.c                                  |   12 +-
  fs/configfs/dir.c                                  |   10 +-
  fs/coredump.c                                      |   16 +-
- fs/dcache.c                                        |   43 +-
+ fs/dcache.c                                        |   51 +-
  fs/ecryptfs/inode.c                                |    2 +-
  fs/ecryptfs/miscdev.c                              |    2 +-
  fs/exec.c                                          |  362 +-
@@ -3205,6 +1709,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  fs/ext4/ext4.h                                     |   20 +-
  fs/ext4/mballoc.c                                  |   44 +-
  fs/ext4/mmp.c                                      |    2 +-
+ fs/ext4/resize.c                                   |   16 +-
  fs/ext4/super.c                                    |    4 +-
  fs/ext4/xattr.c                                    |    5 +-
  fs/fhandle.c                                       |    3 +-
@@ -3219,6 +1724,9 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  fs/fuse/cuse.c                                     |   10 +-
  fs/fuse/dev.c                                      |    4 +-
  fs/fuse/dir.c                                      |    2 +-
+ fs/gfs2/glock.c                                    |   22 +-
+ fs/gfs2/glops.c                                    |    4 +-
+ fs/gfs2/quota.c                                    |    6 +-
  fs/hostfs/hostfs_kern.c                            |    2 +-
  fs/hugetlbfs/inode.c                               |   13 +-
  fs/inode.c                                         |    4 +-
@@ -3226,12 +1734,11 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  fs/jffs2/wbuf.c                                    |    3 +-
  fs/jfs/super.c                                     |    2 +-
  fs/kernfs/dir.c                                    |    2 +-
- fs/kernfs/file.c                                   |   16 +-
+ fs/kernfs/file.c                                   |   20 +-
  fs/kernfs/symlink.c                                |    2 +-
  fs/libfs.c                                         |   12 +-
  fs/lockd/clntproc.c                                |    4 +-
- fs/locks.c                                         |    8 +-
- fs/namei.c                                         |   22 +-
+ fs/namei.c                                         |   24 +-
  fs/namespace.c                                     |   16 +-
  fs/nfs/callback_xdr.c                              |    2 +-
  fs/nfs/inode.c                                     |    6 +-
@@ -3255,7 +1762,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  fs/posix_acl.c                                     |    4 +-
  fs/proc/array.c                                    |   20 +
  fs/proc/base.c                                     |    4 +-
- fs/proc/kcore.c                                    |   32 +-
+ fs/proc/kcore.c                                    |   34 +-
  fs/proc/meminfo.c                                  |    2 +-
  fs/proc/nommu.c                                    |    2 +-
  fs/proc/proc_sysctl.c                              |   18 +-
@@ -3316,8 +1823,8 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  include/linux/clk-provider.h                       |    1 +
  include/linux/compat.h                             |    4 +-
  include/linux/compiler-gcc4.h                      |   20 +
- include/linux/compiler-gcc5.h                      |   22 +
- include/linux/compiler.h                           |   87 +-
+ include/linux/compiler-gcc5.h                      |   19 +
+ include/linux/compiler.h                           |   89 +-
  include/linux/completion.h                         |   12 +-
  include/linux/configfs.h                           |    2 +-
  include/linux/cpufreq.h                            |    3 +-
@@ -3325,6 +1832,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  include/linux/cpumask.h                            |   14 +-
  include/linux/crypto.h                             |    6 +-
  include/linux/ctype.h                              |    2 +-
+ include/linux/dcache.h                             |    4 +-
  include/linux/decompress/mm.h                      |    2 +-
  include/linux/devfreq.h                            |    2 +-
  include/linux/device.h                             |    7 +-
@@ -3334,7 +1842,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  include/linux/elf.h                                |    2 +
  include/linux/err.h                                |    4 +-
  include/linux/extcon.h                             |    2 +-
- include/linux/fb.h                                 |    2 +-
+ include/linux/fb.h                                 |    3 +-
  include/linux/fdtable.h                            |    2 +-
  include/linux/frontswap.h                          |    2 +-
  include/linux/fs.h                                 |    3 +-
@@ -3348,7 +1856,6 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  include/linux/highmem.h                            |   12 +
  include/linux/hwmon-sysfs.h                        |    6 +-
  include/linux/i2c.h                                |    1 +
- include/linux/i2o.h                                |    2 +-
  include/linux/if_pppox.h                           |    2 +-
  include/linux/init.h                               |   12 +-
  include/linux/init_task.h                          |    7 +
@@ -3370,11 +1877,12 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  include/linux/libata.h                             |    2 +-
  include/linux/linkage.h                            |    1 +
  include/linux/list.h                               |   15 +
- include/linux/lockref.h                            |   32 +
+ include/linux/lockref.h                            |   26 +-
  include/linux/math64.h                             |   10 +-
  include/linux/mempolicy.h                          |    7 +
  include/linux/mm.h                                 |  104 +-
  include/linux/mm_types.h                           |   20 +
+ include/linux/mmc/core.h                           |    2 +-
  include/linux/mmiotrace.h                          |    4 +-
  include/linux/mmzone.h                             |    2 +-
  include/linux/mod_devicetable.h                    |    4 +-
@@ -3431,7 +1939,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  include/linux/sunrpc/svc_rdma.h                    |   18 +-
  include/linux/sunrpc/svcauth.h                     |    2 +-
  include/linux/swiotlb.h                            |    3 +-
- include/linux/syscalls.h                           |   18 +-
+ include/linux/syscalls.h                           |   17 +-
  include/linux/syscore_ops.h                        |    2 +-
  include/linux/sysctl.h                             |    3 +-
  include/linux/sysfs.h                              |    9 +-
@@ -3530,7 +2038,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  kernel/events/internal.h                           |   10 +-
  kernel/events/uprobes.c                            |    2 +-
  kernel/exit.c                                      |    2 +-
- kernel/fork.c                                      |  168 +-
+ kernel/fork.c                                      |  161 +-
  kernel/futex.c                                     |   11 +-
  kernel/futex_compat.c                              |    2 +-
  kernel/gcov/base.c                                 |    7 +-
@@ -3543,13 +2051,13 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  kernel/kprobes.c                                   |    4 +-
  kernel/ksysfs.c                                    |    2 +-
  kernel/locking/lockdep.c                           |    7 +-
- kernel/locking/mcs_spinlock.c                      |   10 +-
  kernel/locking/mcs_spinlock.h                      |    2 +-
  kernel/locking/mutex-debug.c                       |   12 +-
  kernel/locking/mutex-debug.h                       |    4 +-
  kernel/locking/mutex.c                             |    6 +-
+ kernel/locking/osq_lock.c                          |   10 +-
  kernel/locking/rtmutex-tester.c                    |   24 +-
- kernel/module.c                                    |  350 +-
+ kernel/module.c                                    |  357 +-
  kernel/notifier.c                                  |   17 +-
  kernel/padata.c                                    |    4 +-
  kernel/panic.c                                     |    5 +-
@@ -3561,9 +2069,9 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  kernel/rcu/rcutorture.c                            |   60 +-
  kernel/rcu/tiny.c                                  |    4 +-
  kernel/rcu/tiny_plugin.h                           |    6 +-
- kernel/rcu/tree.c                                  |  108 +-
+ kernel/rcu/tree.c                                  |  128 +-
  kernel/rcu/tree.h                                  |   26 +-
- kernel/rcu/tree_plugin.h                           |   46 +-
+ kernel/rcu/tree_plugin.h                           |   42 +-
  kernel/rcu/tree_trace.c                            |   22 +-
  kernel/rcu/update.c                                |   10 +-
  kernel/sched/auto_group.c                          |    4 +-
@@ -3585,7 +2093,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  kernel/torture.c                                   |   10 +-
  kernel/trace/blktrace.c                            |    6 +-
  kernel/trace/ftrace.c                              |   15 +-
- kernel/trace/ring_buffer.c                         |   76 +-
+ kernel/trace/ring_buffer.c                         |   96 +-
  kernel/trace/trace.c                               |    2 +-
  kernel/trace/trace.h                               |    2 +-
  kernel/trace/trace_clock.c                         |    4 +-
@@ -3611,7 +2119,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  lib/ioremap.c                                      |    4 +-
  lib/kobject.c                                      |    4 +-
  lib/list_debug.c                                   |  126 +-
- lib/lockref.c                                      |   20 +-
+ lib/lockref.c                                      |   44 +-
  lib/percpu-refcount.c                              |    2 +-
  lib/radix-tree.c                                   |    2 +-
  lib/random32.c                                     |    2 +-
@@ -3624,18 +2132,18 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  mm/Kconfig                                         |    6 +-
  mm/backing-dev.c                                   |    4 +-
  mm/filemap.c                                       |    2 +-
- mm/fremap.c                                        |    5 +
  mm/gup.c                                           |   13 +-
  mm/highmem.c                                       |    7 +-
  mm/hugetlb.c                                       |   70 +-
  mm/internal.h                                      |    3 +-
  mm/maccess.c                                       |    4 +-
- mm/madvise.c                                       |   41 +
+ mm/madvise.c                                       |   37 +
  mm/memory-failure.c                                |   30 +-
  mm/memory.c                                        |  410 +-
  mm/mempolicy.c                                     |   25 +
  mm/mlock.c                                         |   15 +-
- mm/mmap.c                                          |  581 +-
+ mm/mm_init.c                                       |    2 +-
+ mm/mmap.c                                          |  586 +-
  mm/mprotect.c                                      |  137 +-
  mm/mremap.c                                        |   44 +-
  mm/nommu.c                                         |   21 +-
@@ -3655,7 +2163,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  mm/swap.c                                          |    3 +
  mm/swapfile.c                                      |   12 +-
  mm/util.c                                          |    6 +
- mm/vmalloc.c                                       |   77 +-
+ mm/vmalloc.c                                       |  112 +-
  mm/vmstat.c                                        |   12 +-
  net/8021q/vlan.c                                   |    5 +-
  net/8021q/vlan_netlink.c                           |    2 +-
@@ -3687,7 +2195,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  net/core/datagram.c                                |    2 +-
  net/core/dev.c                                     |   18 +-
  net/core/filter.c                                  |    2 +-
- net/core/flow.c                                    |    8 +-
+ net/core/flow.c                                    |    6 +-
  net/core/neighbour.c                               |    4 +-
  net/core/net-sysfs.c                               |    2 +-
  net/core/net_namespace.c                           |    8 +-
@@ -3701,12 +2209,13 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  net/decnet/af_decnet.c                             |    1 +
  net/decnet/sysctl_net_decnet.c                     |    4 +-
  net/hsr/hsr_netlink.c                              |    2 +-
- net/ieee802154/6lowpan_rtnl.c                      |    2 +-
- net/ieee802154/reassembly.c                        |   14 +-
+ net/ieee802154/6lowpan/core.c                      |    2 +-
+ net/ieee802154/6lowpan/reassembly.c                |   14 +-
  net/ipv4/af_inet.c                                 |    2 +-
  net/ipv4/devinet.c                                 |   18 +-
  net/ipv4/fib_frontend.c                            |    6 +-
  net/ipv4/fib_semantics.c                           |    2 +-
+ net/ipv4/fou.c                                     |    4 +-
  net/ipv4/inetpeer.c                                |    2 +-
  net/ipv4/ip_fragment.c                             |   15 +-
  net/ipv4/ip_gre.c                                  |    6 +-
@@ -3724,7 +2233,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  net/ipv4/tcp_probe.c                               |    2 +-
  net/ipv4/udp.c                                     |   10 +-
  net/ipv4/xfrm4_policy.c                            |   18 +-
- net/ipv6/addrconf.c                                |   12 +-
+ net/ipv6/addrconf.c                                |   14 +-
  net/ipv6/af_inet6.c                                |    2 +-
  net/ipv6/datagram.c                                |    2 +-
  net/ipv6/icmp.c                                    |    2 +-
@@ -3748,13 +2257,15 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  net/iucv/iucv.c                                    |    2 +-
  net/key/af_key.c                                   |    4 +-
  net/l2tp/l2tp_eth.c                                |   38 +-
+ net/l2tp/l2tp_ip.c                                 |    2 +-
+ net/l2tp/l2tp_ip6.c                                |    2 +-
  net/mac80211/cfg.c                                 |    8 +-
  net/mac80211/ieee80211_i.h                         |    3 +-
  net/mac80211/iface.c                               |   16 +-
  net/mac80211/main.c                                |    2 +-
  net/mac80211/pm.c                                  |    6 +-
  net/mac80211/rate.c                                |    2 +-
- net/mac80211/util.c                                |    4 +-
+ net/mac80211/util.c                                |    8 +-
  net/netfilter/ipset/ip_set_core.c                  |    2 +-
  net/netfilter/ipvs/ip_vs_conn.c                    |    6 +-
  net/netfilter/ipvs/ip_vs_core.c                    |    4 +-
@@ -3772,6 +2283,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  net/netfilter/nf_log.c                             |   10 +-
  net/netfilter/nf_sockopt.c                         |    4 +-
  net/netfilter/nfnetlink_log.c                      |    4 +-
+ net/netfilter/nft_compat.c                         |    9 +-
  net/netfilter/xt_statistic.c                       |    8 +-
  net/netlink/af_netlink.c                           |    4 +-
  net/openvswitch/vport-internal_dev.c               |    2 +-
@@ -3820,6 +2332,7 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  net/sunrpc/xprtrdma/svc_rdma_recvfrom.c            |    8 +-
  net/sunrpc/xprtrdma/svc_rdma_sendto.c              |    2 +-
  net/sunrpc/xprtrdma/svc_rdma_transport.c           |   10 +-
+ net/tipc/netlink_compat.c                          |   12 +-
  net/tipc/subscr.c                                  |    2 +-
  net/unix/af_unix.c                                 |    7 +-
  net/unix/sysctl_net_unix.c                         |    2 +-
@@ -3881,35 +2394,36 @@ Date:   Sun Mar 8 19:57:15 2015 -0400
  sound/pci/ymfpci/ymfpci.h                          |    2 +-
  sound/pci/ymfpci/ymfpci_main.c                     |   12 +-
  sound/soc/soc-ac97.c                               |    6 +-
+ sound/soc/xtensa/xtfpga-i2s.c                      |    2 +-
  tools/gcc/Makefile                                 |   40 +
  tools/gcc/checker_plugin.c                         |  150 +
- tools/gcc/colorize_plugin.c                        |  210 +
- tools/gcc/constify_plugin.c                        |  558 +
- tools/gcc/gcc-common.h                             |  375 +
- tools/gcc/kallocstat_plugin.c                      |  183 +
- tools/gcc/kernexec_plugin.c                        |  522 +
- tools/gcc/latent_entropy_plugin.c                  |  466 +
+ tools/gcc/colorize_plugin.c                        |  215 +
+ tools/gcc/constify_plugin.c                        |  563 +
+ tools/gcc/gcc-common.h                             |  666 +
+ tools/gcc/kallocstat_plugin.c                      |  188 +
+ tools/gcc/kernexec_plugin.c                        |  547 +
+ tools/gcc/latent_entropy_plugin.c                  |  474 +
  tools/gcc/size_overflow_plugin/.gitignore          |    1 +
  tools/gcc/size_overflow_plugin/Makefile            |   20 +
  .../generate_size_overflow_hash.sh                 |  102 +
- .../insert_size_overflow_asm.c                     |  404 +
- .../size_overflow_plugin/intentional_overflow.c    |  951 +
- tools/gcc/size_overflow_plugin/misc.c              |  427 +
+ .../insert_size_overflow_asm.c                     |  409 +
+ .../size_overflow_plugin/intentional_overflow.c    |  955 +
+ tools/gcc/size_overflow_plugin/misc.c              |  441 +
  .../size_overflow_plugin/remove_unnecessary_dup.c  |  137 +
- tools/gcc/size_overflow_plugin/size_overflow.h     |  226 +
+ tools/gcc/size_overflow_plugin/size_overflow.h     |  281 +
  .../gcc/size_overflow_plugin/size_overflow_debug.c |  164 +
- .../size_overflow_plugin/size_overflow_hash.data   |26684 ++++++++++++++++++++
+ .../size_overflow_plugin/size_overflow_hash.data   |27747 ++++++++++++++++++++
  .../size_overflow_hash_aux.data                    |   92 +
- tools/gcc/size_overflow_plugin/size_overflow_ipa.c |  908 +
- .../size_overflow_plugin/size_overflow_plugin.c    |  231 +
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |  913 +
+ .../size_overflow_plugin/size_overflow_plugin.c    |  256 +
  .../size_overflow_plugin_hash.c                    |  345 +
- .../size_overflow_plugin/size_overflow_transform.c |  430 +
- .../size_overflow_transform_core.c                 |  956 +
- tools/gcc/stackleak_plugin.c                       |  395 +
- tools/gcc/structleak_plugin.c                      |  274 +
+ .../size_overflow_plugin/size_overflow_transform.c |  431 +
+ .../size_overflow_transform_core.c                 |  941 +
+ tools/gcc/stackleak_plugin.c                       |  432 +
+ tools/gcc/structleak_plugin.c                      |  287 +
  tools/include/linux/compiler.h                     |    8 +
  tools/lib/api/Makefile                             |    2 +-
  tools/perf/util/include/asm/alternative-asm.h      |    3 +
  tools/virtio/linux/uaccess.h                       |    2 +-
  virt/kvm/kvm_main.c                                |   44 +-
- 1850 files changed, 57698 insertions(+), 8590 deletions(-)
+ 1899 files changed, 59437 insertions(+), 8692 deletions(-)
