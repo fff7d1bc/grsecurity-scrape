@@ -1,3 +1,25 @@
+commit 3c85103f0377ab0e193be5a427498d1ab1c4ebef
+Merge: 314b162 e580e37
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 4 18:42:22 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e580e375583a4288990269df661098155e29b3e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 4 18:42:01 2015 -0400
+
+    Update to pax-linux-4.0.1-test7.patch:
+    - fixed an xgbe driver compile regression, reported by spender
+    - fixed a bunch of NULL function pointer dereference regressions in the compat drm ioctl code for i915/mga/r128/radeon, reported by minipli
+
+ drivers/gpu/drm/i915/i915_ioc32.c     |   13 ++++++-------
+ drivers/gpu/drm/mga/mga_ioc32.c       |    7 +++----
+ drivers/gpu/drm/r128/r128_ioc32.c     |    7 +++----
+ drivers/gpu/drm/radeon/radeon_ioc32.c |    7 +++----
+ drivers/net/ethernet/amd/xgbe/xgbe.h  |    4 ++--
+ 5 files changed, 17 insertions(+), 21 deletions(-)
+
 commit 314b16217423b8e732f3dcb1e04a9daee66b06ea
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun May 3 14:21:56 2015 -0400
