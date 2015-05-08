@@ -1,3 +1,78 @@
+commit 965d7cc13d29d9b8b2168cf73b05d006ce7a0330
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 20:09:26 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 0ae1f9332e2c234f733300ca9cb61033ff0be292
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 19:44:47 2015 -0400
+
+    make the const ops table non-local
+
+ drivers/iommu/io-pgtable-arm.c |   12 +++++++-----
+ 1 files changed, 7 insertions(+), 5 deletions(-)
+
+commit ba1301fd7a645a5d5be6c59b620ca97c36299ad2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 18:58:43 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 050a518c6f55c8e770e44c7bab3ebf603539b746
+Merge: 7614be0 34db492
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 18:26:43 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	fs/open.c
+
+commit 34db492ef0dddd9c4e3d2f7b2480247ae2bbdaf0
+Merge: e580e37 072cab6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 18:24:48 2015 -0400
+
+    Update to pax-linux-4.0.2-test10.patch:
+    - disable PCID before exiting the kernel to code that may not sanitize its environment properly before turning off paging, fixes tboot/TXT shutdown among others, reported and debugged by Jason Zaman perfinion@gentoo.org
+    - worked around a gcc induced intentional overflow in the bunzip decompressor, reported by Martin Filo (https://bugs.gentoo.org/show_bug.cgi?id=548508)
+    - F_SETPIPE_SZ handling ignored pipe_min_size and could trigger the size overflow instrumentation, reported by minipli
+    - fixed an integer signedness mixup in a parameter of semop and semtimedop, by minipli
+    - fixed some constification fallout in io_pgtable/io_pgtable_ops handling that triggered on arm, reported by Michael Tremer <michael.tremer@ipfire.org>
+    
+    Merge branch 'linux-4.0.y' into pax-test
+    
+    Conflicts:
+    	arch/arm/include/asm/elf.h
+    	fs/binfmt_elf.c
+
+commit 7614be07b9df52ecd1dbad23cef4221dd76a54bf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 18:01:36 2015 -0400
+
+    Even though in the history of autoconfig it has never tripped anyone
+    up under realistic use cases (e.g. nobody starts a config, enables
+    only CONFIG_GRKERNSEC, then exits menuconfig, then loads it back up
+    and tries to apply an autoconfig setting) explicitly mention that you
+    cannot do it and expect the autoconfig to work.  Due to how the Kbuild
+    system works, we can't apply defaults and also allow them to be modified
+    via custom settings -- if they're 'select'ed then they can't be modified,
+    and using 'select' violates any dependencies that may exist.  Therefore
+    we have to resort to using 'default', which after a user has already chosen
+    all the settings by virtue of enabling CONFIG_GRKERNSEC and then saving their
+    complete kernel config, cannot have any effect as the options have now all
+    been chosen and there's no 'default' applicable.
+
+ security/Kconfig |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
 commit 3c85103f0377ab0e193be5a427498d1ab1c4ebef
 Merge: 314b162 e580e37
 Author: Brad Spengler <spender@grsecurity.net>
