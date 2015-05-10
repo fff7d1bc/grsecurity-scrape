@@ -1,3 +1,38 @@
+commit 798f007623ca5c65e3c07f52d1034aac26640103
+Author: Jason A. Donenfeld <Jason@zx2c4.com>
+Date:   Wed May 6 15:09:40 2015 +0200
+
+    usbnet: avoid integer overflow in start_xmit
+    
+    transfer_buffer_length is of type u32. It's therefore wrong to assign it
+    to a signed integer. This patch avoids the overflow.
+    
+    It's worth noting that entry->length here is a long; perhaps it would be
+    beneficial at somepoint to change this to be unsigned as well, if
+    nothing else relies on its signedness for error conditions or the like.
+    
+    Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/usb/usbnet.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 1844c93ca54650d8b56bc28d6fceb7e30ae44337
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Fri May 8 16:36:50 2015 -0500
+
+    mnt: Fix fs_fully_visible to verify the root directory is visible
+    
+    This fixes a dumb bug in fs_fully_visible that allows proc or sys to
+    be mounted if there is a bind mount of part of /proc/ or /sys/ visible.
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Eric Windisch <ewindisch@docker.com>
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+
+ fs/namespace.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
 commit 8674ca202b191f9504414c20b870d93f6cdde83f
 Author: Christophe Leroy <christophe.leroy@c-s.fr>
 Date:   Wed May 6 17:26:47 2015 +0200
