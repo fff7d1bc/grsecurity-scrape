@@ -1,3 +1,47 @@
+commit 743fa074b6cb2515f66b49d2d9f6aeed993b7cc9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 17 16:34:31 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 6a139e192ae004a0108ca54c1fb28e738a28fd65
+Merge: 35b9dfe f296a3a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 17 15:04:29 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f296a3a91c0eb8adeacbe65e74ee26bdc922fd12
+Merge: f11664e 8b660f4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 17 15:04:22 2015 -0400
+
+    Merge branch 'linux-4.0.y' into pax-test
+    
+    Conflicts:
+    	mm/memory-failure.c
+
+commit 35b9dfe2ec2260af1e6d0952c25e18756db64dd5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 17 14:24:15 2015 -0400
+
+    fix whitespace
+
+ grsecurity/gracl.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 38b838667a0c58da6b0e1bb51571eb696d1fe180
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 17 14:22:18 2015 -0400
+
+    Fix an ICE in the RANDSTRUCT plugin on GCC 5.1 reported and fixed by pipacs
+
+ tools/gcc/randomize_layout_plugin.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 9009fade1831c1f748c3d4758859a710d883b468
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu May 14 07:59:25 2015 -0400
