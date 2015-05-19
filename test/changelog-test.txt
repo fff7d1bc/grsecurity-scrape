@@ -1,3 +1,50 @@
+commit 57f09049db562ea13c1a7348251dfa52c971aa91
+Merge: d58754b ce11297
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 18 19:41:42 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ce11297c212fd4e4c0c03b5c1def54b1049fcceb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 18 19:41:17 2015 -0400
+
+    Update to pax-linux-4.0.4-test12.patch:
+    - fixed a xen regression introduced with the recent enlargement of level1_fixmap_pgt, reported by 2d1
+    - fixed a regression in the structleak plugin that would disable it under LTO
+
+ arch/x86/include/asm/pgtable_64.h |    4 ++--
+ arch/x86/xen/mmu.c                |    4 +++-
+ tools/gcc/structleak_plugin.c     |    2 +-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
+
+commit d58754b52933bca6a1c1bb910c7045f8adfe1c1d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 18 18:01:08 2015 -0400
+
+    Remove __inline__ from .c files, let the compiler decide
+    
+    Conflicts:
+    
+    	grsecurity/gracl_segv.c
+
+ grsecurity/gracl.c       |   12 ++++++------
+ grsecurity/gracl_alloc.c |    4 ++--
+ grsecurity/gracl_segv.c  |    6 +++---
+ grsecurity/grsec_sock.c  |    4 ++--
+ 4 files changed, 13 insertions(+), 13 deletions(-)
+
+commit f6b6f7e408d655d6fd25ef038a836c57a1c0ef65
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 18 17:54:21 2015 -0400
+
+    Actually wire up use of the RANDSTRUCT attributes for GCC 5.1, otherwise we'd
+    ICE on some Xen PARAVIRT code (and would miss explicit randomization and would
+    break other code)
+
+ include/linux/compiler-gcc5.h |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
 commit 743fa074b6cb2515f66b49d2d9f6aeed993b7cc9
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun May 17 16:34:31 2015 -0400
