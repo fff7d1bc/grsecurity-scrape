@@ -1,3 +1,53 @@
+commit 8cab60ecbb5b5667ba9ef80654fbeedc4d6e2cd5
+Author: Eric Work <work.eric@gmail.com>
+Date:   Mon May 18 23:26:23 2015 -0700
+
+    md/raid0: fix restore to sector variable in raid0_make_request
+    
+    The variable "sector" in "raid0_make_request()" was improperly updated
+    by a call to "sector_div()" which modifies its first argument in place.
+    Commit 47d68979cc968535cb87f3e5f2e6a3533ea48fbd restored this variable
+    after the call for later re-use.  Unfortunetly the restore was done after
+    the referenced variable "bio" was advanced.  This lead to the original
+    value and the restored value being different.  Here we move this line to
+    the proper place.
+    
+    One observed side effect of this bug was discarding a file though
+    unlinking would cause an unrelated file's contents to be discarded.
+    
+    Signed-off-by: NeilBrown <neilb@suse.de>
+    Fixes: 47d68979cc96 ("md/raid0: fix bug with chunksize not a power of 2.")
+    Cc: stable@vger.kernel.org (any that received above backport)
+    URL: https://bugzilla.kernel.org/show_bug.cgi?id=98501
+
+ drivers/md/raid0.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit ea49dcac0da7f7fc28aca292ecda1fc0560afd5d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 22 21:10:11 2015 -0400
+
+    Include the required BNX2 firmware from Broadcom for usability
+    purposes.  Performed whitespace changes on the WHENCE file to
+    ensure Broadcom's license for the file is not only contained in
+    the resulting compilation but also in the patch itself.  It is
+    being distributed in hex format as permitted by their license.
+
+ firmware/Makefile                         |    1 +
+ firmware/WHENCE                           |   19 +-
+ firmware/bnx2/bnx2-mips-09-6.2.1b.fw.ihex | 6496 +++++++++++++++++++++++++++++
+ 3 files changed, 6507 insertions(+), 9 deletions(-)
+
+commit 639a09d41cd5c6989fda788181bd44fe5f94b639
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 21 07:10:30 2015 -0400
+
+    Fix compile warnings in DRM code caused by recent backport, reported by
+    Nicolas Iooss
+
+ drivers/gpu/drm/drm_context.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
 commit 57f09049db562ea13c1a7348251dfa52c971aa91
 Merge: d58754b ce11297
 Author: Brad Spengler <spender@grsecurity.net>
