@@ -1,3 +1,64 @@
+commit 22050350eb0fd749f46a19c1c6814a5571c8a89b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 27 20:31:40 2015 -0400
+
+    squelch noise from initify plugin by default
+
+ tools/gcc/initify_plugin.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit ea7c117aca7fa6333302e3d29c918a55fefed297
+Merge: 8cab60e 2ca6f6c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 27 19:35:49 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	Makefile
+    	tools/gcc/Makefile
+
+commit 2ca6f6c4ea5dc16ae343bf85db644d9df17ebaf9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 27 19:34:20 2015 -0400
+
+    Update to pax-linux-4.0.4-test13.patch:
+    - fixed arm compilation once again, reported by Michael Tremer <michael.tremer@ipfire.org>
+    - Emese wrote a new gcc plugin called initify that moves some strings into freed-after-init memory, inspired by Mathias Krause (https://lkml.org/lkml/2014/8/21/255)
+      - the result is a saving of a few pages worth of memory on typical configs
+      - it is unconditionally enabled since it should not affect anything except reducing runtime memory usage a little bit
+      - this can be further enhanced in various ways (propagation of __init/__exit annotations, more __nocapture annotations, etc)
+    - fixed some section mismatch fallout brought out by the initify plugin
+
+ Makefile                                  |    2 +
+ arch/x86/crypto/crc32c-pcl-intel-asm_64.S |    2 +-
+ drivers/clk/hisilicon/clk-hi3620.c        |   70 +++---
+ drivers/clk/hisilicon/clk-hix5hd2.c       |    6 +-
+ drivers/clk/rockchip/clk-rk3188.c         |    2 +-
+ drivers/clk/rockchip/clk-rk3288.c         |    2 +-
+ drivers/clk/rockchip/clk.h                |    2 +-
+ drivers/clk/samsung/clk.h                 |    2 +-
+ drivers/clk/ti/composite.c                |    2 +-
+ drivers/clk/zynq/clkc.c                   |   24 +-
+ drivers/leds/leds-clevo-mail.c            |    2 +-
+ drivers/leds/leds-ss4200.c                |    2 +-
+ drivers/platform/chrome/chromeos_laptop.c |    2 +-
+ fs/exec.c                                 |    2 +-
+ include/asm-generic/bug.h                 |    6 +-
+ include/asm-generic/vmlinux.lds.h         |    3 +
+ include/linux/compiler-gcc.h              |    4 +-
+ include/linux/compiler-gcc4.h             |    4 +
+ include/linux/compiler-gcc5.h             |    4 +
+ include/linux/compiler.h                  |    4 +
+ include/linux/fs.h                        |    2 +-
+ include/linux/irqdomain.h                 |    2 +-
+ lib/test-hexdump.c                        |    8 +-
+ tools/gcc/Makefile                        |    2 +
+ tools/gcc/constify_plugin.c               |    3 +-
+ tools/gcc/gcc-common.h                    |   23 ++
+ tools/gcc/initify_plugin.c                |  427 +++++++++++++++++++++++++++++
+ 27 files changed, 542 insertions(+), 72 deletions(-)
+
 commit 8cab60ecbb5b5667ba9ef80654fbeedc4d6e2cd5
 Author: Eric Work <work.eric@gmail.com>
 Date:   Mon May 18 23:26:23 2015 -0700
