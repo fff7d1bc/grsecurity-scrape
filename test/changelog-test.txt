@@ -1,3 +1,119 @@
+commit d435087b7dc7861149ee39c0a06a1d7e8c942f7e
+Author: Rusty Russell <rusty@rustcorp.com.au>
+Date:   Wed May 27 10:59:26 2015 +0930
+
+    lguest: fix out-by-one error in address checking.
+    
+    This bug has been there since day 1; addresses in the top guest physical
+    page weren't considered valid.  You could map that page (the check in
+    check_gpte() is correct), but if a guest tried to put a pagetable there
+    we'd check that address manually when walking it, and kill the guest.
+    
+    Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/lguest/core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 125836e926d5fdf74c748f9aad27bde566566378
+Author: Joe Thornber <ejt@redhat.com>
+Date:   Fri May 29 14:52:51 2015 +0100
+
+    dm: fix casting bug in dm_merge_bvec()
+    
+    dm_merge_bvec() was originally added in f6fccb ("dm: introduce
+    merge_bvec_fn").  In that commit a value in sectors is converted to
+    bytes using << 9, and then assigned to an int.  This code made
+    assumptions about the value of BIO_MAX_SECTORS.
+    
+    A later commit 148e51 ("dm: improve documentation and code clarity in
+    dm_merge_bvec") was meant to have no functional change but it removed
+    the use of BIO_MAX_SECTORS in favor of using queue_max_sectors().  At
+    this point the cast from sector_t to int resulted in a zero value.  The
+    fallout being dm_merge_bvec() would only allow a single page to be added
+    to a bio.
+    
+    This interim fix is minimal for the benefit of stable@ because the more
+    comprehensive cleanup of passing a sector_t to all DM targets' merge
+    function will impact quite a few DM targets.
+    
+    Signed-off-by: Joe Thornber <ejt@redhat.com>
+    Signed-off-by: Mike Snitzer <snitzer@redhat.com>
+    Cc: stable@vger.kernel.org # 3.19+
+
+ drivers/md/dm.c |   17 ++++++++++++-----
+ 1 files changed, 12 insertions(+), 5 deletions(-)
+
+commit e4077a089999d63dfbd6b83a834e24ec25f41fb4
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu May 28 23:09:19 2015 -0400
+
+    d_walk() might skip too much
+    
+    when we find that a child has died while we'd been trying to ascend,
+    we should go into the first live sibling itself, rather than its sibling.
+    
+    Off-by-one in question had been introduced in "deal with deadlock in
+    d_walk()" and the fix needs to be backported to all branches this one
+    has been backported to.
+    
+    Cc: stable@vger.kernel.org # 3.2 and later
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/dcache.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit b18767da07374771cd2c627b4d0aac1372eee807
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Sat May 30 09:16:53 2015 -0700
+
+    udp: fix behavior of wrong checksums
+    
+    We have two problems in UDP stack related to bogus checksums :
+    
+    1) We return -EAGAIN to application even if receive queue is not empty.
+       This breaks applications using edge trigger epoll()
+    
+    2) Under UDP flood, we can loop forever without yielding to other
+       processes, potentially hanging the host, especially on non SMP.
+    
+    This patch is an attempt to make things better.
+    
+    We might in the future add extra support for rt applications
+    wanting to better control time spent doing a recv() in a hostile
+    environment. For example we could validate checksums before queuing
+    packets in socket receive queue.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Willem de Bruijn <willemb@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/udp.c |    6 ++----
+ net/ipv6/udp.c |    6 ++----
+ 2 files changed, 4 insertions(+), 8 deletions(-)
+
+commit 33414e447f7395b1c4a510dda495c9f1318f4570
+Author: Jan Kara <jack@suse.cz>
+Date:   Tue Jun 2 17:10:28 2015 +0200
+
+    lib: Fix strnlen_user() to not touch memory after specified maximum
+    
+    If the specified maximum length of the string is a multiple of unsigned
+    long, we would load one long behind the specified maximum.  If that
+    happens to be in a next page, we can hit a page fault although we were
+    not expected to.
+    
+    Fix the off-by-one bug in the test whether we are at the end of the
+    specified range.
+    
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ lib/strnlen_user.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit 22050350eb0fd749f46a19c1c6814a5571c8a89b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed May 27 20:31:40 2015 -0400
