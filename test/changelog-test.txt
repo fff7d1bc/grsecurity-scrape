@@ -1,3 +1,92 @@
+commit 03b7af8228322b40082478299e9f126c285310d9
+Merge: ff50b9e 25cc98c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 8 21:13:31 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 25cc98cf74ff8408b8eb329fea32acce8e78acbf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 8 21:13:24 2015 -0400
+
+    fix typo
+
+ fs/binfmt_elf.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit ff50b9e20b0f1b7d77a1791842e7af4de4119eba
+Author: Helge Deller <deller@gmx.de>
+Date:   Thu Jun 4 23:57:18 2015 +0200
+
+    compat: cleanup coding in compat_get_bitmap() and compat_put_bitmap()
+    
+    In the functions compat_get_bitmap() and compat_put_bitmap() the
+    variable nr_compat_longs stores how many compat_ulong_t words should be
+    copied in a loop.
+    
+    The copy loop itself is this:
+      if (nr_compat_longs-- > 0) {
+          if (__get_user(um, umask)) return -EFAULT;
+      } else {
+          um = 0;
+      }
+    
+    Since nr_compat_longs gets unconditionally decremented in each loop and
+    since it's type is unsigned this could theoretically lead to out of
+    bounds accesses to userspace if nr_compat_longs wraps around to
+    (unsigned)(-1).
+    
+    Although the callers currently do not trigger out-of-bounds accesses, we
+    should better implement the loop in a safe way to completely avoid such
+    warp-arounds.
+    
+    Signed-off-by: Helge Deller <deller@gmx.de>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+
+ kernel/compat.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit bae0e0db826183b52118e8d0c9729717de984bc1
+Author: Robert Shearman <rshearma@brocade.com>
+Date:   Fri Jun 5 18:51:54 2015 +0100
+
+    ipv6: fix possible use after free of dev stats
+    
+    The memory pointed to by idev->stats.icmpv6msgdev,
+    idev->stats.icmpv6dev and idev->stats.ipv6 can each be used in an RCU
+    read context without taking a reference on idev. For example, through
+    IP6_*_STATS_* calls in ip6_rcv. These memory blocks are freed without
+    waiting for an RCU grace period to elapse. This could lead to the
+    memory being written to after it has been freed.
+    
+    Fix this by using call_rcu to free the memory used for stats, as well
+    as idev after an RCU grace period has elapsed.
+    
+    Signed-off-by: Robert Shearman <rshearma@brocade.com>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/addrconf_core.c |   11 +++++++++--
+ 1 files changed, 9 insertions(+), 2 deletions(-)
+
+commit ec0c6e7c12a3d1f50bdb49e9c57aeca4202d4cb7
+Merge: d435087 41fdefe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 8 20:31:53 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 41fdefe752c9ad838f327944a6633732c3a0a0ff
+Merge: 2ca6f6c be4cb23
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 8 20:31:44 2015 -0400
+
+    Merge branch 'linux-4.0.y' into pax-test
+    
+    Conflicts:
+    	fs/binfmt_elf.c
+
 commit d435087b7dc7861149ee39c0a06a1d7e8c942f7e
 Author: Rusty Russell <rusty@rustcorp.com.au>
 Date:   Wed May 27 10:59:26 2015 +0930
