@@ -1,3 +1,76 @@
+commit 7a7b02ef5103cdc17fb6fcc80ca8a1970b2251ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 17 12:27:08 2015 -0400
+
+    compile fix
+
+ drivers/scsi/sd.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 818f3710c980f01aedb9f7d4fa8a546de0f3431a
+Merge: 85cd1e6 9d91e179
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 17 11:54:37 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/arm/mm/fault.c
+    	arch/x86/mm/fault.c
+    	fs/exec.c
+
+commit 9d91e179fef371eeb1d04b3b7cf302a26437509a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 17 11:50:22 2015 -0400
+
+    Update to pax-linux-4.0.5-test15.patch:
+    - the size overflow plugin caught an integer mixup in scsi_finish_command and sd_done, reported by hunger
+    - changed the loglevel of our own messages that could result in a kernel panic
+    - some small cleanups backported from the upcoming 4.1 port
+
+ arch/arm/mm/fault.c         |    8 ++++----
+ arch/s390/mm/mmap.c         |    6 ++++++
+ arch/x86/mm/fault.c         |   10 +++++-----
+ drivers/firmware/dmi_scan.c |    2 +-
+ drivers/scsi/scsi.c         |    2 +-
+ drivers/scsi/sd.c           |    2 +-
+ fs/binfmt_elf.c             |    3 +--
+ fs/exec.c                   |    8 ++++----
+ 8 files changed, 23 insertions(+), 18 deletions(-)
+
+commit 85cd1e6a1a8f6ab2015b018f1da04517f388dbad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 17 08:48:19 2015 -0400
+
+    compile fix
+
+ tools/gcc/initify_plugin.c |    5 -----
+ 1 files changed, 0 insertions(+), 5 deletions(-)
+
+commit ce92b7eafa5eb34d2ef60937332891cf87ea8e32
+Merge: 03b7af8 fa8b398
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 17 08:26:12 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	tools/gcc/initify_plugin.c
+
+commit fa8b39819cdbfa1346d331dad2b18ebea6f5a0b1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 17 08:25:08 2015 -0400
+
+    Update to pax-linux-4.0.4-test14.patch:
+    - the initify plugin now covers syscall parameters as well and correctly builds string constant initializers
+    - Emese fixed a size overflow compile error, reported by Daniel Micay (https://bugs.archlinux.org/task/45320)
+
+ tools/gcc/gcc-common.h                             |    4 +-
+ tools/gcc/initify_plugin.c                         |   37 ++++++++++++++++----
+ .../size_overflow_plugin/intentional_overflow.c    |    3 ++
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ 4 files changed, 36 insertions(+), 10 deletions(-)
+
 commit 03b7af8228322b40082478299e9f126c285310d9
 Merge: ff50b9e 25cc98c
 Author: Brad Spengler <spender@grsecurity.net>
