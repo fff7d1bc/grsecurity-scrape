@@ -1,3 +1,316 @@
+commit c7255e17f51a8926d2cfd971e7fc0a9ea45d6f66
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 23 20:25:17 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 5be681f7155dc2cc84e9eea68bbda30c27e7c8fb
+Author: Julian Anastasov <ja@ssi.bg>
+Date:   Tue Jun 16 22:56:39 2015 +0300
+
+    neigh: do not modify unlinked entries
+    
+    The lockless lookups can return entry that is unlinked.
+    Sometimes they get reference before last neigh_cleanup_and_release,
+    sometimes they do not need reference. Later, any
+    modification attempts may result in the following problems:
+    
+    1. entry is not destroyed immediately because neigh_update
+    can start the timer for dead entry, eg. on change to NUD_REACHABLE
+    state. As result, entry lives for some time but is invisible
+    and out of control.
+    
+    2. __neigh_event_send can run in parallel with neigh_destroy
+    while refcnt=0 but if timer is started and expired refcnt can
+    reach 0 for second time leading to second neigh_destroy and
+    possible crash.
+    
+    Thanks to Eric Dumazet and Ying Xue for their work and analyze
+    on the __neigh_event_send change.
+    
+    Fixes: 767e97e1e0db ("neigh: RCU conversion of struct neighbour")
+    Fixes: a263b3093641 ("ipv4: Make neigh lookups directly in output packet path.")
+    Fixes: 6fd6ce2056de ("ipv6: Do not depend on rt->n in ip6_finish_output2().")
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: Ying Xue <ying.xue@windriver.com>
+    Signed-off-by: Julian Anastasov <ja@ssi.bg>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/neighbour.c |   13 +++++++++++++
+ 1 files changed, 13 insertions(+), 0 deletions(-)
+
+commit 1bd3aa5e9b1ebb78895d80f4585c8cc3abacf5b1
+Author: Willem de Bruijn <willemb@google.com>
+Date:   Wed Jun 17 15:59:34 2015 -0400
+
+    packet: avoid out of bounds read in round robin fanout
+    
+    PACKET_FANOUT_LB computes f->rr_cur such that it is modulo
+    f->num_members. It returns the old value unconditionally, but
+    f->num_members may have changed since the last store. Ensure
+    that the return value is always < num.
+    
+    When modifying the logic, simplify it further by replacing the loop
+    with an unconditional atomic increment.
+    
+    Fixes: dc99f600698d ("packet: Add fanout support.")
+    Suggested-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Willem de Bruijn <willemb@google.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/packet/af_packet.c |   18 ++----------------
+ 1 files changed, 2 insertions(+), 16 deletions(-)
+
+commit f417894a018e69b88b0468a0c0b97297bec2a329
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 23 18:53:40 2015 -0400
+
+    Backport security fix from https://lkml.org/lkml/2015/6/4/163
+
+ arch/x86/kvm/lapic.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 974dd748317bf29259bcde097e52bc33a662d026
+Author: Steve Cornelius <steve.cornelius@freescale.com>
+Date:   Mon Jun 15 16:52:59 2015 -0700
+
+    crypto: caam - fix RNG buffer cache alignment
+    
+    The hwrng output buffers (2) are cast inside of a a struct (caam_rng_ctx)
+    allocated in one DMA-tagged region. While the kernel's heap allocator
+    should place the overall struct on a cacheline aligned boundary, the 2
+    buffers contained within may not necessarily align. Consenquently, the ends
+    of unaligned buffers may not fully flush, and if so, stale data will be left
+    behind, resulting in small repeating patterns.
+    
+    This fix aligns the buffers inside the struct.
+    
+    Note that not all of the data inside caam_rng_ctx necessarily needs to be
+    DMA-tagged, only the buffers themselves require this. However, a fix would
+    incur the expense of error-handling bloat in the case of allocation failure.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Steve Cornelius <steve.cornelius@freescale.com>
+    Signed-off-by: Victoria Milhoan <vicki.milhoan@freescale.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ drivers/crypto/caam/caamrng.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 793c252a4b60a7797dccfee45af1ac7fd9fa49ea
+Author: Steve Cornelius <steve.cornelius@freescale.com>
+Date:   Mon Jun 15 16:52:56 2015 -0700
+
+    crypto: caam - improve initalization for context state saves
+    
+    Multiple function in asynchronous hashing use a saved-state block,
+    a.k.a. struct caam_hash_state, which holds a stash of information
+    between requests (init/update/final). Certain values in this state
+    block are loaded for processing using an inline-if, and when this
+    is done, the potential for uninitialized data can pose conflicts.
+    Therefore, this patch improves initialization of state data to
+    prevent false assignments using uninitialized data in the state block.
+    
+    This patch addresses the following traceback, originating in
+    ahash_final_ctx(), although a problem like this could certainly
+    exhibit other symptoms:
+    
+    kernel BUG at arch/arm/mm/dma-mapping.c:465!
+    Unable to handle kernel NULL pointer dereference at virtual address 00000000
+    pgd = 80004000
+    [00000000] *pgd=00000000
+    Internal error: Oops: 805 [#1] PREEMPT SMP
+    Modules linked in:
+    CPU: 0    Not tainted  (3.0.15-01752-gdd441b9-dirty #40)
+    PC is at __bug+0x1c/0x28
+    LR is at __bug+0x18/0x28
+    pc : [<80043240>]    lr : [<8004323c>]    psr: 60000013
+    sp : e423fd98  ip : 60000013  fp : 0000001c
+    r10: e4191b84  r9 : 00000020  r8 : 00000009
+    r7 : 88005038  r6 : 00000001  r5 : 2d676572  r4 : e4191a60
+    r3 : 00000000  r2 : 00000001  r1 : 60000093  r0 : 00000033
+    Flags: nZCv  IRQs on  FIQs on  Mode SVC_32  ISA ARM  Segment kernel
+    Control: 10c53c7d  Table: 1000404a  DAC: 00000015
+    Process cryptomgr_test (pid: 1306, stack limit = 0xe423e2f0)
+    Stack: (0xe423fd98 to 0xe4240000)
+    fd80:                                                       11807fd1 80048544
+    fda0: 88005000 e4191a00 e5178040 8039dda0 00000000 00000014 2d676572 e4191008
+    fdc0: 88005018 e4191a60 00100100 e4191a00 00000000 8039ce0c e423fea8 00000007
+    fde0: e4191a00 e4227000 e5178000 8039ce18 e419183c 80203808 80a94a44 00000006
+    fe00: 00000000 80207180 00000000 00000006 e423ff08 00000000 00000007 e5178000
+    fe20: e41918a4 80a949b4 8c4844e2 00000000 00000049 74227000 8c4844e2 00000e90
+    fe40: 0000000e 74227e90 ffff8c58 80ac29e0 e423fed4 8006a350 8c81625c e423ff5c
+    fe60: 00008576 e4002500 00000003 00030010 e4002500 00000003 e5180000 e4002500
+    fe80: e5178000 800e6d24 007fffff 00000000 00000010 e4001280 e4002500 60000013
+    fea0: 000000d0 804df078 00000000 00000000 00000000 00000000 00000000 00000000
+    fec0: 00000000 00000000 00000000 00000000 00000000 00000000 00000000 00000000
+    fee0: 00000000 00000000 e4227000 e4226000 e4753000 e4752000 e40a5000 e40a4000
+    ff00: e41e7000 e41e6000 00000000 00000000 00000000 e423ff14 e423ff14 00000000
+    ff20: 00000400 804f9080 e5178000 e4db0b40 00000000 e4db0b80 0000047c 00000400
+    ff40: 00000000 8020758c 00000400 ffffffff 0000008a 00000000 e4db0b40 80206e00
+    ff60: e4049dbc 00000000 00000000 00000003 e423ffa4 80062978 e41a8bfc 00000000
+    ff80: 00000000 e4049db4 00000013 e4049db0 00000013 00000000 00000000 00000000
+    ffa0: e4db0b40 e4db0b40 80204cbc 00000013 00000000 00000000 00000000 80204cfc
+    ffc0: e4049da0 80089544 80040a40 00000000 e4db0b40 00000000 00000000 00000000
+    ffe0: e423ffe0 e423ffe0 e4049da0 800894c4 80040a40 80040a40 00000000 00000000
+    [<80043240>] (__bug+0x1c/0x28) from [<80048544>] (___dma_single_dev_to_cpu+0x84)
+    [<80048544>] (___dma_single_dev_to_cpu+0x84/0x94) from [<8039dda0>] (ahash_fina)
+    [<8039dda0>] (ahash_final_ctx+0x180/0x428) from [<8039ce18>] (ahash_final+0xc/0)
+    [<8039ce18>] (ahash_final+0xc/0x10) from [<80203808>] (crypto_ahash_op+0x28/0xc)
+    [<80203808>] (crypto_ahash_op+0x28/0xc0) from [<80207180>] (test_hash+0x214/0x5)
+    [<80207180>] (test_hash+0x214/0x5b8) from [<8020758c>] (alg_test_hash+0x68/0x8c)
+    [<8020758c>] (alg_test_hash+0x68/0x8c) from [<80206e00>] (alg_test+0x7c/0x1b8)
+    [<80206e00>] (alg_test+0x7c/0x1b8) from [<80204cfc>] (cryptomgr_test+0x40/0x48)
+    [<80204cfc>] (cryptomgr_test+0x40/0x48) from [<80089544>] (kthread+0x80/0x88)
+    [<80089544>] (kthread+0x80/0x88) from [<80040a40>] (kernel_thread_exit+0x0/0x8)
+    Code: e59f0010 e1a01003 eb126a8d e3a03000 (e5833000)
+    ---[ end trace d52a403a1d1eaa86 ]---
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Steve Cornelius <steve.cornelius@freescale.com>
+    Signed-off-by: Victoria Milhoan <vicki.milhoan@freescale.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ drivers/crypto/caam/caamhash.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 7c28cec8b174cff2faa21f49dd248d8e68fd2acc
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Mon Jun 15 17:50:25 2015 -0400
+
+    tracing: Have filter check for balanced ops
+    
+    When the following filter is used it causes a warning to trigger:
+    
+     # cd /sys/kernel/debug/tracing
+     # echo "((dev==1)blocks==2)" > events/ext4/ext4_truncate_exit/filter
+    -bash: echo: write error: Invalid argument
+     # cat events/ext4/ext4_truncate_exit/filter
+    ((dev==1)blocks==2)
+    ^
+    parse_error: No error
+    
+     ------------[ cut here ]------------
+     WARNING: CPU: 2 PID: 1223 at kernel/trace/trace_events_filter.c:1640 replace_preds+0x3c5/0x990()
+     Modules linked in: bnep lockd grace bluetooth  ...
+     CPU: 3 PID: 1223 Comm: bash Tainted: G        W       4.1.0-rc3-test+ #450
+     Hardware name: Hewlett-Packard HP Compaq Pro 6300 SFF/339A, BIOS K01 v02.05 05/07/2012
+      0000000000000668 ffff8800c106bc98 ffffffff816ed4f9 ffff88011ead0cf0
+      0000000000000000 ffff8800c106bcd8 ffffffff8107fb07 ffffffff8136b46c
+      ffff8800c7d81d48 ffff8800d4c2bc00 ffff8800d4d4f920 00000000ffffffea
+     Call Trace:
+      [<ffffffff816ed4f9>] dump_stack+0x4c/0x6e
+      [<ffffffff8107fb07>] warn_slowpath_common+0x97/0xe0
+      [<ffffffff8136b46c>] ? _kstrtoull+0x2c/0x80
+      [<ffffffff8107fb6a>] warn_slowpath_null+0x1a/0x20
+      [<ffffffff81159065>] replace_preds+0x3c5/0x990
+      [<ffffffff811596b2>] create_filter+0x82/0xb0
+      [<ffffffff81159944>] apply_event_filter+0xd4/0x180
+      [<ffffffff81152bbf>] event_filter_write+0x8f/0x120
+      [<ffffffff811db2a8>] __vfs_write+0x28/0xe0
+      [<ffffffff811dda43>] ? __sb_start_write+0x53/0xf0
+      [<ffffffff812e51e0>] ? security_file_permission+0x30/0xc0
+      [<ffffffff811dc408>] vfs_write+0xb8/0x1b0
+      [<ffffffff811dc72f>] SyS_write+0x4f/0xb0
+      [<ffffffff816f5217>] system_call_fastpath+0x12/0x6a
+     ---[ end trace e11028bd95818dcd ]---
+    
+    Worse yet, reading the error message (the filter again) it says that
+    there was no error, when there clearly was. The issue is that the
+    code that checks the input does not check for balanced ops. That is,
+    having an op between a closed parenthesis and the next token.
+    
+    This would only cause a warning, and fail out before doing any real
+    harm, but it should still not caues a warning, and the error reported
+    should work:
+    
+     # cd /sys/kernel/debug/tracing
+     # echo "((dev==1)blocks==2)" > events/ext4/ext4_truncate_exit/filter
+    -bash: echo: write error: Invalid argument
+     # cat events/ext4/ext4_truncate_exit/filter
+    ((dev==1)blocks==2)
+    ^
+    parse_error: Meaningless filter expression
+    
+    And give no kernel warning.
+    
+    Link: http://lkml.kernel.org/r/20150615175025.7e809215@gandalf.local.home
+    
+    Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Cc: Ingo Molnar <mingo@redhat.com>
+    Cc: Arnaldo Carvalho de Melo <acme@kernel.org>
+    Cc: stable@vger.kernel.org # 2.6.31+
+    Reported-by: Vince Weaver <vincent.weaver@maine.edu>
+    Tested-by: Vince Weaver <vincent.weaver@maine.edu>
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ kernel/trace/trace_events_filter.c |   11 +++++++++--
+ 1 files changed, 9 insertions(+), 2 deletions(-)
+
+commit cbf383fdeb6a8dbcf216767b875eaf7f59b4fd27
+Author: Radim Krčmář <rkrcmar@redhat.com>
+Date:   Fri Jun 5 20:57:41 2015 +0200
+
+    KVM: x86: fix lapic.timer_mode on restore
+    
+    lapic.timer_mode was not properly initialized after migration, which
+    broke few useful things, like login, by making every sleep eternal.
+    
+    Fix this by calling apic_update_lvtt in kvm_apic_post_state_restore.
+    
+    There are other slowpaths that update lvtt, so this patch makes sure
+    something similar doesn't happen again by calling apic_update_lvtt
+    after every modification.
+    
+    Cc: stable@vger.kernel.org
+    Fixes: f30ebc312ca9 ("KVM: x86: optimize some accesses to LVTT and SPIV")
+    Signed-off-by: Radim Krčmář <rkrcmar@redhat.com>
+    Signed-off-by: Marcelo Tosatti <mtosatti@redhat.com>
+
+ arch/x86/kvm/lapic.c |   26 ++++++++++++++++----------
+ 1 files changed, 16 insertions(+), 10 deletions(-)
+
+commit f1d672e2b58b5ca787779392adcd106575908395
+Author: Jaedon Shin <jaedon.shin@gmail.com>
+Date:   Fri Jun 12 18:04:14 2015 +0900
+
+    MPI: MIPS: Fix compilation error with GCC 5.1
+    
+    This patch fixes mips compilation error:
+    
+    lib/mpi/generic_mpih-mul1.c: In function 'mpihelp_mul_1':
+    lib/mpi/longlong.h:651:2: error: impossible constraint in 'asm'
+    
+    Signed-off-by: Jaedon Shin <jaedon.shin@gmail.com>
+    Cc: Linux-MIPS <linux-mips@linux-mips.org>
+    Patchwork: https://patchwork.linux-mips.org/patch/10546/
+    Signed-off-by: Ralf Baechle <ralf@linux-mips.org>
+
+ lib/mpi/longlong.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 7f602e3686a99dad86fa8942b26fea59eccebe6e
+Merge: 7a7b02e 3d5f6be
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 23 18:22:38 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/mips/kernel/irq.c
+
+commit 3d5f6be075c42d4f87171b2a839149f104145e43
+Merge: 9d91e179 a0ce889
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 23 18:21:46 2015 -0400
+
+    Merge branch 'linux-4.0.y' into pax-test
+
 commit 7a7b02ef5103cdc17fb6fcc80ca8a1970b2251ec
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jun 17 12:27:08 2015 -0400
