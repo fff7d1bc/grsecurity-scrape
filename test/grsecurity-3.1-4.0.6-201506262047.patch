@@ -1,0 +1,907 @@
+diff --git a/Documentation/dontdiff b/Documentation/dontdiff
+index 9de9813..1462492 100644
+--- a/Documentation/dontdiff
++++ b/Documentation/dontdiff
+@@ -3,9 +3,11 @@
+ *.bc
+ *.bin
+ *.bz2
++*.c.[012]*.*
+ *.cis
+ *.cpio
+ *.csp
++*.dbg
+ *.dsp
+ *.dvi
+ *.elf
+@@ -15,6 +17,7 @@
+ *.gcov
+ *.gen.S
+ *.gif
++*.gmo
+ *.grep
+ *.grp
+ *.gz
+@@ -51,14 +54,17 @@
+ *.tab.h
+ *.tex
+ *.ver
++*.vim
+ *.xml
+ *.xz
+ *_MODULES
++*_reg_safe.h
+ *_vga16.c
+ *~
+ \#*#
+ *.9
+-.*
++.[^g]*
++.gen*
+ .*.d
+ .mm
+ 53c700_d.h
+@@ -72,9 +78,11 @@ Image
+ Module.markers
+ Module.symvers
+ PENDING
++PERF*
+ SCCS
+ System.map*
+ TAGS
++TRACEEVENT-CFLAGS
+ aconf
+ af_names.h
+ aic7*reg.h*
+@@ -83,6 +91,7 @@ aic7*seq.h*
+ aicasm
+ aicdb.h*
+ altivec*.c
++ashldi3.S
+ asm-offsets.h
+ asm_offsets.h
+ autoconf.h*
+@@ -95,32 +104,40 @@ bounds.h
+ bsetup
+ btfixupprep
+ build
++builtin-policy.h
+ bvmlinux
+ bzImage*
+ capability_names.h
+ capflags.c
+ classlist.h*
++clut_vga16.c
++common-cmds.h
+ comp*.log
+ compile.h*
+ conf
+ config
+ config-*
+ config_data.h*
++config.c
+ config.mak
+ config.mak.autogen
++config.tmp
+ conmakehash
+ consolemap_deftbl.c*
+ cpustr.h
+ crc32table.h*
+ cscope.*
+ defkeymap.c
++devicetable-offsets.h
+ devlist.h*
+ dnotify_test
+ docproc
+ dslm
++dtc-lexer.lex.c
+ elf2ecoff
+ elfconfig.h*
+ evergreen_reg_safe.h
++exception_policy.conf
+ fixdep
+ flask.h
+ fore200e_mkfirm
+@@ -128,12 +145,15 @@ fore200e_pca_fw.c*
+ gconf
+ gconf.glade.h
+ gen-devlist
++gen-kdb_cmds.c
+ gen_crc32table
+ gen_init_cpio
+ generated
+ genheaders
+ genksyms
+ *_gray256.c
++hash
++hid-example
+ hpet_example
+ hugepage-mmap
+ hugepage-shm
+@@ -148,14 +168,14 @@ int32.c
+ int4.c
+ int8.c
+ kallsyms
+-kconfig
++kern_constants.h
+ keywords.c
+ ksym.c*
+ ksym.h*
+ kxgettext
+ lex.c
+ lex.*.c
+-linux
++lib1funcs.S
+ logo_*.c
+ logo_*_clut224.c
+ logo_*_mono.c
+@@ -165,14 +185,15 @@ mach-types.h
+ machtypes.h
+ map
+ map_hugetlb
+-media
+ mconf
++mdp
+ miboot*
+ mk_elfconfig
+ mkboot
+ mkbugboot
+ mkcpustr
+ mkdep
++mkpiggy
+ mkprep
+ mkregtable
+ mktables
+@@ -188,6 +209,8 @@ oui.c*
+ page-types
+ parse.c
+ parse.h
++parse-events*
++pasyms.h
+ patches*
+ pca200e.bin
+ pca200e_ecd.bin2
+@@ -197,6 +220,7 @@ perf-archive
+ piggyback
+ piggy.gzip
+ piggy.S
++pmu-*
+ pnmtologo
+ ppc_defs.h*
+ pss_boot.h
+@@ -206,7 +230,12 @@ r200_reg_safe.h
+ r300_reg_safe.h
+ r420_reg_safe.h
+ r600_reg_safe.h
++randomize_layout_hash.h
++randomize_layout_seed.h
++realmode.lds
++realmode.relocs
+ recordmcount
++regdb.c
+ relocs
+ rlim_names.h
+ rn50_reg_safe.h
+@@ -216,8 +245,12 @@ series
+ setup
+ setup.bin
+ setup.elf
++signing_key*
++size_overflow_hash.h
+ sImage
++slabinfo
+ sm_tbl*
++sortextable
+ split-include
+ syscalltab.h
+ tables.c
+@@ -227,6 +260,7 @@ tftpboot.img
+ timeconst.h
+ times.h*
+ trix_boot.h
++user_constants.h
+ utsrelease.h*
+ vdso-syms.lds
+ vdso.lds
+@@ -238,13 +272,17 @@ vdso32.lds
+ vdso32.so.dbg
+ vdso64.lds
+ vdso64.so.dbg
++vdsox32.lds
++vdsox32-syms.lds
+ version.h*
+ vmImage
+ vmlinux
+ vmlinux-*
+ vmlinux.aout
+ vmlinux.bin.all
++vmlinux.bin.bz2
+ vmlinux.lds
++vmlinux.relocs
+ vmlinuz
+ voffset.h
+ vsyscall.lds
+@@ -252,9 +290,12 @@ vsyscall_32.lds
+ wanxlfw.inc
+ uImage
+ unifdef
++utsrelease.h
+ wakeup.bin
+ wakeup.elf
+ wakeup.lds
++x509*
+ zImage*
+ zconf.hash.c
++zconf.lex.c
+ zoffset.h
+diff --git a/Documentation/kbuild/makefiles.txt b/Documentation/kbuild/makefiles.txt
+index 74b6c6d..eac0e77 100644
+--- a/Documentation/kbuild/makefiles.txt
++++ b/Documentation/kbuild/makefiles.txt
+@@ -23,10 +23,11 @@ This document describes the Linux kernel Makefiles.
+ 	=== 4 Host Program support
+ 	   --- 4.1 Simple Host Program
+ 	   --- 4.2 Composite Host Programs
+-	   --- 4.3 Using C++ for host programs
+-	   --- 4.4 Controlling compiler options for host programs
+-	   --- 4.5 When host programs are actually built
+-	   --- 4.6 Using hostprogs-$(CONFIG_FOO)
++	   --- 4.3 Defining shared libraries
++	   --- 4.4 Using C++ for host programs
++	   --- 4.5 Controlling compiler options for host programs
++	   --- 4.6 When host programs are actually built
++	   --- 4.7 Using hostprogs-$(CONFIG_FOO)
+ 
+ 	=== 5 Kbuild clean infrastructure
+ 
+@@ -643,7 +644,29 @@ Both possibilities are described in the following.
+ 	Finally, the two .o files are linked to the executable, lxdialog.
+ 	Note: The syntax <executable>-y is not permitted for host-programs.
+ 
+---- 4.3 Using C++ for host programs
++--- 4.3 Defining shared libraries
++
++	Objects with extension .so are considered shared libraries, and
++	will be compiled as position independent objects.
++	Kbuild provides support for shared libraries, but the usage
++	shall be restricted.
++	In the following example the libkconfig.so shared library is used
++	to link the executable conf.
++
++	Example:
++		#scripts/kconfig/Makefile
++		hostprogs-y     := conf
++		conf-objs       := conf.o libkconfig.so
++		libkconfig-objs := expr.o type.o
++
++	Shared libraries always require a corresponding -objs line, and
++	in the example above the shared library libkconfig is composed by
++	the two objects expr.o and type.o.
++	expr.o and type.o will be built as position independent code and
++	linked as a shared library libkconfig.so. C++ is not supported for
++	shared libraries.
++
++--- 4.4 Using C++ for host programs
+ 
+ 	kbuild offers support for host programs written in C++. This was
+ 	introduced solely to support kconfig, and is not recommended
+@@ -666,7 +689,7 @@ Both possibilities are described in the following.
+ 		qconf-cxxobjs := qconf.o
+ 		qconf-objs    := check.o
+ 
+---- 4.4 Controlling compiler options for host programs
++--- 4.5 Controlling compiler options for host programs
+ 
+ 	When compiling host programs, it is possible to set specific flags.
+ 	The programs will always be compiled utilising $(HOSTCC) passed
+@@ -694,7 +717,7 @@ Both possibilities are described in the following.
+ 	When linking qconf, it will be passed the extra option
+ 	"-L$(QTDIR)/lib".
+ 
+---- 4.5 When host programs are actually built
++--- 4.6 When host programs are actually built
+ 
+ 	Kbuild will only build host-programs when they are referenced
+ 	as a prerequisite.
+@@ -725,7 +748,7 @@ Both possibilities are described in the following.
+ 	This will tell kbuild to build lxdialog even if not referenced in
+ 	any rule.
+ 
+---- 4.6 Using hostprogs-$(CONFIG_FOO)
++--- 4.7 Using hostprogs-$(CONFIG_FOO)
+ 
+ 	A typical pattern in a Kbuild file looks like this:
+ 
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 4d68ec8..9546b75 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -1203,6 +1203,13 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			Format: <unsigned int> such that (rxsize & ~0x1fffc0) == 0.
+ 			Default: 1024
+ 
++	grsec_proc_gid= [GRKERNSEC_PROC_USERGROUP] Chooses GID to
++			ignore grsecurity's /proc restrictions
++
++	grsec_sysfs_restrict= Format: 0 | 1
++			Default: 1
++			Disables GRKERNSEC_SYSFS_RESTRICT if enabled in config
++
+ 	hashdist=	[KNL,NUMA] Large hashes allocated during boot
+ 			are distributed across NUMA nodes.  Defaults on
+ 			for 64-bit NUMA, off otherwise.
+@@ -2300,6 +2307,10 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			noexec=on: enable non-executable mappings (default)
+ 			noexec=off: disable non-executable mappings
+ 
++	nopcid		[X86-64]
++			Disable PCID (Process-Context IDentifier) even if it
++			is supported by the processor.
++
+ 	nosmap		[X86]
+ 			Disable SMAP (Supervisor Mode Access Prevention)
+ 			even if it is supported by processor.
+@@ -2601,6 +2612,30 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			the specified number of seconds.  This is to be used if
+ 			your oopses keep scrolling off the screen.
+ 
++	pax_nouderef	[X86] disables UDEREF.  Most likely needed under certain
++			virtualization environments that don't cope well with the
++			expand down segment used by UDEREF on X86-32 or the frequent
++			page table updates on X86-64.
++
++	pax_sanitize_slab=
++			Format: { 0 | 1 | off | fast | full }
++			Options '0' and '1' are only provided for backward
++			compatibility, 'off' or 'fast' should be used instead.
++			0|off : disable slab object sanitization
++			1|fast: enable slab object sanitization excluding
++				whitelisted slabs (default)
++			full  : sanitize all slabs, even the whitelisted ones
++
++	pax_softmode=	0/1 to disable/enable PaX softmode on boot already.
++
++	pax_extra_latent_entropy
++			Enable a very simple form of latent entropy extraction
++			from the first 4GB of memory as the bootmem allocator
++			passes the memory pages to the buddy allocator.
++
++	pax_weakuderef	[X86-64] enables the weaker but faster form of UDEREF
++			when the processor supports PCID.
++
+ 	pcbit=		[HW,ISDN]
+ 
+ 	pcd.		[PARIDE]
+diff --git a/Makefile b/Makefile
+index af6da04..22820aa 100644
+--- a/Makefile
++++ b/Makefile
+@@ -298,7 +298,9 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+ HOSTCC       = gcc
+ HOSTCXX      = g++
+ HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
+-HOSTCXXFLAGS = -O2
++HOSTCFLAGS   = -W -Wno-unused-parameter -Wno-missing-field-initializers -fno-delete-null-pointer-checks
++HOSTCFLAGS  += $(call cc-option, -Wno-empty-body)
++HOSTCXXFLAGS = -O2 -Wall -W -Wno-array-bounds
+ 
+ ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
+ HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
+@@ -446,8 +448,8 @@ export RCS_TAR_IGNORE := --exclude SCCS --exclude BitKeeper --exclude .svn \
+ # Rules shared between *config targets and build targets
+ 
+ # Basic helpers built in scripts/
+-PHONY += scripts_basic
+-scripts_basic:
++PHONY += scripts_basic gcc-plugins
++scripts_basic: gcc-plugins
+ 	$(Q)$(MAKE) $(build)=scripts/basic
+ 	$(Q)rm -f .tmp_quiet_recordmcount
+ 
+@@ -622,6 +624,74 @@ endif
+ # Tell gcc to never replace conditional load with a non-conditional one
+ KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
+ 
++ifndef DISABLE_PAX_PLUGINS
++ifeq ($(call cc-ifversion, -ge, 0408, y), y)
++PLUGINCC := $(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-plugin.sh "$(HOSTCXX)" "$(HOSTCXX)" "$(CC)")
++else
++PLUGINCC := $(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-plugin.sh "$(HOSTCC)" "$(HOSTCXX)" "$(CC)")
++endif
++ifneq ($(PLUGINCC),)
++ifdef CONFIG_PAX_CONSTIFY_PLUGIN
++CONSTIFY_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/constify_plugin.so -DCONSTIFY_PLUGIN
++endif
++ifdef CONFIG_PAX_MEMORY_STACKLEAK
++STACKLEAK_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/stackleak_plugin.so -DSTACKLEAK_PLUGIN
++STACKLEAK_PLUGIN_CFLAGS += -fplugin-arg-stackleak_plugin-track-lowest-sp=100
++endif
++ifdef CONFIG_KALLOCSTAT_PLUGIN
++KALLOCSTAT_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/kallocstat_plugin.so
++endif
++ifdef CONFIG_PAX_KERNEXEC_PLUGIN
++KERNEXEC_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/kernexec_plugin.so
++KERNEXEC_PLUGIN_CFLAGS += -fplugin-arg-kernexec_plugin-method=$(CONFIG_PAX_KERNEXEC_PLUGIN_METHOD) -DKERNEXEC_PLUGIN
++KERNEXEC_PLUGIN_AFLAGS := -DKERNEXEC_PLUGIN
++endif
++ifdef CONFIG_GRKERNSEC_RANDSTRUCT
++RANDSTRUCT_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/randomize_layout_plugin.so -DRANDSTRUCT_PLUGIN
++ifdef CONFIG_GRKERNSEC_RANDSTRUCT_PERFORMANCE
++RANDSTRUCT_PLUGIN_CFLAGS += -fplugin-arg-randomize_layout_plugin-performance-mode
++endif
++endif
++ifdef CONFIG_CHECKER_PLUGIN
++ifeq ($(call cc-ifversion, -ge, 0406, y), y)
++CHECKER_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/checker_plugin.so -DCHECKER_PLUGIN
++endif
++endif
++COLORIZE_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/colorize_plugin.so
++ifdef CONFIG_PAX_SIZE_OVERFLOW
++SIZE_OVERFLOW_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/size_overflow_plugin/size_overflow_plugin.so -DSIZE_OVERFLOW_PLUGIN
++endif
++ifdef CONFIG_PAX_LATENT_ENTROPY
++LATENT_ENTROPY_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/latent_entropy_plugin.so -DLATENT_ENTROPY_PLUGIN
++endif
++ifdef CONFIG_PAX_MEMORY_STRUCTLEAK
++STRUCTLEAK_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/structleak_plugin.so -DSTRUCTLEAK_PLUGIN
++endif
++INITIFY_PLUGIN_CFLAGS := -fplugin=$(objtree)/tools/gcc/initify_plugin.so -DINITIFY_PLUGIN
++GCC_PLUGINS_CFLAGS := $(CONSTIFY_PLUGIN_CFLAGS) $(STACKLEAK_PLUGIN_CFLAGS) $(KALLOCSTAT_PLUGIN_CFLAGS)
++GCC_PLUGINS_CFLAGS += $(KERNEXEC_PLUGIN_CFLAGS) $(CHECKER_PLUGIN_CFLAGS) $(COLORIZE_PLUGIN_CFLAGS)
++GCC_PLUGINS_CFLAGS += $(SIZE_OVERFLOW_PLUGIN_CFLAGS) $(LATENT_ENTROPY_PLUGIN_CFLAGS) $(STRUCTLEAK_PLUGIN_CFLAGS)
++GCC_PLUGINS_CFLAGS += $(INITIFY_PLUGIN_CFLAGS)
++GCC_PLUGINS_CFLAGS += $(RANDSTRUCT_PLUGIN_CFLAGS)
++GCC_PLUGINS_AFLAGS := $(KERNEXEC_PLUGIN_AFLAGS)
++export PLUGINCC GCC_PLUGINS_CFLAGS GCC_PLUGINS_AFLAGS CONSTIFY_PLUGIN LATENT_ENTROPY_PLUGIN_CFLAGS
++ifeq ($(KBUILD_EXTMOD),)
++gcc-plugins:
++	$(Q)$(MAKE) $(build)=tools/gcc
++else
++gcc-plugins: ;
++endif
++else
++gcc-plugins:
++ifeq ($(call cc-ifversion, -ge, 0405, y), y)
++	$(error Your gcc installation does not support plugins.  If the necessary headers for plugin support are missing, they should be installed.  On Debian, apt-get install gcc-<ver>-plugin-dev.  If you choose to ignore this error and lessen the improvements provided by this patch, re-run make with the DISABLE_PAX_PLUGINS=y argument.))
++else
++	$(Q)echo "warning, your gcc version does not support plugins, you should upgrade it to gcc 4.5 at least"
++endif
++	$(Q)echo "PAX_MEMORY_STACKLEAK, constification, PAX_LATENT_ENTROPY and other features will be less secure.  PAX_SIZE_OVERFLOW will not be active."
++endif
++endif
++
+ ifdef CONFIG_READABLE_ASM
+ # Disable optimizations that make assembler listings hard to read.
+ # reorder blocks reorders the control in the function
+@@ -714,7 +784,7 @@ KBUILD_CFLAGS   += $(call cc-option, -gsplit-dwarf, -g)
+ else
+ KBUILD_CFLAGS	+= -g
+ endif
+-KBUILD_AFLAGS	+= -Wa,-gdwarf-2
++KBUILD_AFLAGS	+= -Wa,--gdwarf-2
+ endif
+ ifdef CONFIG_DEBUG_INFO_DWARF4
+ KBUILD_CFLAGS	+= $(call cc-option, -gdwarf-4,)
+@@ -884,7 +954,7 @@ export mod_sign_cmd
+ 
+ 
+ ifeq ($(KBUILD_EXTMOD),)
+-core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/
++core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/ grsecurity/
+ 
+ vmlinux-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(init-m) \
+ 		     $(core-y) $(core-m) $(drivers-y) $(drivers-m) \
+@@ -934,6 +1004,8 @@ endif
+ 
+ # The actual objects are generated when descending,
+ # make sure no implicit rule kicks in
++$(filter-out $(init-y),$(vmlinux-deps)): KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++$(filter-out $(init-y),$(vmlinux-deps)): KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
+ $(sort $(vmlinux-deps)): $(vmlinux-dirs) ;
+ 
+ # Handle descending into subdirectories listed in $(vmlinux-dirs)
+@@ -943,7 +1015,7 @@ $(sort $(vmlinux-deps)): $(vmlinux-dirs) ;
+ # Error messages still appears in the original language
+ 
+ PHONY += $(vmlinux-dirs)
+-$(vmlinux-dirs): prepare scripts
++$(vmlinux-dirs): gcc-plugins prepare scripts
+ 	$(Q)$(MAKE) $(build)=$@
+ 
+ define filechk_kernel.release
+@@ -986,10 +1058,13 @@ prepare1: prepare2 $(version_h) include/generated/utsrelease.h \
+ 
+ archprepare: archheaders archscripts prepare1 scripts_basic
+ 
++prepare0: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++prepare0: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
+ prepare0: archprepare FORCE
+ 	$(Q)$(MAKE) $(build)=.
+ 
+ # All the preparing..
++prepare: KBUILD_CFLAGS := $(filter-out $(GCC_PLUGINS_CFLAGS),$(KBUILD_CFLAGS))
+ prepare: prepare0
+ 
+ # Generate some files
+@@ -1103,6 +1178,8 @@ all: modules
+ # using awk while concatenating to the final file.
+ 
+ PHONY += modules
++modules: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++modules: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
+ modules: $(vmlinux-dirs) $(if $(KBUILD_BUILTIN),vmlinux) modules.builtin
+ 	$(Q)$(AWK) '!x[$$0]++' $(vmlinux-dirs:%=$(objtree)/%/modules.order) > $(objtree)/modules.order
+ 	@$(kecho) '  Building modules, stage 2.';
+@@ -1118,7 +1195,7 @@ modules.builtin: $(vmlinux-dirs:%=%/modules.builtin)
+ 
+ # Target to prepare building external modules
+ PHONY += modules_prepare
+-modules_prepare: prepare scripts
++modules_prepare: gcc-plugins prepare scripts
+ 
+ # Target to install modules
+ PHONY += modules_install
+@@ -1184,7 +1261,10 @@ MRPROPER_FILES += .config .config.old .version .old_version \
+ 		  Module.symvers tags TAGS cscope* GPATH GTAGS GRTAGS GSYMS \
+ 		  signing_key.priv signing_key.x509 x509.genkey		\
+ 		  extra_certificates signing_key.x509.keyid		\
+-		  signing_key.x509.signer vmlinux-gdb.py
++		  signing_key.x509.signer vmlinux-gdb.py \
++		  tools/gcc/size_overflow_plugin/size_overflow_hash_aux.h \
++		  tools/gcc/size_overflow_plugin/size_overflow_hash.h \
++		  tools/gcc/randomize_layout_seed.h
+ 
+ # clean - Delete most, but leave enough to build external modules
+ #
+@@ -1223,7 +1303,7 @@ distclean: mrproper
+ 	@find $(srctree) $(RCS_FIND_IGNORE) \
+ 		\( -name '*.orig' -o -name '*.rej' -o -name '*~' \
+ 		-o -name '*.bak' -o -name '#*#' -o -name '.*.orig' \
+-		-o -name '.*.rej' -o -name '*%'  -o -name 'core' \) \
++		-o -name '.*.rej' -o -name '*.so' -o -name '*%' -o -name 'core' \) \
+ 		-type f -print | xargs rm -f
+ 
+ 
+@@ -1389,6 +1469,8 @@ PHONY += $(module-dirs) modules
+ $(module-dirs): crmodverdir $(objtree)/Module.symvers
+ 	$(Q)$(MAKE) $(build)=$(patsubst _module_%,%,$@)
+ 
++modules: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++modules: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
+ modules: $(module-dirs)
+ 	@$(kecho) '  Building modules, stage 2.';
+ 	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modpost
+@@ -1529,17 +1611,21 @@ else
+         target-dir = $(if $(KBUILD_EXTMOD),$(dir $<),$(dir $@))
+ endif
+ 
+-%.s: %.c prepare scripts FORCE
++%.s: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++%.s: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
++%.s: %.c gcc-plugins prepare scripts FORCE
+ 	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+ %.i: %.c prepare scripts FORCE
+ 	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+-%.o: %.c prepare scripts FORCE
++%.o: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++%.o: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
++%.o: %.c gcc-plugins prepare scripts FORCE
+ 	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+ %.lst: %.c prepare scripts FORCE
+ 	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+-%.s: %.S prepare scripts FORCE
++%.s: %.S gcc-plugins prepare scripts FORCE
+ 	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+-%.o: %.S prepare scripts FORCE
++%.o: %.S gcc-plugins prepare scripts FORCE
+ 	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+ %.symtypes: %.c prepare scripts FORCE
+ 	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
+@@ -1551,11 +1637,15 @@ endif
+ 	$(build)=$(build-dir)
+ # Make sure the latest headers are built for Documentation
+ Documentation/: headers_install
+-%/: prepare scripts FORCE
++%/: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++%/: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
++%/: gcc-plugins prepare scripts FORCE
+ 	$(cmd_crmodverdir)
+ 	$(Q)$(MAKE) KBUILD_MODULES=$(if $(CONFIG_MODULES),1) \
+ 	$(build)=$(build-dir)
+-%.ko: prepare scripts FORCE
++%.ko: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++%.ko: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
++%.ko: gcc-plugins prepare scripts FORCE
+ 	$(cmd_crmodverdir)
+ 	$(Q)$(MAKE) KBUILD_MODULES=$(if $(CONFIG_MODULES),1)   \
+ 	$(build)=$(build-dir) $(@:.ko=.o)
+diff --git a/arch/alpha/include/asm/atomic.h b/arch/alpha/include/asm/atomic.h
+index 8f8eafb..3405f46 100644
+--- a/arch/alpha/include/asm/atomic.h
++++ b/arch/alpha/include/asm/atomic.h
+@@ -239,4 +239,14 @@ static inline long atomic64_dec_if_positive(atomic64_t *v)
+ #define atomic_dec(v) atomic_sub(1,(v))
+ #define atomic64_dec(v) atomic64_sub(1,(v))
+ 
++#define atomic64_read_unchecked(v)		atomic64_read(v)
++#define atomic64_set_unchecked(v, i)		atomic64_set((v), (i))
++#define atomic64_add_unchecked(a, v)		atomic64_add((a), (v))
++#define atomic64_add_return_unchecked(a, v)	atomic64_add_return((a), (v))
++#define atomic64_sub_unchecked(a, v)		atomic64_sub((a), (v))
++#define atomic64_inc_unchecked(v)		atomic64_inc(v)
++#define atomic64_inc_return_unchecked(v)	atomic64_inc_return(v)
++#define atomic64_dec_unchecked(v)		atomic64_dec(v)
++#define atomic64_cmpxchg_unchecked(v, o, n)	atomic64_cmpxchg((v), (o), (n))
++
+ #endif /* _ALPHA_ATOMIC_H */
+diff --git a/arch/alpha/include/asm/cache.h b/arch/alpha/include/asm/cache.h
+index ad368a9..fbe0f25 100644
+--- a/arch/alpha/include/asm/cache.h
++++ b/arch/alpha/include/asm/cache.h
+@@ -4,19 +4,19 @@
+ #ifndef __ARCH_ALPHA_CACHE_H
+ #define __ARCH_ALPHA_CACHE_H
+ 
++#include <linux/const.h>
+ 
+ /* Bytes per L1 (data) cache line. */
+ #if defined(CONFIG_ALPHA_GENERIC) || defined(CONFIG_ALPHA_EV6)
+-# define L1_CACHE_BYTES     64
+ # define L1_CACHE_SHIFT     6
+ #else
+ /* Both EV4 and EV5 are write-through, read-allocate,
+    direct-mapped, physical.
+ */
+-# define L1_CACHE_BYTES     32
+ # define L1_CACHE_SHIFT     5
+ #endif
+ 
++#define L1_CACHE_BYTES     (_AC(1,UL) << L1_CACHE_SHIFT)
+ #define SMP_CACHE_BYTES    L1_CACHE_BYTES
+ 
+ #endif
+diff --git a/arch/alpha/include/asm/elf.h b/arch/alpha/include/asm/elf.h
+index 968d999..d36b2df 100644
+--- a/arch/alpha/include/asm/elf.h
++++ b/arch/alpha/include/asm/elf.h
+@@ -91,6 +91,13 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
+ 
+ #define ELF_ET_DYN_BASE		(TASK_UNMAPPED_BASE + 0x1000000)
+ 
++#ifdef CONFIG_PAX_ASLR
++#define PAX_ELF_ET_DYN_BASE	(current->personality & ADDR_LIMIT_32BIT ? 0x10000 : 0x120000000UL)
++
++#define PAX_DELTA_MMAP_LEN	(current->personality & ADDR_LIMIT_32BIT ? 14 : 28)
++#define PAX_DELTA_STACK_LEN	(current->personality & ADDR_LIMIT_32BIT ? 14 : 19)
++#endif
++
+ /* $0 is set by ld.so to a pointer to a function which might be 
+    registered using atexit.  This provides a mean for the dynamic
+    linker to call DT_FINI functions for shared libraries that have
+diff --git a/arch/alpha/include/asm/pgalloc.h b/arch/alpha/include/asm/pgalloc.h
+index aab14a0..b4fa3e7 100644
+--- a/arch/alpha/include/asm/pgalloc.h
++++ b/arch/alpha/include/asm/pgalloc.h
+@@ -29,6 +29,12 @@ pgd_populate(struct mm_struct *mm, pgd_t *pgd, pmd_t *pmd)
+ 	pgd_set(pgd, pmd);
+ }
+ 
++static inline void
++pgd_populate_kernel(struct mm_struct *mm, pgd_t *pgd, pmd_t *pmd)
++{
++	pgd_populate(mm, pgd, pmd);
++}
++
+ extern pgd_t *pgd_alloc(struct mm_struct *mm);
+ 
+ static inline void
+diff --git a/arch/alpha/include/asm/pgtable.h b/arch/alpha/include/asm/pgtable.h
+index a9a1195..e9b8417 100644
+--- a/arch/alpha/include/asm/pgtable.h
++++ b/arch/alpha/include/asm/pgtable.h
+@@ -101,6 +101,17 @@ struct vm_area_struct;
+ #define PAGE_SHARED	__pgprot(_PAGE_VALID | __ACCESS_BITS)
+ #define PAGE_COPY	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW)
+ #define PAGE_READONLY	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW)
++
++#ifdef CONFIG_PAX_PAGEEXEC
++# define PAGE_SHARED_NOEXEC	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOE)
++# define PAGE_COPY_NOEXEC	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW | _PAGE_FOE)
++# define PAGE_READONLY_NOEXEC	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW | _PAGE_FOE)
++#else
++# define PAGE_SHARED_NOEXEC	PAGE_SHARED
++# define PAGE_COPY_NOEXEC	PAGE_COPY
++# define PAGE_READONLY_NOEXEC	PAGE_READONLY
++#endif
++
+ #define PAGE_KERNEL	__pgprot(_PAGE_VALID | _PAGE_ASM | _PAGE_KRE | _PAGE_KWE)
+ 
+ #define _PAGE_NORMAL(x) __pgprot(_PAGE_VALID | __ACCESS_BITS | (x))
+diff --git a/arch/alpha/kernel/module.c b/arch/alpha/kernel/module.c
+index 2fd00b7..cfd5069 100644
+--- a/arch/alpha/kernel/module.c
++++ b/arch/alpha/kernel/module.c
+@@ -160,7 +160,7 @@ apply_relocate_add(Elf64_Shdr *sechdrs, const char *strtab,
+ 
+ 	/* The small sections were sorted to the end of the segment.
+ 	   The following should definitely cover them.  */
+-	gp = (u64)me->module_core + me->core_size - 0x8000;
++	gp = (u64)me->module_core_rw + me->core_size_rw - 0x8000;
+ 	got = sechdrs[me->arch.gotsecindex].sh_addr;
+ 
+ 	for (i = 0; i < n; i++) {
+diff --git a/arch/alpha/kernel/osf_sys.c b/arch/alpha/kernel/osf_sys.c
+index e51f578..16c64a3 100644
+--- a/arch/alpha/kernel/osf_sys.c
++++ b/arch/alpha/kernel/osf_sys.c
+@@ -1296,10 +1296,11 @@ SYSCALL_DEFINE1(old_adjtimex, struct timex32 __user *, txc_p)
+    generic version except that we know how to honor ADDR_LIMIT_32BIT.  */
+ 
+ static unsigned long
+-arch_get_unmapped_area_1(unsigned long addr, unsigned long len,
+-		         unsigned long limit)
++arch_get_unmapped_area_1(struct file *filp, unsigned long addr, unsigned long len,
++		         unsigned long limit, unsigned long flags)
+ {
+ 	struct vm_unmapped_area_info info;
++	unsigned long offset = gr_rand_threadstack_offset(current->mm, filp, flags);
+ 
+ 	info.flags = 0;
+ 	info.length = len;
+@@ -1307,6 +1308,7 @@ arch_get_unmapped_area_1(unsigned long addr, unsigned long len,
+ 	info.high_limit = limit;
+ 	info.align_mask = 0;
+ 	info.align_offset = 0;
++	info.threadstack_offset = offset;
+ 	return vm_unmapped_area(&info);
+ }
+ 
+@@ -1339,20 +1341,24 @@ arch_get_unmapped_area(struct file *filp, unsigned long addr,
+ 	   merely specific addresses, but regions of memory -- perhaps
+ 	   this feature should be incorporated into all ports?  */
+ 
++#ifdef CONFIG_PAX_RANDMMAP
++	if (!(current->mm->pax_flags & MF_PAX_RANDMMAP))
++#endif
++
+ 	if (addr) {
+-		addr = arch_get_unmapped_area_1 (PAGE_ALIGN(addr), len, limit);
++		addr = arch_get_unmapped_area_1 (filp, PAGE_ALIGN(addr), len, limit, flags);
+ 		if (addr != (unsigned long) -ENOMEM)
+ 			return addr;
+ 	}
+ 
+ 	/* Next, try allocating at TASK_UNMAPPED_BASE.  */
+-	addr = arch_get_unmapped_area_1 (PAGE_ALIGN(TASK_UNMAPPED_BASE),
+-					 len, limit);
++	addr = arch_get_unmapped_area_1 (filp, PAGE_ALIGN(current->mm->mmap_base), len, limit, flags);
++
+ 	if (addr != (unsigned long) -ENOMEM)
+ 		return addr;
+ 
+ 	/* Finally, try allocating in low memory.  */
+-	addr = arch_get_unmapped_area_1 (PAGE_SIZE, len, limit);
++	addr = arch_get_unmapped_area_1 (filp, PAGE_SIZE, len, limit, flags);
+ 
+ 	return addr;
+ }
+diff --git a/arch/alpha/mm/fault.c b/arch/alpha/mm/fault.c
+index 9d0ac09..479a962 100644
+--- a/arch/alpha/mm/fault.c
++++ b/arch/alpha/mm/fault.c
+@@ -53,6 +53,124 @@ __load_new_mm_context(struct mm_struct *next_mm)
+ 	__reload_thread(pcb);
+ }
+ 
++#ifdef CONFIG_PAX_PAGEEXEC
++/*
++ * PaX: decide what to do with offenders (regs->pc = fault address)
++ *
++ * returns 1 when task should be killed
++ *         2 when patched PLT trampoline was detected
++ *         3 when unpatched PLT trampoline was detected
++ */
++static int pax_handle_fetch_fault(struct pt_regs *regs)
++{
++
++#ifdef CONFIG_PAX_EMUPLT
++	int err;
++
++	do { /* PaX: patched PLT emulation #1 */
++		unsigned int ldah, ldq, jmp;
++
++		err = get_user(ldah, (unsigned int *)regs->pc);
++		err |= get_user(ldq, (unsigned int *)(regs->pc+4));
++		err |= get_user(jmp, (unsigned int *)(regs->pc+8));
++
++		if (err)
++			break;
++
++		if ((ldah & 0xFFFF0000U) == 0x277B0000U &&
++		    (ldq & 0xFFFF0000U) == 0xA77B0000U &&
++		    jmp == 0x6BFB0000U)
++		{
++			unsigned long r27, addr;
++			unsigned long addrh = (ldah | 0xFFFFFFFFFFFF0000UL) << 16;
++			unsigned long addrl = ldq | 0xFFFFFFFFFFFF0000UL;
++
++			addr = regs->r27 + ((addrh ^ 0x80000000UL) + 0x80000000UL) + ((addrl ^ 0x8000UL) + 0x8000UL);
++			err = get_user(r27, (unsigned long *)addr);
++			if (err)
++				break;
++
++			regs->r27 = r27;
++			regs->pc = r27;
++			return 2;
++		}
++	} while (0);
++
++	do { /* PaX: patched PLT emulation #2 */
++		unsigned int ldah, lda, br;
++
++		err = get_user(ldah, (unsigned int *)regs->pc);
++		err |= get_user(lda, (unsigned int *)(regs->pc+4));
++		err |= get_user(br, (unsigned int *)(regs->pc+8));
++
++		if (err)
++			break;
++
++		if ((ldah & 0xFFFF0000U) == 0x277B0000U &&
++		    (lda & 0xFFFF0000U) == 0xA77B0000U &&
++		    (br & 0xFFE00000U) == 0xC3E00000U)
++		{
++			unsigned long addr = br | 0xFFFFFFFFFFE00000UL;
++			unsigned long addrh = (ldah | 0xFFFFFFFFFFFF0000UL) << 16;
++			unsigned long addrl = lda | 0xFFFFFFFFFFFF0000UL;
++
++			regs->r27 += ((addrh ^ 0x80000000UL) + 0x80000000UL) + ((addrl ^ 0x8000UL) + 0x8000UL);
++			regs->pc += 12 + (((addr ^ 0x00100000UL) + 0x00100000UL) << 2);
++			return 2;
++		}
++	} while (0);
++
++	do { /* PaX: unpatched PLT emulation */
++		unsigned int br;
++
++		err = get_user(br, (unsigned int *)regs->pc);
++
++		if (!err && (br & 0xFFE00000U) == 0xC3800000U) {
++			unsigned int br2, ldq, nop, jmp;
++			unsigned long addr = br | 0xFFFFFFFFFFE00000UL, resolver;
++
++			addr = regs->pc + 4 + (((addr ^ 0x00100000UL) + 0x00100000UL) << 2);
++			err = get_user(br2, (unsigned int *)addr);
++			err |= get_user(ldq, (unsigned int *)(addr+4));
++			err |= get_user(nop, (unsigned int *)(addr+8));
++			err |= get_user(jmp, (unsigned int *)(addr+12));
++			err |= get_user(resolver, (unsigned long *)(addr+16));
++
++			if (err)
++				break;
++
++			if (br2 == 0xC3600000U &&
++			    ldq == 0xA77B000CU &&
++			    nop == 0x47FF041FU &&
++			    jmp == 0x6B7B0000U)
++			{
++				regs->r28 = regs->pc+4;
++				regs->r27 = addr+16;
++				regs->pc = resolver;
++				return 3;
++			}
++		}
++	} while (0);
++#endif
++
++	return 1;
++}
++
++void pax_report_insns(struct pt_regs *regs, void *pc, void *sp)
++{
++	unsigned long i;
++
++	printk(KERN_ERR "PAX: bytes at PC: ");
++	for (i = 0; i < 5; i++) {
++		unsigned int c;
++		if (get_user(c, (unsigned int *)pc+i))
++			printk(

@@ -1,3 +1,35 @@
+commit 0259e046a7235936b51649da3b4deb06cbb661f3
+Merge: c79c7e4 2d31031
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 26 18:41:23 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2d31031ed61f6e4479909b0e168046c9d0bf7b50
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 26 18:40:28 2015 -0400
+
+    Update to pax-linux-4.0.6-test17.patch:
+    - the size overflow plugin caught an integer mixup in the unlzma code, reported by Vladimir Lushnikov (https://bugs.gentoo.org/show_bug.cgi?id=552642)
+
+ drivers/scsi/sd.c          |    2 +-
+ drivers/scsi/sr.c          |    8 ++++----
+ include/scsi/scsi_driver.h |    2 +-
+ lib/decompress_unlzma.c    |    4 ++--
+ 4 files changed, 8 insertions(+), 8 deletions(-)
+
+commit c79c7e4113432689bc13e8a5b1e52a17db38addb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 26 18:17:29 2015 -0400
+
+    fix an issue with CONFIG_DEBUG_SG being enabled with KSTACKOVERFLOW -- a debug
+    check was recently introduced before grsec's rewriting of stack pointers in
+    sg_init_one() which triggered an unnecessary BUG().  Fix this and simplify the
+    code a bit.
+
+ include/linux/scatterlist.h |   17 +++++++++--------
+ 1 files changed, 9 insertions(+), 8 deletions(-)
+
 commit c7255e17f51a8926d2cfd971e7fc0a9ea45d6f66
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 23 20:25:17 2015 -0400
