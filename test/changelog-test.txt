@@ -1,3 +1,20 @@
+commit fe5f27bc35799b82d30623486e87960ad8940bca
+Merge: 0259e04 7eb0472
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 27 22:43:54 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7eb04720d74eae1d83b917d342c364507bce9728
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 27 22:43:27 2015 -0400
+
+    Update to pax-linux-4.0.6-test18.patch:
+    - fixed ftrace runtime patching under KERNEXEC/x86, reported by michael getachew
+
+ arch/x86/kernel/ftrace.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
 commit 0259e046a7235936b51649da3b4deb06cbb661f3
 Merge: c79c7e4 2d31031
 Author: Brad Spengler <spender@grsecurity.net>
