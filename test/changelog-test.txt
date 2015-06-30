@@ -1,3 +1,64 @@
+commit 4f3c887a67fa2f96f0e568ef615e5fb26aa6da97
+Merge: 6a8fbf6 234e24b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 29 20:02:00 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kernel/dumpstack_32.c
+    	arch/x86/kernel/dumpstack_64.c
+
+commit 234e24b0b3c3e25eaf0518112fa4337d686b1487
+Merge: 7eb0472 3066314
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 29 20:00:22 2015 -0400
+
+    Update to pax-linux-4.0.7-test20.patch:
+    - some more LTO support for code called from asm only
+    - use symbol instead of numeric constant for X86_CR0_WP_BIT
+    - use non-deprecated cpumask accessors
+    
+    Merge branch 'linux-4.0.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/kprobes/core.c
+
+commit 6a8fbf60d423a5405ca3d9a6f53cd8b9c399cd23
+Author: Steven Rostedt (Red Hat) <rostedt@goodmis.org>
+Date:   Thu Jun 25 18:10:09 2015 -0400
+
+    tracing/filter: Do not allow infix to exceed end of string
+    
+    While debugging a WARN_ON() for filtering, I found that it is possible
+    for the filter string to be referenced after its end. With the filter:
+    
+     # echo '>' > /sys/kernel/debug/events/ext4/ext4_truncate_exit/filter
+    
+    The filter_parse() function can call infix_get_op() which calls
+    infix_advance() that updates the infix filter pointers for the cnt
+    and tail without checking if the filter is already at the end, which
+    will put the cnt to zero and the tail beyond the end. The loop then calls
+    infix_next() that has
+    
+    	ps->infix.cnt--;
+    	return ps->infix.string[ps->infix.tail++];
+    
+    The cnt will now be below zero, and the tail that is returned is
+    already passed the end of the filter string. So far the allocation
+    of the filter string usually has some buffer that is zeroed out, but
+    if the filter string is of the exact size of the allocated buffer
+    there's no guarantee that the charater after the nul terminating
+    character will be zero.
+    
+    Luckily, only root can write to the filter.
+    
+    Cc: stable@vger.kernel.org # 2.6.33+
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ kernel/trace/trace_events_filter.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
 commit fe5f27bc35799b82d30623486e87960ad8940bca
 Merge: 0259e04 7eb0472
 Author: Brad Spengler <spender@grsecurity.net>
