@@ -1,3 +1,33 @@
+commit f7806e7d24320350c2673c37682a4ebcede48fbb
+Merge: 7da4469 9188503
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 26 19:15:42 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 918850373a254f92f9c146bcaa66ccbcc4da5aa2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 26 19:15:21 2015 -0400
+
+    Update to pax-linux-4.1.3-test10.patch:
+    - fixed compile errors on arm, reported by Michael Tremer <michael.tremer@ipfire.org>
+    - fixed the new pax_nouderef mechanism
+
+ arch/arm/include/asm/cpuidle.h     |    2 +-
+ arch/arm/kernel/cpuidle.c          |    2 +-
+ arch/x86/include/asm/cpufeature.h  |    1 +
+ arch/x86/include/asm/mmu_context.h |   10 +++++-----
+ arch/x86/include/asm/tlbflush.h    |   20 +++++++++++---------
+ arch/x86/kernel/cpu/common.c       |    2 ++
+ drivers/clk/clk-mux.c              |    4 ++--
+ drivers/clk/samsung/clk.h          |    2 +-
+ drivers/gpio/gpio-omap.c           |    2 +-
+ drivers/gpu/drm/tegra/sor.c        |    7 +++++--
+ drivers/scsi/be2iscsi/be_main.c    |    2 +-
+ include/linux/clk-provider.h       |    6 +++---
+ init/main.c                        |    1 +
+ 13 files changed, 35 insertions(+), 26 deletions(-)
+
 commit 7da446903dcd5e93faba1291772a19f3e0e1f261
 Merge: 8fa9f45 47942a0
 Author: Brad Spengler <spender@grsecurity.net>
