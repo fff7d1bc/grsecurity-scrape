@@ -1,3 +1,405 @@
+commit bdc543e6fa0c1cf74bca28aeb344a1e225d7e09b
+Merge: 672a089 d0fff4d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 28 19:37:49 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d0fff4d52431b3b92fb24b3baa7f25d5b7b88439
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 28 19:37:28 2015 -0400
+
+    Revert PCID changes
+
+ arch/x86/include/asm/cpufeature.h  |    1 -
+ arch/x86/include/asm/mmu_context.h |   10 +++++-----
+ arch/x86/include/asm/tlbflush.h    |   20 +++++++++-----------
+ arch/x86/kernel/cpu/common.c       |   31 ++++++++++++++-----------------
+ init/main.c                        |    3 ++-
+ 5 files changed, 30 insertions(+), 35 deletions(-)
+
+commit 672a0895cf976099d985d2a2ef0978fa3b5b5423
+Author: Dave Hansen <dave.hansen@linux.intel.com>
+Date:   Mon Jul 20 16:01:53 2015 -0700
+
+    x86/mm: Add parenthesis for TLB tracepoint size calculation
+    
+    flush_tlb_info->flush_start/end are both normal virtual
+    addresses.  When calculating 'nr_pages' (only used for the
+    tracepoint), I neglected to put parenthesis in.
+    
+    Thanks to David Koufaty for pointing this out.
+    
+    Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: dave@sr71.net
+    Cc: <stable@vger.kernel.org>
+    Link: http://lkml.kernel.org/r/20150720230153.9E834081@viggo.jf.intel.com
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/mm/tlb.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5f1e4f78d034c849ab516a7e5d45475b95eb9a13
+Author: Toshi Kani <toshi.kani@hp.com>
+Date:   Thu Jul 16 17:23:15 2015 -0600
+
+    x86/mm: Remove region_is_ram() call from ioremap
+    
+    __ioremap_caller() calls region_is_ram() to walk through the
+    iomem_resource table to check if a target range is in RAM, which was
+    added to improve the lookup performance over page_is_ram() (commit
+    906e36c5c717 "x86: use optimized ioresource lookup in ioremap
+    function"). page_is_ram() was no longer used when this change was
+    added, though.
+    
+    __ioremap_caller() then calls walk_system_ram_range(), which had
+    replaced page_is_ram() to improve the lookup performance (commit
+    c81c8a1eeede "x86, ioremap: Speed up check for RAM pages").
+    
+    Since both checks walk through the same iomem_resource table for
+    the same purpose, there is no need to call both functions.
+    
+    Aside of that walk_system_ram_range() is the only useful check at the
+    moment because region_is_ram() always returns -1 due to an
+    implementation bug. That bug in region_is_ram() cannot be fixed
+    without breaking existing ioremap callers, which rely on the subtle
+    difference of walk_system_ram_range() versus non page aligned ranges.
+    
+    Once these offending callers are fixed we can use region_is_ram() and
+    remove walk_system_ram_range().
+    
+    [ tglx: Massaged changelog ]
+    
+    Signed-off-by: Toshi Kani <toshi.kani@hp.com>
+    Reviewed-by: Dan Williams <dan.j.williams@intel.com>
+    Cc: Roland Dreier <roland@purestorage.com>
+    Cc: Mike Travis <travis@sgi.com>
+    Cc: Luis R. Rodriguez <mcgrof@suse.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Ingo Molnar <mingo@redhat.com>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: linux-mm@kvack.org
+    Link: http://lkml.kernel.org/r/1437088996-28511-3-git-send-email-toshi.kani@hp.com
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/mm/ioremap.c |   24 ++++++------------------
+ 1 files changed, 6 insertions(+), 18 deletions(-)
+
+commit 4eed17a1f681e80501895c461980734de2bf0c26
+Author: Toshi Kani <toshi.kani@hp.com>
+Date:   Thu Jul 16 17:23:14 2015 -0600
+
+    x86/mm: Move warning from __ioremap_check_ram() to the call site
+    
+    __ioremap_check_ram() has a WARN_ONCE() which is emitted when the
+    given pfn range is not RAM. The warning is bogus in two aspects:
+    
+    - it never triggers since walk_system_ram_range() only calls
+      __ioremap_check_ram() for RAM ranges.
+    
+    - the warning message is wrong as it says: "ioremap on RAM' after it
+      established that the pfn range is not RAM.
+    
+    Move the WARN_ONCE() to __ioremap_caller(), and update the message to
+    include the address range so we get an actual warning when something
+    tries to ioremap system RAM.
+    
+    [ tglx: Massaged changelog ]
+    
+    Signed-off-by: Toshi Kani <toshi.kani@hp.com>
+    Reviewed-by: Dan Williams <dan.j.williams@intel.com>
+    Cc: Roland Dreier <roland@purestorage.com>
+    Cc: Luis R. Rodriguez <mcgrof@suse.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Ingo Molnar <mingo@redhat.com>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: linux-mm@kvack.org
+    Link: http://lkml.kernel.org/r/1437088996-28511-2-git-send-email-toshi.kani@hp.com
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/mm/ioremap.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
+commit 9af4e75578b65827a05cae89a9cdb77d6caef754
+Author: Toshi Kani <toshi.kani@hp.com>
+Date:   Thu Jul 16 17:23:16 2015 -0600
+
+    mm: Fix bugs in region_is_ram()
+    
+    region_is_ram() looks up the iomem_resource table to check if
+    a target range is in RAM.  However, it always returns with -1
+    due to invalid range checks. It always breaks the loop at the
+    first entry of the table.
+    
+    Another issue is that it compares p->flags and flags, but it always
+    fails. flags is declared as int, which makes it as a negative value
+    with IORESOURCE_BUSY (0x80000000) set while p->flags is unsigned long.
+    
+    Fix the range check and flags so that region_is_ram() works as
+    advertised.
+    
+    Signed-off-by: Toshi Kani <toshi.kani@hp.com>
+    Reviewed-by: Dan Williams <dan.j.williams@intel.com>
+    Cc: Mike Travis <travis@sgi.com>
+    Cc: Luis R. Rodriguez <mcgrof@suse.com>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: Roland Dreier <roland@purestorage.com>
+    Cc: linux-mm@kvack.org
+    Link: http://lkml.kernel.org/r/1437088996-28511-4-git-send-email-toshi.kani@hp.com
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ kernel/resource.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit db002defded430624dbef2561ceb76501c8f956b
+Author: Tomas Winkler <tomas.winkler@intel.com>
+Date:   Thu Jun 18 11:41:03 2015 +0300
+
+    mei: prevent unloading mei hw modules while the device is opened.
+    
+    chrdev_open() increases reference counter on cdev->owner. Instead of
+    assigning the owner to mei subsystem, the owner has to be set to the
+    underlaying HW module (mei_me or mei_txe), so once the device is opened
+    the HW module cannot be unloaded.
+    
+    Cc: <stable@vger.kernel.org> #3.17+
+    Signed-off-by: Tomas Winkler <tomas.winkler@intel.com>
+    Signed-off-by: Alexander Usyskin <alexander.usyskin@intel.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/misc/mei/main.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 426a498250be1cf7eb47a4b211754eac4c856fc9
+Author: Steven Rostedt (Red Hat) <rostedt@goodmis.org>
+Date:   Fri Jul 24 10:38:12 2015 -0400
+
+    ftrace: Fix breakage of set_ftrace_pid
+    
+    Commit 4104d326b670 ("ftrace: Remove global function list and call function
+    directly") simplified the ftrace code by removing the global_ops list with a
+    new design. But this cleanup also broke the filtering of PIDs that are added
+    to the set_ftrace_pid file.
+    
+    Add back the proper hooks to have pid filtering working once again.
+    
+    Cc: stable@vger.kernel.org # 3.16+
+    Reported-by: Matt Fleming <matt@console-pimps.org>
+    Reported-by: Richard Weinberger <richard.weinberger@gmail.com>
+    Tested-by: Matt Fleming <matt@console-pimps.org>
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ include/linux/ftrace.h |    3 ++
+ kernel/trace/ftrace.c  |   52 +++++++++++++++++++++++++++++++----------------
+ 2 files changed, 37 insertions(+), 18 deletions(-)
+
+commit ecf07c60ecb962a459c5b466cafc51be06433e4d
+Author: Matt Fleming <matt.fleming@intel.com>
+Date:   Tue Jul 21 15:55:09 2015 +0100
+
+    perf/x86/intel/cqm: Return cached counter value from IRQ context
+    
+    Peter reported the following potential crash which I was able to
+    reproduce with his test program,
+    
+    [  148.765788] ------------[ cut here ]------------
+    [  148.765796] WARNING: CPU: 34 PID: 2840 at kernel/smp.c:417 smp_call_function_many+0xb6/0x260()
+    [  148.765797] Modules linked in:
+    [  148.765800] CPU: 34 PID: 2840 Comm: perf Not tainted 4.2.0-rc1+ #4
+    [  148.765803]  ffffffff81cdc398 ffff88085f105950 ffffffff818bdfd5 0000000000000007
+    [  148.765805]  0000000000000000 ffff88085f105990 ffffffff810e413a 0000000000000000
+    [  148.765807]  ffffffff82301080 0000000000000022 ffffffff8107f640 ffffffff8107f640
+    [  148.765809] Call Trace:
+    [  148.765810]  <NMI>  [<ffffffff818bdfd5>] dump_stack+0x45/0x57
+    [  148.765818]  [<ffffffff810e413a>] warn_slowpath_common+0x8a/0xc0
+    [  148.765822]  [<ffffffff8107f640>] ? intel_cqm_stable+0x60/0x60
+    [  148.765824]  [<ffffffff8107f640>] ? intel_cqm_stable+0x60/0x60
+    [  148.765825]  [<ffffffff810e422a>] warn_slowpath_null+0x1a/0x20
+    [  148.765827]  [<ffffffff811613f6>] smp_call_function_many+0xb6/0x260
+    [  148.765829]  [<ffffffff8107f640>] ? intel_cqm_stable+0x60/0x60
+    [  148.765831]  [<ffffffff81161748>] on_each_cpu_mask+0x28/0x60
+    [  148.765832]  [<ffffffff8107f6ef>] intel_cqm_event_count+0x7f/0xe0
+    [  148.765836]  [<ffffffff811cdd35>] perf_output_read+0x2a5/0x400
+    [  148.765839]  [<ffffffff811d2e5a>] perf_output_sample+0x31a/0x590
+    [  148.765840]  [<ffffffff811d333d>] ? perf_prepare_sample+0x26d/0x380
+    [  148.765841]  [<ffffffff811d3497>] perf_event_output+0x47/0x60
+    [  148.765843]  [<ffffffff811d36c5>] __perf_event_overflow+0x215/0x240
+    [  148.765844]  [<ffffffff811d4124>] perf_event_overflow+0x14/0x20
+    [  148.765847]  [<ffffffff8107e7f4>] intel_pmu_handle_irq+0x1d4/0x440
+    [  148.765849]  [<ffffffff811d07a6>] ? __perf_event_task_sched_in+0x36/0xa0
+    [  148.765853]  [<ffffffff81219bad>] ? vunmap_page_range+0x19d/0x2f0
+    [  148.765854]  [<ffffffff81219d11>] ? unmap_kernel_range_noflush+0x11/0x20
+    [  148.765859]  [<ffffffff814ce6fe>] ? ghes_copy_tofrom_phys+0x11e/0x2a0
+    [  148.765863]  [<ffffffff8109e5db>] ? native_apic_msr_write+0x2b/0x30
+    [  148.765865]  [<ffffffff8109e44d>] ? x2apic_send_IPI_self+0x1d/0x20
+    [  148.765869]  [<ffffffff81065135>] ? arch_irq_work_raise+0x35/0x40
+    [  148.765872]  [<ffffffff811c8d86>] ? irq_work_queue+0x66/0x80
+    [  148.765875]  [<ffffffff81075306>] perf_event_nmi_handler+0x26/0x40
+    [  148.765877]  [<ffffffff81063ed9>] nmi_handle+0x79/0x100
+    [  148.765879]  [<ffffffff81064422>] default_do_nmi+0x42/0x100
+    [  148.765880]  [<ffffffff81064563>] do_nmi+0x83/0xb0
+    [  148.765884]  [<ffffffff818c7c0f>] end_repeat_nmi+0x1e/0x2e
+    [  148.765886]  [<ffffffff811d07a6>] ? __perf_event_task_sched_in+0x36/0xa0
+    [  148.765888]  [<ffffffff811d07a6>] ? __perf_event_task_sched_in+0x36/0xa0
+    [  148.765890]  [<ffffffff811d07a6>] ? __perf_event_task_sched_in+0x36/0xa0
+    [  148.765891]  <<EOE>>  [<ffffffff8110ab66>] finish_task_switch+0x156/0x210
+    [  148.765898]  [<ffffffff818c1671>] __schedule+0x341/0x920
+    [  148.765899]  [<ffffffff818c1c87>] schedule+0x37/0x80
+    [  148.765903]  [<ffffffff810ae1af>] ? do_page_fault+0x2f/0x80
+    [  148.765905]  [<ffffffff818c1f4a>] schedule_user+0x1a/0x50
+    [  148.765907]  [<ffffffff818c666c>] retint_careful+0x14/0x32
+    [  148.765908] ---[ end trace e33ff2be78e14901 ]---
+    
+    The CQM task events are not safe to be called from within interrupt
+    context because they require performing an IPI to read the counter value
+    on all sockets. And performing IPIs from within IRQ context is a
+    "no-no".
+    
+    Make do with the last read counter value currently event in
+    event->count when we're invoked in this context.
+    
+    Reported-by: Peter Zijlstra <peterz@infradead.org>
+    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Vikas Shivappa <vikas.shivappa@intel.com>
+    Cc: Kanaka Juvva <kanaka.d.juvva@intel.com>
+    Cc: Will Auld <will.auld@intel.com>
+    Cc: <stable@vger.kernel.org>
+    Link: http://lkml.kernel.org/r/1437490509-15373-1-git-send-email-matt@codeblueprint.co.uk
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/kernel/cpu/perf_event_intel_cqm.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit f0b71d674319afc7cd3d408a95c315ab9332fea6
+Author: Nikolay Aleksandrov <nikolay@cumulusnetworks.com>
+Date:   Thu Jul 23 12:05:40 2015 +0200
+
+    inet: frags: remove INET_FRAG_EVICTED and use list_evictor for the test
+    
+    We can simply remove the INET_FRAG_EVICTED flag to avoid all the flags
+    race conditions with the evictor and use a participation test for the
+    evictor list, when we're at that point (after inet_frag_kill) in the
+    timer there're 2 possible cases:
+    
+    1. The evictor added the entry to its evictor list while the timer was
+    waiting for the chainlock
+    or
+    2. The timer unchained the entry and the evictor won't see it
+    
+    In both cases we should be able to see list_evictor correctly due
+    to the sync on the chainlock.
+    
+    Joint work with Florian Westphal.
+    
+    Tested-by: Frank Schreuder <fschreuder@transip.nl>
+    Signed-off-by: Nikolay Aleksandrov <nikolay@cumulusnetworks.com>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/inet_frag.h  |    7 +++++--
+ net/ipv4/inet_fragment.c |    1 -
+ net/ipv4/ip_fragment.c   |    2 +-
+ net/ipv6/reassembly.c    |    2 +-
+ 4 files changed, 7 insertions(+), 5 deletions(-)
+
+commit 5bab758a94075d04d16c2e693620149e80c80a6b
+Author: Florian Westphal <fw@strlen.de>
+Date:   Thu Jul 23 12:05:39 2015 +0200
+
+    inet: frag: don't wait for timer deletion when evicting
+    
+    Frank reports 'NMI watchdog: BUG: soft lockup' errors when
+    load is high.  Instead of (potentially) unbounded restarts of the
+    eviction process, just skip to the next entry.
+    
+    One caveat is that, when a netns is exiting, a timer may still be running
+    by the time inet_evict_bucket returns.
+    
+    We use the frag memory accounting to wait for outstanding timers,
+    so that when we free the percpu counter we can be sure no running
+    timer will trip over it.
+    
+    Reported-and-tested-by: Frank Schreuder <fschreuder@transip.nl>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/inet_fragment.c |   29 +++++++++++------------------
+ 1 files changed, 11 insertions(+), 18 deletions(-)
+
+commit 243266640fe195843ebaf0f06f00b81861d79083
+Author: Florian Westphal <fw@strlen.de>
+Date:   Thu Jul 23 12:05:38 2015 +0200
+
+    inet: frag: change *_frag_mem_limit functions to take netns_frags as argument
+    
+    Followup patch will call it after inet_frag_queue was freed, so q->net
+    doesn't work anymore (but netf = q->net; free(q); mem_limit(netf) would).
+    
+    Tested-by: Frank Schreuder <fschreuder@transip.nl>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/inet_frag.h                 |    8 ++++----
+ net/ieee802154/6lowpan/reassembly.c     |    6 +++---
+ net/ipv4/inet_fragment.c                |    4 ++--
+ net/ipv4/ip_fragment.c                  |   10 +++++-----
+ net/ipv6/netfilter/nf_conntrack_reasm.c |    6 +++---
+ net/ipv6/reassembly.c                   |    6 +++---
+ 6 files changed, 20 insertions(+), 20 deletions(-)
+
+commit 980c50f6c86defb6bc40d7912008fb5d7057b345
+Author: Florian Westphal <fw@strlen.de>
+Date:   Thu Jul 23 12:05:37 2015 +0200
+
+    inet: frag: don't re-use chainlist for evictor
+    
+    commit 65ba1f1ec0eff ("inet: frags: fix a race between inet_evict_bucket
+    and inet_frag_kill") describes the bug, but the fix doesn't work reliably.
+    
+    Problem is that ->flags member can be set on other cpu without chainlock
+    being held by that task, i.e. the RMW-Cycle can clear INET_FRAG_EVICTED
+    bit after we put the element on the evictor private list.
+    
+    We can crash when walking the 'private' evictor list since an element can
+    be deleted from list underneath the evictor.
+    
+    Join work with Nikolay Alexandrov.
+    
+    Fixes: b13d3cbfb8e8 ("inet: frag: move eviction of queues to work queue")
+    Reported-by: Johan Schuijt <johan@transip.nl>
+    Tested-by: Frank Schreuder <fschreuder@transip.nl>
+    Signed-off-by: Nikolay Alexandrov <nikolay@cumulusnetworks.com>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/inet_frag.h  |    2 ++
+ net/ipv4/inet_fragment.c |    8 +++-----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 18dbb7c79efd6ad05708d5015e9ba1013b5e8d78
+Author: Johan Hedberg <johan.hedberg@intel.com>
+Date:   Mon Jul 20 20:31:25 2015 +0300
+
+    Bluetooth: Fix NULL pointer dereference in smp_conn_security
+    
+    The l2cap_conn->smp pointer may be NULL for various valid reasons where SMP has
+    failed to initialize properly. One such scenario is when crypto support is
+    missing, another when the adapter has been powered on through a legacy method.
+    The smp_conn_security() function should have the appropriate check for this
+    situation to avoid NULL pointer dereferences.
+    
+    Signed-off-by: Johan Hedberg <johan.hedberg@intel.com>
+    Signed-off-by: Marcel Holtmann <marcel@holtmann.org>
+    Cc: stable@vger.kernel.org # 4.0+
+
+ net/bluetooth/smp.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
 commit f7806e7d24320350c2673c37682a4ebcede48fbb
 Merge: 7da4469 9188503
 Author: Brad Spengler <spender@grsecurity.net>
