@@ -1,3 +1,308 @@
+commit 5cbedec9d29ae9835ac38560f82cb98acc993647
+Author: Benjamin Randazzo <benjamin@randazzo.fr>
+Date:   Sat Jul 25 16:36:50 2015 +0200
+
+    md: use kzalloc() when bitmap is disabled
+    
+    In drivers/md/md.c get_bitmap_file() uses kmalloc() for creating a
+    mdu_bitmap_file_t called "file".
+    
+    5769         file = kmalloc(sizeof(*file), GFP_NOIO);
+    5770         if (!file)
+    5771                 return -ENOMEM;
+    
+    This structure is copied to user space at the end of the function.
+    
+    5786         if (err == 0 &&
+    5787             copy_to_user(arg, file, sizeof(*file)))
+    5788                 err = -EFAULT
+    
+    But if bitmap is disabled only the first byte of "file" is initialized
+    with zero, so it's possible to read some bytes (up to 4095) of kernel
+    space memory from user space. This is an information leak.
+    
+    5775         /* bitmap disabled, zero the first byte and copy out */
+    5776         if (!mddev->bitmap_info.file)
+    5777                 file->pathname[0] = '\0';
+    
+    Signed-off-by: Benjamin Randazzo <benjamin@randazzo.fr>
+    Signed-off-by: NeilBrown <neilb@suse.com>
+    
+    Conflicts:
+    
+    	drivers/md/md.c
+
+ drivers/md/md.c |   22 +++++++++++-----------
+ 1 files changed, 11 insertions(+), 11 deletions(-)
+
+commit ef22ba5ed995e594e32b3c6c80246b0037c98e7e
+Author: Kinglong Mee <kinglongmee@gmail.com>
+Date:   Mon Jul 27 15:31:38 2015 +0800
+
+    nfs: Fix an oops caused by using other thread's stack space in ASYNC mode
+    
+    An oops caused by using other thread's stack space in sunrpc ASYNC sending thread.
+    
+    [ 9839.007187] ------------[ cut here ]------------
+    [ 9839.007923] kernel BUG at fs/nfs/nfs4xdr.c:910!
+    [ 9839.008069] invalid opcode: 0000 [#1] SMP
+    [ 9839.008069] Modules linked in: blocklayoutdriver rpcsec_gss_krb5 nfsv4 dns_resolver nfs fscache snd_hda_codec_generic snd_hda_intel snd_hda_controller snd_hda_codec snd_hwdep snd_seq snd_seq_device snd_pcm joydev iosf_mbi crct10dif_pclmul snd_timer crc32_pclmul crc32c_intel ghash_clmulni_intel snd soundcore ppdev pvpanic parport_pc i2c_piix4 serio_raw virtio_balloon parport acpi_cpufreq nfsd nfs_acl lockd grace auth_rpcgss sunrpc qxl drm_kms_helper virtio_net virtio_console virtio_blk ttm drm virtio_pci virtio_ring virtio ata_generic pata_acpi
+    [ 9839.008069] CPU: 0 PID: 308 Comm: kworker/0:1H Not tainted 4.0.0-0.rc4.git1.3.fc23.x86_64 #1
+    [ 9839.008069] Hardware name: Bochs Bochs, BIOS Bochs 01/01/2011
+    [ 9839.008069] Workqueue: rpciod rpc_async_schedule [sunrpc]
+    [ 9839.008069] task: ffff8800d8b4d8e0 ti: ffff880036678000 task.ti: ffff880036678000
+    [ 9839.008069] RIP: 0010:[<ffffffffa0339cc9>]  [<ffffffffa0339cc9>] reserve_space.part.73+0x9/0x10 [nfsv4]
+    [ 9839.008069] RSP: 0018:ffff88003667ba58  EFLAGS: 00010246
+    [ 9839.008069] RAX: 0000000000000000 RBX: 000000001fc15e18 RCX: ffff8800c0193800
+    [ 9839.008069] RDX: ffff8800e4ae3f24 RSI: 000000001fc15e2c RDI: ffff88003667bcd0
+    [ 9839.008069] RBP: ffff88003667ba58 R08: ffff8800d9173008 R09: 0000000000000003
+    [ 9839.008069] R10: ffff88003667bcd0 R11: 000000000000000c R12: 0000000000010000
+    [ 9839.008069] R13: ffff8800d9173350 R14: 0000000000000000 R15: ffff8800c0067b98
+    [ 9839.008069] FS:  0000000000000000(0000) GS:ffff88011fc00000(0000) knlGS:0000000000000000
+    [ 9839.008069] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+    [ 9839.008069] CR2: 00007f988c9c8bb0 CR3: 00000000d99b6000 CR4: 00000000000407f0
+    [ 9839.008069] Stack:
+    [ 9839.008069]  ffff88003667bbc8 ffffffffa03412c5 00000000c6c55680 ffff880000000003
+    [ 9839.008069]  0000000000000088 00000010c6c55680 0001000000000002 ffffffff816e87e9
+    [ 9839.008069]  0000000000000000 00000000477290e2 ffff88003667bab8 ffffffff81327ba3
+    [ 9839.008069] Call Trace:
+    [ 9839.008069]  [<ffffffffa03412c5>] encode_attrs+0x435/0x530 [nfsv4]
+    [ 9839.008069]  [<ffffffff816e87e9>] ? inet_sendmsg+0x69/0xb0
+    [ 9839.008069]  [<ffffffff81327ba3>] ? selinux_socket_sendmsg+0x23/0x30
+    [ 9839.008069]  [<ffffffff8164c1df>] ? do_sock_sendmsg+0x9f/0xc0
+    [ 9839.008069]  [<ffffffff8164c278>] ? kernel_sendmsg+0x58/0x70
+    [ 9839.008069]  [<ffffffffa011acc0>] ? xdr_reserve_space+0x20/0x170 [sunrpc]
+    [ 9839.008069]  [<ffffffffa011acc0>] ? xdr_reserve_space+0x20/0x170 [sunrpc]
+    [ 9839.008069]  [<ffffffffa0341b40>] ? nfs4_xdr_enc_open_noattr+0x130/0x130 [nfsv4]
+    [ 9839.008069]  [<ffffffffa03419a5>] encode_open+0x2d5/0x340 [nfsv4]
+    [ 9839.008069]  [<ffffffffa0341b40>] ? nfs4_xdr_enc_open_noattr+0x130/0x130 [nfsv4]
+    [ 9839.008069]  [<ffffffffa011ab89>] ? xdr_encode_opaque+0x19/0x20 [sunrpc]
+    [ 9839.008069]  [<ffffffffa0339cfb>] ? encode_string+0x2b/0x40 [nfsv4]
+    [ 9839.008069]  [<ffffffffa0341bf3>] nfs4_xdr_enc_open+0xb3/0x140 [nfsv4]
+    [ 9839.008069]  [<ffffffffa0110a4c>] rpcauth_wrap_req+0xac/0xf0 [sunrpc]
+    [ 9839.008069]  [<ffffffffa01017db>] call_transmit+0x18b/0x2d0 [sunrpc]
+    [ 9839.008069]  [<ffffffffa0101650>] ? call_decode+0x860/0x860 [sunrpc]
+    [ 9839.008069]  [<ffffffffa0101650>] ? call_decode+0x860/0x860 [sunrpc]
+    [ 9839.008069]  [<ffffffffa010caa0>] __rpc_execute+0x90/0x460 [sunrpc]
+    [ 9839.008069]  [<ffffffffa010ce85>] rpc_async_schedule+0x15/0x20 [sunrpc]
+    [ 9839.008069]  [<ffffffff810b452b>] process_one_work+0x1bb/0x410
+    [ 9839.008069]  [<ffffffff810b47d3>] worker_thread+0x53/0x470
+    [ 9839.008069]  [<ffffffff810b4780>] ? process_one_work+0x410/0x410
+    [ 9839.008069]  [<ffffffff810b4780>] ? process_one_work+0x410/0x410
+    [ 9839.008069]  [<ffffffff810ba7b8>] kthread+0xd8/0xf0
+    [ 9839.008069]  [<ffffffff810ba6e0>] ? kthread_worker_fn+0x180/0x180
+    [ 9839.008069]  [<ffffffff81786418>] ret_from_fork+0x58/0x90
+    [ 9839.008069]  [<ffffffff810ba6e0>] ? kthread_worker_fn+0x180/0x180
+    [ 9839.008069] Code: 00 00 48 c7 c7 21 fa 37 a0 e8 94 1c d6 e0 c6 05 d2 17 05 00 01 8b 03 eb d7 66 0f 1f 84 00 00 00 00 00 66 66 66 66 90 55 48 89 e5 <0f> 0b 0f 1f 44 00 00 66 66 66 66 90 55 48 89 e5 41 54 53 89 f3
+    [ 9839.008069] RIP  [<ffffffffa0339cc9>] reserve_space.part.73+0x9/0x10 [nfsv4]
+    [ 9839.008069]  RSP <ffff88003667ba58>
+    [ 9839.071114] ---[ end trace cc14c03adb522e94 ]---
+    
+    Signed-off-by: Kinglong Mee <kinglongmee@gmail.com>
+    Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+
+ fs/nfs/internal.h |   21 +++++++++++++++++++++
+ fs/nfs/nfs4proc.c |   10 +++++++++-
+ 2 files changed, 30 insertions(+), 1 deletions(-)
+
+commit 79a18310c8c3f5e66e8b0d5ec4623b04734c982e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 1 14:55:32 2015 -0400
+
+    From: Colin Ian King <colin.king () canonical com>
+    Subject: [PATCH] KEYS: ensure we free the assoc array edit if edit is valid
+    
+    __key_link_end is not freeing the associated array edit structure
+    and this leads to a 512 byte memory leak each time an identical
+    existing key is added with add_key().
+    
+    The reason the add_key() system call returns okay is that
+    key_create_or_update() calls __key_link_begin() before checking to see
+    whether it can update a key directly rather than adding/replacing - which
+    it turns out it can.  Thus __key_link() is not called through
+    __key_instantiate_and_link() and __key_link_end() must cancel the edit.
+    
+    CVE-2015-1333
+    
+    Signed-off-by: Colin Ian King <colin.king () canonical com>
+    Signed-off-by: David Howells <dhowells () redhat com>
+
+ security/keys/keyring.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
+
+commit 66b9be9914bf6c6d81a83b364cd992369ad7664e
+Author: Shahed Shaikh <shahed.shaikh@qlogic.com>
+Date:   Wed Jul 29 07:55:35 2015 -0400
+
+    qlcnic: Fix corruption while copying
+    
+    Use proper typecasting while performing byte-by-byte copy
+    
+    Signed-off-by: Shahed Shaikh <shahed.shaikh@qlogic.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ .../net/ethernet/qlogic/qlcnic/qlcnic_83xx_init.c  |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 6663f1a1d2bafc21dcb990066413f1580bd17a9a
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Wed Jul 29 12:01:41 2015 +0200
+
+    ipv6: flush nd cache on IFF_NOARP change
+    
+    This patch is the IPv6 equivalent of commit
+    6c8b4e3ff81b ("arp: flush arp cache on IFF_NOARP change")
+    
+    Without it, we keep buggy neighbours in the cache, with destination
+    MAC address equal to our own MAC address.
+    
+    Tested:
+     tcpdump -i eth0 -s 0 ip6 -n -e &
+     ip link set dev eth0 arp off
+     ping6 remote   // sends buggy frames
+     ip link set dev eth0 arp on
+     ping6 remote   // should work once kernel is patched
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Reported-by: Mario Fanelli <mariofanelli@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ndisc.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 5b6b6bc934c671c3583072b045fd44261f962243
+Author: Guenter Roeck <linux@roeck-us.net>
+Date:   Sat Jul 4 13:23:42 2015 -0700
+
+    hwmon: (nct7802) Fix integer overflow seen when writing voltage limits
+    
+    Writing a large value into a voltage limit attribute can result
+    in an overflow due to an auto-conversion from unsigned long to
+    unsigned int.
+    
+    Cc: Constantine Shulyupin <const@MakeLinux.com>
+    Reviewed-by: Jean Delvare <jdelvare@suse.de>
+    Cc: stable@vger.kernel.org # v4.1+
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+
+ drivers/hwmon/nct7802.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 24494632f692af77e1bc1a85959cf661405f4dec
+Author: Dmitry Skorodumov <sdmitry@parallels.com>
+Date:   Tue Jul 28 18:38:32 2015 +0400
+
+    x86/efi: Use all 64 bit of efi_memmap in setup_e820()
+    
+    The efi_info structure stores low 32 bits of memory map
+    in efi_memmap and high 32 bits in efi_memmap_hi.
+    
+    While constructing pointer in the setup_e820(), need
+    to take into account all 64 bit of the pointer.
+    
+    It is because on 64bit machine the function
+    efi_get_memory_map() may return full 64bit pointer and before
+    the patch that pointer was truncated.
+    
+    The issue is triggered on Parallles virtual machine and
+    fixed with this patch.
+    
+    Signed-off-by: Dmitry Skorodumov <sdmitry@parallels.com>
+    Cc: Denis V. Lunev <den@openvz.org>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+
+ arch/x86/boot/compressed/eboot.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit e559670082dc866b8d7460f965f715fdd577d961
+Author: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+Date:   Wed Jul 15 19:36:03 2015 -0700
+
+    efi: Check for NULL efi kernel parameters
+    
+    Even though it is documented how to specifiy efi parameters, it is
+    possible to cause a kernel panic due to a dereference of a NULL pointer when
+    parsing such parameters if "efi" alone is given:
+    
+    PANIC: early exception 0e rip 10:ffffffff812fb361 error 0 cr2 0
+    [ 0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 4.2.0-rc1+ #450
+    [ 0.000000]  ffffffff81fe20a9 ffffffff81e03d50 ffffffff8184bb0f 00000000000003f8
+    [ 0.000000]  0000000000000000 ffffffff81e03e08 ffffffff81f371a1 64656c62616e6520
+    [ 0.000000]  0000000000000069 000000000000005f 0000000000000000 0000000000000000
+    [ 0.000000] Call Trace:
+    [ 0.000000]  [<ffffffff8184bb0f>] dump_stack+0x45/0x57
+    [ 0.000000]  [<ffffffff81f371a1>] early_idt_handler_common+0x81/0xae
+    [ 0.000000]  [<ffffffff812fb361>] ? parse_option_str+0x11/0x90
+    [ 0.000000]  [<ffffffff81f4dd69>] arch_parse_efi_cmdline+0x15/0x42
+    [ 0.000000]  [<ffffffff81f376e1>] do_early_param+0x50/0x8a
+    [ 0.000000]  [<ffffffff8106b1b3>] parse_args+0x1e3/0x400
+    [ 0.000000]  [<ffffffff81f37a43>] parse_early_options+0x24/0x28
+    [ 0.000000]  [<ffffffff81f37691>] ? loglevel+0x31/0x31
+    [ 0.000000]  [<ffffffff81f37a78>] parse_early_param+0x31/0x3d
+    [ 0.000000]  [<ffffffff81f3ae98>] setup_arch+0x2de/0xc08
+    [ 0.000000]  [<ffffffff8109629a>] ? vprintk_default+0x1a/0x20
+    [ 0.000000]  [<ffffffff81f37b20>] start_kernel+0x90/0x423
+    [ 0.000000]  [<ffffffff81f37495>] x86_64_start_reservations+0x2a/0x2c
+    [ 0.000000]  [<ffffffff81f37582>] x86_64_start_kernel+0xeb/0xef
+    [ 0.000000] RIP 0xffffffff81ba2efc
+    
+    This panic is not reproducible with "efi=" as this will result in a non-NULL
+    zero-length string.
+    
+    Thus, verify that the pointer to the parameter string is not NULL. This is
+    consistent with other parameter-parsing functions which check for NULL pointers.
+    
+    Signed-off-by: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+    Cc: Dave Young <dyoung@redhat.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+
+ arch/x86/platform/efi/efi.c |    5 +++++
+ drivers/firmware/efi/efi.c  |    5 +++++
+ 2 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 5ff384683c424fd7a1aa5c60f3f74aaea195be16
+Author: Andy Lutomirski <luto@kernel.org>
+Date:   Thu Jul 30 14:31:31 2015 -0700
+
+    x86/xen: Probe target addresses in set_aliased_prot() before the hypercall
+    
+    The update_va_mapping hypercall can fail if the VA isn't present
+    in the guest's page tables.  Under certain loads, this can
+    result in an OOPS when the target address is in unpopulated vmap
+    space.
+    
+    While we're at it, add comments to help explain what's going on.
+    
+    This isn't a great long-term fix.  This code should probably be
+    changed to use something like set_memory_ro.
+    
+    Signed-off-by: Andy Lutomirski <luto@kernel.org>
+    Cc: Andrew Cooper <andrew.cooper3@citrix.com>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: David Vrabel <dvrabel@cantab.net>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Jan Beulich <jbeulich@suse.com>
+    Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Sasha Levin <sasha.levin@oracle.com>
+    Cc: Steven Rostedt <rostedt@goodmis.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: security@kernel.org <security@kernel.org>
+    Cc: <stable@vger.kernel.org>
+    Cc: xen-devel <xen-devel@lists.xen.org>
+    Link: http://lkml.kernel.org/r/0b0e55b995cda11e7829f140b833ef932fcabe3a.1438291540.git.luto@kernel.org
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/xen/enlighten.c |   40 ++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 40 insertions(+), 0 deletions(-)
+
 commit bdc543e6fa0c1cf74bca28aeb344a1e225d7e09b
 Merge: 672a089 d0fff4d
 Author: Brad Spengler <spender@grsecurity.net>
