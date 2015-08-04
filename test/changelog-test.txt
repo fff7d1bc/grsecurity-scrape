@@ -1,3 +1,52 @@
+commit c5627f0435c7ec05a07670d053ff24876106e7d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 3 22:36:31 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit cd384c2ee9ff24d7c8e83685bc2793a9ddb80328
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 3 22:12:02 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit d877f072db628ea9265aa7f651384d7e0ec6865a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 3 21:46:08 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 9c510798245942db9e1df1945f7a240f3d51ad80
+Merge: 5cbedec a10d38f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 3 21:16:26 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	security/selinux/hooks.c
+
+commit a10d38f1c800bd587a5feeed9d8cea68dba1aec5
+Merge: d0fff4d 89e4199
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 3 21:15:54 2015 -0400
+
+    Merge branch 'linux-4.1.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/drm_ioc32.c
+    	lib/bitmap.c
+    	mm/memory.c
+
 commit 5cbedec9d29ae9835ac38560f82cb98acc993647
 Author: Benjamin Randazzo <benjamin@randazzo.fr>
 Date:   Sat Jul 25 16:36:50 2015 +0200
