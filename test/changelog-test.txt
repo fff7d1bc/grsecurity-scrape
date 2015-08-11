@@ -1,3 +1,287 @@
+commit 1f986987319e242de1c1a09022d5d813924c6aa4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 20:34:37 2015 -0400
+
+    compile fix recent PCID change
+
+ arch/x86/include/asm/tlbflush.h |   11 +++++------
+ 1 files changed, 5 insertions(+), 6 deletions(-)
+
+commit c64bb46423e12f56b43f338115cd187caeb6034b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 20:00:53 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9d2f46bfdb737df5bd56b4bb77e5393f84bb802a
+Author: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+Date:   Mon Aug 3 14:57:30 2015 +0900
+
+    HID: hid-input: Fix accessing freed memory during device disconnect
+    
+    During unbinding the driver was dereferencing a pointer to memory
+    already freed by power_supply_unregister().
+    
+    Driver was freeing its internal description of battery through pointers
+    stored in power_supply structure. However, because the core owns the
+    power supply instance, after calling power_supply_unregister() this
+    memory is freed and the driver cannot access these members.
+    
+    Fix this by storing the pointer to internal description of battery in a
+    local variable before calling power_supply_unregister(), so the pointer
+    remains valid.
+    
+    Signed-off-by: Krzysztof Kozlowski <k.kozlowski@samsung.com>
+    Reported-by: H.J. Lu <hjl.tools@gmail.com>
+    Fixes: 297d716f6260 ("power_supply: Change ownership from driver to core")
+    Cc: <stable@vger.kernel.org>
+    Reviewed-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+    Signed-off-by: Jiri Kosina <jkosina@suse.com>
+
+ drivers/hid/hid-input.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit 3df182a69e38644cffc1fcde01408bfdd84dd920
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 19:24:50 2015 -0400
+
+    Small optimization that avoids a find_vm_area on stack copies
+
+ mm/slab.c |    6 +++++-
+ mm/slob.c |    6 +++++-
+ mm/slub.c |    6 +++++-
+ 3 files changed, 15 insertions(+), 3 deletions(-)
+
+commit 8bdd4f688a9d992ecbe58802bd0de32c42c5297f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 19:15:58 2015 -0400
+
+    Add ability to mark vmalloc maps as being involved in copies to userland.
+    This allows us to restore the new seq file buffer allocation code and maintain
+    our existing infoleak protection for seqfile buffers.
+
+ fs/seq_file.c           |   11 ++++++++++-
+ include/linux/vmalloc.h |    4 ++++
+ mm/slab.c               |    7 +++++++
+ mm/slob.c               |    7 +++++++
+ mm/slub.c               |    7 +++++++
+ mm/vmalloc.c            |    8 ++++++++
+ 6 files changed, 43 insertions(+), 1 deletions(-)
+
+commit a3f5cb0a1c1ed7fc67651d3a2b81ca41231ee3f3
+Author: Nikolay Aleksandrov <nikolay@cumulusnetworks.com>
+Date:   Tue Aug 4 19:06:33 2015 +0200
+
+    bridge: netlink: account for the IFLA_BRPORT_PROXYARP_WIFI attribute size and policy
+    
+    The attribute size wasn't accounted for in the get_slave_size() callback
+    (br_port_get_slave_size) when it was introduced, so fix it now. Also add
+    a policy entry for it in br_port_policy.
+    
+    Signed-off-by: Nikolay Aleksandrov <nikolay@cumulusnetworks.com>
+    Fixes: 842a9ae08a25 ("bridge: Extend Proxy ARP design to allow optional rules for Wi-Fi")
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bridge/br_netlink.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 5e8e9a3f0f858fbba32b5f5966d65987d009ed70
+Author: Nikolay Aleksandrov <nikolay@cumulusnetworks.com>
+Date:   Tue Aug 4 19:06:32 2015 +0200
+
+    bridge: netlink: account for the IFLA_BRPORT_PROXYARP attribute size and policy
+    
+    The attribute size wasn't accounted for in the get_slave_size() callback
+    (br_port_get_slave_size) when it was introduced, so fix it now. Also add
+    a policy entry for it in br_port_policy.
+    
+    Signed-off-by: Nikolay Aleksandrov <nikolay@cumulusnetworks.com>
+    Fixes: 958501163ddd ("bridge: Add support for IEEE 802.11 Proxy ARP")
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bridge/br_netlink.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit a19f8506f07feb487f51c876c5d5176c899b3387
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Sat Aug 1 15:33:26 2015 +0300
+
+    rds: fix an integer overflow test in rds_info_getsockopt()
+    
+    "len" is a signed integer.  We check that len is not negative, so it
+    goes from zero to INT_MAX.  PAGE_SIZE is unsigned long so the comparison
+    is type promoted to unsigned long.  ULONG_MAX - 4095 is a higher than
+    INT_MAX so the condition can never be true.
+    
+    I don't know if this is harmful but it seems safe to limit "len" to
+    INT_MAX - 4095.
+    
+    Fixes: a8c879a7ee98 ('RDS: Info and stats')
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/info.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f22c7b1b8c91ec671dfb118ecb1dbb404c653bf8
+Author: Herbert Xu <herbert@gondor.apana.org.au>
+Date:   Tue Aug 4 15:42:47 2015 +0800
+
+    net: Fix skb_set_peeked use-after-free bug
+    
+    The commit 738ac1ebb96d02e0d23bc320302a6ea94c612dec ("net: Clone
+    skb before setting peeked flag") introduced a use-after-free bug
+    in skb_recv_datagram.  This is because skb_set_peeked may create
+    a new skb and free the existing one.  As it stands the caller will
+    continue to use the old freed skb.
+    
+    This patch fixes it by making skb_set_peeked return the new skb
+    (or the old one if unchanged).
+    
+    Fixes: 738ac1ebb96d ("net: Clone skb before setting peeked flag")
+    Reported-by: Brenden Blanco <bblanco@plumgrid.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+    Tested-by: Brenden Blanco <bblanco@plumgrid.com>
+    Reviewed-by: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/datagram.c |   13 +++++++------
+ 1 files changed, 7 insertions(+), 6 deletions(-)
+
+commit 2d8040a96a62265ac5545261cc3485d1e465f235
+Author: David S. Miller <davem@davemloft.net>
+Date:   Thu Aug 6 19:13:25 2015 -0700
+
+    sparc64: Fix userspace FPU register corruptions.
+    
+    If we have a series of events from userpsace, with %fprs=FPRS_FEF,
+    like follows:
+    
+    ETRAP
+    	ETRAP
+    		VIS_ENTRY(fprs=0x4)
+    		VIS_EXIT
+    		RTRAP (kernel FPU restore with fpu_saved=0x4)
+    	RTRAP
+    
+    We will not restore the user registers that were clobbered by the FPU
+    using kernel code in the inner-most trap.
+    
+    Traps allocate FPU save slots in the thread struct, and FPU using
+    sequences save the "dirty" FPU registers only.
+    
+    This works at the initial trap level because all of the registers
+    get recorded into the top-level FPU save area, and we'll return
+    to userspace with the FPU disabled so that any FPU use by the user
+    will take an FPU disabled trap wherein we'll load the registers
+    back up properly.
+    
+    But this is not how trap returns from kernel to kernel operate.
+    
+    The simplest fix for this bug is to always save all FPU register state
+    for anything other than the top-most FPU save area.
+    
+    Getting rid of the optimized inner-slot FPU saving code ends up
+    making VISEntryHalf degenerate into plain VISEntry.
+    
+    Longer term we need to do something smarter to reinstate the partial
+    save optimizations.  Perhaps the fundament error is having trap entry
+    and exit allocate FPU save slots and restore register state.  Instead,
+    the VISEntry et al. calls should be doing that work.
+    
+    This bug is about two decades old.
+    
+    Reported-by: James Y Knight <jyknight@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/include/asm/visasm.h |   16 +++------
+ arch/sparc/lib/NG4memcpy.S      |    5 ++-
+ arch/sparc/lib/VISsave.S        |   67 +-------------------------------------
+ arch/sparc/lib/ksyms.c          |    4 --
+ 4 files changed, 11 insertions(+), 81 deletions(-)
+
+commit 5f11caef496debbc32465910acf360bed4a7953e
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Tue Aug 4 23:23:50 2015 -0400
+
+    may_follow_link() should use nd->inode
+    
+    Now that we can get there in RCU mode, we shouldn't play with
+    nd->path.dentry->d_inode - it's not guaranteed to be stable.
+    Use nd->inode instead.
+    
+    Reported-by: Hugh Dickins <hughd@google.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/namei.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7ceeafab141e7a54050b2d392181f670b0a3aea4
+Merge: 84279d9 0007a85
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 18:34:56 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0007a85d08e7c1e6ab95aaeb31c142c237b543f0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 18:34:34 2015 -0400
+
+    Update to pax-linux-4.1.5-test12.patch:
+    - fixed boot warning about static_cpu_has(X86_FEATURE_PCIDUDEREF)
+
+ arch/x86/include/asm/cpufeature.h |    2 +-
+ arch/x86/kernel/head64.c          |    2 --
+ 2 files changed, 1 insertions(+), 3 deletions(-)
+
+commit 4f50708a26734083292c7c906dcff241ef82924c
+Merge: 640dcd8 352cb86
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 18:33:43 2015 -0400
+
+    Merge branch 'linux-4.1.y' into pax-test
+
+commit 84279d97b5e4697c143a255ea1424e3c4157cceb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 02:39:35 2015 -0400
+
+    Backport virtio-net security fix by Jason Wang from:
+    http://marc.info/?l=linux-netdev&m=143868216724068&w=2
+
+ drivers/net/virtio_net.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit fcf4c10e74760ab213cec1b55d63e2d2fd9da01d
+Merge: c5627f0 640dcd8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 02:29:34 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	init/main.c
+
+commit 640dcd80f5bc1cad2e143729b8a9b422165cdc7e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 02:26:15 2015 -0400
+
+    Update to pax-linux-4.1.4-test11.patch:
+    - more fixes for pax_nouderef handling (PCID/INVPCID will still be used on the host), reported by Victor
+
+ arch/x86/include/asm/cpufeature.h         |    1 +
+ arch/x86/include/asm/mmu_context.h        |   10 ++--
+ arch/x86/include/asm/tlbflush.h           |   26 +++++----
+ arch/x86/kernel/cpu/common.c              |   80 +++++++++++++++++++++++-----
+ arch/x86/kernel/entry_64.S                |    4 +-
+ drivers/gpu/drm/drm_ioc32.c               |    1 -
+ init/main.c                               |   48 -----------------
+ mm/memory.c                               |    1 -
+ tools/gcc/size_overflow_plugin/.gitignore |    1 +
+ 9 files changed, 90 insertions(+), 82 deletions(-)
+
 commit c5627f0435c7ec05a07670d053ff24876106e7d2
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Aug 3 22:36:31 2015 -0400
