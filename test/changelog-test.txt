@@ -1,3 +1,146 @@
+commit 417d7cf832d54e32e04357cf1060023717497049
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Mon Aug 10 15:07:34 2015 -0700
+
+    inet: fix possible request socket leak
+    
+    In commit b357a364c57c9 ("inet: fix possible panic in
+    reqsk_queue_unlink()"), I missed fact that tcp_check_req()
+    can return the listener socket in one case, and that we must
+    release the request socket refcount or we leak it.
+    
+    Tested:
+    
+     Following packetdrill test template shows the issue
+    
+    0     socket(..., SOCK_STREAM, IPPROTO_TCP) = 3
+    +0    setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+    +0    bind(3, ..., ...) = 0
+    +0    listen(3, 1) = 0
+    
+    +0    < S 0:0(0) win 2920 <mss 1460,sackOK,nop,nop>
+    +0    > S. 0:0(0) ack 1 <mss 1460,nop,nop,sackOK>
+    +.002 < . 1:1(0) ack 21 win 2920
+    +0    > R 21:21(0)
+    
+    Fixes: b357a364c57c9 ("inet: fix possible panic in reqsk_queue_unlink()")
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_ipv4.c |    2 +-
+ net/ipv6/tcp_ipv6.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 00d1b8e2bdbad87b713fba3a4866f10693c7c114
+Author: Manfred Spraul <manfred@colorfullife.com>
+Date:   Fri Aug 14 15:35:10 2015 -0700
+
+    ipc/sem.c: update/correct memory barriers
+    
+    sem_lock() did not properly pair memory barriers:
+    
+    !spin_is_locked() and spin_unlock_wait() are both only control barriers.
+    The code needs an acquire barrier, otherwise the cpu might perform read
+    operations before the lock test.
+    
+    As no primitive exists inside <include/spinlock.h> and since it seems
+    noone wants another primitive, the code creates a local primitive within
+    ipc/sem.c.
+    
+    With regards to -stable:
+    
+    The change of sem_wait_array() is a bugfix, the change to sem_lock() is a
+    nop (just a preprocessor redefinition to improve the readability).  The
+    bugfix is necessary for all kernels that use sem_wait_array() (i.e.:
+    starting from 3.10).
+    
+    Signed-off-by: Manfred Spraul <manfred@colorfullife.com>
+    Reported-by: Oleg Nesterov <oleg@redhat.com>
+    Acked-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+    Cc: "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
+    Cc: Kirill Tkhai <ktkhai@parallels.com>
+    Cc: Ingo Molnar <mingo@redhat.com>
+    Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+    Cc: Davidlohr Bueso <dave@stgolabs.net>
+    Cc: <stable@vger.kernel.org>	[3.10+]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ ipc/sem.c |   18 ++++++++++++++----
+ 1 files changed, 14 insertions(+), 4 deletions(-)
+
+commit 92e6c9f02acf1ecb2b51c7c7a46a7f82f7c16375
+Author: Andy Whitcroft <apw@canonical.com>
+Date:   Thu Aug 13 20:49:01 2015 +0100
+
+    ipv4: off-by-one in continuation handling in /proc/net/route
+    
+    When generating /proc/net/route we emit a header followed by a line for
+    each route.  When a short read is performed we will restart this process
+    based on the open file descriptor.  When calculating the start point we
+    fail to take into account that the 0th entry is the header.  This leads
+    us to skip the first entry when doing a continuation read.
+    
+    This can be easily seen with the comparison below:
+    
+      while read l; do echo "$l"; done </proc/net/route >A
+      cat /proc/net/route >B
+      diff -bu A B | grep '^[+-]'
+    
+    On my example machine I have approximatly 10KB of route output.  There we
+    see the very first non-title element is lost in the while read case,
+    and an entry around the 8K mark in the cat case:
+    
+      +wlan0 00000000 02021EAC 0003 0 0 400 00000000 0 0 0
+      -tun1  00C0AC0A 00000000 0001 0 0 950 00C0FFFF 0 0 0
+    
+    Fix up the off-by-one when reaquiring position on continuation.
+    
+    Fixes: 8be33e955cb9 ("fib_trie: Fib walk rcu should take a tnode and key instead of a trie and a leaf")
+    BugLink: http://bugs.launchpad.net/bugs/1483440
+    Acked-by: Alexander Duyck <alexander.h.duyck@redhat.com>
+    Signed-off-by: Andy Whitcroft <apw@canonical.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/fib_trie.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 934dc18989ecb31873d13f1056c2782ba6c29574
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu Aug 13 08:25:20 2015 -0700
+
+    Revert x86 sigcontext cleanups
+    
+    This reverts commits 9a036b93a344 ("x86/signal/64: Remove 'fs' and 'gs'
+    from sigcontext") and c6f2062935c8 ("x86/signal/64: Fix SS handling for
+    signals delivered to 64-bit programs").
+    
+    They were cleanups, but they break dosemu by changing the signal return
+    behavior (and removing 'fs' and 'gs' from the sigcontext struct - while
+    not actually changing any behavior - causes build problems).
+    
+    Reported-and-tested-by: Stas Sergeev <stsp@list.ru>
+    Acked-by: Andy Lutomirski <luto@amacapital.net>
+    Cc: Ingo Molnar <mingo@kernel.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/x86/include/asm/sigcontext.h      |    6 +++---
+ arch/x86/include/uapi/asm/sigcontext.h |   21 +++------------------
+ arch/x86/kernel/signal.c               |   26 +++++++++++---------------
+ 3 files changed, 17 insertions(+), 36 deletions(-)
+
+commit abd2382b82a99608d21f7c0372ba3f4fc7f1d698
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 14 21:33:40 2015 -0400
+
+    Revert "ARM: net: handle negative offsets in BPF JIT."
+    
+    This reverts commit 36523ec244eb01a4fce02a1cbc0643eb80a55324.
+
+ arch/arm/net/bpf_jit_32.c |   47 ++++++++------------------------------------
+ 1 files changed, 9 insertions(+), 38 deletions(-)
+
 commit 1f986987319e242de1c1a09022d5d813924c6aa4
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Aug 10 20:34:37 2015 -0400
