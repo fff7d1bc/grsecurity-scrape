@@ -1,3 +1,47 @@
+commit cee8eacb4ed0695ad72fc8a4bb515bf4aaadf1d7
+Merge: 1a0a86b 6de0e2c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 18 19:50:26 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6de0e2c52cdd79828f8f31298d67ec6020c51ff7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 18 19:50:00 2015 -0400
+
+    Update to pax-linux-4.1.6-test14.patch:
+    - fixed early memory reservation problem under KERNEXEC/i386, reported by spender
+
+ arch/x86/kernel/setup.c |    9 ++-------
+ 1 files changed, 2 insertions(+), 7 deletions(-)
+
+commit 1a0a86be4eb920418dd8c87e32742291a8a1c9a5
+Merge: 417d7cf 81cf0c8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 18 18:17:05 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/include/asm/tlbflush.h
+
+commit 81cf0c88c9a2338e2d6687eb5efe72797a4cef5a
+Merge: 0007a85 4ff62ca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 18 18:16:20 2015 -0400
+
+    Update to pax-linux-4.1.6-test13.patch:
+    - fixed some more integer handling issues in sr_done, reported by Christian Apeltauer and nickrobbins@yahoo.com (https://bugs.gentoo.org/show_bug.cgi?id=555860)
+    - fixed KERNEXEC/i386 and alternatives patching some more, reported by ubug (https://forums.grsecurity.net/viewtopic.php?f=3&t=4252)
+    - cleaned up __native_flush_tlb after the recent split of PCID/UDEREF support
+    - made some preparatory changes to support the upcoming size overflow feature that tracks data flow across structure fields as well
+    
+    Merge branch 'linux-4.1.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/entry_64.S
+    	arch/x86/kernel/nmi.c
+
 commit 417d7cf832d54e32e04357cf1060023717497049
 Author: Eric Dumazet <edumazet@google.com>
 Date:   Mon Aug 10 15:07:34 2015 -0700
