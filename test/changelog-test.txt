@@ -1,3 +1,274 @@
+commit 5316471ff29eab2296624f7d1dd8fe9ee185ee4b
+Author: Masahiro Yamada <yamada.masahiro@socionext.com>
+Date:   Mon Aug 17 04:03:33 2015 +0100
+
+    ARM: 8418/1: add boot image dependencies to not generate invalid images
+    
+    U-Boot is often used to boot the kernel on ARM boards, but uImage
+    is not built by "make all", so we are often inclined to do
+    "make all uImage" to generate DTBs, modules and uImage in a single
+    command, but we should notice a pitfall behind it.  In fact,
+    "make all uImage" could generate an invalid uImage if it is run with
+    the parallel option (-j).
+    
+    You can reproduce this problem with the following procedure:
+    
+    [1] First, build "all" and "uImage" separately.
+        You will get a valid uImage
+    
+      $ git clean -f -x -d
+      $ export CROSS_COMPILE=<your-tools-prefix>
+      $ make -s -j8 ARCH=arm multi_v7_defconfig
+      $ make -s -j8 ARCH=arm all
+      $ make -j8 ARCH=arm UIMAGE_LOADADDR=0x80208000 uImage
+        CHK     include/config/kernel.release
+        CHK     include/generated/uapi/linux/version.h
+        CHK     include/generated/utsrelease.h
+      make[1]: `include/generated/mach-types.h' is up to date.
+        CHK     include/generated/timeconst.h
+        CHK     include/generated/bounds.h
+        CHK     include/generated/asm-offsets.h
+        CALL    scripts/checksyscalls.sh
+        CHK     include/generated/compile.h
+        Kernel: arch/arm/boot/Image is ready
+        Kernel: arch/arm/boot/zImage is ready
+        UIMAGE  arch/arm/boot/uImage
+      Image Name:   Linux-4.2.0-rc5-00156-gdd2384a-d
+      Created:      Sat Aug  8 23:21:35 2015
+      Image Type:   ARM Linux Kernel Image (uncompressed)
+      Data Size:    6138648 Bytes = 5994.77 kB = 5.85 MB
+      Load Address: 80208000
+      Entry Point:  80208000
+        Image arch/arm/boot/uImage is ready
+      $ ls -l arch/arm/boot/*Image
+      -rwxrwxr-x 1 masahiro masahiro 13766656 Aug  8 23:20 arch/arm/boot/Image
+      -rw-rw-r-- 1 masahiro masahiro  6138712 Aug  8 23:21 arch/arm/boot/uImage
+      -rwxrwxr-x 1 masahiro masahiro  6138648 Aug  8 23:20 arch/arm/boot/zImage
+    
+    [2] Update some source file(s)
+    
+      $ touch init/main.c
+    
+    [3] Then, re-build "all" and "uImage" simultaneously.
+        You will get an invalid uImage at random.
+    
+      $ make -j8 ARCH=arm UIMAGE_LOADADDR=0x80208000 all uImage
+        CHK     include/config/kernel.release
+        CHK     include/generated/uapi/linux/version.h
+        CHK     include/generated/utsrelease.h
+      make[1]: `include/generated/mach-types.h' is up to date.
+        CHK     include/generated/timeconst.h
+        CHK     include/generated/bounds.h
+        CHK     include/generated/asm-offsets.h
+        CALL    scripts/checksyscalls.sh
+        CC      init/main.o
+        CHK     include/generated/compile.h
+        LD      init/built-in.o
+        LINK    vmlinux
+        LD      vmlinux.o
+        MODPOST vmlinux.o
+        GEN     .version
+        CHK     include/generated/compile.h
+        UPD     include/generated/compile.h
+        CC      init/version.o
+        LD      init/built-in.o
+        KSYM    .tmp_kallsyms1.o
+        KSYM    .tmp_kallsyms2.o
+        LD      vmlinux
+        SORTEX  vmlinux
+        SYSMAP  System.map
+        OBJCOPY arch/arm/boot/Image
+        Building modules, stage 2.
+        Kernel: arch/arm/boot/Image is ready
+        GZIP    arch/arm/boot/compressed/piggy.gzip
+        AS      arch/arm/boot/compressed/piggy.gzip.o
+        Kernel: arch/arm/boot/Image is ready
+        LD      arch/arm/boot/compressed/vmlinux
+        GZIP    arch/arm/boot/compressed/piggy.gzip
+        OBJCOPY arch/arm/boot/zImage
+        Kernel: arch/arm/boot/zImage is ready
+        UIMAGE  arch/arm/boot/uImage
+      Image Name:   Linux-4.2.0-rc5-00156-gdd2384a-d
+      Created:      Sat Aug  8 23:23:14 2015
+      Image Type:   ARM Linux Kernel Image (uncompressed)
+      Data Size:    26472 Bytes = 25.85 kB = 0.03 MB
+      Load Address: 80208000
+      Entry Point:  80208000
+        Image arch/arm/boot/uImage is ready
+        MODPOST 192 modules
+        AS      arch/arm/boot/compressed/piggy.gzip.o
+        LD      arch/arm/boot/compressed/vmlinux
+        OBJCOPY arch/arm/boot/zImage
+        Kernel: arch/arm/boot/zImage is ready
+      $ ls -l arch/arm/boot/*Image
+      -rwxrwxr-x 1 masahiro masahiro 13766656 Aug  8 23:23 arch/arm/boot/Image
+      -rw-rw-r-- 1 masahiro masahiro    26536 Aug  8 23:23 arch/arm/boot/uImage
+      -rwxrwxr-x 1 masahiro masahiro  6138648 Aug  8 23:23 arch/arm/boot/zImage
+    
+    Please notice the uImage is extremely small when this issue is
+    encountered.  Besides, "Kernel: arch/arm/boot/zImage is ready" is
+    displayed twice, before and after the uImage log.
+    
+    The root cause of this is the race condition between zImage and
+    uImage.  Actually, uImage depends on zImage, but the dependency
+    between the two is only described in arch/arm/boot/Makefile.
+    Because arch/arm/boot/Makefile is not included from the top-level
+    Makefile, it cannot know the dependency between zImage and uImage.
+    
+    Consequently, when we run make with the parallel option, Kbuild
+    updates vmlinux first, and then two different threads descends into
+    the arch/arm/boot/Makefile almost at the same time, one for updating
+    zImage and the other for uImage.  While one thread is re-generating
+    zImage, the other also tries to update zImage before creating uImage
+    on top of that.  zImage is overwritten by the slower thread and then
+    uImage is created based on the half-written zImage.
+    
+    This is the reason why "Kernel: arch/arm/boot/zImage is ready" is
+    displayed twice, and a broken uImage is created.
+    
+    The same problem could happen on bootpImage.
+    
+    This commit adds dependencies among Image, zImage, uImage, and
+    bootpImage to arch/arm/Makefile, which is included from the
+    top-level Makefile.
+    
+    Signed-off-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+
+ arch/arm/Makefile |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit f42eedeab0696d55347452d2b77911e06ed90a14
+Author: Vincent Bernat <vincent@bernat.im>
+Date:   Sat Aug 15 15:49:13 2015 +0200
+
+    9p: ensure err is initialized to 0 in p9_client_read/write
+    
+    Some use of those functions were providing unitialized values to those
+    functions. Notably, when reading 0 bytes from an empty file on a 9P
+    filesystem, the return code of read() was not 0.
+    
+    Tested with this simple program:
+    
+        #include <assert.h>
+        #include <sys/types.h>
+        #include <sys/stat.h>
+        #include <fcntl.h>
+        #include <unistd.h>
+    
+        int main(int argc, const char **argv)
+        {
+            assert(argc == 2);
+            char buffer[256];
+            int fd = open(argv[1], O_RDONLY|O_NOCTTY);
+            assert(fd >= 0);
+            assert(read(fd, buffer, 0) == 0);
+            return 0;
+        }
+    
+    Cc: stable@vger.kernel.org # v4.1
+    Signed-off-by: Vincent Bernat <vincent@bernat.im>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ net/9p/client.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 77e41c5af13df22d45eae269a4241ad9ec56d73c
+Author: Michal Hocko <mhocko@suse.com>
+Date:   Fri Aug 21 14:11:51 2015 -0700
+
+    mm: make page pfmemalloc check more robust
+    
+    Commit c48a11c7ad26 ("netvm: propagate page->pfmemalloc to skb") added
+    checks for page->pfmemalloc to __skb_fill_page_desc():
+    
+            if (page->pfmemalloc && !page->mapping)
+                    skb->pfmemalloc = true;
+    
+    It assumes page->mapping == NULL implies that page->pfmemalloc can be
+    trusted.  However, __delete_from_page_cache() can set set page->mapping
+    to NULL and leave page->index value alone.  Due to being in union, a
+    non-zero page->index will be interpreted as true page->pfmemalloc.
+    
+    So the assumption is invalid if the networking code can see such a page.
+    And it seems it can.  We have encountered this with a NFS over loopback
+    setup when such a page is attached to a new skbuf.  There is no copying
+    going on in this case so the page confuses __skb_fill_page_desc which
+    interprets the index as pfmemalloc flag and the network stack drops
+    packets that have been allocated using the reserves unless they are to
+    be queued on sockets handling the swapping which is the case here and
+    that leads to hangs when the nfs client waits for a response from the
+    server which has been dropped and thus never arrive.
+    
+    The struct page is already heavily packed so rather than finding another
+    hole to put it in, let's do a trick instead.  We can reuse the index
+    again but define it to an impossible value (-1UL).  This is the page
+    index so it should never see the value that large.  Replace all direct
+    users of page->pfmemalloc by page_is_pfmemalloc which will hide this
+    nastiness from unspoiled eyes.
+    
+    The information will get lost if somebody wants to use page->index
+    obviously but that was the case before and the original code expected
+    that the information should be persisted somewhere else if that is
+    really needed (e.g.  what SLAB and SLUB do).
+    
+    [akpm@linux-foundation.org: fix blooper in slub]
+    Fixes: c48a11c7ad26 ("netvm: propagate page->pfmemalloc to skb")
+    Signed-off-by: Michal Hocko <mhocko@suse.com>
+    Debugged-by: Vlastimil Babka <vbabka@suse.com>
+    Debugged-by: Jiri Bohac <jbohac@suse.com>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: David Miller <davem@davemloft.net>
+    Acked-by: Mel Gorman <mgorman@suse.de>
+    Cc: <stable@vger.kernel.org>	[3.6+]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	mm/page_alloc.c
+
+ drivers/net/ethernet/intel/fm10k/fm10k_main.c     |    2 +-
+ drivers/net/ethernet/intel/igb/igb_main.c         |    2 +-
+ drivers/net/ethernet/intel/ixgbe/ixgbe_main.c     |    2 +-
+ drivers/net/ethernet/intel/ixgbevf/ixgbevf_main.c |    2 +-
+ include/linux/mm.h                                |   28 +++++++++++++++++++++
+ include/linux/mm_types.h                          |    9 ------
+ include/linux/skbuff.h                            |   14 +++------
+ mm/page_alloc.c                                   |    7 +++-
+ mm/slab.c                                         |    4 +-
+ mm/slub.c                                         |    2 +-
+ net/core/skbuff.c                                 |    2 +-
+ 11 files changed, 46 insertions(+), 28 deletions(-)
+
+commit 9f031f8887e8fad0cc93f07b346021630f1697e3
+Author: Andy Lutomirski <luto@kernel.org>
+Date:   Mon Aug 17 12:22:50 2015 -0700
+
+    Revert "sched/x86_64: Don't save flags on context switch"
+    
+    This reverts commit:
+    
+      2c7577a75837 ("sched/x86_64: Don't save flags on context switch")
+    
+    It was a nice speedup.  It's also not quite correct: SYSENTER
+    enables interrupts too early.
+    
+    We can re-add this optimization once the SYSENTER code is beaten
+    into shape, which should happen in 4.3 or 4.4.
+    
+    Signed-off-by: Andy Lutomirski <luto@kernel.org>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: stable@vger.kernel.org # v3.19
+    Link: http://lkml.kernel.org/r/85f56651f59f76624e80785a8fd3bdfdd089a818.1439838962.git.luto@kernel.org
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/include/asm/switch_to.h |   12 ++++--------
+ 1 files changed, 4 insertions(+), 8 deletions(-)
+
 commit cee8eacb4ed0695ad72fc8a4bb515bf4aaadf1d7
 Merge: 1a0a86b 6de0e2c
 Author: Brad Spengler <spender@grsecurity.net>
