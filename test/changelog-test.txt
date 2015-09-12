@@ -1,3 +1,54 @@
+commit db21a18b927710f55c4e27871e889d5e64a75625
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 11 19:49:18 2015 -0400
+
+    Work around a compilation error caused by the following patch:
+    2015-08-17  Jason Merrill  <jason@redhat.com>
+    +
+    +      PR c++/65734
+    +      * stor-layout.c (layout_type): Layout the TYPE_MAIN_VARIANT.
+    It's currently only been observed with the Debian unstable version
+    of GCC 5.2.
+    
+    The record fields themselves are shared among all type variants,
+    so all we need to do (as we did before) is update the pointer
+    to the list of fields for each type variant.  Then, as the above
+    patch only performs layouts on the main type variant, we explicitly
+    only perform the resetting of TYPE_SIZE and the call to layout_type
+    for that main variant.  This will prevent TYPE_SIZE from being left
+    as NULL_TREE for the other variants, which is interpreted in later
+    GCC code as an incomplete type, causing the observed compilation
+    errors.  Since finalize_type_size() ends up being called on all
+    type variants, we don't need to do any additional work.
+
+ tools/gcc/randomize_layout_plugin.c |   16 ++++++++++++----
+ 1 files changed, 12 insertions(+), 4 deletions(-)
+
+commit e9978423f2be2079590c31770ed9fd25c80c8840
+Merge: 5316471 6f2767b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 10 17:55:32 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6f2767b753af5394329acecb713f35f219937fb7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 10 17:54:44 2015 -0400
+
+    Update to pax-linux-4.1.6-test16.patch:
+    - fixed a section mismatch problem on bios32_indirect
+    - fixed __phys_addr_symbol prototype on amd64, reported by igraltist
+    - Mathias Krause fixed an integer underflow problem caught by the size_overflow plugin in _decode_session6, reported by satmd and Marcin Jurkowski (https://bugs.gentoo.org/show_bug.cgi?id=545192)
+    - fixed mm counter accounting for swap entries under SEGMEXEC/i386
+
+ arch/x86/include/asm/page_64.h |    4 ++--
+ arch/x86/pci/pcbios.c          |    2 +-
+ mm/memory.c                    |   19 +++++++++++++++----
+ net/ipv6/xfrm6_policy.c        |    6 ++++--
+ tools/gcc/constify_plugin.c    |    6 +-----
+ tools/gcc/gcc-common.h         |    2 ++
+ 6 files changed, 25 insertions(+), 14 deletions(-)
+
 commit 5316471ff29eab2296624f7d1dd8fe9ee185ee4b
 Author: Masahiro Yamada <yamada.masahiro@socionext.com>
 Date:   Mon Aug 17 04:03:33 2015 +0100
