@@ -1,3 +1,65 @@
+commit f96899231124d616f85b1283baa69df4c593e266
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 13 14:17:09 2015 -0400
+
+    Update our *_secure sysctl variants as well
+
+ kernel/sysctl.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 4f5e68af3c693a2214e26052ead9658a0ce85df6
+Author: Ilya Dryomov <idryomov@gmail.com>
+Date:   Wed Sep 9 15:39:06 2015 -0700
+
+    sysctl: fix int -> unsigned long assignments in INT_MIN case
+    
+    The following
+    
+        if (val < 0)
+            *lvalp = (unsigned long)-val;
+    
+    is incorrect because the compiler is free to assume -val to be positive
+    and use a sign-extend instruction for extending the bit pattern.  This is
+    a problem if val == INT_MIN:
+    
+        # echo -2147483648 >/proc/sys/dev/scsi/logging_level
+        # cat /proc/sys/dev/scsi/logging_level
+        -18446744071562067968
+    
+    Cast to unsigned long before negation - that way we first sign-extend and
+    then negate an unsigned, which is well defined.  With this:
+    
+        # cat /proc/sys/dev/scsi/logging_level
+        -2147483648
+    
+    Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+    Cc: Mikulas Patocka <mikulas@twibright.com>
+    Cc: Robert Xiao <nneonneo@gmail.com>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Kees Cook <keescook@chromium.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/sysctl.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 8d9daf1705a8b321508a9e31d59b06d1dfe7290a
+Merge: db21a18 a964f88
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 13 13:37:22 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/xen/Kconfig
+
+commit a964f883594918a075b038cc9634d70260e73048
+Merge: 6f2767b 0c5c1f1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 13 13:36:25 2015 -0400
+
+    Merge branch 'linux-4.1.y' into pax-test
+
 commit db21a18b927710f55c4e27871e889d5e64a75625
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Sep 11 19:49:18 2015 -0400
