@@ -1,3 +1,96 @@
+commit fed13a5012b8d7e87a6f9efa2e40e0be28eaecd9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 9 23:12:43 2015 -0400
+
+    compile fix
+
+ arch/x86/mm/pgtable.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 58edc15a668a6dd90b3f66abc84b509f8fba7505
+Author: Daniel Borkmann <daniel@iogearbox.net>
+Date:   Mon Aug 31 19:11:02 2015 +0200
+
+    netfilter: conntrack: use nf_ct_tmpl_free in CT/synproxy error paths
+    
+    Commit 0838aa7fcfcd ("netfilter: fix netns dependencies with conntrack
+    templates") migrated templates to the new allocator api, but forgot to
+    update error paths for them in CT and synproxy to use nf_ct_tmpl_free()
+    instead of nf_conntrack_free().
+    
+    Due to that, memory is being freed into the wrong kmemcache, but also
+    we drop the per net reference count of ct objects causing an imbalance.
+    
+    In Brad's case, this leads to a wrap-around of net->ct.count and thus
+    lets __nf_conntrack_alloc() refuse to create a new ct object:
+    
+      [   10.340913] xt_addrtype: ipv6 does not support BROADCAST matching
+      [   10.810168] nf_conntrack: table full, dropping packet
+      [   11.917416] r8169 0000:07:00.0 eth0: link up
+      [   11.917438] IPv6: ADDRCONF(NETDEV_CHANGE): eth0: link becomes ready
+      [   12.815902] nf_conntrack: table full, dropping packet
+      [   15.688561] nf_conntrack: table full, dropping packet
+      [   15.689365] nf_conntrack: table full, dropping packet
+      [   15.690169] nf_conntrack: table full, dropping packet
+      [   15.690967] nf_conntrack: table full, dropping packet
+      [...]
+    
+    With slab debugging, it also reports the wrong kmemcache (kmalloc-512 vs.
+    nf_conntrack_ffffffff81ce75c0) and reports poison overwrites, etc. Thus,
+    to fix the problem, export and use nf_ct_tmpl_free() instead.
+    
+    Fixes: 0838aa7fcfcd ("netfilter: fix netns dependencies with conntrack templates")
+    Reported-by: Brad Jackson <bjackson0971@gmail.com>
+    Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ include/net/netfilter/nf_conntrack.h |    1 +
+ net/netfilter/nf_conntrack_core.c    |    3 ++-
+ net/netfilter/nf_synproxy_core.c     |    2 +-
+ net/netfilter/xt_CT.c                |    2 +-
+ 4 files changed, 5 insertions(+), 3 deletions(-)
+
+commit 37d26e44573aaa9c3b1f0c36ec9d4bddc008fc03
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 9 18:22:54 2015 -0400
+
+    Fix BUG() in scatterwalk_map_and_copy caused by virt_to_page being
+    called on the KSTACKOVERFLOW's vmalloc'd stack.  Thanks to
+    Yves-Alexis Perez for the report
+
+ crypto/scatterwalk.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 8137d53d2b60023587a48004f0b67946ed6db4a8
+Merge: 147420b a9c991f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 9 18:20:32 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a9c991f727bb8daf15838296e301683791c17071
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 9 18:20:07 2015 -0400
+
+    Update to pax-linux-4.2.3-test8.patch:
+    - fixed vsyscall/pvclock regression caused by the recent page table hardening, reported by kamil (https://forums.grsecurity.net/viewtopic.php?f=3&t=4272)
+
+ arch/x86/kernel/espfix_64.c |    4 +---
+ arch/x86/kernel/kvmclock.c  |   20 ++++++--------------
+ arch/x86/mm/highmem_32.c    |    2 ++
+ arch/x86/mm/pgtable.c       |   33 +++++++++++++++++++++++++++++++++
+ 4 files changed, 42 insertions(+), 17 deletions(-)
+
+commit 147420b0f00c7f20f354e1dfa460b904a3af432b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 9 08:54:24 2015 -0400
+
+    Properly fix the bug reported at:
+    https://code.google.com/p/android/issues/detail?id=187973
+
+ drivers/net/slip/slhc.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
 commit 4918a68ea80e1185ec8f3a94d3a2210552ed0bb5
 Merge: 4e736d9 7e02f35
 Author: Brad Spengler <spender@grsecurity.net>
