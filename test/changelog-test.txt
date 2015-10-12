@@ -1,3 +1,335 @@
+commit 45ff0fe97624b7133be6f0280ab8fda4610b7937
+Merge: ca6828e 1c527d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 11 17:17:58 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/mm/pgtable.c
+
+commit 1c527d25ad2ece4cdb4723047625d96b942a3b91
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 11 17:16:49 2015 -0400
+
+    Update to pax-linux-4.2.3-test9.patch:
+    - really fixed vsyscall/pvclock regression caused by the recent page table hardening, reported by kamil (https://forums.grsecurity.net/viewtopic.php?f=3&t=4272) and quasar366 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4275)
+    - fixed a compilation error caused by the above regression, reported by spender
+    - fixed an arm compilation error, reported by Emese
+
+ arch/arm/kernel/module-plts.c |    7 +------
+ arch/x86/mm/pgtable.c         |   21 +++++++++++++++++++--
+ 2 files changed, 20 insertions(+), 8 deletions(-)
+
+commit ca6828e73b10b4a7537b16a37c2c0280523171e1
+Author: Trond Myklebust <trond.myklebust@primarydata.com>
+Date:   Fri Oct 9 13:44:34 2015 -0400
+
+    namei: results of d_is_negative() should be checked after dentry revalidation
+    
+    Leandro Awa writes:
+     "After switching to version 4.1.6, our parallelized and distributed
+      workflows now fail consistently with errors of the form:
+    
+      T34: ./regex.c:39:22: error: config.h: No such file or directory
+    
+      From our 'git bisect' testing, the following commit appears to be the
+      possible cause of the behavior we've been seeing: commit 766c4cbfacd8"
+    
+    Al Viro says:
+     "What happens is that 766c4cbfacd8 got the things subtly wrong.
+    
+      We used to treat d_is_negative() after lookup_fast() as "fall with
+      ENOENT".  That was wrong - checking ->d_flags outside of ->d_seq
+      protection is unreliable and failing with hard error on what should've
+      fallen back to non-RCU pathname resolution is a bug.
+    
+      Unfortunately, we'd pulled the test too far up and ran afoul of
+      another kind of staleness.  The dentry might have been absolutely
+      stable from the RCU point of view (and we might be on UP, etc), but
+      stale from the remote fs point of view.  If ->d_revalidate() returns
+      "it's actually stale", dentry gets thrown away and the original code
+      wouldn't even have looked at its ->d_flags.
+    
+      What we need is to check ->d_flags where 766c4cbfacd8 does (prior to
+      ->d_seq validation) but only use the result in cases where we do not
+      discard this dentry outright"
+    
+    Reported-by: Leandro Awa <lawa@nvidia.com>
+    Link: https://bugzilla.kernel.org/show_bug.cgi?id=104911
+    Fixes: 766c4cbfacd8 ("namei: d_is_negative() should be checked...")
+    Tested-by: Leandro Awa <lawa@nvidia.com>
+    Cc: stable@vger.kernel.org # v4.1+
+    Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+    Acked-by: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/namei.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit c0181260ce096a814637ad60e45a64c94840fffa
+Author: Matt Fleming <matt.fleming@intel.com>
+Date:   Fri Sep 25 23:02:18 2015 +0100
+
+    x86/efi: Fix boot crash by mapping EFI memmap entries bottom-up at runtime, instead of top-down
+    
+    Beginning with UEFI v2.5 EFI_PROPERTIES_TABLE was introduced
+    that signals that the firmware PE/COFF loader supports splitting
+    code and data sections of PE/COFF images into separate EFI
+    memory map entries. This allows the kernel to map those regions
+    with strict memory protections, e.g. EFI_MEMORY_RO for code,
+    EFI_MEMORY_XP for data, etc.
+    
+    Unfortunately, an unwritten requirement of this new feature is
+    that the regions need to be mapped with the same offsets
+    relative to each other as observed in the EFI memory map. If
+    this is not done crashes like this may occur,
+    
+      BUG: unable to handle kernel paging request at fffffffefe6086dd
+      IP: [<fffffffefe6086dd>] 0xfffffffefe6086dd
+      Call Trace:
+       [<ffffffff8104c90e>] efi_call+0x7e/0x100
+       [<ffffffff81602091>] ? virt_efi_set_variable+0x61/0x90
+       [<ffffffff8104c583>] efi_delete_dummy_variable+0x63/0x70
+       [<ffffffff81f4e4aa>] efi_enter_virtual_mode+0x383/0x392
+       [<ffffffff81f37e1b>] start_kernel+0x38a/0x417
+       [<ffffffff81f37495>] x86_64_start_reservations+0x2a/0x2c
+       [<ffffffff81f37582>] x86_64_start_kernel+0xeb/0xef
+    
+    Here 0xfffffffefe6086dd refers to an address the firmware
+    expects to be mapped but which the OS never claimed was mapped.
+    The issue is that included in these regions are relative
+    addresses to other regions which were emitted by the firmware
+    toolchain before the "splitting" of sections occurred at
+    runtime.
+    
+    Needless to say, we don't satisfy this unwritten requirement on
+    x86_64 and instead map the EFI memory map entries in reverse
+    order. The above crash is almost certainly triggerable with any
+    kernel newer than v3.13 because that's when we rewrote the EFI
+    runtime region mapping code, in commit d2f7cbe7b26a ("x86/efi:
+    Runtime services virtual mapping"). For kernel versions before
+    v3.13 things may work by pure luck depending on the
+    fragmentation of the kernel virtual address space at the time we
+    map the EFI regions.
+    
+    Instead of mapping the EFI memory map entries in reverse order,
+    where entry N has a higher virtual address than entry N+1, map
+    them in the same order as they appear in the EFI memory map to
+    preserve this relative offset between regions.
+    
+    This patch has been kept as small as possible with the intention
+    that it should be applied aggressively to stable and
+    distribution kernels. It is very much a bugfix rather than
+    support for a new feature, since when EFI_PROPERTIES_TABLE is
+    enabled we must map things as outlined above to even boot - we
+    have no way of asking the firmware not to split the code/data
+    regions.
+    
+    In fact, this patch doesn't even make use of the more strict
+    memory protections available in UEFI v2.5. That will come later.
+    
+    Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+    Reported-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+    Cc: <stable@vger.kernel.org>
+    Cc: Borislav Petkov <bp@suse.de>
+    Cc: Chun-Yi <jlee@suse.com>
+    Cc: Dave Young <dyoung@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: James Bottomley <JBottomley@Odin.com>
+    Cc: Lee, Chun-Yi <jlee@suse.com>
+    Cc: Leif Lindholm <leif.lindholm@linaro.org>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+    Cc: Mike Galbraith <efault@gmx.de>
+    Cc: Peter Jones <pjones@redhat.com>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: linux-kernel@vger.kernel.org
+    Link: http://lkml.kernel.org/r/1443218539-7610-2-git-send-email-matt@codeblueprint.co.uk
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/platform/efi/efi.c |   67 ++++++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 66 insertions(+), 1 deletions(-)
+
+commit 9377caab146791c8c587da3750d6eddcd01bdfba
+Author: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Date:   Fri Sep 25 23:02:19 2015 +0100
+
+    arm64/efi: Fix boot crash by not padding between EFI_MEMORY_RUNTIME regions
+    
+    The new Properties Table feature introduced in UEFIv2.5 may
+    split memory regions that cover PE/COFF memory images into
+    separate code and data regions. Since these regions only differ
+    in the type (runtime code vs runtime data) and the permission
+    bits, but not in the memory type attributes (UC/WC/WT/WB), the
+    spec does not require them to be aligned to 64 KB.
+    
+    Since the relative offset of PE/COFF .text and .data segments
+    cannot be changed on the fly, this means that we can no longer
+    pad out those regions to be mappable using 64 KB pages.
+    Unfortunately, there is no annotation in the UEFI memory map
+    that identifies data regions that were split off from a code
+    region, so we must apply this logic to all adjacent runtime
+    regions whose attributes only differ in the permission bits.
+    
+    So instead of rounding each memory region to 64 KB alignment at
+    both ends, only round down regions that are not directly
+    preceded by another runtime region with the same type
+    attributes. Since the UEFI spec does not mandate that the memory
+    map be sorted, this means we also need to sort it first.
+    
+    Note that this change will result in all EFI_MEMORY_RUNTIME
+    regions whose start addresses are not aligned to the OS page
+    size to be mapped with executable permissions (i.e., on kernels
+    compiled with 64 KB pages). However, since these mappings are
+    only active during the time that UEFI Runtime Services are being
+    invoked, the window for abuse is rather small.
+    
+    Tested-by: Mark Salter <msalter@redhat.com>
+    Tested-by: Mark Rutland <mark.rutland@arm.com> [UEFI 2.4 only]
+    Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+    Reviewed-by: Mark Salter <msalter@redhat.com>
+    Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+    Cc: <stable@vger.kernel.org> # v4.0+
+    Cc: Catalin Marinas <catalin.marinas@arm.com>
+    Cc: Leif Lindholm <leif.lindholm@linaro.org>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Mike Galbraith <efault@gmx.de>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Will Deacon <will.deacon@arm.com>
+    Cc: linux-kernel@vger.kernel.org
+    Link: http://lkml.kernel.org/r/1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/arm64/kernel/efi.c                 |    3 +-
+ drivers/firmware/efi/libstub/arm-stub.c |   88 +++++++++++++++++++++++++-----
+ 2 files changed, 75 insertions(+), 16 deletions(-)
+
+commit 189124f1e733622c44d72060832af3c68d7ee8bc
+Author: Ralf Baechle <ralf@linux-mips.org>
+Date:   Fri Oct 2 09:48:57 2015 +0200
+
+    MIPS: BPF: Fix load delay slots.
+    
+    The entire bpf_jit_asm.S is written in noreorder mode because "we know
+    better" according to a comment.  This also prevented the assembler from
+    throwing in the required NOPs for MIPS I processors which have no
+    load-use interlock, thus the load's consumer might end up using the
+    old value of the register from prior to the load.
+    
+    Fixed by putting the assembler in reorder mode for just the affected
+    load instructions.  This is not enough for gas to actually try to be
+    clever by looking at the next instruction and inserting a nop only
+    when needed but as the comment said "we know better", so getting gas
+    to unconditionally emit a NOP is just right in this case and prevents
+    adding further ifdefery.
+    
+    Signed-off-by: Ralf Baechle <ralf@linux-mips.org>
+
+ arch/mips/net/bpf_jit_asm.S |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit b4b012d6599fbc3c6e81f0a03cd59eb9f0095ed8
+Author: Lee, Chun-Yi <joeyli.kernel@gmail.com>
+Date:   Tue Sep 29 20:58:57 2015 +0800
+
+    x86/kexec: Fix kexec crash in syscall kexec_file_load()
+    
+    The original bug is a page fault crash that sometimes happens
+    on big machines when preparing ELF headers:
+    
+        BUG: unable to handle kernel paging request at ffffc90613fc9000
+        IP: [<ffffffff8103d645>] prepare_elf64_ram_headers_callback+0x165/0x260
+    
+    The bug is caused by us under-counting the number of memory ranges
+    and subsequently not allocating enough ELF header space for them.
+    The bug is typically masked on smaller systems, because the ELF header
+    allocation is rounded up to the next page.
+    
+    This patch modifies the code in fill_up_crash_elf_data() by using
+    walk_system_ram_res() instead of walk_system_ram_range() to correctly
+    count the max number of crash memory ranges. That's because the
+    walk_system_ram_range() filters out small memory regions that
+    reside in the same page, but walk_system_ram_res() does not.
+    
+    Here's how I found the bug:
+    
+    After tracing prepare_elf64_headers() and prepare_elf64_ram_headers_callback(),
+    the code uses walk_system_ram_res() to fill-in crash memory regions information
+    to the program header, so it counts those small memory regions that
+    reside in a page area.
+    
+    But, when the kernel was using walk_system_ram_range() in
+    fill_up_crash_elf_data() to count the number of crash memory regions,
+    it filters out small regions.
+    
+    I printed those small memory regions, for example:
+    
+      kexec: Get nr_ram ranges. vaddr=0xffff880077592258 paddr=0x77592258, sz=0xdc0
+    
+    Based on the code in walk_system_ram_range(), this memory region
+    will be filtered out:
+    
+      pfn = (0x77592258 + 0x1000 - 1) >> 12 = 0x77593
+      end_pfn = (0x77592258 + 0xfc0 -1 + 1) >> 12 = 0x77593
+      end_pfn - pfn = 0x77593 - 0x77593 = 0  <=== if (end_pfn > pfn) is FALSE
+    
+    So, the max_nr_ranges that's counted by the kernel doesn't include
+    small memory regions - causing us to under-allocate the required space.
+    That causes the page fault crash that happens in a later code path
+    when preparing ELF headers.
+    
+    This bug is not easy to reproduce on small machines that have few
+    CPUs, because the allocated page aligned ELF buffer has more free
+    space to cover those small memory regions' PT_LOAD headers.
+    
+    Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+    Cc: Andy Lutomirski <luto@kernel.org>
+    Cc: Baoquan He <bhe@redhat.com>
+    Cc: Jiang Liu <jiang.liu@linux.intel.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Mike Galbraith <efault@gmx.de>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Stephen Rothwell <sfr@canb.auug.org.au>
+    Cc: Takashi Iwai <tiwai@suse.de>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Viresh Kumar <viresh.kumar@linaro.org>
+    Cc: Vivek Goyal <vgoyal@redhat.com>
+    Cc: kexec@lists.infradead.org
+    Cc: linux-kernel@vger.kernel.org
+    Cc: <stable@vger.kernel.org>
+    Link: http://lkml.kernel.org/r/1443531537-29436-1-git-send-email-jlee@suse.com
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/kernel/crash.c |    7 +++----
+ 1 files changed, 3 insertions(+), 4 deletions(-)
+
+commit bf91f1e0162bdd27ebd1411090a81fd9188daa4f
+Author: Elad Raz <eladr@mellanox.com>
+Date:   Sat Aug 22 08:44:11 2015 +0300
+
+    netfilter: ipset: Fixing unnamed union init
+    
+    In continue to proposed Vinson Lee's post [1], this patch fixes compilation
+    issues founded at gcc 4.4.7. The initialization of .cidr field of unnamed
+    unions causes compilation error in gcc 4.4.x.
+    
+    References
+    
+    Visible links
+    [1] https://lkml.org/lkml/2015/7/5/74
+    
+    Signed-off-by: Elad Raz <eladr@mellanox.com>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/netfilter/ipset/ip_set_hash_netnet.c     |   20 ++++++++++++++++++--
+ net/netfilter/ipset/ip_set_hash_netportnet.c |   20 ++++++++++++++++++--
+ 2 files changed, 36 insertions(+), 4 deletions(-)
+
 commit fed13a5012b8d7e87a6f9efa2e40e0be28eaecd9
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Oct 9 23:12:43 2015 -0400
