@@ -1,3 +1,233 @@
+commit 7af7ad1e287067b7ea659dc0dd3e2e355588e246
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 13 08:03:51 2015 -0400
+
+    Apply fix by Tejun Heo for upstream bug reported on the forums by Fuxino:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4276#p15570
+    
+    Probably made more easily reproducible via SANITIZE, but we won't know for
+    sure without a full oops report.
+    
+    For some reason even though this patch was marked for 4.2+ stable over a month
+    ago, it still hasn't hit Greg's tree.
+
+ block/blk-cgroup.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 8e1f29f9e1af36f71d12213ea6530eb77014c00c
+Author: Dmitry Vyukov <dvyukov@google.com>
+Date:   Thu Sep 17 17:17:10 2015 +0200
+
+    tty: fix data race on tty_buffer.commit
+    
+    Race on buffer data happens when newly committed data is
+    picked up by an old flush work in the following scenario:
+    __tty_buffer_request_room does a plain write of tail->commit,
+    no barriers were executed before that.
+    At this point flush_to_ldisc reads this new value of commit,
+    and reads buffer data, no barriers in between.
+    The committed buffer data is not necessary visible to flush_to_ldisc.
+    
+    Similar bug happens when tty_schedule_flip commits data.
+    
+    Update commit with smp_store_release and read commit with
+    smp_load_acquire, as it is commit that signals data readiness.
+    This is orthogonal to the existing synchronization on tty_buffer.next,
+    which is required to not dismiss a buffer with unconsumed data.
+    
+    The data race was found with KernelThreadSanitizer (KTSAN).
+    
+    Signed-off-by: Dmitry Vyukov <dvyukov@google.com>
+    Reviewed-by: Peter Hurley <peter@hurleysoftware.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_buffer.c |   15 ++++++++++++---
+ 1 files changed, 12 insertions(+), 3 deletions(-)
+
+commit d62db216e7182e24317596471c1a3a2a9fb9d1f5
+Author: Peter Hurley <peter@hurleysoftware.com>
+Date:   Sun Jul 12 20:50:49 2015 -0400
+
+    tty: Replace smp_rmb/smp_wmb with smp_load_acquire/smp_store_release
+    
+    Clarify flip buffer producer/consumer operation; the use of
+    smp_load_acquire() and smp_store_release() more clearly indicates
+    which memory access requires a barrier.
+    
+    Signed-off-by: Peter Hurley <peter@hurleysoftware.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_buffer.c |   10 ++++------
+ 1 files changed, 4 insertions(+), 6 deletions(-)
+
+commit c6bbe8a6097f869b6a3d3c40d456727180573dd9
+Author: Kosuke Tatsukawa <tatsu@ab.jp.nec.com>
+Date:   Fri Oct 2 08:27:05 2015 +0000
+
+    tty: fix stall caused by missing memory barrier in drivers/tty/n_tty.c
+    
+    My colleague ran into a program stall on a x86_64 server, where
+    n_tty_read() was waiting for data even if there was data in the buffer
+    in the pty.  kernel stack for the stuck process looks like below.
+     #0 [ffff88303d107b58] __schedule at ffffffff815c4b20
+     #1 [ffff88303d107bd0] schedule at ffffffff815c513e
+     #2 [ffff88303d107bf0] schedule_timeout at ffffffff815c7818
+     #3 [ffff88303d107ca0] wait_woken at ffffffff81096bd2
+     #4 [ffff88303d107ce0] n_tty_read at ffffffff8136fa23
+     #5 [ffff88303d107dd0] tty_read at ffffffff81368013
+     #6 [ffff88303d107e20] __vfs_read at ffffffff811a3704
+     #7 [ffff88303d107ec0] vfs_read at ffffffff811a3a57
+     #8 [ffff88303d107f00] sys_read at ffffffff811a4306
+     #9 [ffff88303d107f50] entry_SYSCALL_64_fastpath at ffffffff815c86d7
+    
+    There seems to be two problems causing this issue.
+    
+    First, in drivers/tty/n_tty.c, __receive_buf() stores the data and
+    updates ldata->commit_head using smp_store_release() and then checks
+    the wait queue using waitqueue_active().  However, since there is no
+    memory barrier, __receive_buf() could return without calling
+    wake_up_interactive_poll(), and at the same time, n_tty_read() could
+    start to wait in wait_woken() as in the following chart.
+    
+            __receive_buf()                         n_tty_read()
+    ------------------------------------------------------------------------
+    if (waitqueue_active(&tty->read_wait))
+    /* Memory operations issued after the
+       RELEASE may be completed before the
+       RELEASE operation has completed */
+                                            add_wait_queue(&tty->read_wait, &wait);
+                                            ...
+                                            if (!input_available_p(tty, 0)) {
+    smp_store_release(&ldata->commit_head,
+                      ldata->read_head);
+                                            ...
+                                            timeout = wait_woken(&wait,
+                                              TASK_INTERRUPTIBLE, timeout);
+    ------------------------------------------------------------------------
+    
+    The second problem is that n_tty_read() also lacks a memory barrier
+    call and could also cause __receive_buf() to return without calling
+    wake_up_interactive_poll(), and n_tty_read() to wait in wait_woken()
+    as in the chart below.
+    
+            __receive_buf()                         n_tty_read()
+    ------------------------------------------------------------------------
+                                            spin_lock_irqsave(&q->lock, flags);
+                                            /* from add_wait_queue() */
+                                            ...
+                                            if (!input_available_p(tty, 0)) {
+                                            /* Memory operations issued after the
+                                               RELEASE may be completed before the
+                                               RELEASE operation has completed */
+    smp_store_release(&ldata->commit_head,
+                      ldata->read_head);
+    if (waitqueue_active(&tty->read_wait))
+                                            __add_wait_queue(q, wait);
+                                            spin_unlock_irqrestore(&q->lock,flags);
+                                            /* from add_wait_queue() */
+                                            ...
+                                            timeout = wait_woken(&wait,
+                                              TASK_INTERRUPTIBLE, timeout);
+    ------------------------------------------------------------------------
+    
+    There are also other places in drivers/tty/n_tty.c which have similar
+    calls to waitqueue_active(), so instead of adding many memory barrier
+    calls, this patch simply removes the call to waitqueue_active(),
+    leaving just wake_up*() behind.
+    
+    This fixes both problems because, even though the memory access before
+    or after the spinlocks in both wake_up*() and add_wait_queue() can
+    sneak into the critical section, it cannot go past it and the critical
+    section assures that they will be serialized (please see "INTER-CPU
+    ACQUIRING BARRIER EFFECTS" in Documentation/memory-barriers.txt for a
+    better explanation).  Moreover, the resulting code is much simpler.
+    
+    Latency measurement using a ping-pong test over a pty doesn't show any
+    visible performance drop.
+    
+    Signed-off-by: Kosuke Tatsukawa <tatsu@ab.jp.nec.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/n_tty.c |   15 +++++----------
+ 1 files changed, 5 insertions(+), 10 deletions(-)
+
+commit 3af2011ac1a085a3e8c57ca3a840aec393b37db3
+Author: Dmitry Vyukov <dvyukov@google.com>
+Date:   Thu Sep 17 17:17:08 2015 +0200
+
+    tty: fix data race in flush_to_ldisc
+    
+    flush_to_ldisc reads port->itty and checks that it is not NULL,
+    concurrently release_tty sets port->itty to NULL. It is possible
+    that flush_to_ldisc loads port->itty once, ensures that it is
+    not NULL, but then reloads it again and uses. The second load
+    can already return NULL, which will cause a crash.
+    
+    Use READ_ONCE to read port->itty.
+    
+    The data race was found with KernelThreadSanitizer (KTSAN).
+    
+    Signed-off-by: Dmitry Vyukov <dvyukov@google.com>
+    Reviewed-by: Peter Hurley <peter@hurleysoftware.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_buffer.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4a433f384b0a5b7e39f969ee8df89c56537d078d
+Author: Dmitry Vyukov <dvyukov@google.com>
+Date:   Thu Sep 17 17:17:09 2015 +0200
+
+    tty: fix data race in tty_buffer_flush
+    
+    tty_buffer_flush frees not acquired buffers.
+    As the result, for example, read of b->size in tty_buffer_free
+    can return garbage value which will lead to a huge buffer
+    hanging in the freelist. This is just the benignest
+    manifestation of freeing of a not acquired object.
+    If the object is passed to kfree, heap can be corrupted.
+    
+    Acquire visibility over the buffer before freeing it.
+    
+    The data race was found with KernelThreadSanitizer (KTSAN).
+    
+    Signed-off-by: Dmitry Vyukov <dvyukov@google.com>
+    Reviewed-by: Peter Hurley <peter@hurleysoftware.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_buffer.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 1477c439d65debf45ac3164a1615504131fad1ff
+Author: Jann Horn <jann@thejh.net>
+Date:   Sun Oct 4 19:29:12 2015 +0200
+
+    drivers/tty: require read access for controlling terminal
+    
+    This is mostly a hardening fix, given that write-only access to other
+    users' ttys is usually only given through setgid tty executables.
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_io.c |   31 +++++++++++++++++++++++++++----
+ 1 files changed, 27 insertions(+), 4 deletions(-)
+
+commit c2d51348729aa244b827216715db7734daf07155
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 12 07:19:03 2015 -0400
+
+    Don't auto-enable UDEREF on x64 with a VirtualBox host
+    
+    Conflicts:
+    
+    	security/Kconfig
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 45ff0fe97624b7133be6f0280ab8fda4610b7937
 Merge: ca6828e 1c527d2
 Author: Brad Spengler <spender@grsecurity.net>
