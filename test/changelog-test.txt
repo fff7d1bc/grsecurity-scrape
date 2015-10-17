@@ -1,3 +1,21 @@
+commit 00f1afa694317365e9bd6dc77d2e3e96ae3a68ec
+Merge: 7098385 57dc21d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 17 11:04:56 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 57dc21d203a9fa1312a4abc608da5b3644d29078
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 17 11:04:34 2015 -0400
+
+    Update to pax-linux-4.2.3-test12.patch:
+    - removed size_overflow_hash.data.prev that was left behind by accident
+    - Emese fixed a false positive overflow report in the megaraid driver due to a gcc limitation, reported by vortex (https://forums.grsecurity.net/viewtopic.php?f=3&t=4277)
+
+ drivers/scsi/megaraid/megaraid_sas.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 7098385851c43dea6692508c71cd5fbcce3187b2
 Merge: bc6d23e 78b0f64
 Author: Brad Spengler <spender@grsecurity.net>
