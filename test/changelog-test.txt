@@ -1,3 +1,244 @@
+commit 7098385851c43dea6692508c71cd5fbcce3187b2
+Merge: bc6d23e 78b0f64
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 16 17:45:06 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	tools/gcc/size_overflow_plugin/intentional_overflow.c
+
+commit 78b0f643d8d2b870e8ad5df075d4ab79befa4266
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 16 17:44:18 2015 -0400
+
+    Update to pax-linux-4.2.3-test11.patch:
+    - Emese fixed a few false positives caused by error codes
+    - simplified the switch_mm code on x86 a bit
+
+ arch/x86/include/asm/mmu_context.h                 |  118 +++++--------
+ include/drm/drm_mm.h                               |    2 +-
+ .../size_overflow_plugin/intentional_overflow.c    |   11 +-
+ tools/gcc/size_overflow_plugin/size_overflow.h     |   19 ++-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |  178 +++++++++-----------
+ .../size_overflow_transform_core.c                 |   31 ++--
+ 7 files changed, 169 insertions(+), 192 deletions(-)
+
+commit bc6d23e3408e389f8a96134f6bc915e9fc8b370b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 16 17:28:54 2015 -0400
+
+    Update rpm devel spec, thanks to Andrew
+
+ scripts/package/mkspec |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit b3f30cb9207a72a6aa4a78f23f8c5353be0bb27b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 15 20:10:56 2015 -0400
+
+    disable tracing support with GRKERNSEC_KMEM (it forces debugfs support on)
+
+ kernel/trace/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 82a0c12587f14add438ddf3b558e2278fcb7a387
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 15 19:19:43 2015 -0400
+
+    Force DEBUG_FS off the hard way, since 'select' can cause it to be
+    inadvertently enabled.  Add a backup check that fails the build if
+    GRKERNSEC_KMEM is enabled with DEBUG_FS
+    Ditto for PROC_PAGE_MONITOR
+
+ arch/arc/Kconfig                       |    1 +
+ arch/arm/Kconfig.debug                 |    1 +
+ arch/arm64/Kconfig.debug               |    1 +
+ arch/blackfin/Kconfig.debug            |    1 +
+ arch/s390/Kconfig.debug                |    1 +
+ arch/x86/Kconfig.debug                 |    2 ++
+ drivers/iommu/Kconfig                  |    1 +
+ drivers/md/bcache/Kconfig              |    1 +
+ drivers/net/wireless/ath/ath9k/Kconfig |    1 -
+ include/linux/grsecurity.h             |    6 ++++++
+ init/Kconfig                           |    1 +
+ kernel/trace/Kconfig                   |    2 ++
+ lib/Kconfig.debug                      |    6 +++++-
+ mm/Kconfig                             |    3 +++
+ net/sunrpc/Kconfig                     |    1 +
+ 15 files changed, 27 insertions(+), 2 deletions(-)
+
+commit 1b6f8fc8b8100292647638c713326776a0865705
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 15 17:58:59 2015 -0400
+
+    Force DEBUG_FS off in the kernel config, even having it present is a security
+    risk
+    
+    Conflicts:
+    
+    	lib/Kconfig.debug
+
+ lib/Kconfig.debug |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 21057fc30571f96aa46acf8922417311905d0f2b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 15 08:15:33 2015 -0400
+
+    Backport fix from: https://patchwork.kernel.org/patch/6853351/
+    The debug_read_tlb() uses the sprintf() functions directly on the buffer
+    allocated by buf = kmalloc(count), without taking into account the size
+    of the buffer, with the consequence corrupting the heap, depending on
+    the count requested by the user.
+    
+    The patch fixes the issue replacing sprintf() by seq_printf().
+    
+    Signed-off-by: Salva Peiró <speirofr@gmail.com>
+
+ drivers/iommu/omap-iommu-debug.c |   26 +++++++-------------------
+ drivers/iommu/omap-iommu.c       |   28 +++++++++++-----------------
+ drivers/iommu/omap-iommu.h       |    3 +--
+ 3 files changed, 19 insertions(+), 38 deletions(-)
+
+commit ba936d19274485bad900a69d679878a50faa50aa
+Author: Joe Perches <joe@perches.com>
+Date:   Wed Oct 14 01:09:40 2015 -0700
+
+    ethtool: Use kcalloc instead of kmalloc for ethtool_get_strings
+    
+    It seems that kernel memory can leak into userspace by a
+    kmalloc, ethtool_get_strings, then copy_to_user sequence.
+    
+    Avoid this by using kcalloc to zero fill the copied buffer.
+    
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Acked-by: Ben Hutchings <ben@decadent.org.uk>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/ethtool.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit bae0a8209962cede6a0d486cf2414cac1747f91b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 14 19:54:27 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |   53 +++++++++++++++++--
+ 1 files changed, 47 insertions(+), 6 deletions(-)
+
+commit 1d840cc98b8f9b62d3c906ae24385f79c9131e29
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 14 19:50:48 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit fca9b7af6aebd1d80f364d6d849470e917919004
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 14 19:47:21 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |  300 ++++++++++++++++----
+ 1 files changed, 244 insertions(+), 56 deletions(-)
+
+commit 07cadc277ba83222698c99091c7da2c28275981f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 14 19:39:44 2015 -0400
+
+    squelch some informational messages only used by Emese
+
+ .../size_overflow_plugin/intentional_overflow.c    |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 77eeeac20bde1e0ebd72efe0f7b5c52786411bc7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 14 19:15:56 2015 -0400
+
+    Re-enable size_overflow
+
+ security/Kconfig |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit cb8efa1fd63be1bbcf5e585396cc0ed562d0c624
+Merge: 913cbf6 4c48a7f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 14 17:14:42 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	tools/gcc/size_overflow_plugin/size_overflow_hash.data
+
+commit 4c48a7fc8df9310f994708b42fe1102a2943917c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 14 17:12:54 2015 -0400
+
+    Update to pax-linux-4.2.3-test10.patch:
+    - fixed accidentally dropped csum_partial_copy_generic_to_user entry point for pre-P6 i386 configs, by minipli
+    - Emese fixed a bunch of false positives with the size overflow plugin, let's see how it goes in the real world :)
+
+ arch/x86/include/asm/processor.h                   |    2 +-
+ arch/x86/include/asm/ptrace.h                      |    8 +-
+ arch/x86/lib/checksum_32.S                         |    2 +
+ arch/x86/xen/mmu.c                                 |    2 +-
+ drivers/ata/libahci.c                              |    2 +-
+ drivers/i2c/busses/i2c-diolan-u2c.c                |    2 +-
+ drivers/oprofile/oprofile_files.c                  |    2 +-
+ drivers/spi/spidev.c                               |    2 +-
+ drivers/tty/n_tty.c                                |    2 +-
+ drivers/usb/core/message.c                         |    6 +-
+ fs/binfmt_elf.c                                    |    2 +-
+ fs/ubifs/io.c                                      |    2 +-
+ include/drm/drm_mm.h                               |    2 +-
+ include/linux/completion.h                         |   12 +-
+ include/linux/jiffies.h                            |   10 +-
+ include/linux/kernel.h                             |    2 +-
+ include/linux/mm.h                                 |    2 +-
+ include/linux/random.h                             |    4 +-
+ include/linux/sched.h                              |    2 +-
+ include/linux/usb.h                                |    2 +-
+ kernel/sched/completion.c                          |    6 +-
+ kernel/time/timer.c                                |    2 +-
+ lib/bitmap.c                                       |    2 +-
+ mm/internal.h                                      |    2 +-
+ net/sunrpc/svcauth_unix.c                          |    2 +-
+ .../disable_size_overflow_hash.data                |22980 +++++++++++---------
+ .../insert_size_overflow_asm.c                     |    7 +
+ .../size_overflow_plugin/intentional_overflow.c    |   10 +-
+ tools/gcc/size_overflow_plugin/size_overflow.h     |   29 +-
+ .../gcc/size_overflow_plugin/size_overflow_debug.c |   20 +-
+ .../size_overflow_plugin/size_overflow_hash.data   |14092 ++++++++----
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |  252 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ .../size_overflow_plugin_hash.c                    |   13 +-
+ .../size_overflow_plugin/size_overflow_transform.c |  205 +-
+ .../size_overflow_transform_core.c                 |    4 +-
+ 36 files changed, 21958 insertions(+), 15740 deletions(-)
+
+commit 913cbf6a23fcad570b776b1a5a71242b909c5c99
+Author: Dave Kleikamp <dave.kleikamp@oracle.com>
+Date:   Mon Oct 5 10:08:51 2015 -0500
+
+    crypto: sparc - initialize blkcipher.ivsize
+    
+    Some of the crypto algorithms write to the initialization vector,
+    but no space has been allocated for it. This clobbers adjacent memory.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Dave Kleikamp <dave.kleikamp@oracle.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ arch/sparc/crypto/aes_glue.c      |    2 ++
+ arch/sparc/crypto/camellia_glue.c |    1 +
+ arch/sparc/crypto/des_glue.c      |    2 ++
+ 3 files changed, 5 insertions(+), 0 deletions(-)
+
 commit 7af7ad1e287067b7ea659dc0dd3e2e355588e246
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Oct 13 08:03:51 2015 -0400
