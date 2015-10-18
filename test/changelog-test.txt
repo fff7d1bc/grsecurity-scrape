@@ -1,3 +1,21 @@
+commit a61fd152e87bd3ed91194b07f6b1fcbcd165093b
+Merge: 00f1afa db7a8e5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 17 18:33:48 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit db7a8e5c284179889014b5929a40298e1b228fbc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 17 18:33:22 2015 -0400
+
+    Update to pax-linux-4.2.3-test13.patch:
+    - Emese worked around a sign mixup with wiphy.rts_threshold, reported by gus (https://forums.grsecurity.net/viewtopic.php?f=3&t=4278)
+
+ .../disable_size_overflow_hash.data                |    2 ++
+ .../size_overflow_plugin/size_overflow_hash.data   |    2 --
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 00f1afa694317365e9bd6dc77d2e3e96ae3a68ec
 Merge: 7098385 57dc21d
 Author: Brad Spengler <spender@grsecurity.net>
