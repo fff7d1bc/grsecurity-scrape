@@ -1,3 +1,31 @@
+commit 0e55d80a65998266cab71804131a072fcc8ee558
+Merge: a61fd15 9c4310f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 17 23:15:36 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9c4310fdb2d19f83affc62eb2698d3763ce8c36b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 17 23:15:13 2015 -0400
+
+    Update to pax-linux-4.2.3-test14.patch:
+    - reverted some page table hardening that caused too much slowdown under virtualization, reported by quasar366 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4275)
+
+ arch/x86/include/asm/pgtable-2level.h |   18 ++----------------
+ arch/x86/include/asm/pgtable-3level.h |   10 ----------
+ arch/x86/include/asm/pgtable_32.h     |    2 ++
+ arch/x86/include/asm/pgtable_64.h     |   18 ++----------------
+ arch/x86/mm/highmem_32.c              |    2 ++
+ arch/x86/mm/init_64.c                 |    2 ++
+ arch/x86/mm/iomap_32.c                |    4 ++++
+ arch/x86/mm/pageattr.c                |    4 ++++
+ arch/x86/mm/pgtable.c                 |    2 ++
+ arch/x86/mm/pgtable_32.c              |    3 +++
+ mm/highmem.c                          |    5 +++++
+ mm/vmalloc.c                          |    7 +++++++
+ 12 files changed, 35 insertions(+), 42 deletions(-)
+
 commit a61fd152e87bd3ed91194b07f6b1fcbcd165093b
 Merge: 00f1afa db7a8e5
 Author: Brad Spengler <spender@grsecurity.net>
