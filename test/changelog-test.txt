@@ -1,3 +1,28 @@
+commit a2409394c2b0d97a9f02bf62ca4c0254602e58a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 20 08:58:25 2015 -0400
+
+    set default to y
+
+ security/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 3abe24117389419654da44adc87a9a03ad7e3f38
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 20 08:08:32 2015 -0400
+
+    Add a new config option from Emese to allow SIZE_OVERFLOW to be enabled
+    while having it not kill the userland process in an overflow condition.
+    This will help us obtain reports over the next few weeks while not making
+    some percentage of users' machines unusable.
+    
+    To enable this option, set CONFIG_PAX_SIZE_OVERFLOW_DISABLE_KILL=y in .config
+
+ fs/exec.c                                          |    5 +++++
+ security/Kconfig                                   |    4 ++++
+ .../size_overflow_plugin/size_overflow_plugin.c    |    4 ++--
+ 3 files changed, 11 insertions(+), 2 deletions(-)
+
 commit bcae982f720ce0b3463a81f2b72a4807cb89048b
 Merge: 0e55d80 128d3a5
 Author: Brad Spengler <spender@grsecurity.net>
