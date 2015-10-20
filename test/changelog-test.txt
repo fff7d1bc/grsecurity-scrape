@@ -1,3 +1,24 @@
+commit bcae982f720ce0b3463a81f2b72a4807cb89048b
+Merge: 0e55d80 128d3a5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 19 18:56:09 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 128d3a5452ab001b29235b05eb0be3334fff3998
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 19 18:55:37 2015 -0400
+
+    Update to pax-linux-4.2.3-test14.patch:
+    - Emese fixed a false positive size overflow report, reported by gus (https://forums.grsecurity.net/viewtopic.php?t=4280)
+    - fixed an integer sign mixup in usb_stor_invoke_transport, reported by Arnaud <arnaud@drno.eu>
+
+ drivers/usb/storage/transport.c                    |    2 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |   15 +++-
+ .../size_overflow_transform_core.c                 |   90 ++++++++++++++-----
+ 4 files changed, 81 insertions(+), 28 deletions(-)
+
 commit 0e55d80a65998266cab71804131a072fcc8ee558
 Merge: a61fd15 9c4310f
 Author: Brad Spengler <spender@grsecurity.net>
