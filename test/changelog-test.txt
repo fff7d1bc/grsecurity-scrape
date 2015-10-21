@@ -1,3 +1,47 @@
+commit 4a110451298bfce895ed224e6bbd9201d8605b2b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 20 19:25:13 2015 -0400
+
+    Ratelimit the dump_stack as well, both to 15s with a burst of 3, enough not to completely
+    flood syslog
+
+ fs/exec.c |   11 +++++++++--
+ 1 files changed, 9 insertions(+), 2 deletions(-)
+
+commit 183fc2ae7d90e077fd27623998d82916260a2223
+Merge: a240939 d6dc25f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 20 19:16:04 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	tools/gcc/size_overflow_plugin/size_overflow_plugin.c
+
+commit d6dc25f193a832e08d8e7cf097d7f70b3dc24776
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 20 19:14:41 2015 -0400
+
+    Update to pax-linux-4.2.3-test16.patch:
+    - fixed undefined integer shift in proc_do_submiturb, reported by Arnaud <arnaud@drno.eu>
+    - fixed integer underflow in scm_detach_fds (similar to 1ac70e7ad24a88710cf9b6d7ababaefa2b575df0 upstream), reported by kdave (https://forums.grsecurity.net/viewtopic.php?f=1&t=4286)
+    - Emese added a temporary workaround for miscompiling the ath10k driver, reported by victor
+    - Emese fixed a false positive that affected the iwlwifi driver among others, reported by victor
+    - Emese disabled size overflow checking in acpi_ex_do_math_op and on acpi_object_integer, reported by xxterry1xx and rfnx (https://forums.grsecurity.net/viewtopic.php?f=3&t=4287)
+
+ drivers/net/wireless/ath/ath10k/ce.c               |    2 +-
+ drivers/usb/core/devio.c                           |    2 +-
+ fs/dlm/lowcomms.c                                  |    2 +-
+ net/core/scm.c                                     |    6 ++-
+ .../disable_size_overflow_hash.data                |    4 +-
+ .../size_overflow_plugin/intentional_overflow.c    |   44 --------------------
+ tools/gcc/size_overflow_plugin/size_overflow.h     |    1 -
+ .../size_overflow_plugin/size_overflow_hash.data   |    4 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    4 +-
+ .../size_overflow_plugin/size_overflow_transform.c |    3 -
+ .../size_overflow_transform_core.c                 |    6 +++
+ 11 files changed, 19 insertions(+), 59 deletions(-)
+
 commit a2409394c2b0d97a9f02bf62ca4c0254602e58a6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Oct 20 08:58:25 2015 -0400
