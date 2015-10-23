@@ -1,3 +1,136 @@
+commit 8f521b864bd7428f3ad42613416c106d1d619c4d
+Merge: 26adf00 285f0d1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 22 19:41:57 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/gpu/drm/drm_lock.c
+
+commit 285f0d1cda31b45ee217b90861677c032cb6550b
+Merge: d6dc25f 190bd21
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 22 19:40:34 2015 -0400
+
+    Merge branch 'linux-4.2.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/process_64.c
+
+commit 26adf00caf8f4ebf155422082d4e8b8e4eb60eef
+Author: Eric W. Biederman <ebiederm@xmission.com>
+Date:   Sat Aug 15 13:36:12 2015 -0500
+
+    dcache: Handle escaped paths in prepend_path
+    
+    A rename can result in a dentry that by walking up d_parent
+    will never reach it's mnt_root.  For lack of a better term
+    I call this an escaped path.
+    
+    prepend_path is called by four different functions __d_path,
+    d_absolute_path, d_path, and getcwd.
+    
+    __d_path only wants to see paths are connected to the root it passes
+    in.  So __d_path needs prepend_path to return an error.
+    
+    d_absolute_path similarly wants to see paths that are connected to
+    some root.  Escaped paths are not connected to any mnt_root so
+    d_absolute_path needs prepend_path to return an error greater
+    than 1.  So escaped paths will be treated like paths on lazily
+    unmounted mounts.
+    
+    getcwd needs to prepend "(unreachable)" so getcwd also needs
+    prepend_path to return an error.
+    
+    d_path is the interesting hold out.  d_path just wants to print
+    something, and does not care about the weird cases.  Which raises
+    the question what should be printed?
+    
+    Given that <escaped_path>/<anything> should result in -ENOENT I
+    believe it is desirable for escaped paths to be printed as empty
+    paths.  As there are not really any meaninful path components when
+    considered from the perspective of a mount tree.
+    
+    So tweak prepend_path to return an empty path with an new error
+    code of 3 when it encounters an escaped path.
+    
+    Signed-off-by: "Eric W. Biederman" <ebiederm@xmission.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/dcache.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit d402147a7689356c29bfd46a7cfa6594e517ab95
+Author: Salva Peiró <speirofr@gmail.com>
+Date:   Wed Oct 14 17:48:02 2015 +0200
+
+    staging/dgnc: fix info leak in ioctl
+    
+    The dgnc_mgmt_ioctl() code fails to initialize the 16 _reserved bytes of
+    struct digi_dinfo after the ->dinfo_nboards member. Add an explicit
+    memset(0) before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Salva Peiró <speirofr@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/staging/dgnc/dgnc_mgmt.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit bafc510c4fb4e8a5e69531fdc3a733e58c4bbdbf
+Author: Salva Peiró <speirofr@gmail.com>
+Date:   Wed Oct 7 07:09:26 2015 -0300
+
+    [media] media/vivid-osd: fix info leak in ioctl
+    
+    The vivid_fb_ioctl() code fails to initialize the 16 _reserved bytes of
+    struct fb_vblank after the ->hcount member. Add an explicit
+    memset(0) before filling the structure to avoid the info leak.
+    
+    Signed-off-by: Salva Peiró <speirofr@gmail.com>
+    Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
+    Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+
+ drivers/media/platform/vivid/vivid-osd.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 980a903796ae06366fd5acbcd179ee2dc57fbabf
+Author: David Howells <dhowells@redhat.com>
+Date:   Mon Oct 19 11:20:28 2015 +0100
+
+    KEYS: Don't permit request_key() to construct a new keyring
+    
+    If request_key() is used to find a keyring, only do the search part - don't
+    do the construction part if the keyring was not found by the search.  We
+    don't really want keyrings in the negative instantiated state since the
+    rejected/negative instantiation error value in the payload is unioned with
+    keyring metadata.
+    
+    Now the kernel gives an error:
+    
+    	request_key("keyring", "#selinux,bdekeyring", "keyring", KEY_SPEC_USER_SESSION_KEYRING) = -1 EPERM (Operation not permitted)
+    
+    Signed-off-by: David Howells <dhowells@redhat.com>
+
+ security/keys/request_key.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit f705c157ed6f8a9c4c0cf552fd5f054d9d500550
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Mon Oct 19 13:16:49 2015 +0300
+
+    irda: precedence bug in irlmp_seq_hb_idx()
+    
+    This is decrementing the pointer, instead of the value stored in the
+    pointer.  KASan detects it as an out of bounds reference.
+    
+    Reported-by: "Berry Cheng 程君(成淼)" <chengmiao.cj@alibaba-inc.com>
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/irda/irlmp.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 4a110451298bfce895ed224e6bbd9201d8605b2b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Oct 20 19:25:13 2015 -0400
