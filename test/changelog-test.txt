@@ -1,3 +1,23 @@
+commit d9ef04f20fc634595883d1c1950c32a8fe04df22
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 24 08:27:29 2015 -0400
+
+    Fix from Emese for https://forums.grsecurity.net/viewtopic.php?f=3&t=4291
+
+ drivers/usb/class/cdc-acm.h |    2 +-
+ include/linux/usb.h         |    8 ++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit eea46f1d247f5f63e3762da91a41cba76567800f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 23 18:24:57 2015 -0400
+
+    Update size_overflow hash tables
+
+ .../disable_size_overflow_hash.data                |    5 ++++-
+ .../size_overflow_plugin/size_overflow_hash.data   |    5 +----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
 commit 8f521b864bd7428f3ad42613416c106d1d619c4d
 Merge: 26adf00 285f0d1
 Author: Brad Spengler <spender@grsecurity.net>
