@@ -1,3 +1,37 @@
+commit b088cabd42c6fe825baa27f40ab450ad75e571d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 18:09:55 2015 -0400
+
+    Temporarily work around an ICE on GCC >= 5 reported by Daniel Micay due to
+    backporting of __builtin_usub_overflow
+
+ include/linux/compiler-gcc.h |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit ba858f46865c6751af3ddba03b176e4d5ecf85c1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 17:59:17 2015 -0400
+
+    Update size_overflow hash table
+
+ .../disable_size_overflow_hash.data                |    7 +++++++
+ .../size_overflow_plugin/size_overflow_hash.data   |    9 +--------
+ 2 files changed, 8 insertions(+), 8 deletions(-)
+
+commit ba803bceaea0283b38e91c1d3176bf0671786269
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 15:31:17 2015 -0400
+
+    Fix oversight in pipacs' removal of FPU state from the task struct:
+    fpu_copy was performing an OOB copy starting from the address of the 'state'
+    pointer in the fpu struct instead of starting from the address pointed
+    to by the state pointer.  Reported at:
+    https://bugs.archlinux.org/task/46764
+
+ arch/x86/include/asm/fpu/internal.h |    4 ++--
+ arch/x86/kernel/fpu/core.c          |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
 commit 26e7d31c5b5c970c50297d2b8be165e9c9ab9d83
 Merge: 85d8735 a851b41
 Author: Brad Spengler <spender@grsecurity.net>
