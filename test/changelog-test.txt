@@ -1,3 +1,121 @@
+commit 26e7d31c5b5c970c50297d2b8be165e9c9ab9d83
+Merge: 85d8735 a851b41
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 13:39:21 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a851b41415a0402d76f10712b6950ddff3872a22
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 13:38:25 2015 -0400
+
+    Update to latest size_overflow plugin release:
+    Temporarily ignore bitfield types: https://bugs.archlinux.org/task/46798
+    Use SI or wider type for the size_overflow type: https://forums.grsecurity.net/viewtopic.php?t=4293&p=15655#p15655
+
+ .../size_overflow_plugin/intentional_overflow.c    |    3 +++
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |    7 +++++++
+ .../size_overflow_transform_core.c                 |    2 --
+ 4 files changed, 11 insertions(+), 3 deletions(-)
+
+commit 85d8735a1d1190e3ad2e3f032ae88f811090fdfc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 13:01:32 2015 -0400
+
+    fpu doesn't live on the task_struct with PaX, so don't even bother computing some task_size
+    variable that isn't used for anything
+
+ arch/x86/kernel/fpu/init.c |   14 --------------
+ 1 files changed, 0 insertions(+), 14 deletions(-)
+
+commit cfd0008de8db38841f7f06b979482900994717b9
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Fri Oct 16 11:32:42 2015 +0200
+
+    overflow-arith: begin to add support for overflow builtin functions
+    
+    The idea of the overflow-arith.h header is to collect overflow checking
+    functions in one central place.
+    
+    If gcc compiler supports the __builtin_overflow_* builtins we use them
+    because they might give better performance, otherwise the code falls
+    back to normal overflow checking functions.
+    
+    The builtin_overflow functions are supported by gcc-5 and clang. The
+    matter of supporting clang is to just provide a corresponding
+    CC_HAVE_BUILTIN_OVERFLOW, because the specific overflow checking builtins
+    don't differ between gcc and clang.
+    
+    I just provide overflow_usub function here as I intend this to get merged
+    into net, more functions will definitely follow as they are needed.
+    
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/linux/compiler-gcc.h   |    4 ++++
+ include/linux/overflow-arith.h |   18 ++++++++++++++++++
+ 2 files changed, 22 insertions(+), 0 deletions(-)
+
+commit 18d5034650b637ec479f41d98e3912398b3e3efc
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Fri Oct 16 11:32:43 2015 +0200
+
+    ipv6: protect mtu calculation of wrap-around and infinite loop by rounding issues
+    
+    Raw sockets with hdrincl enabled can insert ipv6 extension headers
+    right into the data stream. In case we need to fragment those packets,
+    we reparse the options header to find the place where we can insert
+    the fragment header. If the extension headers exceed the link's MTU we
+    actually cannot make progress in such a case.
+    
+    Instead of ending up in broken arithmetic or rounding towards 0 and
+    entering an endless loop in ip6_fragment, just prevent those cases by
+    aborting early and signal -EMSGSIZE to user space.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_output.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 0e1d1c0f1981b4049a70d23dce4c69daf19f020b
+Merge: c81314c 9470e78
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 11:51:44 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9470e7893a9a1bf15f9b7d412dc09bebb59105e8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 25 11:50:54 2015 -0400
+
+    Temporary squelching of overflow warning on skb_transport_offset(), will be fixed properly after H2HC
+
+ include/linux/skbuff.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c81314ce278e9cfa3322881a6133c2c7e53b9430
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 24 23:13:36 2015 -0400
+
+    Update recordmcount/fixdep paths in RPM spec, from Andrew
+
+ scripts/package/mkspec |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 798e4296bd55778b5e77f1db69c1bb972419590f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 24 23:11:22 2015 -0400
+
+    Update size_overflow hash table
+
+ .../disable_size_overflow_hash.data                |    3 +++
+ .../size_overflow_plugin/size_overflow_hash.data   |    5 +----
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
 commit d9ef04f20fc634595883d1c1950c32a8fe04df22
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Oct 24 08:27:29 2015 -0400
