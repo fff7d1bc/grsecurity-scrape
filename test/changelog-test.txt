@@ -1,3 +1,12 @@
+commit 2bf85cb1c3df45d59d8b59aeacf63cbbee360175
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 29 08:52:07 2015 -0400
+
+    Temporarily disable the builtin_overflow again as the kernexec plugin also has problems with it
+
+ include/linux/compiler-gcc.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit a41c8c4d880b6005e874bf5440e24713da8483cd
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Oct 28 19:28:30 2015 -0400
