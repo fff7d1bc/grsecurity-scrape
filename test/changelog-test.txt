@@ -1,3 +1,124 @@
+commit a41c8c4d880b6005e874bf5440e24713da8483cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 28 19:28:30 2015 -0400
+
+    temporarily work around issue with the dynamic FPU state and lazy FPU mode
+    upstream configures FPU mode based on the eagerfpu variable before it's ever actually
+    set by the commandline parser (so eagerfpu= on the commandline has no effect)
+
+ arch/x86/kernel/fpu/init.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 8452f9d5cfabda9228496050a16bc8728c0ebbb7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 28 19:25:55 2015 -0400
+
+    Remove/reorder some code due to the reverting of the FPU-state-in-task_struct code
+
+ arch/x86/include/asm/fpu/types.h |   69 ++++++++++++++++++--------------------
+ arch/x86/include/asm/processor.h |   10 ++----
+ arch/x86/kernel/fpu/init.c       |   20 -----------
+ include/linux/sched.h            |    4 +-
+ 4 files changed, 38 insertions(+), 65 deletions(-)
+
+commit c2127bd4215f8f02a1391bef3bde55d0bb1c19bc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 27 23:38:11 2015 -0400
+
+    fix typo
+
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c588def7b5713c31fef2b848bfebf0d727791b82
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 27 21:09:04 2015 -0400
+
+    remove the PAGE_SIZE padding from fpregs_state since it's not included as part
+    of the task struct
+
+ arch/x86/include/asm/fpu/types.h |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 3bd1e5915353fee1f347577f0e80d925910695f9
+Author: Herbert Xu <herbert@gondor.apana.org.au>
+Date:   Mon Oct 19 18:23:57 2015 +0800
+
+    crypto: api - Only abort operations on fatal signal
+    
+    Currently a number of Crypto API operations may fail when a signal
+    occurs.  This causes nasty problems as the caller of those operations
+    are often not in a good position to restart the operation.
+    
+    In fact there is currently no need for those operations to be
+    interrupted by user signals at all.  All we need is for them to
+    be killable.
+    
+    This patch replaces the relevant calls of signal_pending with
+    fatal_signal_pending, and wait_for_completion_interruptible with
+    wait_for_completion_killable, respectively.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ crypto/ablkcipher.c  |    2 +-
+ crypto/algapi.c      |    2 +-
+ crypto/api.c         |    6 +++---
+ crypto/crypto_user.c |    2 +-
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 2b278f02de77bd3d0ffb4c64bc56b702d4e27e49
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 27 18:02:42 2015 -0400
+
+    Update a comment
+
+ arch/x86/include/asm/fpu/internal.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 66cbab70d87485c22946485bfd375c3e88140213
+Merge: cad84c5 8610c94
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 27 07:44:23 2015 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8610c949a76ac2a09b334f41c35cb8e7a04a0ce8
+Merge: a851b41 f69d603
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Oct 27 07:44:14 2015 -0400
+
+    Merge branch 'linux-4.2.y' into pax-test
+
+commit cad84c52f547c8ba47ddcf39d1f260f55350f0c2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 26 07:33:21 2015 -0400
+
+    re-enable builtin_overflow support
+
+ include/linux/compiler-gcc.h |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 6e281aebbf456c27ce530055d5668bc5829c02a8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 26 07:32:15 2015 -0400
+
+    Update the size_overflow plugin from Emese to fix the ICE on builtin_overflow use
+
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |    3 ++-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 75ed97df02fc6eb862df511da6ca690de3d0f15c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 26 07:17:00 2015 -0400
+
+    Fix from Emese for a size_overflow report in the fbcon code on the
+    'softback_lines' global variable
+
+ drivers/video/console/fbcon.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit b088cabd42c6fe825baa27f40ab450ad75e571d3
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Oct 25 18:09:55 2015 -0400
