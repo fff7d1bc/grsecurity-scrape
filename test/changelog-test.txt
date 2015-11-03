@@ -1,3 +1,366 @@
+commit 715e674a838f08748044bce459380762e9c1cd29
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Wed Oct 7 11:03:28 2015 -0500
+
+    PCI: Prevent out of bounds access in numa_node override
+    
+    63692df103e9 ("PCI: Allow numa_node override via sysfs") didn't check that
+    the numa node provided by userspace is valid.  Passing a node number too
+    high would attempt to access invalid memory and trigger a kernel panic.
+    
+    Fixes: 63692df103e9 ("PCI: Allow numa_node override via sysfs")
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: Bjorn Helgaas <bhelgaas@google.com>
+    CC: stable@vger.kernel.org	# v3.19+
+
+ drivers/pci/pci-sysfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 6abe1bb892fe394df80dd4267a8bd2874d537e4e
+Author: David Howells <dhowells@redhat.com>
+Date:   Fri Sep 18 11:45:12 2015 +0100
+
+    ovl: use O_LARGEFILE in ovl_copy_up()
+    
+    Open the lower file with O_LARGEFILE in ovl_copy_up().
+    
+    Pass O_LARGEFILE unconditionally in ovl_copy_up_data() as it's purely for
+    catching 32-bit userspace dealing with a file large enough that it'll be
+    mishandled if the application isn't aware that there might be an integer
+    overflow.  Inside the kernel, there shouldn't be any problems.
+    
+    Reported-by: Ulrich Obergfell <uobergfe@redhat.com>
+    Signed-off-by: David Howells <dhowells@redhat.com>
+    Signed-off-by: Miklos Szeredi <miklos@szeredi.hu>
+    Cc: <stable@vger.kernel.org> # v3.18+
+
+ fs/overlayfs/copy_up.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit bf5e23398e4a82e28fe0801337a4b78ca951a1d9
+Author: David Howells <dhowells@redhat.com>
+Date:   Fri Sep 18 11:45:22 2015 +0100
+
+    ovl: fix dentry reference leak
+    
+    In ovl_copy_up_locked(), newdentry is leaked if the function exits through
+    out_cleanup as this just to out after calling ovl_cleanup() - which doesn't
+    actually release the ref on newdentry.
+    
+    The out_cleanup segment should instead exit through out2 as certainly
+    newdentry leaks - and possibly upper does also, though this isn't caught
+    given the catch of newdentry.
+    
+    Without this fix, something like the following is seen:
+    
+    	BUG: Dentry ffff880023e9eb20{i=f861,n=#ffff880023e82d90} still in use (1) [unmount of tmpfs tmpfs]
+    	BUG: Dentry ffff880023ece640{i=0,n=bigfile}  still in use (1) [unmount of tmpfs tmpfs]
+    
+    when unmounting the upper layer after an error occurred in copyup.
+    
+    An error can be induced by creating a big file in a lower layer with
+    something like:
+    
+    	dd if=/dev/zero of=/lower/a/bigfile bs=65536 count=1 seek=$((0xf000))
+    
+    to create a large file (4.1G).  Overlay an upper layer that is too small
+    (on tmpfs might do) and then induce a copy up by opening it writably.
+    
+    Reported-by: Ulrich Obergfell <uobergfe@redhat.com>
+    Signed-off-by: David Howells <dhowells@redhat.com>
+    Signed-off-by: Miklos Szeredi <miklos@szeredi.hu>
+    Cc: <stable@vger.kernel.org> # v3.18+
+
+ fs/overlayfs/copy_up.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit da93976d3355abae09d9fd6a68e7dea77ed619d1
+Author: Miklos Szeredi <miklos@szeredi.hu>
+Date:   Mon Oct 12 15:56:20 2015 +0200
+
+    ovl: fix open in stacked overlay
+    
+    If two overlayfs filesystems are stacked on top of each other, then we need
+    recursion in ovl_d_select_inode().
+    
+    I guess d_backing_inode() is supposed to do that.  But currently it doesn't
+    and that functionality is open coded in vfs_open().  This is now copied
+    into ovl_d_select_inode() to fix this regression.
+    
+    Reported-by: Alban Crequy <alban.crequy@gmail.com>
+    Signed-off-by: Miklos Szeredi <miklos@szeredi.hu>
+    Fixes: 4bacc9c9234c ("overlayfs: Make f_path always point to the overlay...")
+    Cc: David Howells <dhowells@redhat.com>
+    Cc: <stable@vger.kernel.org> # v4.2+
+
+ fs/overlayfs/inode.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 0ddd9cf6149717882b81c946149bf55332d763ae
+Author: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+Date:   Mon Aug 24 15:57:18 2015 +0300
+
+    ovl: free stack of paths in ovl_fill_super
+    
+    This fixes small memory leak after mount.
+    
+    Kmemleak report:
+    
+    unreferenced object 0xffff88003683fe00 (size 16):
+      comm "mount", pid 2029, jiffies 4294909563 (age 33.380s)
+      hex dump (first 16 bytes):
+        20 27 1f bb 00 88 ff ff 40 4b 0f 36 02 88 ff ff   '......@K.6....
+      backtrace:
+        [<ffffffff811f8cd4>] create_object+0x124/0x2c0
+        [<ffffffff817a059b>] kmemleak_alloc+0x7b/0xc0
+        [<ffffffff811dffe6>] __kmalloc+0x106/0x340
+        [<ffffffffa01b7a29>] ovl_fill_super+0x389/0x9a0 [overlay]
+        [<ffffffff81200ac4>] mount_nodev+0x54/0xa0
+        [<ffffffffa01b7118>] ovl_mount+0x18/0x20 [overlay]
+        [<ffffffff81201ab3>] mount_fs+0x43/0x170
+        [<ffffffff81220d34>] vfs_kern_mount+0x74/0x170
+        [<ffffffff812233ad>] do_mount+0x22d/0xdf0
+        [<ffffffff812242cb>] SyS_mount+0x7b/0xc0
+        [<ffffffff817b6bee>] entry_SYSCALL_64_fastpath+0x12/0x76
+        [<ffffffffffffffff>] 0xffffffffffffffff
+    
+    Signed-off-by: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+    Signed-off-by: Miklos Szeredi <miklos@szeredi.hu>
+    Fixes: a78d9f0d5d5c ("ovl: support multiple lower layers")
+    Cc: <stable@vger.kernel.org> # v4.0+
+
+ fs/overlayfs/super.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit b86575c9973b9ad55d659fd8a6be8f864435ad0e
+Author: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+Date:   Mon Aug 24 15:57:19 2015 +0300
+
+    ovl: free lower_mnt array in ovl_put_super
+    
+    This fixes memory leak after umount.
+    
+    Kmemleak report:
+    
+    unreferenced object 0xffff8800ba791010 (size 8):
+      comm "mount", pid 2394, jiffies 4294996294 (age 53.920s)
+      hex dump (first 8 bytes):
+        20 1c 13 02 00 88 ff ff                           .......
+      backtrace:
+        [<ffffffff811f8cd4>] create_object+0x124/0x2c0
+        [<ffffffff817a059b>] kmemleak_alloc+0x7b/0xc0
+        [<ffffffff811dffe6>] __kmalloc+0x106/0x340
+        [<ffffffffa0152bfc>] ovl_fill_super+0x55c/0x9b0 [overlay]
+        [<ffffffff81200ac4>] mount_nodev+0x54/0xa0
+        [<ffffffffa0152118>] ovl_mount+0x18/0x20 [overlay]
+        [<ffffffff81201ab3>] mount_fs+0x43/0x170
+        [<ffffffff81220d34>] vfs_kern_mount+0x74/0x170
+        [<ffffffff812233ad>] do_mount+0x22d/0xdf0
+        [<ffffffff812242cb>] SyS_mount+0x7b/0xc0
+        [<ffffffff817b6bee>] entry_SYSCALL_64_fastpath+0x12/0x76
+        [<ffffffffffffffff>] 0xffffffffffffffff
+    
+    Signed-off-by: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+    Signed-off-by: Miklos Szeredi <miklos@szeredi.hu>
+    Fixes: dd662667e6d3 ("ovl: add mutli-layer infrastructure")
+    Cc: <stable@vger.kernel.org> # v4.0+
+
+ fs/overlayfs/super.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9f49b5376fae99cd590d13726e2633bc0a53b6db
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Sun Nov 1 17:09:15 2015 -0800
+
+    mm: get rid of 'vmalloc_info' from /proc/meminfo
+    
+    It turns out that at least some versions of glibc end up reading
+    /proc/meminfo at every single startup, because glibc wants to know the
+    amount of memory the machine has.  And while that's arguably insane,
+    it's just how things are.
+    
+    And it turns out that it's not all that expensive most of the time, but
+    the vmalloc information statistics (amount of virtual memory used in the
+    vmalloc space, and the biggest remaining chunk) can be rather expensive
+    to compute.
+    
+    The 'get_vmalloc_info()' function actually showed up on my profiles as
+    4% of the CPU usage of "make test" in the git source repository, because
+    the git tests are lots of very short-lived shell-scripts etc.
+    
+    It turns out that apparently this same silly vmalloc info gathering
+    shows up on the facebook servers too, according to Dave Jones.  So it's
+    not just "make test" for git.
+    
+    We had two patches to just cache the information (one by me, one by
+    Ingo) to mitigate this issue, but the whole vmalloc information of of
+    rather dubious value to begin with, and people who *actually* want to
+    know what the situation is wrt the vmalloc area should just look at the
+    much more complete /proc/vmallocinfo instead.
+    
+    In fact, according to my testing - and perhaps more importantly,
+    according to that big search engine in the sky: Google - there is
+    nothing out there that actually cares about those two expensive fields:
+    VmallocUsed and VmallocChunk.
+    
+    So let's try to just remove them entirely.  Actually, this just removes
+    the computation and reports the numbers as zero for now, just to try to
+    be minimally intrusive.
+    
+    If this breaks anything, we'll obviously have to re-introduce the code
+    to compute this all and add the caching patches on top.  But if given
+    the option, I'd really prefer to just remove this bad idea entirely
+    rather than add even more code to work around our historical mistake
+    that likely nobody really cares about.
+    
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/proc/meminfo.c       |    7 ++-----
+ include/linux/vmalloc.h |   12 ------------
+ mm/vmalloc.c            |   47 -----------------------------------------------
+ 3 files changed, 2 insertions(+), 64 deletions(-)
+
+commit 66425129a550275398f886498d957284539bb331
+Author: Marek Vasut <marex@denx.de>
+Date:   Fri Oct 30 13:48:19 2015 +0100
+
+    can: Use correct type in sizeof() in nla_put()
+    
+    The sizeof() is invoked on an incorrect variable, likely due to some
+    copy-paste error, and this might result in memory corruption. Fix this.
+    
+    Signed-off-by: Marek Vasut <marex@denx.de>
+    Cc: Wolfgang Grandegger <wg@grandegger.com>
+    Cc: netdev@vger.kernel.org
+    Cc: linux-stable <stable@vger.kernel.org>
+    Signed-off-by: Marc Kleine-Budde <mkl@pengutronix.de>
+
+ drivers/net/can/dev.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8c8e802a86f8faf2519710db043339e1cc953bc4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 2 17:20:52 2015 -0500
+
+    Fix the FPU code properly by copying the dynamically-sized FPU state on
+    each clone of the task struct, making it equivalent to the new FPU-in-task-struct code
+    
+    Fix is from the PaX Team
+
+ arch/x86/kernel/process.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 036bc2e2231c76f7eb470bfef67b6bc26187aeae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 2 17:19:43 2015 -0500
+
+    Revert the forced eagerfpu since it's now fixed properly
+
+ arch/x86/kernel/fpu/init.c |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
+commit a08ab82bcf321704f6a228c7924b860510c6d610
+Author: Carol L Soto <clsoto@linux.vnet.ibm.com>
+Date:   Tue Oct 27 17:36:20 2015 +0200
+
+    net/mlx4: Copy/set only sizeof struct mlx4_eqe bytes
+    
+    When doing memcpy/memset of EQEs, we should use sizeof struct
+    mlx4_eqe as the base size and not caps.eqe_size which could be bigger.
+    
+    If caps.eqe_size is bigger than the struct mlx4_eqe then we corrupt
+    data in the master context.
+    
+    When using a 64 byte stride, the memcpy copied over 63 bytes to the
+    slave_eq structure.  This resulted in copying over the entire eqe of
+    interest, including its ownership bit -- and also 31 bytes of garbage
+    into the next WQE in the slave EQ -- which did NOT include the ownership
+    bit (and therefore had no impact).
+    
+    However, once the stride is increased to 128, we are overwriting the
+    ownership bits of *three* eqes in the slave_eq struct.  This results
+    in an incorrect ownership bit for those eqes, which causes the eq to
+    seem to be full. The issue therefore surfaced only once 128-byte EQEs
+    started being used in SRIOV and (overarchitectures that have 128/256
+    byte cache-lines such as PPC) - e.g after commit 77507aa249ae
+    "net/mlx4_core: Enable CQE/EQE stride support".
+    
+    Fixes: 08ff32352d6f ('mlx4: 64-byte CQE/EQE support')
+    Signed-off-by: Carol L Soto <clsoto@linux.vnet.ibm.com>
+    Signed-off-by: Jack Morgenstein <jackm@dev.mellanox.co.il>
+    Signed-off-by: Or Gerlitz <ogerlitz@mellanox.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/mellanox/mlx4/cmd.c |    2 +-
+ drivers/net/ethernet/mellanox/mlx4/eq.c  |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 811ab3b52935612def289efa5e9e2aa973f16f26
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Wed Oct 28 13:21:04 2015 +0100
+
+    ipv6: protect mtu calculation of wrap-around and infinite loop by rounding issues
+    
+    Raw sockets with hdrincl enabled can insert ipv6 extension headers
+    right into the data stream. In case we need to fragment those packets,
+    we reparse the options header to find the place where we can insert
+    the fragment header. If the extension headers exceed the link's MTU we
+    actually cannot make progress in such a case.
+    
+    Instead of ending up in broken arithmetic or rounding towards 0 and
+    entering an endless loop in ip6_fragment, just prevent those cases by
+    aborting early and signal -EMSGSIZE to user space.
+    
+    This is the second version of the patch which doesn't use the
+    overflow_usub function, which got reverted for now.
+    
+    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_output.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit f074980442c7c3ff4a75c711ff18204dfb4131b8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 29 18:19:02 2015 -0400
+
+    Revert "ipv6: protect mtu calculation of wrap-around and infinite loop by rounding issues"
+    
+    This reverts commit 18d5034650b637ec479f41d98e3912398b3e3efc.
+
+ net/ipv6/ip6_output.c |    6 +-----
+ 1 files changed, 1 insertions(+), 5 deletions(-)
+
+commit 53e629c2d13ed09f4c889925482606f82a65bd1d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 29 18:18:55 2015 -0400
+
+    Revert "overflow-arith: begin to add support for overflow builtin functions"
+    
+    This reverts commit cfd0008de8db38841f7f06b979482900994717b9.
+    
+    Conflicts:
+    
+    	include/linux/compiler-gcc.h
+
+ include/linux/compiler-gcc.h   |    4 ----
+ include/linux/overflow-arith.h |   18 ------------------
+ 2 files changed, 0 insertions(+), 22 deletions(-)
+
+commit 225122602b5b7fd58ec5c2a4a1a4a9a29fe7a02a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 29 09:00:11 2015 -0400
+
+    Update size_overflow plugin
+
+ .../size_overflow_plugin/intentional_overflow.c    |    3 +++
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ 2 files changed, 4 insertions(+), 1 deletions(-)
+
 commit 2bf85cb1c3df45d59d8b59aeacf63cbbee360175
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Oct 29 08:52:07 2015 -0400
