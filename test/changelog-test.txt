@@ -1,3 +1,77 @@
+commit 07fd498a96e2d589ad743851c0dec482a92e0429
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 8 17:04:31 2015 -0500
+
+    Fix an upstream type confusion bug exposed by RANDSTRUCT:
+    at the beginning of each sem_array/shmid_kernel/msg_queue
+    struct is an kern_ipc_perm struct.  Unlike every other place in the
+    kernel where some field must be at an explicit location, there's
+    no documentation at all that the kern_ipc_perm must be at the beginning
+    of these structs.  Previously, shmid_kernel and kern_ipc_perm were both
+    randomized with RANDSTRUCT.  The problem arises due to the show() handler
+    for /proc for msg/sem/shm -- what it is provided is a pointer to
+    a kern_ipc_perm struct (as a void *) which each show() handler then
+    assumes can be implicitly cast to its own particular struct type without
+    any kind of container_of being performed.  Fix this by doing the proper
+    type conversions for each via container_of, and randomize the sem and msg
+    structs while we're at it.
+
+ include/linux/msg.h |    2 +-
+ include/linux/sem.h |    2 +-
+ ipc/msg.c           |    3 ++-
+ ipc/sem.c           |    3 ++-
+ ipc/shm.c           |    3 ++-
+ 5 files changed, 8 insertions(+), 5 deletions(-)
+
+commit 6591e1a526c544936975cd3515d8def09e8026f0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 3 19:36:05 2015 -0500
+
+    Properly fix the PCI sysfs node check that was recently improperly fixed
+    upstream (it's under CAP_SYS_ADMIN so it's not really serious)
+    Reported by Mathias Krause
+
+ drivers/pci/pci-sysfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ece03d4d07f29634687b2ea5edb7cab23888cff3
+Merge: 715e674 7755256
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 2 21:32:10 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 775525660a6353feb261ad6232f6acbc23826bf4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 2 21:31:21 2015 -0500
+
+    Update to pax-linux-4.2.5-test17.patch:
+    - Emese fixed a bunch of size overflow reports:
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=4290
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=4291
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=4288
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=4285
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=4283
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=4287
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=4289
+      - https://bugs.archlinux.org/task/46798
+    - fixed the x86 fpu code some more, reported by spender and others (https://bugs.gentoo.org/show_bug.cgi?id=563804, https://bugs.archlinux.org/task/46764)
+
+ arch/x86/include/asm/fpu/internal.h                |    4 +-
+ arch/x86/kernel/fpu/core.c                         |    2 +-
+ arch/x86/kernel/process.c                          |    3 +-
+ arch/x86/kernel/process_64.c                       |    6 +-
+ drivers/usb/class/cdc-acm.h                        |    2 +-
+ drivers/video/console/fbcon.c                      |    2 +-
+ fs/dlm/lowcomms.c                                  |    2 +-
+ include/linux/usb.h                                |    8 +-
+ .../disable_size_overflow_hash.data                |   15 +-
+ .../size_overflow_plugin/intentional_overflow.c    |    3 +
+ .../size_overflow_plugin/size_overflow_hash.data   |  373 ++++++++++++++++----
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |    3 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ 13 files changed, 329 insertions(+), 96 deletions(-)
+
 commit 715e674a838f08748044bce459380762e9c1cd29
 Author: Sasha Levin <sasha.levin@oracle.com>
 Date:   Wed Oct 7 11:03:28 2015 -0500
