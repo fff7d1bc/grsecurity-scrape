@@ -1,3 +1,37 @@
+commit 81e26429b7a36f0c75de3ab42754256720c0a159
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 9 07:37:30 2015 -0500
+
+    btrfs: fix signed overflow in btrfs_sync_file
+    
+    The calculation of range length in btrfs_sync_file leads to signed
+    overflow. This was caught by PaX gcc SIZE_OVERFLOW plugin.
+    
+    https://forums.grsecurity.net/viewtopic.php?f=1&t=4284
+    
+    The fsync call passes 0 and LLONG_MAX, the range length does not fit to
+    loff_t and overflows, but the value is converted to u64 so it silently
+    works as expected.
+    
+    The minimal fix is a typecast to u64, switching functions to take
+    (start, end) instead of (start, len) would be more intrusive.
+    
+    Coccinelle script found that there's one more opencoded calculation of
+    the length.
+    
+    <smpl>
+    @@
+    loff_t start, end;
+    @@
+    * end - start
+    </smpl>
+    
+    CC: stable@vger.kernel.org
+    Signed-off-by: David Sterba <dsterba@suse.com>
+
+ fs/btrfs/file.c |   10 +++++++---
+ 1 files changed, 7 insertions(+), 3 deletions(-)
+
 commit 07fd498a96e2d589ad743851c0dec482a92e0429
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Nov 8 17:04:31 2015 -0500
