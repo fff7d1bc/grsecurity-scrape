@@ -1,3 +1,51 @@
+commit 9c49029fe4cb9a52cb174aebfd5946a9d26b9956
+Merge: 5482e7e 7033393
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 9 19:51:58 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 70333935932c9f3eb333a354dd760b4233efcc37
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 9 19:51:19 2015 -0500
+
+    Update to pax-linux-4.2.6-test18.patch:
+    - cleaned up the last of the FPU changes, by spender
+    - fixed a few KERNEXEC regressions (backported from 4.3)
+    - Emese fixed a few size overflow false positives in kvm, reported by Christian Roessner (https://bugs.gentoo.org/show_bug.cgi?id=558138#c23)
+    - David Sterba fixed a few integer overflows in btrfs caught by the size overflow plugin (https://patchwork.kernel.org/patch/7585611/ and https://patchwork.kernel.org/patch/7582351/), reported by Victor, Stebalien and alan.d (https://forums.grsecurity.net/viewtopic.php?f=1&t=4284)
+
+ arch/x86/include/asm/fpu/internal.h                |    2 +-
+ arch/x86/include/asm/fpu/types.h                   |    1 -
+ arch/x86/kernel/apic/apic.c                        |    4 ++-
+ arch/x86/kernel/fpu/init.c                         |   36 --------------------
+ arch/x86/kernel/process_64.c                       |    6 +--
+ arch/x86/kernel/vsmp_64.c                          |   13 +++++--
+ drivers/acpi/video_detect.c                        |    2 +-
+ drivers/lguest/core.c                              |    2 +-
+ fs/btrfs/file.c                                    |   10 ++++--
+ fs/btrfs/inode.c                                   |   12 ++++++
+ .../disable_size_overflow_hash.data                |    5 ++-
+ .../size_overflow_plugin/size_overflow_hash.data   |    7 +---
+ 12 files changed, 42 insertions(+), 58 deletions(-)
+
+commit 5482e7eb4ba3c5cc90472ccdb1bfe2cec64413e2
+Merge: 81e2642 682ba19
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 9 18:19:48 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/pci/pci-sysfs.c
+
+commit 682ba19ce305f501c9bc5c42a76f2c7442aa22fc
+Merge: 7755256 1c02865
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 9 18:18:24 2015 -0500
+
+    Merge branch 'linux-4.2.y' into pax-test
+
 commit 81e26429b7a36f0c75de3ab42754256720c0a159
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Nov 9 07:37:30 2015 -0500
