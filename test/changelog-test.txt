@@ -1,3 +1,146 @@
+commit 5e0ec21349bb3aeead0701ef51df3086ad377979
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 12 19:54:21 2015 -0500
+
+    Revert https://patchwork.kernel.org/patch/7585611/ for now as it's been reported
+    to cause userland hangs, similar to previous bugs seen in the past
+
+ fs/btrfs/inode.c |   12 ------------
+ 1 files changed, 0 insertions(+), 12 deletions(-)
+
+commit 65402b5a6125cc95c3223a0da8f2817e13bf18ec
+Author: françois romieu <romieu@fr.zoreil.com>
+Date:   Wed Nov 11 23:35:18 2015 +0100
+
+    r8169: fix kasan reported skb use-after-free.
+    
+    Signed-off-by: Francois Romieu <romieu@fr.zoreil.com>
+    Reported-by: Dave Jones <davej@codemonkey.org.uk>
+    Fixes: d7d2d89d4b0af ("r8169: Add software counter for multicast packages")
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Acked-by: Corinna Vinschen <vinschen@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/realtek/r8169.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit bbfcbb7b1e086062aa17358927e14e394830b8a3
+Author: Anthony Lineham <anthony.lineham@alliedtelesis.co.nz>
+Date:   Thu Oct 22 11:17:03 2015 +1300
+
+    netfilter: Fix removal of GRE expectation entries created by PPTP
+    
+    The uninitialized tuple structure caused incorrect hash calculation
+    and the lookup failed.
+    
+    Link: https://bugzilla.kernel.org/show_bug.cgi?id=106441
+    Signed-off-by: Anthony Lineham <anthony.lineham@alliedtelesis.co.nz>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/ipv4/netfilter/nf_nat_pptp.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit d7cb19f37a91603021e2bed6417766ecca315bd0
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Tue Nov 10 09:14:39 2015 +0100
+
+    KVM: svm: unconditionally intercept #DB
+    
+    This is needed to avoid the possibility that the guest triggers
+    an infinite stream of #DB exceptions (CVE-2015-8104).
+    
+    VMX is not affected: because it does not save DR6 in the VMCS,
+    it already intercepts #DB unconditionally.
+    
+    Reported-by: Jan Beulich <jbeulich@suse.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/svm.c |   14 +++-----------
+ 1 files changed, 3 insertions(+), 11 deletions(-)
+
+commit 5b241ac6551e1675e1cbbc4a74fa1c698ada28f4
+Author: Eric Northup <digitaleric@google.com>
+Date:   Tue Nov 3 18:03:53 2015 +0100
+
+    KVM: x86: work around infinite loop in microcode when #AC is delivered
+    
+    It was found that a guest can DoS a host by triggering an infinite
+    stream of "alignment check" (#AC) exceptions.  This causes the
+    microcode to enter an infinite loop where the core never receives
+    another interrupt.  The host kernel panics pretty quickly due to the
+    effects (CVE-2015-5307).
+    
+    Signed-off-by: Eric Northup <digitaleric@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/include/uapi/asm/svm.h |    1 +
+ arch/x86/kvm/svm.c              |    8 ++++++++
+ arch/x86/kvm/vmx.c              |    5 ++++-
+ 3 files changed, 13 insertions(+), 1 deletions(-)
+
+commit 6113725aaaf6626522b93732f29dd36370695a89
+Author: Daniel Borkmann <daniel@iogearbox.net>
+Date:   Thu Nov 5 00:01:51 2015 +0100
+
+    debugfs: fix refcount imbalance in start_creating
+    
+    In debugfs' start_creating(), we pin the file system to safely access
+    its root. When we failed to create a file, we unpin the file system via
+    failed_creating() to release the mount count and eventually the reference
+    of the vfsmount.
+    
+    However, when we run into an error during lookup_one_len() when still
+    in start_creating(), we only release the parent's mutex but not so the
+    reference on the mount. Looks like it was done in the past, but after
+    splitting portions of __create_file() into start_creating() and
+    end_creating() via 190afd81e4a5 ("debugfs: split the beginning and the
+    end of __create_file() off"), this seemed missed. Noticed during code
+    review.
+    
+    Fixes: 190afd81e4a5 ("debugfs: split the beginning and the end of __create_file() off")
+    Cc: stable@vger.kernel.org # v4.0+
+    Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/debugfs/inode.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit e91f8a6717837a8a64b6e86317a1373ec9cd6c04
+Author: Maciej W. Rozycki <macro@imgtec.com>
+Date:   Mon Oct 26 15:48:19 2015 +0000
+
+    binfmt_elf: Don't clobber passed executable's file header
+    
+    Do not clobber the buffer space passed from `search_binary_handler' and
+    originally preloaded by `prepare_binprm' with the executable's file
+    header by overwriting it with its interpreter's file header.  Instead
+    keep the buffer space intact and directly use the data structure locally
+    allocated for the interpreter's file header, fixing a bug introduced in
+    2.1.14 with loadable module support (linux-mips.org commit beb11695
+    [Import of Linux/MIPS 2.1.14], predating kernel.org repo's history).
+    Adjust the amount of data read from the interpreter's file accordingly.
+    
+    This was not an issue before loadable module support, because back then
+    `load_elf_binary' was executed only once for a given ELF executable,
+    whether the function succeeded or failed.
+    
+    With loadable module support supported and enabled, upon a failure of
+    `load_elf_binary' -- which may for example be caused by architecture
+    code rejecting an executable due to a missing hardware feature requested
+    in the file header -- a module load is attempted and then the function
+    reexecuted by `search_binary_handler'.  With the executable's file
+    header replaced with its interpreter's file header the executable can
+    then be erroneously accepted in this subsequent attempt.
+    
+    Cc: stable@vger.kernel.org # all the way back
+    Signed-off-by: Maciej W. Rozycki <macro@imgtec.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/binfmt_elf.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
 commit 9c49029fe4cb9a52cb174aebfd5946a9d26b9956
 Merge: 5482e7e 7033393
 Author: Brad Spengler <spender@grsecurity.net>
