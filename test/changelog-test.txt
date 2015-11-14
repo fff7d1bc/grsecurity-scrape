@@ -1,3 +1,47 @@
+commit 4e75d2b7d6546add44f0951e78410b131a1e660d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 14 15:08:46 2015 -0500
+
+    switch the default for SIZE_OVERFLOW_KILL to n, later we'll remove
+    the option entirely
+    Distros should make sure their users report all overflows printed to the
+    kernel logs so the underlying issues can be fixed
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2e37eb35e0f1ba5a0feac5264a7b24d89376d0a2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 14 15:07:51 2015 -0500
+
+    Resync with PaX
+
+ fs/btrfs/inode.c |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+commit 2f63d2552f38c700902d17bf9b591d82f39a3fb5
+Merge: 5e0ec21 823b1bc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 14 14:29:16 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 823b1bc5a8e670f7ddfa98ee0d83762bffab28fb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 14 14:28:35 2015 -0500
+
+    Update to pax-linux-4.2.6-test19.patch:
+    - David Sterba updated the fix for one of the previous btrfs problems
+    - Emese and Rasmus Villemoes <linux@rasmusvillemoes.dk> fixed a few bugs in the initify plugin
+    - fixed debian package generation to support building out-of-tree modules with plugins, reported by Elie Roudninski <elie.roudninski@gmail.com>
+
+ fs/btrfs/delayed-inode.c   |    3 +-
+ fs/btrfs/delayed-inode.h   |    2 +-
+ fs/btrfs/inode.c           |    2 +-
+ scripts/package/builddeb   |    2 +-
+ tools/gcc/initify_plugin.c |  264 ++++++++++++++++++++++++++++++--------------
+ 5 files changed, 188 insertions(+), 85 deletions(-)
+
 commit 5e0ec21349bb3aeead0701ef51df3086ad377979
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Nov 12 19:54:21 2015 -0500
