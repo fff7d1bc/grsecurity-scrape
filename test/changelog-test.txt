@@ -1,3 +1,237 @@
+commit 708c2e025f8a05b76f319cfa5fa624d37d8ef6f3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 17 18:43:24 2015 -0500
+
+    Fix multiple character encodings in patch, reported by IooNag on the forums
+
+ grsecurity/Makefile      |    2 +-
+ net/netfilter/xt_gradm.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d1f7534df8687fd05858fd45805b1185eafe38a7
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Tue Nov 17 15:10:59 2015 +0100
+
+    af_unix: take receive queue lock while appending new skb
+    
+    While possibly in future we don't necessarily need to use
+    sk_buff_head.lock this is a rather larger change, as it affects the
+    af_unix fd garbage collector, diag and socket cleanups. This is too much
+    for a stable patch.
+    
+    For the time being grab sk_buff_head.lock without disabling bh and irqs,
+    so don't use locked skb_queue_tail.
+    
+    Fixes: 869e7c62486e ("net: af_unix: implement stream sendpage support")
+    Cc: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Reported-by: Eric Dumazet <edumazet@google.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 0df914e7a66a4807bac7762ab33ba3020944ef6b
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Nov 16 16:25:56 2015 +0100
+
+    af_unix: don't append consumed skbs to sk_receive_queue
+    
+    In case multiple writes to a unix stream socket race we could end up in a
+    situation where we pre-allocate a new skb for use in unix_stream_sendpage
+    but have to free it again in the locked section because another skb
+    has been appended meanwhile, which we must use. Accidentally we didn't
+    clear the pointer after consuming it and so we touched freed memory
+    while appending it to the sk_receive_queue. So, clear the pointer after
+    consuming the skb.
+    
+    This bug has been found with syzkaller
+    (http://github.com/google/syzkaller) by Dmitry Vyukov.
+    
+    Fixes: 869e7c62486e ("net: af_unix: implement stream sendpage support")
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit ac8466abcd0ae871cd38d868e1a4e903b92ffc48
+Author: Jason A. Donenfeld <Jason@zx2c4.com>
+Date:   Thu Nov 12 17:35:58 2015 +0100
+
+    ip_tunnel: disable preemption when updating per-cpu tstats
+    
+    Drivers like vxlan use the recently introduced
+    udp_tunnel_xmit_skb/udp_tunnel6_xmit_skb APIs. udp_tunnel6_xmit_skb
+    makes use of ip6tunnel_xmit, and ip6tunnel_xmit, after sending the
+    packet, updates the struct stats using the usual
+    u64_stats_update_begin/end calls on this_cpu_ptr(dev->tstats).
+    udp_tunnel_xmit_skb makes use of iptunnel_xmit, which doesn't touch
+    tstats, so drivers like vxlan, immediately after, call
+    iptunnel_xmit_stats, which does the same thing - calls
+    u64_stats_update_begin/end on this_cpu_ptr(dev->tstats).
+    
+    While vxlan is probably fine (I don't know?), calling a similar function
+    from, say, an unbound workqueue, on a fully preemptable kernel causes
+    real issues:
+    
+    [  188.434537] BUG: using smp_processor_id() in preemptible [00000000] code: kworker/u8:0/6
+    [  188.435579] caller is debug_smp_processor_id+0x17/0x20
+    [  188.435583] CPU: 0 PID: 6 Comm: kworker/u8:0 Not tainted 4.2.6 #2
+    [  188.435607] Call Trace:
+    [  188.435611]  [<ffffffff8234e936>] dump_stack+0x4f/0x7b
+    [  188.435615]  [<ffffffff81915f3d>] check_preemption_disabled+0x19d/0x1c0
+    [  188.435619]  [<ffffffff81915f77>] debug_smp_processor_id+0x17/0x20
+    
+    The solution would be to protect the whole
+    this_cpu_ptr(dev->tstats)/u64_stats_update_begin/end blocks with
+    disabling preemption and then reenabling it.
+    
+    Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/ip6_tunnel.h |    3 ++-
+ include/net/ip_tunnels.h |    3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 44665148f06b73ea0c253a1a34d15689674d7421
+Author: Mathias Krause <minipli@googlemail.com>
+Date:   Fri Nov 6 16:30:38 2015 -0800
+
+    printk: prevent userland from spoofing kernel messages
+    
+    The following statement of ABI/testing/dev-kmsg is not quite right:
+    
+       It is not possible to inject messages from userspace with the
+       facility number LOG_KERN (0), to make sure that the origin of the
+       messages can always be reliably determined.
+    
+    Userland actually can inject messages with a facility of 0 by abusing the
+    fact that the facility is stored in a u8 data type.  By using a facility
+    which is a multiple of 256 the assignment of msg->facility in log_store()
+    implicitly truncates it to 0, i.e.  LOG_KERN, allowing users of /dev/kmsg
+    to spoof kernel messages as shown below:
+    
+    The following call...
+       # printf '<%d>Kernel panic - not syncing: beer empty\n' 0 >/dev/kmsg
+    ...leads to the following log entry (dmesg -x | tail -n 1):
+       user  :emerg : [   66.137758] Kernel panic - not syncing: beer empty
+    
+    However, this call...
+       # printf '<%d>Kernel panic - not syncing: beer empty\n' 0x800 >/dev/kmsg
+    ...leads to the slightly different log entry (note the kernel facility):
+       kern  :emerg : [   74.177343] Kernel panic - not syncing: beer empty
+    
+    Fix that by limiting the user provided facility to 8 bit right from the
+    beginning and catch the truncation early.
+    
+    Fixes: 7ff9554bb578 ("printk: convert byte-buffer to variable-length...")
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Cc: Petr Mladek <pmladek@suse.cz>
+    Cc: Alex Elder <elder@linaro.org>
+    Cc: Joe Perches <joe@perches.com>
+    Cc: Kay Sievers <kay@vrfy.org>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/printk/printk.c |   13 ++++++++-----
+ 1 files changed, 8 insertions(+), 5 deletions(-)
+
+commit bef8fb168317597f02c00ab4075ff094dcdfd2c6
+Author: Borislav Petkov <bp@suse.de>
+Date:   Thu Nov 5 16:57:56 2015 +0100
+
+    x86/cpu: Call verify_cpu() after having entered long mode too
+    
+    When we get loaded by a 64-bit bootloader, kernel entry point is
+    startup_64 in head_64.S. We don't trust any and all bootloaders because
+    some will fiddle with CPU configuration so we go ahead and massage each
+    CPU into sanity again.
+    
+    For example, some dell BIOSes have this XD disable feature which set
+    IA32_MISC_ENABLE[34] and disable NX. This might be some dumb workaround
+    for other OSes but Linux sure doesn't need it.
+    
+    A similar thing is present in the Surface 3 firmware - see
+    https://bugzilla.kernel.org/show_bug.cgi?id=106051 - which sets this bit
+    only on the BSP:
+    
+      # rdmsr -a 0x1a0
+      400850089
+      850089
+      850089
+      850089
+    
+    I know, right?!
+    
+    There's not even an off switch in there.
+    
+    So fix all those cases by sanitizing the 64-bit entry point too. For
+    that, make verify_cpu() callable in 64-bit mode also.
+    
+    Requested-and-debugged-by: "H. Peter Anvin" <hpa@zytor.com>
+    Reported-and-tested-by: Bastien Nocera <bugzilla@hadess.net>
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+    Cc: Matt Fleming <matt@codeblueprint.co.uk>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: stable@vger.kernel.org
+    Link: http://lkml.kernel.org/r/1446739076-21303-1-git-send-email-bp@alien8.de
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    
+    Conflicts:
+    
+    	arch/x86/kernel/head_64.S
+
+ arch/x86/kernel/head_64.S    |    9 +++++++++
+ arch/x86/kernel/verify_cpu.S |   12 +++++++-----
+ 2 files changed, 16 insertions(+), 5 deletions(-)
+
+commit 9cb084208a9589a6a5be01d2b7df88843f4b01a4
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Tue Nov 10 16:23:15 2015 +0100
+
+    af-unix: fix use-after-free with concurrent readers while splicing
+    
+    During splicing an af-unix socket to a pipe we have to drop all
+    af-unix socket locks. While doing so we allow another reader to enter
+    unix_stream_read_generic which can read, copy and finally free another
+    skb. If exactly this skb is just in process of being spliced we get a
+    use-after-free report by kasan.
+    
+    First, we must make sure to not have a free while the skb is used during
+    the splice operation. We simply increment its use counter before unlocking
+    the reader lock.
+    
+    Stream sockets have the nice characteristic that we don't care about
+    zero length writes and they never reach the peer socket's queue. That
+    said, we can take the UNIXCB.consumed field as the indicator if the
+    skb was already freed from the socket's receive queue. If the skb was
+    fully consumed after we locked the reader side again we know it has been
+    dropped by a second reader. We indicate a short read to user space and
+    abort the current splice operation.
+    
+    This bug has been found with syzkaller
+    (http://github.com/google/syzkaller) by Dmitry Vyukov.
+    
+    Fixes: 2b514574f7e8 ("net: af_unix: implement splice for stream af_unix sockets")
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |   18 ++++++++++++++++++
+ 1 files changed, 18 insertions(+), 0 deletions(-)
+
 commit 4e75d2b7d6546add44f0951e78410b131a1e660d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Nov 14 15:08:46 2015 -0500
