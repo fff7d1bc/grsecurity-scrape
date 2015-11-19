@@ -1,3 +1,33 @@
+commit 917a60c749d80121229a1752874ff8a606778fc5
+Merge: 76fc822 77d474f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 18 19:58:31 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 77d474f0bcb2e5acafc78c66c456d1aebaac14b3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 18 19:58:08 2015 -0500
+
+    Update to pax-linux-4.2.6-test20.patch:
+    - constified some vdso/vsyscall related code/data
+
+ arch/x86/entry/vdso/vdso2c.h              |    4 ++--
+ arch/x86/entry/vsyscall/vsyscall_emu_64.S |    2 +-
+ arch/x86/mm/ioremap.c                     |    2 +-
+ mm/debug.c                                |    3 +++
+ 4 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 76fc8223b2e6b6c950702adfdb055dd5da90657c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 18 17:40:27 2015 -0500
+
+    Allow processes with CAP_SYS_PTRACE to ignore /proc/pid restrictions,
+    as reported by Andrew
+
+ fs/proc/base.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 708c2e025f8a05b76f319cfa5fa624d37d8ef6f3
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Nov 17 18:43:24 2015 -0500
