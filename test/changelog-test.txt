@@ -1,3 +1,78 @@
+commit f0ea1bc982c60c1c39d0f95d9f3db0ec799387ca
+Merge: 3929e88 c692401
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 15:41:38 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c69240179ca6ff101670f4859bb0e9a9deb85359
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 15:41:06 2015 -0500
+
+    Update to pax-linux-4.2.6-test22.patch:
+    - made the previous READ_ONCE/WRITE_ONCE fix compatible with gcc PR 58145
+
+ include/linux/compiler.h |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 3929e882e451b177af1a615858f0a96a7cd734b1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 13:14:25 2015 -0500
+
+    remove disable_kill option entirely for the final 4.2 release
+
+ fs/exec.c        |   11 -----------
+ security/Kconfig |    5 -----
+ 2 files changed, 0 insertions(+), 16 deletions(-)
+
+commit 91633d0eebc41553ea77b5fa7559aa806a60008c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 07:38:10 2015 -0500
+
+    compile fix
+
+ net/unix/af_unix.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 0afc2f69e7f948995522f6e1dbb957ed84abd9b9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 07:14:43 2015 -0500
+
+    Revert previous AF_UNIX fix:
+    http://www.spinics.net/lists/netdev/msg318826.html
+    and apply new one by Jason Baron:
+    https://lkml.org/lkml/2015/9/29/825
+
+ include/net/af_unix.h |    1 +
+ net/unix/af_unix.c    |   36 ++++++++++++++++++++++++++++++------
+ 2 files changed, 31 insertions(+), 6 deletions(-)
+
+commit 0a3eec2b3d110042af4e0a9f1e87458262fce1eb
+Merge: 917a60c 8fd74af
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 06:50:33 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8fd74afe08ee45516a9daf2593f31c176516cb55
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 06:49:57 2015 -0500
+
+    Update to pax-linux-4.2.6-test21.patch:
+    - fixed a size overflow plugin bug that could cause a compiler error
+    - Emese fixed a size overflow false positive in xfrm4_mode_tunnel_input, reported by Arnaud <arnaud@drno.eu>
+    - updated gcc-common.h to support gcc-6
+    - fixed some undefined behaviour in READ_ONCE/WRITE_ONCE
+
+ include/linux/compiler.h                           |   38 +++----------------
+ tools/gcc/gcc-common.h                             |   39 ++++++++++++++++----
+ tools/gcc/initify_plugin.c                         |    4 +-
+ .../disable_size_overflow_hash.data                |    7 +++-
+ .../size_overflow_plugin/intentional_overflow.c    |    2 +-
+ .../size_overflow_plugin/size_overflow_hash.data   |    9 +----
+ .../size_overflow_plugin/size_overflow_transform.c |    4 +-
+ 7 files changed, 50 insertions(+), 53 deletions(-)
+
 commit 917a60c749d80121229a1752874ff8a606778fc5
 Merge: 76fc822 77d474f
 Author: Brad Spengler <spender@grsecurity.net>
