@@ -1,3 +1,12 @@
+commit c3f2cc8921a08fff1fbad9127dd7a30c4a953e88
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 21 18:36:58 2015 -0500
+
+    Fix gcc 5.x compilation, reported by Arnaud and coldhak
+
+ tools/gcc/gcc-common.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit f0ea1bc982c60c1c39d0f95d9f3db0ec799387ca
 Merge: 3929e88 c692401
 Author: Brad Spengler <spender@grsecurity.net>
