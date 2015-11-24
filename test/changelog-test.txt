@@ -1,3 +1,272 @@
+commit 2545f7485c4676c52855750b992d8c1921e559c4
+Merge: 93a41eb 83df348
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 23 20:30:33 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 83df3482b33ef4d8192a253a6852e9a9db1f7dca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 23 20:30:16 2015 -0500
+
+    Update to pax-linux-4.2.6-test23.patch:
+    - fixed gcc-common.h regression under gcc-5, reported by Arnaud and coldhak
+    - fixed ath10k compile error with the size overflow plugin, reported by victor and careta (https://forums.grsecurity.net/viewtopic.php?t=4323)
+
+ drivers/net/wireless/ath/ath10k/ce.c |    4 ++--
+ tools/gcc/gcc-common.h               |   13 ++++++-------
+ 2 files changed, 8 insertions(+), 9 deletions(-)
+
+commit 93a41eb6e3a7ab9446658b6d2ec4623014b55232
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 22 17:14:38 2015 -0500
+
+    update gcc-common.h
+
+ tools/gcc/gcc-common.h |   13 ++++++-------
+ 1 files changed, 6 insertions(+), 7 deletions(-)
+
+commit 7da11be9f025bd8193f03f9b32697bc1ce8ac650
+Author: Andrew Cooper <andrew.cooper3@citrix.com>
+Date:   Wed Jun 3 10:31:14 2015 +0100
+
+    x86/cpu: Fix SMAP check in PVOPS environments
+    
+    There appears to be no formal statement of what pv_irq_ops.save_fl() is
+    supposed to return precisely.  Native returns the full flags, while lguest and
+    Xen only return the Interrupt Flag, and both have comments by the
+    implementations stating that only the Interrupt Flag is looked at.  This may
+    have been true when initially implemented, but no longer is.
+    
+    To make matters worse, the Xen PVOP leaves the upper bits undefined, making
+    the BUG_ON() undefined behaviour.  Experimentally, this now trips for 32bit PV
+    guests on Broadwell hardware.  The BUG_ON() is consistent for an individual
+    build, but not consistent for all builds.  It has also been a sitting timebomb
+    since SMAP support was introduced.
+    
+    Use native_save_fl() instead, which will obtain an accurate view of the AC
+    flag.
+    
+    Signed-off-by: Andrew Cooper <andrew.cooper3@citrix.com>
+    Reviewed-by: David Vrabel <david.vrabel@citrix.com>
+    Tested-by: Rusty Russell <rusty@rustcorp.com.au>
+    Cc: Rusty Russell <rusty@rustcorp.com.au>
+    Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+    Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+    Cc: <lguest@lists.ozlabs.org>
+    Cc: Xen-devel <xen-devel@lists.xen.org>
+    CC: stable@vger.kernel.org
+    Link: http://lkml.kernel.org/r/1433323874-6927-1-git-send-email-andrew.cooper3@citrix.com
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/kernel/cpu/common.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 08ce34cf092b9f1b5311f156df4182a282bf7acc
+Author: Dave Hansen <dave.hansen@linux.intel.com>
+Date:   Wed Nov 11 10:19:31 2015 -0800
+
+    x86/mpx: Do proper get_user() when running 32-bit binaries on 64-bit kernels
+    
+    When you call get_user(foo, bar), you effectively do a
+    
+    	copy_from_user(&foo, bar, sizeof(*bar));
+    
+    Note that the sizeof() is implicit.
+    
+    When we reach out to userspace to try to zap an entire "bounds
+    table" we need to go read a "bounds directory entry" in order to
+    locate the table's address.  The size of a "directory entry"
+    depends on the binary being run and is always the size of a
+    pointer.
+    
+    But, when we have a 64-bit kernel and a 32-bit application, the
+    directory entry is still only 32-bits long, but we fetch it with
+    a 64-bit pointer which makes get_user() does a 64-bit fetch.
+    Reading 4 extra bytes isn't harmful, unless we are at the end of
+    and run off the table.  It might also cause the zero page to get
+    faulted in unnecessarily even if you are not at the end.
+    
+    Fix it up by doing a special 32-bit get_user() via a cast when
+    we have 32-bit userspace.
+    
+    Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: <stable@vger.kernel.org>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: Dave Hansen <dave@sr71.net>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Link: http://lkml.kernel.org/r/20151111181931.3ACF6822@viggo.jf.intel.com
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/mm/mpx.c |   25 ++++++++++++++++++++++++-
+ 1 files changed, 24 insertions(+), 1 deletions(-)
+
+commit 9e1e1d1d6f6f41b13a6e85f25e27aee4410f58bf
+Author: Dave Hansen <dave.hansen@linux.intel.com>
+Date:   Wed Nov 11 10:19:34 2015 -0800
+
+    x86/mpx: Fix 32-bit address space calculation
+    
+    I received a bug report that running 32-bit MPX binaries on
+    64-bit kernels was broken.  I traced it down to this little code
+    snippet.  We were switching our "number of bounds directory
+    entries" calculation correctly.  But, we didn't switch the other
+    side of the calculation: the virtual space size.
+    
+    This meant that we were calculating an absurd size for
+    bd_entry_virt_space() on 32-bit because we used the 64-bit
+    virt_space.
+    
+    This was _also_ broken for 32-bit kernels running on 64-bit
+    hardware since boot_cpu_data.x86_virt_bits=48 even when running
+    in 32-bit mode.
+    
+    Correct that and properly handle all 3 possible cases:
+    
+     1. 32-bit binary on 64-bit kernel
+     2. 64-bit binary on 64-bit kernel
+     3. 32-bit binary on 32-bit kernel
+    
+    This manifested in having bounds tables not properly unmapped.
+    It "leaked" memory but had no functional impact otherwise.
+    
+    Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: <stable@vger.kernel.org>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: Dave Hansen <dave@sr71.net>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Link: http://lkml.kernel.org/r/20151111181934.FA7FAC34@viggo.jf.intel.com
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/mm/mpx.c |   22 +++++++++++++++++-----
+ 1 files changed, 17 insertions(+), 5 deletions(-)
+
+commit c197eee75054d90aafe695c0edb4f25feb469292
+Author: Huaitong Han <huaitong.han@intel.com>
+Date:   Fri Nov 6 17:00:23 2015 +0800
+
+    x86/fpu: Fix get_xsave_addr() behavior under virtualization
+    
+    KVM uses the get_xsave_addr() function in a different fashion from
+    the native kernel, in that the 'xsave' parameter belongs to guest vcpu,
+    not the currently running task.
+    
+    But 'xsave' is replaced with current task's (host) xsave structure, so
+    get_xsave_addr() will incorrectly return the bad xsave address to KVM.
+    
+    Fix it so that the passed in 'xsave' address is used - as intended
+    originally.
+    
+    Signed-off-by: Huaitong Han <huaitong.han@intel.com>
+    Reviewed-by: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: <stable@vger.kernel.org>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Paolo Bonzini <pbonzini@redhat.com>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Fenghua Yu <fenghua.yu@intel.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: dave.hansen@intel.com
+    Link: http://lkml.kernel.org/r/1446800423-21622-1-git-send-email-huaitong.han@intel.com
+    [ Tidied up the changelog. ]
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+    
+    Conflicts:
+    
+    	arch/x86/kernel/fpu/xstate.c
+
+ arch/x86/kernel/fpu/xstate.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 460cdd8a9a19731ce27333866943eed81cba1d96
+Author: Dave Hansen <dave.hansen@linux.intel.com>
+Date:   Tue Nov 10 16:23:54 2015 -0800
+
+    x86/fpu: Fix 32-bit signal frame handling
+    
+    (This should have gone to LKML originally. Sorry for the extra
+     noise, folks on the cc.)
+    
+    Background:
+    
+    Signal frames on x86 have two formats:
+    
+      1. For 32-bit executables (whether on a real 32-bit kernel or
+         under 32-bit emulation on a 64-bit kernel) we have a
+        'fpregset_t' that includes the "FSAVE" registers.
+    
+      2. For 64-bit executables (on 64-bit kernels obviously), the
+         'fpregset_t' is smaller and does not contain the "FSAVE"
+         state.
+    
+    When creating the signal frame, we have to be aware of whether
+    we are running a 32 or 64-bit executable so we create the
+    correct format signal frame.
+    
+    Problem:
+    
+    save_xstate_epilog() uses 'fx_sw_reserved_ia32' whenever it is
+    called for a 32-bit executable.  This is for real 32-bit and
+    ia32 emulation.
+    
+    But, fpu__init_prepare_fx_sw_frame() only initializes
+    'fx_sw_reserved_ia32' when emulation is enabled, *NOT* for real
+    32-bit kernels.
+    
+    This leads to really wierd situations where 32-bit programs
+    lose their extended state when returning from a signal handler.
+    The kernel copies the uninitialized (zero) 'fx_sw_reserved_ia32'
+    out to userspace in save_xstate_epilog().  But when returning
+    from the signal, the kernel errors out in check_for_xstate()
+    when it does not see FP_XSTATE_MAGIC1 present (because it was
+    zeroed).  This leads to the FPU/XSAVE state being initialized.
+    
+    For MPX, this leads to the most permissive state and means we
+    silently lose bounds violations.  I think this would also mean
+    that we could lose *ANY* FPU/SSE/AVX state.  I'm not sure why
+    no one has spotted this bug.
+    
+    I believe this was broken by:
+    
+    	72a671ced66d ("x86, fpu: Unify signal handling code paths for x86 and x86_64 kernels")
+    
+    way back in 2012.
+    
+    Signed-off-by: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: <stable@vger.kernel.org>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: dave@sr71.net
+    Cc: fenghua.yu@intel.com
+    Cc: yu-cheng.yu@intel.com
+    Link: http://lkml.kernel.org/r/20151111002354.A0799571@viggo.jf.intel.com
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/kernel/fpu/signal.c |   11 +++++------
+ 1 files changed, 5 insertions(+), 6 deletions(-)
+
 commit c3f2cc8921a08fff1fbad9127dd7a30c4a953e88
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Nov 21 18:36:58 2015 -0500
