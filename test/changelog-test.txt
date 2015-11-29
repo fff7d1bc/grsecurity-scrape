@@ -1,3 +1,410 @@
+commit 70614db891859ff8474665fc0e982e772c5baf6c
+Merge: 2aa7479 7f57ad4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 28 21:58:09 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7f57ad48fc90cc2c942ef8cad44804ea6cdbfc67
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 28 21:57:41 2015 -0500
+
+    Update to pax-linux-4.2.6-test25.patch:
+    - fixed constify regression, reported by spender
+
+ tools/gcc/constify_plugin.c                        |   14 +++++++-------
+ tools/gcc/initify_plugin.c                         |    2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |   13 ++++++-------
+ tools/gcc/structleak_plugin.c                      |    2 +-
+ 4 files changed, 15 insertions(+), 16 deletions(-)
+
+commit 2aa74790571aaea3d90191b1d235f580600d109f
+Merge: e10e76a 0851e20
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Nov 27 21:02:06 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0851e206a7d21e18d353984cb3f827158ce4237b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Nov 27 21:01:41 2015 -0500
+
+    Update to pax-linux-4.2.6-test24.patch:
+    - Emese fixed a few false positive overflow reports due to intentional overflows introduced by gcc, reported by Arnaud, kdave (https://forums.grsecurity.net/viewtopic.php?t=4287&p=15813#p15799) and rfnx (https://forums.grsecurity.net/viewtopic.php?t=4322)
+    - Emese fixed a false positive size overflow report in ext4, reported by saironiq (https://forums.grsecurity.net/viewtopic.php?f=3&t=4324)
+    - fixed a potential integer truncation error in the raid10 code caught by the size overflow plugin, reported by Alexander Tsoy (https://bugs.gentoo.org/show_bug.cgi?id=566316#c10)
+    - fixed a few integer sign conversion errors in the kernel's zlib code caught by the size overflow plugin, reported by audiocricket (https://forums.grsecurity.net/viewtopic.php?f=3&t=4325)
+    - fixed the handling of the no-constify constify plugin parameter
+    - constified kvm_x86_ops
+    - fixed macro param usage in access_ok, reported by gcc-6
+    - turned off ipa-icf on the size overflow plugin as gcc-5 compiles it very slowly
+    - fixed all plugins for gcc-6
+
+ arch/arm/kvm/arm.c                                 |    2 +-
+ arch/mips/kvm/mips.c                               |    2 +-
+ arch/powerpc/kvm/powerpc.c                         |    2 +-
+ arch/x86/include/asm/uaccess.h                     |    2 +-
+ arch/x86/kvm/svm.c                                 |    2 +-
+ arch/x86/kvm/vmx.c                                 |   24 ++++----
+ arch/x86/kvm/x86.c                                 |    2 +-
+ crypto/zlib.c                                      |    8 +-
+ drivers/md/raid10.c                                |    2 +-
+ include/linux/kvm_host.h                           |    4 +-
+ scripts/Makefile.host                              |    6 ++
+ tools/gcc/constify_plugin.c                        |   27 +++++---
+ tools/gcc/initify_plugin.c                         |    6 +-
+ tools/gcc/kernexec_plugin.c                        |   10 +--
+ tools/gcc/size_overflow_plugin/Makefile            |    2 +
+ .../disable_size_overflow_hash.data                |    3 +
+ .../insert_size_overflow_asm.c                     |    2 +-
+ .../size_overflow_plugin/intentional_overflow.c    |   63 ++++++++++++++++++++
+ tools/gcc/size_overflow_plugin/size_overflow.h     |    1 +
+ .../gcc/size_overflow_plugin/size_overflow_debug.c |    2 +-
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 -
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |    2 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |   14 +++--
+ .../size_overflow_transform_core.c                 |    2 +
+ virt/kvm/kvm_main.c                                |    2 +-
+ 26 files changed, 140 insertions(+), 57 deletions(-)
+
+commit e10e76a7ca9aab3528a613e91b556fd2f961c446
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Nov 27 20:04:14 2015 -0500
+
+    update RANDSTRUCT for gcc6
+
+ tools/gcc/randomize_layout_plugin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit dd166b8680fdf8a72b44f175630803f33f442428
+Author: Filipe Manana <fdmanana@suse.com>
+Date:   Fri Oct 16 12:34:25 2015 +0100
+
+    Btrfs: fix truncation of compressed and inlined extents
+    
+    When truncating a file to a smaller size which consists of an inline
+    extent that is compressed, we did not discard (or made unusable) the
+    data between the new file size and the old file size, wasting metadata
+    space and allowing for the truncated data to be leaked and the data
+    corruption/loss mentioned below.
+    We were also not correctly decrementing the number of bytes used by the
+    inode, we were setting it to zero, giving a wrong report for callers of
+    the stat(2) syscall. The fsck tool also reported an error about a mismatch
+    between the nbytes of the file versus the real space used by the file.
+    
+    Now because we weren't discarding the truncated region of the file, it
+    was possible for a caller of the clone ioctl to actually read the data
+    that was truncated, allowing for a security breach without requiring root
+    access to the system, using only standard filesystem operations. The
+    scenario is the following:
+    
+       1) User A creates a file which consists of an inline and compressed
+          extent with a size of 2000 bytes - the file is not accessible to
+          any other users (no read, write or execution permission for anyone
+          else);
+    
+       2) The user truncates the file to a size of 1000 bytes;
+    
+       3) User A makes the file world readable;
+    
+       4) User B creates a file consisting of an inline extent of 2000 bytes;
+    
+       5) User B issues a clone operation from user A's file into its own
+          file (using a length argument of 0, clone the whole range);
+    
+       6) User B now gets to see the 1000 bytes that user A truncated from
+          its file before it made its file world readbale. User B also lost
+          the bytes in the range [1000, 2000[ bytes from its own file, but
+          that might be ok if his/her intention was reading stale data from
+          user A that was never supposed to be public.
+    
+    Note that this contrasts with the case where we truncate a file from 2000
+    bytes to 1000 bytes and then truncate it back from 1000 to 2000 bytes. In
+    this case reading any byte from the range [1000, 2000[ will return a value
+    of 0x00, instead of the original data.
+    
+    This problem exists since the clone ioctl was added and happens both with
+    and without my recent data loss and file corruption fixes for the clone
+    ioctl (patch "Btrfs: fix file corruption and data loss after cloning
+    inline extents").
+    
+    So fix this by truncating the compressed inline extents as we do for the
+    non-compressed case, which involves decompressing, if the data isn't already
+    in the page cache, compressing the truncated version of the extent, writing
+    the compressed content into the inline extent and then truncate it.
+    
+    The following test case for fstests reproduces the problem. In order for
+    the test to pass both this fix and my previous fix for the clone ioctl
+    that forbids cloning a smaller inline extent into a larger one,
+    which is titled "Btrfs: fix file corruption and data loss after cloning
+    inline extents", are needed. Without that other fix the test fails in a
+    different way that does not leak the truncated data, instead part of
+    destination file gets replaced with zeroes (because the destination file
+    has a larger inline extent than the source).
+    
+      seq=`basename $0`
+      seqres=$RESULT_DIR/$seq
+      echo "QA output created by $seq"
+      tmp=/tmp/$$
+      status=1	# failure is the default!
+      trap "_cleanup; exit \$status" 0 1 2 3 15
+    
+      _cleanup()
+      {
+          rm -f $tmp.*
+      }
+    
+      # get standard environment, filters and checks
+      . ./common/rc
+      . ./common/filter
+    
+      # real QA test starts here
+      _need_to_be_root
+      _supported_fs btrfs
+      _supported_os Linux
+      _require_scratch
+      _require_cloner
+    
+      rm -f $seqres.full
+    
+      _scratch_mkfs >>$seqres.full 2>&1
+      _scratch_mount "-o compress"
+    
+      # Create our test files. File foo is going to be the source of a clone operation
+      # and consists of a single inline extent with an uncompressed size of 512 bytes,
+      # while file bar consists of a single inline extent with an uncompressed size of
+      # 256 bytes. For our test's purpose, it's important that file bar has an inline
+      # extent with a size smaller than foo's inline extent.
+      $XFS_IO_PROG -f -c "pwrite -S 0xa1 0 128"   \
+              -c "pwrite -S 0x2a 128 384" \
+              $SCRATCH_MNT/foo | _filter_xfs_io
+      $XFS_IO_PROG -f -c "pwrite -S 0xbb 0 256" $SCRATCH_MNT/bar | _filter_xfs_io
+    
+      # Now durably persist all metadata and data. We do this to make sure that we get
+      # on disk an inline extent with a size of 512 bytes for file foo.
+      sync
+    
+      # Now truncate our file foo to a smaller size. Because it consists of a
+      # compressed and inline extent, btrfs did not shrink the inline extent to the
+      # new size (if the extent was not compressed, btrfs would shrink it to 128
+      # bytes), it only updates the inode's i_size to 128 bytes.
+      $XFS_IO_PROG -c "truncate 128" $SCRATCH_MNT/foo
+    
+      # Now clone foo's inline extent into bar.
+      # This clone operation should fail with errno EOPNOTSUPP because the source
+      # file consists only of an inline extent and the file's size is smaller than
+      # the inline extent of the destination (128 bytes < 256 bytes). However the
+      # clone ioctl was not prepared to deal with a file that has a size smaller
+      # than the size of its inline extent (something that happens only for compressed
+      # inline extents), resulting in copying the full inline extent from the source
+      # file into the destination file.
+      #
+      # Note that btrfs' clone operation for inline extents consists of removing the
+      # inline extent from the destination inode and copy the inline extent from the
+      # source inode into the destination inode, meaning that if the destination
+      # inode's inline extent is larger (N bytes) than the source inode's inline
+      # extent (M bytes), some bytes (N - M bytes) will be lost from the destination
+      # file. Btrfs could copy the source inline extent's data into the destination's
+      # inline extent so that we would not lose any data, but that's currently not
+      # done due to the complexity that would be needed to deal with such cases
+      # (specially when one or both extents are compressed), returning EOPNOTSUPP, as
+      # it's normally not a very common case to clone very small files (only case
+      # where we get inline extents) and copying inline extents does not save any
+      # space (unlike for normal, non-inlined extents).
+      $CLONER_PROG -s 0 -d 0 -l 0 $SCRATCH_MNT/foo $SCRATCH_MNT/bar
+    
+      # Now because the above clone operation used to succeed, and due to foo's inline
+      # extent not being shinked by the truncate operation, our file bar got the whole
+      # inline extent copied from foo, making us lose the last 128 bytes from bar
+      # which got replaced by the bytes in range [128, 256[ from foo before foo was
+      # truncated - in other words, data loss from bar and being able to read old and
+      # stale data from foo that should not be possible to read anymore through normal
+      # filesystem operations. Contrast with the case where we truncate a file from a
+      # size N to a smaller size M, truncate it back to size N and then read the range
+      # [M, N[, we should always get the value 0x00 for all the bytes in that range.
+    
+      # We expected the clone operation to fail with errno EOPNOTSUPP and therefore
+      # not modify our file's bar data/metadata. So its content should be 256 bytes
+      # long with all bytes having the value 0xbb.
+      #
+      # Without the btrfs bug fix, the clone operation succeeded and resulted in
+      # leaking truncated data from foo, the bytes that belonged to its range
+      # [128, 256[, and losing data from bar in that same range. So reading the
+      # file gave us the following content:
+      #
+      # 0000000 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1 a1
+      # *
+      # 0000200 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a 2a
+      # *
+      # 0000400
+      echo "File bar's content after the clone operation:"
+      od -t x1 $SCRATCH_MNT/bar
+    
+      # Also because the foo's inline extent was not shrunk by the truncate
+      # operation, btrfs' fsck, which is run by the fstests framework everytime a
+      # test completes, failed reporting the following error:
+      #
+      #  root 5 inode 257 errors 400, nbytes wrong
+    
+      status=0
+      exit
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Filipe Manana <fdmanana@suse.com>
+
+ fs/btrfs/inode.c |   82 ++++++++++++++++++++++++++++++++++++++++++++---------
+ 1 files changed, 68 insertions(+), 14 deletions(-)
+
+commit fe6936fd0f41ee2dccce47f5642251649a54e4d4
+Author: Christoph Biedl <linux-kernel.bfrz@manchmal.in-ulm.de>
+Date:   Wed Nov 25 07:47:40 2015 +0100
+
+    isdn: Partially revert debug format string usage clean up
+    
+    Commit 35a4a57 ("isdn: clean up debug format string usage") introduced
+    a safeguard to avoid accidential format string interpolation of data
+    when calling debugl1 or HiSax_putstatus. This did however not take into
+    account VHiSax_putstatus (called by HiSax_putstatus) does *not* call
+    vsprintf if the head parameter is NULL - the format string is treated
+    as plain text then instead. As a result, the string "%s" is processed
+    literally, and the actual information is lost. This affects the isdnlog
+    userspace program which stopped logging information since that commit.
+    
+    So revert the HiSax_putstatus invocations to the previous state.
+    
+    Fixes: 35a4a5733b0a ("isdn: clean up debug format string usage")
+    Cc: Kees Cook <keescook@chromium.org>
+    Cc: Karsten Keil <isdn@linux-pingi.de>
+    Signed-off-by: Christoph Biedl <linux-kernel.bfrz@manchmal.in-ulm.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/isdn/hisax/config.c  |    2 +-
+ drivers/isdn/hisax/hfc_pci.c |    2 +-
+ drivers/isdn/hisax/hfc_sx.c  |    2 +-
+ drivers/isdn/hisax/q931.c    |    6 +++---
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 574035e44b3d49a71f1c0737b7b49bf60ddf0ce7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 25 20:24:52 2015 -0500
+
+    future-proof the code against users of VM_NO_GUARD, mark KASAN as an incompatibility with KSTACKOVERFLOW
+
+ lib/Kconfig.kasan |    2 +-
+ mm/vmalloc.c      |    2 ++
+ 2 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 8a355f2c56ecd40ada14fd16717105ea9a9ac0b5
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Mon Nov 23 21:11:08 2015 -0500
+
+    fix sysvfs symlinks
+    
+    The thing got broken back in 2002 - sysvfs does *not* have inline
+    symlinks; even short ones have bodies stored in the first block
+    of file.  sysv_symlink() handles that correctly; unfortunately,
+    attempting to look an existing symlink up will end up confusing
+    them for inline symlinks, and interpret the block number containing
+    the body as the body itself.
+    
+    Nobody has noticed until now, which says something about the level
+    of testing sysvfs gets ;-/
+    
+    Cc: stable@vger.kernel.org # all of them, not that anyone cared
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/sysv/inode.c |   11 ++---------
+ 1 files changed, 2 insertions(+), 9 deletions(-)
+
+commit 195f1b816ff4cdcc8defc2dc0424cf25a0d937fb
+Author: Jan Kara <jack@suse.cz>
+Date:   Mon Nov 23 13:09:50 2015 +0100
+
+    vfs: Make sendfile(2) killable even better
+    
+    Commit 296291cdd162 (mm: make sendfile(2) killable) fixed an issue where
+    sendfile(2) was doing a lot of tiny writes into a filesystem and thus
+    was unkillable for a long time. However sendfile(2) can be (mis)used to
+    issue lots of writes into arbitrary file descriptor such as evenfd or
+    similar special file descriptors which never hit the standard filesystem
+    write path and thus are still unkillable. E.g. the following example
+    from Dmitry burns CPU for ~16s on my test system without possibility to
+    be killed:
+    
+            int r1 = eventfd(0, 0);
+            int r2 = memfd_create("", 0);
+            unsigned long n = 1<<30;
+            fallocate(r2, 0, 0, n);
+            sendfile(r1, r2, 0, n);
+    
+    There are actually quite a few tests for pending signals in sendfile
+    code however we data to write is always available none of them seems to
+    trigger. So fix the problem by adding a test for pending signal into
+    splice_from_pipe_next() also before the loop waiting for pipe buffers to
+    be available. This should fix all the lockup issues with sendfile of the
+    do-ton-of-tiny-writes nature.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/splice.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit 92470552efa5a49718308238c7da9ba2579a1147
+Author: Jan Kara <jack@suse.cz>
+Date:   Mon Nov 23 13:09:51 2015 +0100
+
+    vfs: Avoid softlockups with sendfile(2)
+    
+    The following test program from Dmitry can cause softlockups or RCU
+    stalls as it copies 1GB from tmpfs into eventfd and we don't have any
+    scheduling point at that path in sendfile(2) implementation:
+    
+            int r1 = eventfd(0, 0);
+            int r2 = memfd_create("", 0);
+            unsigned long n = 1<<30;
+            fallocate(r2, 0, 0, n);
+            sendfile(r1, r2, 0, n);
+    
+    Add cond_resched() into __splice_from_pipe() to fix the problem.
+    
+    CC: Dmitry Vyukov <dvyukov@google.com>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/splice.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 28ab97eb348dca6653eccb40d012103786d03ae6
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Tue Nov 24 11:39:54 2015 -0800
+
+    pidns: fix NULL dereference in __task_pid_nr_ns()
+    
+    I got a crash during a "perf top" session that was caused by a race in
+    __task_pid_nr_ns() :
+    
+    pid_nr_ns() was inlined, but apparently compiler chose to read
+    task->pids[type].pid twice, and the pid->level dereference crashed
+    because we got a NULL pointer at the second read :
+    
+        if (pid && ns->level <= pid->level) { // CRASH
+    
+    Just use RCU API properly to solve this race, and not worry about "perf
+    top" crashing hosts :(
+    
+    get_task_pid() can benefit from same fix.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/pid.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 2545f7485c4676c52855750b992d8c1921e559c4
 Merge: 93a41eb 83df348
 Author: Brad Spengler <spender@grsecurity.net>
