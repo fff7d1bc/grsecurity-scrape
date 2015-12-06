@@ -1,3 +1,424 @@
+commit 24ce7d83ff71aa7102231f41c41aaf44f949751a
+Author: David Gstir <david@sigma-star.at>
+Date:   Sun Nov 15 17:14:41 2015 +0100
+
+    crypto: nx - Fix timing leak in GCM and CCM decryption
+    
+    Using non-constant time memcmp() makes the verification of the authentication
+    tag in the decrypt path vulnerable to timing attacks. Fix this by using
+    crypto_memneq() instead.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: David Gstir <david@sigma-star.at>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ drivers/crypto/nx/nx-aes-ccm.c |    2 +-
+ drivers/crypto/nx/nx-aes-gcm.c |    2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 5c001f6d281406b32d79cf9b7851413adb658641
+Author: David Gstir <david@sigma-star.at>
+Date:   Sun Nov 15 17:14:42 2015 +0100
+
+    crypto: talitos - Fix timing leak in ESP ICV verification
+    
+    Using non-constant time memcmp() makes the verification of the authentication
+    tag in the decrypt path vulnerable to timing attacks. Fix this by using
+    crypto_memneq() instead.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: David Gstir <david@sigma-star.at>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+    
+    Conflicts:
+    
+    	drivers/crypto/talitos.c
+
+ drivers/crypto/talitos.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 66e9fe2d958fcdce01c6dadf415864e8cdeb06cb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 4 23:40:00 2015 -0500
+
+    Fix a size_overflow report caused by __get_user not fully initializing a register when
+    reading in less than a register-width from userland, reported by peetaur at:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4332
+    Fix is from the PaX Team
+
+ arch/x86/include/asm/uaccess.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8599b6467ba41cf3d4e9a96495b5d71d44e74f6c
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Thu Nov 26 08:18:14 2015 -0800
+
+    tcp: initialize tp->copied_seq in case of cross SYN connection
+    
+    Dmitry provided a syzkaller (http://github.com/google/syzkaller)
+    generated program that triggers the WARNING at
+    net/ipv4/tcp.c:1729 in tcp_recvmsg() :
+    
+    WARN_ON(tp->copied_seq != tp->rcv_nxt &&
+            !(flags & (MSG_PEEK | MSG_TRUNC)));
+    
+    His program is specifically attempting a Cross SYN TCP exchange,
+    that we support (for the pleasure of hackers ?), but it looks we
+    lack proper tcp->copied_seq initialization.
+    
+    Thanks again Dmitry for your report and testings.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Tested-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_input.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 73c0ec9194319dc262011dbe7196c55cb450f29a
+Author: Guillaume Nault <g.nault@alphalink.fr>
+Date:   Thu Dec 3 16:49:32 2015 +0100
+
+    pppoe: fix memory corruption in padt work structure
+    
+    pppoe_connect() mustn't touch the padt_work field of pppoe sockets
+    because that work could be already pending.
+    
+    [   21.473147] BUG: unable to handle kernel NULL pointer dereference at 00000004
+    [   21.474523] IP: [<c1043177>] process_one_work+0x29/0x31c
+    [   21.475164] *pde = 00000000
+    [   21.475513] Oops: 0000 [#1] SMP
+    [   21.475910] Modules linked in: pppoe pppox ppp_generic slhc crc32c_intel aesni_intel virtio_net xts aes_i586 lrw gf128mul ablk_helper cryptd evdev acpi_cpufreq processor serio_raw button ext4 crc16 mbcache jbd2 virtio_blk virtio_pci virtio_ring virtio
+    [   21.476168] CPU: 2 PID: 164 Comm: kworker/2:2 Not tainted 4.4.0-rc1 #1
+    [   21.476168] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS Debian-1.8.2-1 04/01/2014
+    [   21.476168] task: f5f83c00 ti: f5e28000 task.ti: f5e28000
+    [   21.476168] EIP: 0060:[<c1043177>] EFLAGS: 00010046 CPU: 2
+    [   21.476168] EIP is at process_one_work+0x29/0x31c
+    [   21.484082] EAX: 00000000 EBX: f678b2a0 ECX: 00000004 EDX: 00000000
+    [   21.484082] ESI: f6c69940 EDI: f5e29ef0 EBP: f5e29f0c ESP: f5e29edc
+    [   21.484082]  DS: 007b ES: 007b FS: 00d8 GS: 0000 SS: 0068
+    [   21.484082] CR0: 80050033 CR2: 000000a4 CR3: 317ad000 CR4: 00040690
+    [   21.484082] Stack:
+    [   21.484082]  00000000 f6c69950 00000000 f6c69940 c0042338 f5e29f0c c1327945 00000000
+    [   21.484082]  00000008 f678b2a0 f6c69940 f678b2b8 f5e29f30 c1043984 f5f83c00 f6c69970
+    [   21.484082]  f678b2a0 c10437d3 f6775e80 f678b2a0 c10437d3 f5e29fac c1047059 f5e29f74
+    [   21.484082] Call Trace:
+    [   21.484082]  [<c1327945>] ? _raw_spin_lock_irq+0x28/0x30
+    [   21.484082]  [<c1043984>] worker_thread+0x1b1/0x244
+    [   21.484082]  [<c10437d3>] ? rescuer_thread+0x229/0x229
+    [   21.484082]  [<c10437d3>] ? rescuer_thread+0x229/0x229
+    [   21.484082]  [<c1047059>] kthread+0x8f/0x94
+    [   21.484082]  [<c1327a32>] ? _raw_spin_unlock_irq+0x22/0x26
+    [   21.484082]  [<c1327ee9>] ret_from_kernel_thread+0x21/0x38
+    [   21.484082]  [<c1046fca>] ? kthread_parkme+0x19/0x19
+    [   21.496082] Code: 5d c3 55 89 e5 57 56 53 89 c3 83 ec 24 89 d0 89 55 e0 8d 7d e4 e8 6c d8 ff ff b9 04 00 00 00 89 45 d8 8b 43 24 89 45 dc 8b 45 d8 <8b> 40 04 8b 80 e0 00 00 00 c1 e8 05 24 01 88 45 d7 8b 45 e0 8d
+    [   21.496082] EIP: [<c1043177>] process_one_work+0x29/0x31c SS:ESP 0068:f5e29edc
+    [   21.496082] CR2: 0000000000000004
+    [   21.496082] ---[ end trace e362cc9cf10dae89 ]---
+    
+    Reported-by: Andrew <nitr0@seti.kr.ua>
+    Fixes: 287f3a943fef ("pppoe: Use workqueue to die properly when a PADT is received")
+    Signed-off-by: Guillaume Nault <g.nault@alphalink.fr>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ppp/pppoe.c |   14 ++++++++++----
+ 1 files changed, 10 insertions(+), 4 deletions(-)
+
+commit 909cb25969d65dbdd08c69486c72cb09cf30131a
+Merge: 2fd6be6 b27a8b0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 4 19:40:10 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	Makefile
+
+commit b27a8b0f99304f0bc3ea3a8e55f04f6bb57bbe8f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 4 19:38:31 2015 -0500
+
+    Update to pax-linux-4.2.6-test26.patch:
+    - fixed integer truncation check in md introduced by upstream commits 284ae7cab0f7335c9e0aa8992b28415ef1a54c7c and 58c0fed400603a802968b23ddf78f029c5a84e41, reported by BeiKed9o (https://forums.grsecurity.net/viewtopic.php?f=3&t=4328)
+    - gcc plugin compilation problems will now also produce the output of the checking script to make diagnosis easier, reported by hunger
+    - Emese fixed a false positive size overflow report in __vhost_add_used_n, reported by quasar366 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4329)
+    - fixed a potential integer truncation error in the raid1 code caught by the size overflow plugin, reported by d1b (https://forums.grsecurity.net/viewtopic.php?f=3&t=4331)
+
+ Makefile                                           |    5 +++
+ drivers/md/md.c                                    |    5 ++-
+ drivers/md/raid1.c                                 |    2 +-
+ fs/proc/task_mmu.c                                 |    3 ++
+ .../disable_size_overflow_hash.data                |    4 ++-
+ .../size_overflow_plugin/intentional_overflow.c    |   32 ++++++++++++++++---
+ .../size_overflow_plugin/size_overflow_hash.data   |    2 -
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ 8 files changed, 43 insertions(+), 12 deletions(-)
+
+commit 2fd6be640143ad13633518208bb1ba5730bf4949
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Tue Dec 1 20:08:51 2015 -0800
+
+    net_sched: fix qdisc_tree_decrease_qlen() races
+    
+    qdisc_tree_decrease_qlen() suffers from two problems on multiqueue
+    devices.
+    
+    One problem is that it updates sch->q.qlen and sch->qstats.drops
+    on the mq/mqprio root qdisc, while it should not : Daniele
+    reported underflows errors :
+    [  681.774821] PAX: sch->q.qlen: 0 n: 1
+    [  681.774825] PAX: size overflow detected in function qdisc_tree_decrease_qlen net/sched/sch_api.c:769 cicus.693_49 min, count: 72, decl: qlen; num: 0; context: sk_buff_head;
+    [  681.774954] CPU: 2 PID: 19 Comm: ksoftirqd/2 Tainted: G           O    4.2.6.201511282239-1-grsec #1
+    [  681.774955] Hardware name: ASUSTeK COMPUTER INC. X302LJ/X302LJ, BIOS X302LJ.202 03/05/2015
+    [  681.774956]  ffffffffa9a04863 0000000000000000 0000000000000000 ffffffffa990ff7c
+    [  681.774959]  ffffc90000d3bc38 ffffffffa95d2810 0000000000000007 ffffffffa991002b
+    [  681.774960]  ffffc90000d3bc68 ffffffffa91a44f4 0000000000000001 0000000000000001
+    [  681.774962] Call Trace:
+    [  681.774967]  [<ffffffffa95d2810>] dump_stack+0x4c/0x7f
+    [  681.774970]  [<ffffffffa91a44f4>] report_size_overflow+0x34/0x50
+    [  681.774972]  [<ffffffffa94d17e2>] qdisc_tree_decrease_qlen+0x152/0x160
+    [  681.774976]  [<ffffffffc02694b1>] fq_codel_dequeue+0x7b1/0x820 [sch_fq_codel]
+    [  681.774978]  [<ffffffffc02680a0>] ? qdisc_peek_dequeued+0xa0/0xa0 [sch_fq_codel]
+    [  681.774980]  [<ffffffffa94cd92d>] __qdisc_run+0x4d/0x1d0
+    [  681.774983]  [<ffffffffa949b2b2>] net_tx_action+0xc2/0x160
+    [  681.774985]  [<ffffffffa90664c1>] __do_softirq+0xf1/0x200
+    [  681.774987]  [<ffffffffa90665ee>] run_ksoftirqd+0x1e/0x30
+    [  681.774989]  [<ffffffffa90896b0>] smpboot_thread_fn+0x150/0x260
+    [  681.774991]  [<ffffffffa9089560>] ? sort_range+0x40/0x40
+    [  681.774992]  [<ffffffffa9085fe4>] kthread+0xe4/0x100
+    [  681.774994]  [<ffffffffa9085f00>] ? kthread_worker_fn+0x170/0x170
+    [  681.774995]  [<ffffffffa95d8d1e>] ret_from_fork+0x3e/0x70
+    
+    mq/mqprio have their own ways to report qlen/drops by folding stats on
+    all their queues, with appropriate locking.
+    
+    A second problem is that qdisc_tree_decrease_qlen() calls qdisc_lookup()
+    without proper locking : concurrent qdisc updates could corrupt the list
+    that qdisc_match_from_root() parses to find a qdisc given its handle.
+    
+    Fix first problem adding a TCQ_F_NOPARENT qdisc flag that
+    qdisc_tree_decrease_qlen() can use to abort its tree traversal,
+    as soon as it meets a mq/mqprio qdisc children.
+    
+    Second problem can be fixed by RCU protection.
+    Qdisc are already freed after RCU grace period, so qdisc_list_add() and
+    qdisc_list_del() simply have to use appropriate rcu list variants.
+    
+    A future patch will add a per struct netdev_queue list anchor, so that
+    qdisc_tree_decrease_qlen() can have more efficient lookups.
+    
+    Reported-by: Daniele Fucini <dfucini@gmail.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Cong Wang <cwang@twopensource.com>
+    Cc: Jamal Hadi Salim <jhs@mojatatu.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/sched/sch_generic.c
+
+ include/net/sch_generic.h |    3 +++
+ net/sched/sch_api.c       |   27 ++++++++++++++++++---------
+ net/sched/sch_generic.c   |    2 +-
+ net/sched/sch_mq.c        |    4 ++--
+ net/sched/sch_mqprio.c    |    4 ++--
+ 5 files changed, 26 insertions(+), 14 deletions(-)
+
+commit 47e3db55fb66525b7a769de3e2275b5d75a03f39
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Tue Dec 1 07:20:07 2015 -0800
+
+    ipv6: sctp: implement sctp_v6_destroy_sock()
+    
+    Dmitry Vyukov reported a memory leak using IPV6 SCTP sockets.
+    
+    We need to call inet6_destroy_sock() to properly release
+    inet6 specific fields.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/socket.c |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
+
+commit c97f798d6e4fb454a7bfbb39fc073c8f538863c9
+Author: Jan Engelhardt <jengelh@inai.de>
+Date:   Mon Nov 23 17:46:32 2015 +0100
+
+    target: fix COMPARE_AND_WRITE non zero SGL offset data corruption
+    
+    target_core_sbc's compare_and_write functionality suffers from taking
+    data at the wrong memory location when writing a CAW request to disk
+    when a SGL offset is non-zero.
+    
+    This can happen with loopback and vhost-scsi fabric drivers when
+    SCF_PASSTHROUGH_SG_TO_MEM_NOALLOC is used to map existing user-space
+    SGL memory into COMPARE_AND_WRITE READ/WRITE payload buffers.
+    
+    Given the following sample LIO subtopology,
+    
+    % targetcli ls /loopback/
+    o- loopback ................................. [1 Target]
+      o- naa.6001405ebb8df14a ....... [naa.60014059143ed2b3]
+        o- luns ................................... [2 LUNs]
+          o- lun0 ................ [iblock/ram0 (/dev/ram0)]
+          o- lun1 ................ [iblock/ram1 (/dev/ram1)]
+    % lsscsi -g
+    [3:0:1:0]    disk    LIO-ORG  IBLOCK           4.0   /dev/sdc   /dev/sg3
+    [3:0:1:1]    disk    LIO-ORG  IBLOCK           4.0   /dev/sdd   /dev/sg4
+    
+    the following bug can be observed in Linux 4.3 and 4.4~rc1:
+    
+    % perl -e 'print chr$_ for 0..255,reverse 0..255' >rand
+    % perl -e 'print "\0" x 512' >zero
+    % cat rand >/dev/sdd
+    % sg_compare_and_write -i rand -D zero --lba 0 /dev/sdd
+    % sg_compare_and_write -i zero -D rand --lba 0 /dev/sdd
+    Miscompare reported
+    % hexdump -Cn 512 /dev/sdd
+    00000000  0f 0e 0d 0c 0b 0a 09 08  07 06 05 04 03 02 01 00
+    00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00
+    *
+    00000200
+    
+    Rather than writing all-zeroes as instructed with the -D file, it
+    corrupts the data in the sector by splicing some of the original
+    bytes in. The page of the first entry of cmd->t_data_sg includes the
+    CDB, and sg->offset is set to a position past the CDB. I presume that
+    sg->offset is also the right choice to use for subsequent sglist
+    members.
+    
+    Signed-off-by: Jan Engelhardt <jengelh@netitwork.de>
+    Tested-by: Douglas Gilbert <dgilbert@interlog.com>
+    Cc: <stable@vger.kernel.org> # v3.12+
+    Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
+
+ drivers/target/target_core_sbc.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 43aa1ca4268298d8f65be2411d627573f33afb3e
+Author: Nicholas Bellinger <nab@linux-iscsi.org>
+Date:   Thu Nov 5 23:37:59 2015 -0800
+
+    target: Fix race for SCF_COMPARE_AND_WRITE_POST checking
+    
+    This patch addresses a race + use after free where the first
+    stage of COMPARE_AND_WRITE in compare_and_write_callback()
+    is rescheduled after the backend sends the secondary WRITE,
+    resulting in second stage compare_and_write_post() callback
+    completing in target_complete_ok_work() before the first
+    can return.
+    
+    Because current code depends on checking se_cmd->se_cmd_flags
+    after return from se_cmd->transport_complete_callback(),
+    this results in first stage having SCF_COMPARE_AND_WRITE_POST
+    set, which incorrectly falls through into second stage CAW
+    processing code, eventually triggering a NULL pointer
+    dereference due to use after free.
+    
+    To address this bug, pass in a new *post_ret parameter into
+    se_cmd->transport_complete_callback(), and depend upon this
+    value instead of ->se_cmd_flags to determine when to return
+    or fall through into ->queue_status() code for CAW.
+    
+    Cc: Sagi Grimberg <sagig@mellanox.com>
+    Cc: <stable@vger.kernel.org> # v3.12+
+    Signed-off-by: Nicholas Bellinger <nab@linux-iscsi.org>
+
+ drivers/target/target_core_sbc.c       |   13 +++++++++----
+ drivers/target/target_core_transport.c |   14 ++++++++------
+ include/target/target_core_base.h      |    2 +-
+ 3 files changed, 18 insertions(+), 11 deletions(-)
+
+commit c26b157afe2cbde205fcdd36c0b0cc6ca36c2a6e
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Thu Nov 26 12:08:18 2015 +0100
+
+    af-unix: passcred support for sendpage
+    
+    sendpage did not care about credentials at all. This could lead to
+    situations in which because of fd passing between processes we could
+    append data to skbs with different scm data. It is illegal to splice those
+    skbs together. Instead we have to allocate a new skb and if requested
+    fill out the scm details.
+    
+    Fixes: 869e7c62486ec ("net: af_unix: implement stream sendpage support")
+    Reported-by: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |   79 ++++++++++++++++++++++++++++++++++++++++++----------
+ 1 files changed, 64 insertions(+), 15 deletions(-)
+
+commit db1370c0dee2dfc22c3549eff6791afd19aaa365
+Author: Peter Hurley <peter@hurleysoftware.com>
+Date:   Fri Nov 27 14:18:39 2015 -0500
+
+    wan/x25: Fix use-after-free in x25_asy_open_tty()
+    
+    The N_X25 line discipline may access the previous line discipline's closed
+    and already-freed private data on open [1].
+    
+    The tty->disc_data field _never_ refers to valid data on entry to the
+    line discipline's open() method. Rather, the ldisc is expected to
+    initialize that field for its own use for the lifetime of the instance
+    (ie. from open() to close() only).
+    
+    [1]
+        [  634.336761] ==================================================================
+        [  634.338226] BUG: KASAN: use-after-free in x25_asy_open_tty+0x13d/0x490 at addr ffff8800a743efd0
+        [  634.339558] Read of size 4 by task syzkaller_execu/8981
+        [  634.340359] =============================================================================
+        [  634.341598] BUG kmalloc-512 (Not tainted): kasan: bad access detected
+        ...
+        [  634.405018] Call Trace:
+        [  634.405277] dump_stack (lib/dump_stack.c:52)
+        [  634.405775] print_trailer (mm/slub.c:655)
+        [  634.406361] object_err (mm/slub.c:662)
+        [  634.406824] kasan_report_error (mm/kasan/report.c:138 mm/kasan/report.c:236)
+        [  634.409581] __asan_report_load4_noabort (mm/kasan/report.c:279)
+        [  634.411355] x25_asy_open_tty (drivers/net/wan/x25_asy.c:559 (discriminator 1))
+        [  634.413997] tty_ldisc_open.isra.2 (drivers/tty/tty_ldisc.c:447)
+        [  634.414549] tty_set_ldisc (drivers/tty/tty_ldisc.c:567)
+        [  634.415057] tty_ioctl (drivers/tty/tty_io.c:2646 drivers/tty/tty_io.c:2879)
+        [  634.423524] do_vfs_ioctl (fs/ioctl.c:43 fs/ioctl.c:607)
+        [  634.427491] SyS_ioctl (fs/ioctl.c:622 fs/ioctl.c:613)
+        [  634.427945] entry_SYSCALL_64_fastpath (arch/x86/entry/entry_64.S:188)
+    
+    Reported-and-tested-by: Sasha Levin <sasha.levin@oracle.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Peter Hurley <peter@hurleysoftware.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/wan/x25_asy.c |    6 +-----
+ 1 files changed, 1 insertions(+), 5 deletions(-)
+
+commit 39f32f33dc362f9704113cc7874238792f8294c9
+Author: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+Date:   Mon Nov 30 14:32:54 2015 -0200
+
+    sctp: use GFP_USER for user-controlled kmalloc
+    
+    Dmitry Vyukov reported that the user could trigger a kernel warning by
+    using a large len value for getsockopt SCTP_GET_LOCAL_ADDRS, as that
+    value directly affects the value used as a kmalloc() parameter.
+    
+    This patch thus switches the allocation flags from all user-controllable
+    kmalloc size to GFP_USER to put some more restrictions on it and also
+    disables the warn, as they are not necessary.
+    
+    Signed-off-by: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/socket.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 70614db891859ff8474665fc0e982e772c5baf6c
 Merge: 2aa7479 7f57ad4
 Author: Brad Spengler <spender@grsecurity.net>
