@@ -1,3 +1,461 @@
+commit 08df80079f2039f577c94cbb78479b4166e964a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 9 22:44:52 2015 -0500
+
+    fix harmless compiler warning
+
+ kernel/ptrace.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7df1e03db2cc00d6927d174088d715d545f6caca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 9 22:43:52 2015 -0500
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 4f99b6c5ed05452d23fa480834dfc08ae7197d51
+Merge: 015e832 2ddeae1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 9 21:49:14 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kvm/svm.c
+    	fs/proc/base.c
+
+commit 2ddeae161726b8316b4f2740f9e2ff7ac282c844
+Merge: 6ddfdb5 7317505
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 9 21:45:41 2015 -0500
+
+    Merge branch 'linux-4.2.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/kernel/fpu/xstate.c
+    	arch/x86/kernel/head_64.S
+    	drivers/tty/tty_audit.c
+    	include/linux/tty.h
+
+commit 015e832266e2aba7984ed94b688d15a00c091edf
+Merge: 1798180 6ddfdb5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 9 21:44:11 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/tty/tty_audit.c
+    	include/linux/tty.h
+
+commit 6ddfdb5a2291947e1479615b89ed8f0f6529b276
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 9 21:42:28 2015 -0500
+
+    Update to pax-linux-4.2.6-test27.patch:
+    - fixed __get_user on x86 to lie less about the size of the load, reported by peetaur (https://forums.grsecurity.net/viewtopic.php?f=3&t=4332)
+    - Emese fixed an intentional overflow caused by gcc, reported by saironiq (https://forums.grsecurity.net/viewtopic.php?f=3&t=4333)
+    - Emese fixed a false positive overflow report in the forcedeth driver, reported by fx3 (https://forums.grsecurity.net/viewtopic.php?t=4334)
+    - Emese fixed a false positive overflow report in KVM's emulator, reported by fx3 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4336)
+    - Emese fixed the initify plugin to detect some captured use of __func__, reported by Rasmus Villemoes <linux@rasmusvillemoes.dk>
+    - constrained shmmax and shmall to avoid triggering size overflow checks, reported by Mathias Krause <minipli@ld-linux.so>
+    - the checker plugin can partially handle sparse's locking context annotations, it's context insensitive and thus not exactly useful for now, also see https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59856
+
+ Makefile                                           |    6 +
+ arch/x86/include/asm/cacheflush.h                  |    2 +-
+ arch/x86/include/asm/compat.h                      |    4 +
+ arch/x86/include/asm/dma.h                         |    2 +
+ arch/x86/include/asm/uaccess.h                     |   20 +-
+ arch/x86/kernel/apic/vector.c                      |    6 +-
+ arch/x86/kernel/cpu/mtrr/generic.c                 |    6 +-
+ arch/x86/kernel/cpu/perf_event_intel.c             |   28 +-
+ arch/x86/kvm/i8259.c                               |   10 +-
+ arch/x86/kvm/ioapic.c                              |    2 +
+ arch/x86/kvm/x86.c                                 |    2 +
+ arch/x86/lib/usercopy_64.c                         |    2 +-
+ arch/x86/mm/mpx.c                                  |    4 +-
+ arch/x86/mm/pageattr.c                             |    7 +
+ drivers/base/devres.c                              |    4 +-
+ drivers/base/power/runtime.c                       |    6 +-
+ drivers/base/regmap/regmap.c                       |    4 +-
+ drivers/block/drbd/drbd_receiver.c                 |    4 +-
+ drivers/block/drbd/drbd_worker.c                   |    6 +-
+ drivers/block/nbd.c                                |    2 +-
+ drivers/char/virtio_console.c                      |    6 +-
+ drivers/md/dm.c                                    |   12 +-
+ drivers/net/ethernet/nvidia/forcedeth.c            |    4 +-
+ drivers/net/macvtap.c                              |    4 +-
+ drivers/tty/n_tty.c                                |    2 +-
+ drivers/tty/tty_audit.c                            |    2 +-
+ drivers/video/fbdev/core/fbmem.c                   |   10 +-
+ fs/compat.c                                        |    3 +-
+ fs/coredump.c                                      |    2 +-
+ fs/dcache.c                                        |   13 +-
+ fs/fhandle.c                                       |    2 +-
+ fs/file.c                                          |   14 +-
+ fs/fs-writeback.c                                  |   11 +-
+ fs/overlayfs/copy_up.c                             |    2 +-
+ fs/readdir.c                                       |    3 +-
+ fs/super.c                                         |    3 +-
+ include/linux/compiler.h                           |   36 ++-
+ include/linux/rcupdate.h                           |    8 +
+ include/linux/sched.h                              |    4 +-
+ include/linux/seqlock.h                            |   10 +
+ include/linux/spinlock.h                           |   17 +-
+ include/linux/srcu.h                               |    5 +-
+ include/linux/syscalls.h                           |    2 +-
+ include/linux/tty.h                                |    4 +-
+ include/linux/writeback.h                          |    3 +-
+ include/uapi/linux/swab.h                          |    6 +-
+ ipc/ipc_sysctl.c                                   |    6 +
+ kernel/exit.c                                      |   25 +-
+ kernel/resource.c                                  |    4 +-
+ kernel/signal.c                                    |   12 +-
+ kernel/user.c                                      |    2 +-
+ kernel/workqueue.c                                 |    6 +-
+ lib/rhashtable.c                                   |    4 +-
+ net/compat.c                                       |    2 +-
+ net/ipv4/xfrm4_mode_transport.c                    |    2 +-
+ security/keys/internal.h                           |    8 +-
+ security/keys/keyring.c                            |    4 -
+ sound/core/seq/seq_clientmgr.c                     |    8 +-
+ sound/core/seq/seq_compat.c                        |    2 +-
+ sound/core/seq/seq_memory.c                        |    6 +-
+ tools/gcc/checker_plugin.c                         |  415 +++++++++++++++++++-
+ tools/gcc/gcc-common.h                             |    1 +
+ tools/gcc/initify_plugin.c                         |   33 ++-
+ .../disable_size_overflow_hash.data                |    1 +
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 -
+ 65 files changed, 713 insertions(+), 144 deletions(-)
+
+commit 1798180b176cfdedf4ca09877dc09ad2298cd014
+Author: Peter Hurley <peter@hurleysoftware.com>
+Date:   Sun Nov 8 08:52:31 2015 -0500
+
+    tty: audit: Fix audit source
+    
+    The data to audit/record is in the 'from' buffer (ie., the input
+    read buffer).
+    
+    Fixes: 72586c6061ab ("n_tty: Fix auditing support for cannonical mode")
+    Cc: stable <stable@vger.kernel.org> # 4.1+
+    Cc: Miloslav Trmač <mitr@redhat.com>
+    Signed-off-by: Peter Hurley <peter@hurleysoftware.com>
+    Acked-by: Laura Abbott <labbott@fedoraproject.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/n_tty.c     |    2 +-
+ drivers/tty/tty_audit.c |    2 +-
+ include/linux/tty.h     |    6 +++---
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 558c7e73286735e7f8d81727843c389f3e564ed2
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Tue Dec 8 03:07:22 2015 -0500
+
+    9p: ->evict_inode() should kick out ->i_data, not ->i_mapping
+    
+    For block devices the pagecache is associated with the inode
+    on bdevfs, not with the aliasing ones on the mountable filesystems.
+    The latter have its own ->i_data empty and ->i_mapping pointing
+    to the (unique per major/minor) bdevfs inode.  That guarantees
+    cache coherence between all block device inodes with the same
+    device number.
+    
+    Eviction of an alias inode has no business trying to evict the
+    pages belonging to bdevfs one; moreover, ->i_mapping is only
+    safe to access when the thing is opened.  At the time of
+    ->evict_inode() the victim is definitely *not* opened.  We are
+    about to kill the address space embedded into struct inode
+    (inode->i_data) and that's what we need to empty of any pages.
+    
+    9p instance tries to empty inode->i_mapping instead, which is
+    both unsafe and bogus - if we have several device nodes with
+    the same device number in different places, closing one of them
+    should not try to empty the (shared) page cache.
+    
+    Fortunately, other instances in the tree are OK; they are
+    evicting from &inode->i_data instead, as 9p one should.
+    
+    Cc: stable@vger.kernel.org # v2.6.32+, ones prior to 2.6.36 need only half of that
+    Reported-by: "Suzuki K. Poulose" <Suzuki.Poulose@arm.com>
+    Tested-by: "Suzuki K. Poulose" <Suzuki.Poulose@arm.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/9p/vfs_inode.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 037f7332eaf1c065207db9d9123562a0a5459e88
+Author: Jan Stancek <jstancek@redhat.com>
+Date:   Tue Dec 8 13:57:51 2015 -0500
+
+    ipmi: move timer init to before irq is setup
+    
+    We encountered a panic on boot in ipmi_si on a dell per320 due to an
+    uninitialized timer as follows.
+    
+    static int smi_start_processing(void       *send_info,
+                                    ipmi_smi_t intf)
+    {
+            /* Try to claim any interrupts. */
+            if (new_smi->irq_setup)
+                    new_smi->irq_setup(new_smi);
+    
+     --> IRQ arrives here and irq handler tries to modify uninitialized timer
+    
+        which triggers BUG_ON(!timer->function) in __mod_timer().
+    
+     Call Trace:
+       <IRQ>
+       [<ffffffffa0532617>] start_new_msg+0x47/0x80 [ipmi_si]
+       [<ffffffffa053269e>] start_check_enables+0x4e/0x60 [ipmi_si]
+       [<ffffffffa0532bd8>] smi_event_handler+0x1e8/0x640 [ipmi_si]
+       [<ffffffff810f5584>] ? __rcu_process_callbacks+0x54/0x350
+       [<ffffffffa053327c>] si_irq_handler+0x3c/0x60 [ipmi_si]
+       [<ffffffff810efaf0>] handle_IRQ_event+0x60/0x170
+       [<ffffffff810f245e>] handle_edge_irq+0xde/0x180
+       [<ffffffff8100fc59>] handle_irq+0x49/0xa0
+       [<ffffffff8154643c>] do_IRQ+0x6c/0xf0
+       [<ffffffff8100ba53>] ret_from_intr+0x0/0x11
+    
+            /* Set up the timer that drives the interface. */
+            setup_timer(&new_smi->si_timer, smi_timeout, (long)new_smi);
+    
+    The following patch fixes the problem.
+    
+    To: Openipmi-developer@lists.sourceforge.net
+    To: Corey Minyard <minyard@acm.org>
+    CC: linux-kernel@vger.kernel.org
+    
+    Signed-off-by: Jan Stancek <jstancek@redhat.com>
+    Signed-off-by: Tony Camuso <tcamuso@redhat.com>
+    Signed-off-by: Corey Minyard <cminyard@mvista.com>
+    Cc: stable@vger.kernel.org # Applies cleanly to 3.10-, needs small rework before
+
+ drivers/char/ipmi/ipmi_si_intf.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit e15b4ee2742c5619359c2ee8c345cfdde6dddde4
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Thu Dec 3 22:04:01 2015 -0500
+
+    bitops.h: correctly handle rol32 with 0 byte shift
+    
+    ROL on a 32 bit integer with a shift of 32 or more is undefined and the
+    result is arch-dependent. Avoid this by handling the trivial case of
+    roling by 0 correctly.
+    
+    The trivial solution of checking if shift is 0 breaks gcc's detection
+    of this code as a ROL instruction, which is unacceptable.
+    
+    This bug was reported and fixed in GCC
+    (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=57157):
+    
+    	The standard rotate idiom,
+    
+    	  (x << n) | (x >> (32 - n))
+    
+    	is recognized by gcc (for concreteness, I discuss only the case that x
+    	is an uint32_t here).
+    
+    	However, this is portable C only for n in the range 0 < n < 32. For n
+    	== 0, we get x >> 32 which gives undefined behaviour according to the
+    	C standard (6.5.7, Bitwise shift operators). To portably support n ==
+    	0, one has to write the rotate as something like
+    
+    	  (x << n) | (x >> ((-n) & 31))
+    
+    	And this is apparently not recognized by gcc.
+    
+    Note that this is broken on older GCCs and will result in slower ROL.
+    
+    Acked-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/bitops.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ce8356f6a992579d7cb2fd5c9bbe72d71d7e0ae7
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Mon Nov 9 17:51:23 2015 -0800
+
+    net: fix a race in dst_release()
+    
+    [ Upstream commit d69bbf88c8d0b367cf3e3a052f6daadf630ee566 ]
+    
+    Only cpu seeing dst refcount going to 0 can safely
+    dereference dst->flags.
+    
+    Otherwise an other cpu might already have freed the dst.
+    
+    Fixes: 27b75c95f10d ("net: avoid RCU for NOCACHE dst")
+    Reported-by: Greg Thelen <gthelen@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    
+    Conflicts:
+    
+    	net/core/dst.c
+
+ net/core/dst.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit fd6d066be125ec23856c705101701e6df3eae799
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 8 20:55:51 2015 -0500
+
+    Backport: ptrace: use fsuid, fsgid, effective creds for fs access checks
+    
+    By checking the effective credentials instead of the real UID / permitted
+    capabilities, ensure that the calling process actually intended to use its
+    credentials.
+    
+    To ensure that all ptrace checks use the correct caller credentials (e.g.
+    in case out-of-tree code or newly added code omits the PTRACE_MODE_*CREDS
+    flag), use two new flags and require one of them to be set.
+    
+    The problem was that when a privileged task had temporarily dropped its
+    privileges, e.g.  by calling setreuid(0, user_uid), with the intent to
+    perform following syscalls with the credentials of a user, it still passed
+    ptrace access checks that the user would not be able to pass.
+    
+    While an attacker should not be able to convince the privileged task to
+    perform a ptrace() syscall, this is a problem because the ptrace access
+    check is reused for things in procfs.
+    
+    In particular, the following somewhat interesting procfs entries only rely
+    on ptrace access checks:
+    
+     /proc/$pid/stat - uses the check for determining whether pointers
+         should be visible, useful for bypassing ASLR
+     /proc/$pid/maps - also useful for bypassing ASLR
+     /proc/$pid/cwd - useful for gaining access to restricted
+         directories that contain files with lax permissions, e.g. in
+         this scenario:
+         lrwxrwxrwx root root /proc/13020/cwd -> /root/foobar
+         drwx------ root root /root
+         drwxr-xr-x root root /root/foobar
+         -rw-r--r-- root root /root/foobar/secret
+    
+    Therefore, on a system where a root-owned mode 6755 binary changes its
+    effective credentials as described and then dumps a user-specified file,
+    this could be used by an attacker to reveal the memory layout of root's
+    processes or reveal the contents of files he is not allowed to access
+    (through /proc/$pid/cwd).
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Acked-by: Kees Cook <keescook@chromium.org>
+    Cc: Casey Schaufler <casey@schaufler-ca.com>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Ingo Molnar <mingo@redhat.com>
+    Cc: James Morris <james.l.morris@oracle.com>
+    Cc: "Serge E. Hallyn" <serge.hallyn@ubuntu.com>
+    Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+    Cc: Andy Lutomirski <luto@kernel.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+
+ fs/proc/array.c        |    2 +-
+ fs/proc/base.c         |   24 ++++++++++++------------
+ fs/proc/namespaces.c   |    4 ++--
+ fs/proc/task_mmu.c     |    2 +-
+ include/linux/ptrace.h |   24 +++++++++++++++++++++++-
+ kernel/events/core.c   |    2 +-
+ kernel/futex.c         |    2 +-
+ kernel/futex_compat.c  |    2 +-
+ kernel/kcmp.c          |    4 ++--
+ kernel/ptrace.c        |   36 +++++++++++++++++++++++++++++-------
+ mm/process_vm_access.c |    2 +-
+ security/commoncap.c   |    7 ++++++-
+ 12 files changed, 80 insertions(+), 31 deletions(-)
+
+commit 60bfe5c382e5e97ae8d558224ec40a108437307f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 8 20:40:02 2015 -0500
+
+    Backport: security: let security modules use PTRACE_MODE_* with bitmasks
+    
+    It looks like smack and yama weren't aware that the ptrace mode
+    can have flags ORed into it - PTRACE_MODE_NOAUDIT until now, but
+    only for /proc/$pid/stat, and with the PTRACE_MODE_*CREDS patch,
+    all modes have flags ORed into them.
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Acked-by: Kees Cook <keescook@chromium.org>
+    Acked-by: Casey Schaufler <casey@schaufler-ca.com>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Ingo Molnar <mingo@redhat.com>
+    Cc: James Morris <james.l.morris@oracle.com>
+    Cc: "Serge E. Hallyn" <serge.hallyn@ubuntu.com>
+    Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+    Cc: Andy Lutomirski <luto@kernel.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+
+ security/smack/smack_lsm.c |    8 +++-----
+ security/yama/yama_lsm.c   |    4 ++--
+ 2 files changed, 5 insertions(+), 7 deletions(-)
+
+commit 2744e9cf5a84c515268784034f99bc839a359747
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 8 20:13:37 2015 -0500
+
+    Update mm_access in anticipation of upstream /proc security fixes, reported by Jann Horn
+
+ kernel/fork.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4d0bf7315334418044d567eb47c9e36c1df73ba0
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sun Dec 6 12:33:02 2015 -0500
+
+    Don't reset ->total_link_count on nested calls of vfs_path_lookup()
+    
+    we already zero it on outermost set_nameidata(), so initialization in
+    path_init() is pointless and wrong.  The same DoS exists on pre-4.2
+    kernels, but there a slightly different fix will be needed.
+    
+    Cc: stable@vger.kernel.org # v4.2
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    
+    Conflicts:
+    
+    	fs/namei.c
+
+ fs/namei.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit e16faf47cc7dcb32105830b0af6d2c35f8724455
+Author: Miklos Szeredi <miklos@szeredi.hu>
+Date:   Fri Dec 4 19:18:48 2015 +0100
+
+    ovl: fix permission checking for setattr
+    
+    [Al Viro] The bug is in being too enthusiastic about optimizing ->setattr()
+    away - instead of "copy verbatim with metadata" + "chmod/chown/utimes"
+    (with the former being always safe and the latter failing in case of
+    insufficient permissions) it tries to combine these two.  Note that copyup
+    itself will have to do ->setattr() anyway; _that_ is where the elevated
+    capabilities are right.  Having these two ->setattr() (one to set verbatim
+    copy of metadata, another to do what overlayfs ->setattr() had been asked
+    to do in the first place) combined is where it breaks.
+    
+    Signed-off-by: Miklos Szeredi <miklos@szeredi.hu>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/overlayfs/inode.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
 commit 24ce7d83ff71aa7102231f41c41aaf44f949751a
 Author: David Gstir <david@sigma-star.at>
 Date:   Sun Nov 15 17:14:41 2015 +0100
@@ -2595,7 +3053,7 @@ Date:   Tue Oct 20 19:25:13 2015 -0400
  1 files changed, 9 insertions(+), 2 deletions(-)
 
 commit 183fc2ae7d90e077fd27623998d82916260a2223
-Merge: a240939 d6dc25f
+Merge: a2409394 d6dc25f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Oct 20 19:16:04 2015 -0400
 
