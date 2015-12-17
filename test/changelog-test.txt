@@ -1,3 +1,69 @@
+commit e314f0fb63020f61543b401ff594e953c2c304e5
+Author: tadeusz.struk@intel.com <tadeusz.struk@intel.com>
+Date:   Tue Dec 15 10:46:17 2015 -0800
+
+    net: fix uninitialized variable issue
+    
+    msg_iocb needs to be initialized on the recv/recvfrom path.
+    Otherwise afalg will wrongly interpret it as an async call.
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Harald Freudenberger <freude@linux.vnet.ibm.com>
+    Signed-off-by: Tadeusz Struk <tadeusz.struk@intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/socket.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit a3f56a43ad56b8fcaf04f6327636ed2f5970de3b
+Merge: dfa764c 142edcf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 16 21:01:17 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 142edcf1005a57fb8887823565cf0bafad2f313c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 16 21:00:57 2015 -0500
+
+    Update to pax-linux-4.3.3-test12.patch:
+    - Emese fixed a size overflow false positive in reiserfs/leaf_paste_entries, reported by Christian Apeltauer (https://bugs.gentoo.org/show_bug.cgi?id=568046)
+    - fixed a bunch of int/size_t mismatches in the drivers/tty/n_tty.c code causing size overflow false positives, reported by Toralf FÃ¶rster, mathias (https://forums.grsecurity.net/viewtopic.php?f=3&t=4342), N8Fear (https://forums.grsecurity.net/viewtopic.php?f=3&t=4341)
+
+ drivers/tty/n_tty.c                                |   16 ++++++++--------
+ .../disable_size_overflow_hash.data                |    2 ++
+ .../size_overflow_plugin/size_overflow_hash.data   |    6 ++----
+ 3 files changed, 12 insertions(+), 12 deletions(-)
+
+commit dfa764cc549892a5bfc1083cac78b99032cae577
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Tue Dec 15 22:59:12 2015 +0100
+
+    ipv6: automatically enable stable privacy mode if stable_secret set
+    
+    Bjørn reported that while we switch all interfaces to privacy stable mode
+    when setting the secret, we don't set this mode for new interfaces. This
+    does not make sense, so change this behaviour.
+    
+    Fixes: 622c81d57b392cc ("ipv6: generation of stable privacy addresses for link-local and autoconf")
+    Reported-by: Bjørn Mork <bjorn@mork.no>
+    Cc: Bjørn Mork <bjorn@mork.no>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/addrconf.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit c2815a1fee03f222273e77c14e43f960da06f35a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 16 13:03:38 2015 -0500
+
+    Work around upstream limitation on the number of thread info flags causing a compilation error
+    Reported by fabled at http://forums.grsecurity.net/viewtopic.php?f=3&t=4339
+
+ arch/arm/kernel/entry-common.S |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
 commit 8c9ae168e09ae49324d709d76d73d9fc4ca477e1
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Dec 15 19:03:41 2015 -0500
