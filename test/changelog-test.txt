@@ -1,3 +1,169 @@
+commit 195cea04477025da4a2078bd3e1fb7c4e11206c2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 22 20:44:01 2015 -0500
+
+    Add new kernel command-line param: pax_size_overflow_report_only
+    If a user triggers a size_overflow violation that makes it difficult
+    to obtain the call trace without serial console/net console, they can
+    use this option to provide that information to us
+
+ Documentation/kernel-parameters.txt |    5 +++++
+ fs/exec.c                           |   12 +++++++++---
+ init/main.c                         |   11 +++++++++++
+ 3 files changed, 25 insertions(+), 3 deletions(-)
+
+commit 4254a8da5851df8c08cdca5c392916e8c105408d
+Author: WANG Cong <xiyou.wangcong@gmail.com>
+Date:   Mon Dec 21 10:55:45 2015 -0800
+
+    addrconf: always initialize sysctl table data
+    
+    When sysctl performs restrict writes, it allows to write from
+    a middle position of a sysctl file, which requires us to initialize
+    the table data before calling proc_dostring() for the write case.
+    
+    Fixes: 3d1bec99320d ("ipv6: introduce secret_stable to ipv6_devconf")
+    Reported-by: Sasha Levin <sasha.levin@oracle.com>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Tested-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/addrconf.c |   11 ++++-------
+ 1 files changed, 4 insertions(+), 7 deletions(-)
+
+commit f8002863fb06c363180637046947a78a6ccb3d33
+Author: WANG Cong <xiyou.wangcong@gmail.com>
+Date:   Wed Dec 16 23:39:04 2015 -0800
+
+    net: check both type and procotol for tcp sockets
+    
+    Dmitry reported the following out-of-bound access:
+    
+    Call Trace:
+     [<ffffffff816cec2e>] __asan_report_load4_noabort+0x3e/0x40
+    mm/kasan/report.c:294
+     [<ffffffff84affb14>] sock_setsockopt+0x1284/0x13d0 net/core/sock.c:880
+     [<     inline     >] SYSC_setsockopt net/socket.c:1746
+     [<ffffffff84aed7ee>] SyS_setsockopt+0x1fe/0x240 net/socket.c:1729
+     [<ffffffff85c18c76>] entry_SYSCALL_64_fastpath+0x16/0x7a
+    arch/x86/entry/entry_64.S:185
+    
+    This is because we mistake a raw socket as a tcp socket.
+    We should check both sk->sk_type and sk->sk_protocol to ensure
+    it is a tcp socket.
+    
+    Willem points out __skb_complete_tx_timestamp() needs to fix as well.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Willem de Bruijn <willemdebruijn.kernel@gmail.com>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Acked-by: Willem de Bruijn <willemb@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/skbuff.c |    3 ++-
+ net/core/sock.c   |    3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+commit bd6b3399804470a4ad8f34229469ca149dceba3d
+Author: Colin Ian King <colin.king@canonical.com>
+Date:   Fri Dec 18 14:22:01 2015 -0800
+
+    proc: fix -ESRCH error when writing to /proc/$pid/coredump_filter
+    
+    Writing to /proc/$pid/coredump_filter always returns -ESRCH because commit
+    774636e19ed51 ("proc: convert to kstrto*()/kstrto*_from_user()") removed
+    the setting of ret after the get_proc_task call and incorrectly left it as
+    -ESRCH.  Instead, return 0 when successful.
+    
+    Example breakage:
+    
+      echo 0 > /proc/self/coredump_filter
+      bash: echo: write error: No such process
+    
+    Fixes: 774636e19ed51 ("proc: convert to kstrto*()/kstrto*_from_user()")
+    Signed-off-by: Colin Ian King <colin.king@canonical.com>
+    Acked-by: Kees Cook <keescook@chromium.org>
+    Cc: <stable@vger.kernel.org> [4.3+]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/proc/base.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit b28aca2b99ed08546778355fb9402c503ff9b29e
+Author: Junichi Nomura <j-nomura@ce.jp.nec.com>
+Date:   Tue Dec 22 10:23:44 2015 -0700
+
+    block: ensure to split after potentially bouncing a bio
+    
+    blk_queue_bio() does split then bounce, which makes the segment
+    counting based on pages before bouncing and could go wrong. Move
+    the split to after bouncing, like we do for blk-mq, and the we
+    fix the issue of having the bio count for segments be wrong.
+    
+    Fixes: 54efd50bfd87 ("block: make generic_make_request handle arbitrarily sized bios")
+    Cc: stable@vger.kernel.org
+    Tested-by: Artem S. Tashkinov <t.artem@lycos.com>
+    Signed-off-by: Jens Axboe <axboe@fb.com>
+
+ block/blk-core.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit e62a25e917a9e5b35ddd5b4f1b5e5e30fbd2e84c
+Merge: f6f63ae ec72fa5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 22 19:46:26 2015 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ec72fa5f8d9cb4e223bad1b8b5c2e1071c222f2a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 22 19:45:51 2015 -0500
+
+    Update to pax-linux-4.3.3-test13.patch:
+    - Emese fixed a (probably) false positive integer truncation in xfs_da_grow_inode_int, reported by jdkbx (http://forums.grsecurity.net/viewtopic.php?f=3&t=4346)
+    - fixed a size overflow in btrfs/try_merge_map, reported by Alex W (https://bugs.archlinux.org/task/47173) and mathias and dwokfur (https://forums.grsecurity.net/viewtopic.php?f=3&t=4344)
+
+ arch/arm/mm/fault.c          |    2 +-
+ arch/x86/mm/fault.c          |    2 +-
+ fs/btrfs/extent_map.c        |    8 ++++++--
+ fs/xfs/libxfs/xfs_da_btree.c |    4 +++-
+ 4 files changed, 11 insertions(+), 5 deletions(-)
+
+commit f6f63ae154cd45028add1dc41957878060d77fbf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 17 18:43:44 2015 -0500
+
+    ptrace_has_cap() checks whether the current process should be
+    treated as having a certain capability for ptrace checks
+    against another process. Until now, this was equivalent to
+    has_ns_capability(current, target_ns, CAP_SYS_PTRACE).
+    
+    However, if a root-owned process wants to enter a user
+    namespace for some reason without knowing who owns it and
+    therefore can't change to the namespace owner's uid and gid
+    before entering, as soon as it has entered the namespace,
+    the namespace owner can attach to it via ptrace and thereby
+    gain access to its uid and gid.
+    
+    While it is possible for the entering process to switch to
+    the uid of a claimed namespace owner before entering,
+    causing the attempt to enter to fail if the claimed uid is
+    wrong, this doesn't solve the problem of determining an
+    appropriate gid.
+    
+    With this change, the entering process can first enter the
+    namespace and then safely inspect the namespace's
+    properties, e.g. through /proc/self/{uid_map,gid_map},
+    assuming that the namespace owner doesn't have access to
+    uid 0.
+    Signed-off-by: Jann Horn <jann@thejh.net>
+
+ kernel/ptrace.c |   30 +++++++++++++++++++++++++-----
+ 1 files changed, 25 insertions(+), 5 deletions(-)
+
 commit e314f0fb63020f61543b401ff594e953c2c304e5
 Author: tadeusz.struk@intel.com <tadeusz.struk@intel.com>
 Date:   Tue Dec 15 10:46:17 2015 -0800
