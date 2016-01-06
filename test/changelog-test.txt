@@ -1,3 +1,231 @@
+commit 5a8266a6b2769ccdb447256f95bc2577a73cccd1
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Tue Jan 5 10:46:00 2016 +0100
+
+    bridge: Only call /sbin/bridge-stp for the initial network namespace
+    
+    [I stole this patch from Eric Biederman. He wrote:]
+    
+    > There is no defined mechanism to pass network namespace information
+    > into /sbin/bridge-stp therefore don't even try to invoke it except
+    > for bridge devices in the initial network namespace.
+    >
+    > It is possible for unprivileged users to cause /sbin/bridge-stp to be
+    > invoked for any network device name which if /sbin/bridge-stp does not
+    > guard against unreasonable arguments or being invoked twice on the
+    > same network device could cause problems.
+    
+    [Hannes: changed patch using netns_eq]
+    
+    Cc: Eric W. Biederman <ebiederm@xmission.com>
+    Signed-off-by: Eric W. Biederman <ebiederm@xmission.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/bridge/br_stp_if.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 650d535cc39f0aeff2f57e60b6617be25d3ef48b
+Author: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+Date:   Wed Dec 23 16:28:40 2015 -0200
+
+    sctp: use GFP_USER for user-controlled kmalloc
+    
+    Commit cacc06215271 ("sctp: use GFP_USER for user-controlled kmalloc")
+    missed two other spots.
+    
+    For connectx, as it's more likely to be used by kernel users of the API,
+    it detects if GFP_USER should be used or not.
+    
+    Fixes: cacc06215271 ("sctp: use GFP_USER for user-controlled kmalloc")
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/socket.c |    9 ++++++---
+ 1 files changed, 6 insertions(+), 3 deletions(-)
+
+commit 5718a1f63c41fc156f729783423b002763779d04
+Author: Florian Westphal <fw@strlen.de>
+Date:   Thu Dec 31 14:26:33 2015 +0100
+
+    connector: bump skb->users before callback invocation
+    
+    Dmitry reports memleak with syskaller program.
+    Problem is that connector bumps skb usecount but might not invoke callback.
+    
+    So move skb_get to where we invoke the callback.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/connector/connector.c |   11 +++--------
+ 1 files changed, 3 insertions(+), 8 deletions(-)
+
+commit 2e6372e6a97f8d642416899861f91777f44f13b7
+Author: Rainer Weikusat <rweikusat@mobileactivedefense.com>
+Date:   Sun Jan 3 18:56:38 2016 +0000
+
+    af_unix: Fix splice-bind deadlock
+    
+    On 2015/11/06, Dmitry Vyukov reported a deadlock involving the splice
+    system call and AF_UNIX sockets,
+    
+    http://lists.openwall.net/netdev/2015/11/06/24
+    
+    The situation was analyzed as
+    
+    (a while ago) A: socketpair()
+    B: splice() from a pipe to /mnt/regular_file
+    	does sb_start_write() on /mnt
+    C: try to freeze /mnt
+    	wait for B to finish with /mnt
+    A: bind() try to bind our socket to /mnt/new_socket_name
+    	lock our socket, see it not bound yet
+    	decide that it needs to create something in /mnt
+    	try to do sb_start_write() on /mnt, block (it's
+    	waiting for C).
+    D: splice() from the same pipe to our socket
+    	lock the pipe, see that socket is connected
+    	try to lock the socket, block waiting for A
+    B:	get around to actually feeding a chunk from
+    	pipe to file, try to lock the pipe.  Deadlock.
+    
+    on 2015/11/10 by Al Viro,
+    
+    http://lists.openwall.net/netdev/2015/11/10/4
+    
+    The patch fixes this by removing the kern_path_create related code from
+    unix_mknod and executing it as part of unix_bind prior acquiring the
+    readlock of the socket in question. This means that A (as used above)
+    will sb_start_write on /mnt before it acquires the readlock, hence, it
+    won't indirectly block B which first did a sb_start_write and then
+    waited for a thread trying to acquire the readlock. Consequently, A
+    being blocked by C waiting for B won't cause a deadlock anymore
+    (effectively, both A and B acquire two locks in opposite order in the
+    situation described above).
+    
+    Dmitry Vyukov(<dvyukov@google.com>) tested the original patch.
+    
+    Signed-off-by: Rainer Weikusat <rweikusat@mobileactivedefense.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/unix/af_unix.c
+
+ net/unix/af_unix.c |   70 +++++++++++++++++++++++++++++++--------------------
+ 1 files changed, 42 insertions(+), 28 deletions(-)
+
+commit 2e729e557c571f3253e32472cd7d382ac16cf1c3
+Author: Qiu Peiyang <peiyangx.qiu@intel.com>
+Date:   Thu Dec 31 13:11:28 2015 +0800
+
+    tracing: Fix setting of start_index in find_next()
+    
+    When we do cat /sys/kernel/debug/tracing/printk_formats, we hit kernel
+    panic at t_show.
+    
+    general protection fault: 0000 [#1] PREEMPT SMP
+    CPU: 0 PID: 2957 Comm: sh Tainted: G W  O 3.14.55-x86_64-01062-gd4acdc7 #2
+    RIP: 0010:[<ffffffff811375b2>]
+     [<ffffffff811375b2>] t_show+0x22/0xe0
+    RSP: 0000:ffff88002b4ebe80  EFLAGS: 00010246
+    RAX: 0000000000000000 RBX: 0000000000000000 RCX: 0000000000000004
+    RDX: 0000000000000004 RSI: ffffffff81fd26a6 RDI: ffff880032f9f7b1
+    RBP: ffff88002b4ebe98 R08: 0000000000001000 R09: 000000000000ffec
+    R10: 0000000000000000 R11: 000000000000000f R12: ffff880004d9b6c0
+    R13: 7365725f6d706400 R14: ffff880004d9b6c0 R15: ffffffff82020570
+    FS:  0000000000000000(0000) GS:ffff88003aa00000(0063) knlGS:00000000f776bc40
+    CS:  0010 DS: 002b ES: 002b CR0: 0000000080050033
+    CR2: 00000000f6c02ff0 CR3: 000000002c2b3000 CR4: 00000000001007f0
+    Call Trace:
+     [<ffffffff811dc076>] seq_read+0x2f6/0x3e0
+     [<ffffffff811b749b>] vfs_read+0x9b/0x160
+     [<ffffffff811b7f69>] SyS_read+0x49/0xb0
+     [<ffffffff81a3a4b9>] ia32_do_call+0x13/0x13
+     ---[ end trace 5bd9eb630614861e ]---
+    Kernel panic - not syncing: Fatal exception
+    
+    When the first time find_next calls find_next_mod_format, it should
+    iterate the trace_bprintk_fmt_list to find the first print format of
+    the module. However in current code, start_index is smaller than *pos
+    at first, and code will not iterate the list. Latter container_of will
+    get the wrong address with former v, which will cause mod_fmt be a
+    meaningless object and so is the returned mod_fmt->fmt.
+    
+    This patch will fix it by correcting the start_index. After fixed,
+    when the first time calls find_next_mod_format, start_index will be
+    equal to *pos, and code will iterate the trace_bprintk_fmt_list to
+    get the right module printk format, so is the returned mod_fmt->fmt.
+    
+    Link: http://lkml.kernel.org/r/5684B900.9000309@intel.com
+    
+    Cc: stable@vger.kernel.org # 3.12+
+    Fixes: 102c9323c35a8 "tracing: Add __tracepoint_string() to export string pointers"
+    Signed-off-by: Qiu Peiyang <peiyangx.qiu@intel.com>
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ kernel/trace/trace_printk.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 0994af4b1930f32aa493dc08145cd304f8bfc8f4
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Mon Dec 28 20:47:08 2015 -0500
+
+    [PATCH] arm: fix handling of F_OFD_... in oabi_fcntl64()
+    
+    Cc: stable@vger.kernel.org # 3.15+
+    Reviewed-by: Jeff Layton <jeff.layton@primarydata.com>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ arch/arm/kernel/sys_oabi-compat.c |   73 +++++++++++++++++++------------------
+ 1 files changed, 37 insertions(+), 36 deletions(-)
+
+commit 4ed030f65dcf3e6b0128032a49a7d75f947fa351
+Merge: de243c2 3adc55a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 5 18:10:10 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3adc55a5acfa429c2a7cc883aef08b960c0079b0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 5 18:08:53 2016 -0500
+
+    Update to pax-linux-4.3.3-test16.patch:
+    - small cleanup in entry_64.S on x86
+    - Emese fixed the initify plugin to recursively check variable initializers, reported by Rasmus Villemoes
+    - fixed an integer truncation of a partially uninitialized value bug in em_pop_sreg, reported by fx3 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4354)
+    - fixed alternatives patching of call insns under KERNEXEC/i386, reported by fly_a320 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4305) and TTgrsec (https://forums.grsecurity.net/viewtopic.php?f=3&t=4353)
+    - fixed a size overflow false positive that triggered in tcp_parse_options on arm, reported by iamb (https://forums.grsecurity.net/viewtopic.php?f=3&t=4350&p=15917#p15916)
+    - fixed a boot crash on amd64 with KERNEXEC/OR and CONTEXT_TRACKING, reported by Klaus Kusche (https://bugs.gentoo.org/show_bug.cgi?id=570420)
+
+ arch/x86/entry/entry_64.S                          |   60 +++++-----
+ arch/x86/kernel/alternative.c                      |    2 +-
+ arch/x86/kvm/emulate.c                             |    4 +-
+ tools/gcc/initify_plugin.c                         |  123 +++++++++----------
+ .../disable_size_overflow_hash.data                |    4 +-
+ .../size_overflow_plugin/size_overflow_hash.data   |    2 -
+ 6 files changed, 93 insertions(+), 102 deletions(-)
+
+commit de243c26efd0e423ca92db825af2c3f8eb1ca043
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 29 18:01:24 2015 -0500
+
+    It was noticed during an internal audit that the code under GRKERNSEC_PROC_MEMMAP
+    which aimed to enforce a 16MB minimum on RLIMIT_DATA for suid/sgid binaries only
+    did so if RLIMIT_DATA was set lower than PAGE_SIZE.
+    
+    This addition was only supplemental as GRKERNSEC_BRUTE is the main defense
+    against suid/sgid attacks and the flaw above would only eliminate the extra
+    entropy provided for the brk-managed heap, still leaving it with the minimum
+    of 16-bit entropy for mmap on x86 and 28 on x64.
+
+ mm/mmap.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 8e264cfe47e5f08cdc9ed009a630277206cd2534
 Merge: 436201b 2584340
 Author: Brad Spengler <spender@grsecurity.net>
