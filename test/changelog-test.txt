@@ -1,3 +1,550 @@
+commit 8c3bcb7dbf7f606acfa0983e81f0f928da1f1ace
+Merge: d141a86 ea4a835
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 16 14:12:22 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/gpu/drm/i810/i810_drv.c
+
+commit ea4a835328ada6513ac013986764d6caea8cd348
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 16 14:11:30 2016 -0500
+
+    Update to pax-linux-4.3.3-test21.patch:
+    - fixed some fallout from the drm_drivers constification, reported by spender
+
+ drivers/gpu/drm/armada/armada_drv.c     |    3 +--
+ drivers/gpu/drm/exynos/exynos_drm_drv.c |    1 -
+ drivers/gpu/drm/i810/i810_dma.c         |    2 +-
+ drivers/gpu/drm/i810/i810_drv.c         |    6 +++++-
+ drivers/gpu/drm/i810/i810_drv.h         |    2 +-
+ 5 files changed, 8 insertions(+), 6 deletions(-)
+
+commit d141a86fd66194bc3f896b6809b189e2f12a9a83
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 16 13:16:36 2016 -0500
+
+    compile fix
+
+ drivers/gpu/drm/i810/i810_dma.c |    2 +-
+ drivers/gpu/drm/i810/i810_drv.c |    4 +++-
+ drivers/gpu/drm/i810/i810_drv.h |    2 +-
+ 3 files changed, 5 insertions(+), 3 deletions(-)
+
+commit 0d9dc4b25ea32c14561bcfe6b5b24f1b00fe0270
+Merge: 5fa135d bbda879
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 16 12:59:22 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit bbda87914edf63e27fb46670bf3a373f2b963c73
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 16 12:58:04 2016 -0500
+
+    Update to pax-linux-4.3.3-test20.patch:
+    - constified drm_driver
+    - Emese fixed a special case in handling __func__ in the initify plugin
+    - Emese fixed a false positive size overflow report in handling inbufBits, reported by Martin Filo (https://bugs.gentoo.org/show_bug.cgi?id=567048)
+    - fixed regression that caused perf to not resolve kernel code addresses under KERNEXEC/i386, reported by minipli
+
+ arch/x86/kernel/cpu/perf_event.h                   |    2 +-
+ arch/x86/kernel/cpu/perf_event_intel_ds.c          |    7 +-
+ arch/x86/kernel/cpu/perf_event_intel_lbr.c         |    4 +-
+ arch/x86/kernel/uprobes.c                          |    2 +-
+ arch/x86/mm/mpx.c                                  |    2 +-
+ drivers/gpu/drm/amd/amdgpu/amdgpu.h                |    2 +-
+ drivers/gpu/drm/amd/amdgpu/amdgpu_drv.c            |    8 ++-
+ drivers/gpu/drm/amd/amdgpu/amdgpu_kms.c            |    2 +-
+ drivers/gpu/drm/drm_pci.c                          |    6 +-
+ drivers/gpu/drm/gma500/psb_drv.c                   |    5 +-
+ drivers/gpu/drm/i915/i915_dma.c                    |    2 +-
+ drivers/gpu/drm/i915/i915_drv.c                    |   15 ++--
+ drivers/gpu/drm/i915/i915_drv.h                    |    2 +-
+ drivers/gpu/drm/i915/i915_irq.c                    |   88 ++++++++++----------
+ drivers/gpu/drm/mga/mga_drv.c                      |    5 +-
+ drivers/gpu/drm/mga/mga_drv.h                      |    2 +-
+ drivers/gpu/drm/mga/mga_state.c                    |    2 +-
+ drivers/gpu/drm/nouveau/nouveau_drm.c              |   13 ++--
+ drivers/gpu/drm/qxl/qxl_drv.c                      |    8 ++-
+ drivers/gpu/drm/qxl/qxl_ioctl.c                    |    2 +-
+ drivers/gpu/drm/r128/r128_drv.c                    |    4 +-
+ drivers/gpu/drm/r128/r128_drv.h                    |    2 +-
+ drivers/gpu/drm/r128/r128_state.c                  |    2 +-
+ drivers/gpu/drm/radeon/radeon_drv.c                |   17 +++-
+ drivers/gpu/drm/radeon/radeon_drv.h                |    2 +-
+ drivers/gpu/drm/radeon/radeon_kms.c                |    2 +-
+ drivers/gpu/drm/radeon/radeon_state.c              |    2 +-
+ drivers/gpu/drm/savage/savage_bci.c                |    2 +-
+ drivers/gpu/drm/savage/savage_drv.c                |    5 +-
+ drivers/gpu/drm/savage/savage_drv.h                |    2 +-
+ drivers/gpu/drm/sis/sis_drv.c                      |    5 +-
+ drivers/gpu/drm/sis/sis_drv.h                      |    2 +-
+ drivers/gpu/drm/sis/sis_mm.c                       |    2 +-
+ drivers/gpu/drm/via/via_dma.c                      |    2 +-
+ drivers/gpu/drm/via/via_drv.c                      |    5 +-
+ drivers/gpu/drm/via/via_drv.h                      |    2 +-
+ include/drm/drmP.h                                 |    2 +-
+ mm/slab.c                                          |    2 +-
+ net/sunrpc/xprtrdma/svc_rdma.c                     |    6 +-
+ tools/gcc/initify_plugin.c                         |   15 +++-
+ .../disable_size_overflow_hash.data                |    1 +
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 +-
+ 42 files changed, 156 insertions(+), 110 deletions(-)
+
+commit 5fa135dc116350e0205c39ef65eaf6496ed2748a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 16 12:19:23 2016 -0500
+
+    compile fix
+
+ grsecurity/grsec_sig.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit a9090fa58f33f75c7450fda5721a9b13625a47d9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 16 12:10:37 2016 -0500
+
+    As pointed out by Jann Horn, some distros are starting to circumvent
+    previous assumptions about the attainability of a user to control
+    multiple UIDs by handing out suid binaries that allow a user to run
+    processes (including exploits) under a number of other pre-defined
+    UIDs.  As this could potentially be used to bypass GRKERNSEC_BRUTE
+    (though it would have to involve some code path that doesn't involve
+    locks) fix that here by ensuring no more than 8 users on a system can
+    be banned before a reboot is required.  If more are banned, a panic
+    is triggered.
+
+ grsecurity/grsec_sig.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit a8d37776e9521c567ebff6730d49312f72435f08
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Thu Dec 3 11:12:07 2015 -0800
+
+    proc: add a reschedule point in proc_readfd_common()
+    
+    User can pass an arbitrary large buffer to getdents().
+    
+    It is typically a 32KB buffer used by libc scandir() implementation.
+    
+    When scanning /proc/{pid}/fd, we can hold cpu way too long,
+    so add a cond_resched() to be kind with other tasks.
+    
+    We've seen latencies of more than 50ms on real workloads.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Alexander Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/proc/fd.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 0adba75f8708f13b1f5d98ebe3fc2fb961e100c8
+Author: Rabin Vincent <rabin@rab.in>
+Date:   Tue Jan 12 20:17:08 2016 +0100
+
+    net: bpf: reject invalid shifts
+    
+    On ARM64, a BUG() is triggered in the eBPF JIT if a filter with a
+    constant shift that can't be encoded in the immediate field of the
+    UBFM/SBFM instructions is passed to the JIT.  Since these shifts
+    amounts, which are negative or >= regsize, are invalid, reject them in
+    the eBPF verifier and the classic BPF filter checker, for all
+    architectures.
+    
+    Signed-off-by: Rabin Vincent <rabin@rab.in>
+    Acked-by: Alexei Starovoitov <ast@kernel.org>
+    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ kernel/bpf/verifier.c |   10 ++++++++++
+ net/core/filter.c     |    5 +++++
+ 2 files changed, 15 insertions(+), 0 deletions(-)
+
+commit c248e115a73496625a1c64660d0eeefd67e55cbf
+Author: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+Date:   Fri Jan 8 11:00:54 2016 -0200
+
+    sctp: fix use-after-free in pr_debug statement
+    
+    Dmitry Vyukov reported a use-after-free in the code expanded by the
+    macro debug_post_sfx, which is caused by the use of the asoc pointer
+    after it was freed within sctp_side_effect() scope.
+    
+    This patch fixes it by allowing sctp_side_effect to clear that asoc
+    pointer when the TCB is freed.
+    
+    As Vlad explained, we also have to cover the SCTP_DISPOSITION_ABORT case
+    because it will trigger DELETE_TCB too on that same loop.
+    
+    Also, there were places issuing SCTP_CMD_INIT_FAILED and ASSOC_FAILED
+    but returning SCTP_DISPOSITION_CONSUME, which would fool the scheme
+    above. Fix it by returning SCTP_DISPOSITION_ABORT instead.
+    
+    The macro is already prepared to handle such NULL pointer.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/sm_sideeffect.c |   11 ++++++-----
+ net/sctp/sm_statefuns.c  |   17 ++++-------------
+ 2 files changed, 10 insertions(+), 18 deletions(-)
+
+commit 395ea8a9e73e184fc14153a033000bccf4213213
+Author: willy tarreau <w@1wt.eu>
+Date:   Sun Jan 10 07:54:56 2016 +0100
+
+    unix: properly account for FDs passed over unix sockets
+    
+    It is possible for a process to allocate and accumulate far more FDs than
+    the process' limit by sending them over a unix socket then closing them
+    to keep the process' fd count low.
+    
+    This change addresses this problem by keeping track of the number of FDs
+    in flight per user and preventing non-privileged processes from having
+    more FDs in flight than their configured FD limit.
+    
+    Reported-by: socketpair@gmail.com
+    Reported-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
+    Mitigates: CVE-2013-4312 (Linux 2.0+)
+    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: Willy Tarreau <w@1wt.eu>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/linux/sched.h |    1 +
+ net/unix/af_unix.c    |   24 ++++++++++++++++++++----
+ net/unix/garbage.c    |   13 ++++++++-----
+ 3 files changed, 29 insertions(+), 9 deletions(-)
+
+commit cb207ab8fbd71dcfc4a49d533aba8085012543fd
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Thu Jan 7 14:52:43 2016 -0500
+
+    net: sctp: prevent writes to cookie_hmac_alg from accessing invalid memory
+    
+    proc_dostring() needs an initialized destination string, while the one
+    provided in proc_sctp_do_hmac_alg() contains stack garbage.
+    
+    Thus, writing to cookie_hmac_alg would strlen() that garbage and end up
+    accessing invalid memory.
+    
+    Fixes: 3c68198e7 ("sctp: Make hmac algorithm selection for cookie generation dynamic")
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/sysctl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4014e09faf0fe9054119624ccfff1236e886b554
+Author: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+Date:   Tue Nov 24 17:13:21 2015 -0500
+
+    RDS: fix race condition when sending a message on unbound socket
+    
+    commit 8c7188b23474cca017b3ef354c4a58456f68303a upstream.
+    
+    Sasha's found a NULL pointer dereference in the RDS connection code when
+    sending a message to an apparently unbound socket.  The problem is caused
+    by the code checking if the socket is bound in rds_sendmsg(), which checks
+    the rs_bound_addr field without taking a lock on the socket.  This opens a
+    race where rs_bound_addr is temporarily set but where the transport is not
+    in rds_bind(), leading to a NULL pointer dereference when trying to
+    dereference 'trans' in __rds_conn_create().
+    
+    Vegard wrote a reproducer for this issue, so kindly ask him to share if
+    you're interested.
+    
+    I cannot reproduce the NULL pointer dereference using Vegard's reproducer
+    with this patch, whereas I could without.
+    
+    Complete earlier incomplete fix to CVE-2015-6937:
+    
+      74e98eb08588 ("RDS: verify the underlying transport exists before creating a connection")
+    
+    Cc: David S. Miller <davem@davemloft.net>
+    
+    Reviewed-by: Vegard Nossum <vegard.nossum@oracle.com>
+    Reviewed-by: Sasha Levin <sasha.levin@oracle.com>
+    Acked-by: Santosh Shilimkar <santosh.shilimkar@oracle.com>
+    Signed-off-by: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+    
+    Conflicts:
+    
+    	net/rds/send.c
+
+ net/rds/connection.c |    6 ------
+ 1 files changed, 0 insertions(+), 6 deletions(-)
+
+commit 206df8d01104344d7588d801016a281a4cd25556
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Tue Sep 8 10:53:40 2015 -0400
+
+    RDS: verify the underlying transport exists before creating a connection
+    
+    There was no verification that an underlying transport exists when creating
+    a connection, this would cause dereferencing a NULL ptr.
+    
+    It might happen on sockets that weren't properly bound before attempting to
+    send a message, which will cause a NULL ptr deref:
+    
+    [135546.047719] kasan: GPF could be caused by NULL-ptr deref or user memory accessgeneral protection fault: 0000 [#1] PREEMPT SMP DEBUG_PAGEALLOC KASAN
+    [135546.051270] Modules linked in:
+    [135546.051781] CPU: 4 PID: 15650 Comm: trinity-c4 Not tainted 4.2.0-next-20150902-sasha-00041-gbaa1222-dirty #2527
+    [135546.053217] task: ffff8800835bc000 ti: ffff8800bc708000 task.ti: ffff8800bc708000
+    [135546.054291] RIP: __rds_conn_create (net/rds/connection.c:194)
+    [135546.055666] RSP: 0018:ffff8800bc70fab0  EFLAGS: 00010202
+    [135546.056457] RAX: dffffc0000000000 RBX: 0000000000000f2c RCX: ffff8800835bc000
+    [135546.057494] RDX: 0000000000000007 RSI: ffff8800835bccd8 RDI: 0000000000000038
+    [135546.058530] RBP: ffff8800bc70fb18 R08: 0000000000000001 R09: 0000000000000000
+    [135546.059556] R10: ffffed014d7a3a23 R11: ffffed014d7a3a21 R12: 0000000000000000
+    [135546.060614] R13: 0000000000000001 R14: ffff8801ec3d0000 R15: 0000000000000000
+    [135546.061668] FS:  00007faad4ffb700(0000) GS:ffff880252000000(0000) knlGS:0000000000000000
+    [135546.062836] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+    [135546.063682] CR2: 000000000000846a CR3: 000000009d137000 CR4: 00000000000006a0
+    [135546.064723] Stack:
+    [135546.065048]  ffffffffafe2055c ffffffffafe23fc1 ffffed00493097bf ffff8801ec3d0008
+    [135546.066247]  0000000000000000 00000000000000d0 0000000000000000 ac194a24c0586342
+    [135546.067438]  1ffff100178e1f78 ffff880320581b00 ffff8800bc70fdd0 ffff880320581b00
+    [135546.068629] Call Trace:
+    [135546.069028] ? __rds_conn_create (include/linux/rcupdate.h:856 net/rds/connection.c:134)
+    [135546.069989] ? rds_message_copy_from_user (net/rds/message.c:298)
+    [135546.071021] rds_conn_create_outgoing (net/rds/connection.c:278)
+    [135546.071981] rds_sendmsg (net/rds/send.c:1058)
+    [135546.072858] ? perf_trace_lock (include/trace/events/lock.h:38)
+    [135546.073744] ? lockdep_init (kernel/locking/lockdep.c:3298)
+    [135546.074577] ? rds_send_drop_to (net/rds/send.c:976)
+    [135546.075508] ? __might_fault (./arch/x86/include/asm/current.h:14 mm/memory.c:3795)
+    [135546.076349] ? __might_fault (mm/memory.c:3795)
+    [135546.077179] ? rds_send_drop_to (net/rds/send.c:976)
+    [135546.078114] sock_sendmsg (net/socket.c:611 net/socket.c:620)
+    [135546.078856] SYSC_sendto (net/socket.c:1657)
+    [135546.079596] ? SYSC_connect (net/socket.c:1628)
+    [135546.080510] ? trace_dump_stack (kernel/trace/trace.c:1926)
+    [135546.081397] ? ring_buffer_unlock_commit (kernel/trace/ring_buffer.c:2479 kernel/trace/ring_buffer.c:2558 kernel/trace/ring_buffer.c:2674)
+    [135546.082390] ? trace_buffer_unlock_commit (kernel/trace/trace.c:1749)
+    [135546.083410] ? trace_event_raw_event_sys_enter (include/trace/events/syscalls.h:16)
+    [135546.084481] ? do_audit_syscall_entry (include/trace/events/syscalls.h:16)
+    [135546.085438] ? trace_buffer_unlock_commit (kernel/trace/trace.c:1749)
+    [135546.085515] rds_ib_laddr_check(): addr 36.74.25.172 ret -99 node type -1
+    
+    Acked-by: Santosh Shilimkar <santosh.shilimkar@oracle.com>
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/connection.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 173fa03f05cf0ad485d49a42cbdee8844d3a689a
+Author: Steven Rostedt (Red Hat) <rostedt@goodmis.org>
+Date:   Tue Jan 5 20:32:47 2016 -0500
+
+    ftrace/module: Call clean up function when module init fails early
+    
+    If the module init code fails after calling ftrace_module_init() and before
+    calling do_init_module(), we can suffer from a memory leak. This is because
+    ftrace_module_init() allocates pages to store the locations that ftrace
+    hooks are placed in the module text. If do_init_module() fails, it still
+    calls the MODULE_GOING notifiers which will tell ftrace to do a clean up of
+    the pages it allocated for the module. But if load_module() fails before
+    then, the pages allocated by ftrace_module_init() will never be freed.
+    
+    Call ftrace_release_mod() on the module if load_module() fails before
+    getting to do_init_module().
+    
+    Link: http://lkml.kernel.org/r/567CEA31.1070507@intel.com
+    
+    Reported-by: "Qiu, PeiyangX" <peiyangx.qiu@intel.com>
+    Fixes: a949ae560a511 "ftrace/module: Hardcode ftrace_module_init() call into load_module()"
+    Cc: stable@vger.kernel.org # v2.6.38+
+    Acked-by: Rusty Russell <rusty@rustcorp.com.au>
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ include/linux/ftrace.h |    1 +
+ kernel/module.c        |    6 ++++++
+ 2 files changed, 7 insertions(+), 0 deletions(-)
+
+commit 1e5a4a81a4c16c8ac2e264b88a02cc2f42ed0399
+Author: Francesco Ruggeri <fruggeri@aristanetworks.com>
+Date:   Wed Jan 6 00:18:48 2016 -0800
+
+    net: possible use after free in dst_release
+    
+    dst_release should not access dst->flags after decrementing
+    __refcnt to 0. The dst_entry may be in dst_busy_list and
+    dst_gc_task may dst_destroy it before dst_release gets a chance
+    to access dst->flags.
+    
+    Fixes: d69bbf88c8d0 ("net: fix a race in dst_release()")
+    Fixes: 27b75c95f10d ("net: avoid RCU for NOCACHE dst")
+    Signed-off-by: Francesco Ruggeri <fruggeri@arista.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/dst.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit bfb0455793dd4e0f0b49d34a68b3249ab55565cc
+Author: Alan <gnomes@lxorguk.ukuu.org.uk>
+Date:   Wed Jan 6 14:55:02 2016 +0000
+
+    mkiss: fix scribble on freed memory
+    
+    commit d79f16c046086f4fe0d42184a458e187464eb83e fixed a user triggerable
+    scribble on free memory but added a new one which allows the user to
+    scribble even more and user controlled data into freed space.
+    
+    As with 6pack we need to halt the queue before we free the buffers, because
+    the transmit logic is not protected by the semaphore.
+    
+    Signed-off-by: Alan Cox <alan@linux.intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hamradio/mkiss.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 5cbbcbd32dc1949470f61d342503808fa9555276
+Author: David Miller <davem@davemloft.net>
+Date:   Thu Dec 17 16:05:49 2015 -0500
+
+    mkiss: Fix use after free in mkiss_close().
+    
+    Need to do the unregister_device() after all references to the driver
+    private have been done.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hamradio/mkiss.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit b00171576794a98068e069a660f0991a6a5190ff
+Author: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+Date:   Tue Jan 5 11:51:25 2016 +0000
+
+    6pack: fix free memory scribbles
+    
+    commit acf673a3187edf72068ee2f92f4dc47d66baed47 fixed a user triggerable free
+    memory scribble but in doing so replaced it with a different one that allows
+    the user to control the data and scribble even more.
+    
+    sixpack_close is called by the tty layer in tty context. The tty context is
+    protected by sp_get() and sp_put(). However network layer activity via
+    sp_xmit() is not protected this way. We must therefore stop the queue
+    otherwise the user gets to dump a buffer mostly of their choice into freed
+    kernel pages.
+    
+    Signed-off-by: Alan Cox <alan@linux.intel.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hamradio/6pack.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 5b64a833907cd230a3106aeba2304b2c1bcd116d
+Author: David Miller <davem@davemloft.net>
+Date:   Thu Dec 17 16:05:32 2015 -0500
+
+    6pack: Fix use after free in sixpack_close().
+    
+    Need to do the unregister_device() after all references to the driver
+    private have been done.
+    
+    Also we need to use del_timer_sync() for the timers so that we don't
+    have any asynchronous references after the unregister.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hamradio/6pack.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 4f9d532742656b3613d579220fd10c78f24ba37b
+Author: Rabin Vincent <rabin@rab.in>
+Date:   Tue Jan 5 16:23:07 2016 +0100
+
+    net: filter: make JITs zero A for SKF_AD_ALU_XOR_X
+    
+    The SKF_AD_ALU_XOR_X ancillary is not like the other ancillary data
+    instructions since it XORs A with X while all the others replace A with
+    some loaded value.  All the BPF JITs fail to clear A if this is used as
+    the first instruction in a filter.  This was found using american fuzzy
+    lop.
+    
+    Add a helper to determine if A needs to be cleared given the first
+    instruction in a filter, and use this in the JITs.  Except for ARM, the
+    rest have only been compile-tested.
+    
+    Fixes: 3480593131e0 ("net: filter: get rid of BPF_S_* enum")
+    Signed-off-by: Rabin Vincent <rabin@rab.in>
+    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
+    Acked-by: Alexei Starovoitov <ast@kernel.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/arm/net/bpf_jit_32.c       |   16 +---------------
+ arch/mips/net/bpf_jit.c         |   16 +---------------
+ arch/powerpc/net/bpf_jit_comp.c |   13 ++-----------
+ arch/sparc/net/bpf_jit_comp.c   |   17 ++---------------
+ include/linux/filter.h          |   19 +++++++++++++++++++
+ 5 files changed, 25 insertions(+), 56 deletions(-)
+
+commit 570d88f8acfffda92b89ae2e1c47320d47256034
+Author: John Fastabend <john.fastabend@gmail.com>
+Date:   Tue Jan 5 09:11:36 2016 -0800
+
+    net: sched: fix missing free per cpu on qstats
+    
+    When a qdisc is using per cpu stats (currently just the ingress
+    qdisc) only the bstats are being freed. This also free's the qstats.
+    
+    Fixes: b0ab6f92752b9f9d8 ("net: sched: enable per cpu qstats")
+    Signed-off-by: John Fastabend <john.r.fastabend@intel.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Acked-by: Daniel Borkmann <daniel@iogearbox.net>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sched/sch_generic.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 32c0ebc51857ee83470a10dcb234d308a0ed1881
+Author: Rabin Vincent <rabin@rab.in>
+Date:   Tue Jan 5 18:34:04 2016 +0100
+
+    ARM: net: bpf: fix zero right shift
+    
+    The LSR instruction cannot be used to perform a zero right shift since a
+    0 as the immediate value (imm5) in the LSR instruction encoding means
+    that a shift of 32 is perfomed.  See DecodeIMMShift() in the ARM ARM.
+    
+    Make the JIT skip generation of the LSR if a zero-shift is requested.
+    
+    This was found using american fuzzy lop.
+    
+    Signed-off-by: Rabin Vincent <rabin@rab.in>
+    Acked-by: Alexei Starovoitov <ast@kernel.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/arm/net/bpf_jit_32.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 51f5d291750285efa4d4bbe84e5ec23dc00c8d2d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 6 20:35:57 2016 -0500
+
+    Don't perform hidden lookups in RBAC against the directory of
+    a file being opened with O_CREAT, reported by Karl Witt
+    
+    Conflicts:
+    
+    	fs/namei.c
+
+ fs/namei.c |    3 ---
+ 1 files changed, 0 insertions(+), 3 deletions(-)
+
 commit 5a8266a6b2769ccdb447256f95bc2577a73cccd1
 Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
 Date:   Tue Jan 5 10:46:00 2016 +0100
