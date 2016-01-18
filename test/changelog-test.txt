@@ -1,3 +1,43 @@
+commit b56c3a63f431c193400aee17543021950bd14bc4
+Merge: 38b1a3d 470069c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 17 18:30:19 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 470069cfedef2180313233d275be5901bd6d1135
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 17 18:29:59 2016 -0500
+
+    Update to pax-linux-4.3.3-test22.patch:
+    - Emesed fixed a gcc induced intentional integer overflow in asix_rx_fixup_internal, reported by thomas callison caffrey
+    - fixed some more fallout from the drm_drivers constification, reported by Colin Childs and Toralf Foerster
+
+ drivers/gpu/drm/amd/amdgpu/amdgpu_drv.c |   14 ++++----------
+ drivers/gpu/drm/drm_pci.c               |    3 +++
+ drivers/gpu/drm/gma500/psb_drv.c        |    4 ----
+ drivers/gpu/drm/i915/i915_drv.c         |   16 ++++++++--------
+ drivers/gpu/drm/nouveau/nouveau_drm.c   |    6 +++---
+ drivers/gpu/drm/radeon/radeon_drv.c     |    4 +---
+ drivers/net/usb/asix_common.c           |    3 ++-
+ include/drm/drmP.h                      |    1 +
+ 8 files changed, 22 insertions(+), 29 deletions(-)
+
+commit 38b1a3d676f407865c3d41840df8213c5ad639c1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 17 12:33:53 2016 -0500
+
+    As reported by Luis Ressel, the Kconfig help for GRKERNSEC_BRUTE
+    mentioned banning execution of suid/sgid binaries, though the kernel
+    source clearly only mentions banning execution of suid binaries.  Since
+    there's no reason for us to not ban execution of sgid binaries as well,
+    make the implementation match the Kconfig description.
+
+ fs/exec.c              |    4 ++--
+ grsecurity/grsec_sig.c |   27 ++++++++++++++-------------
+ include/linux/sched.h  |    4 ++--
+ 3 files changed, 18 insertions(+), 17 deletions(-)
+
 commit 8c3bcb7dbf7f606acfa0983e81f0f928da1f1ace
 Merge: d141a86 ea4a835
 Author: Brad Spengler <spender@grsecurity.net>
