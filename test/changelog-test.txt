@@ -1,3 +1,351 @@
+commit 540f2affebd42cdc26a699208ab4f1cb0cb75e33
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 19 21:18:47 2016 -0500
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 7e649765626a28437f573f0fbe7a51a04615f041
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 19 20:29:46 2016 -0500
+
+    Backport fix from: https://lkml.org/lkml/2015/12/13/187
+
+ fs/ext4/extents.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 53b859cd0a5f5b6ad54fe0c879dfedaa3c5a3005
+Author: Jann Horn <jann@thejh.net>
+Date:   Tue Jan 5 18:27:30 2016 +0100
+
+    compat_ioctl: don't call do_ioctl under set_fs(KERNEL_DS)
+    
+    This replaces all code in fs/compat_ioctl.c that translated
+    ioctl arguments into a in-kernel structure, then performed
+    do_ioctl under set_fs(KERNEL_DS), with code that allocates
+    data on the user stack and can call the VFS ioctl handler
+    under USER_DS.
+    
+    This is done as a hardening measure because the caller
+    does not know what kind of ioctl handler will be invoked,
+    only that no corresponding compat_ioctl handler exists and
+    what the ioctl command number is. The accidental
+    invocation of an unlocked_ioctl handler that unexpectedly
+    calls copy_to_user could be a severe security issue.
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    
+    Conflicts:
+    
+    	fs/compat_ioctl.c
+
+ fs/compat_ioctl.c |  130 ++++++++++++++++++++++++++++-------------------------
+ 1 files changed, 68 insertions(+), 62 deletions(-)
+
+commit 3e89e770ae27e931cd1583f021abac41eeebc3e7
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu Jan 7 09:53:30 2016 -0500
+
+    compat_ioctl: don't pass fd around when not needed
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/compat_ioctl.c  |  103 ++++++++++++++++++++++++++--------------------------
+ fs/internal.h      |    7 ++++
+ fs/ioctl.c         |    4 +-
+ include/linux/fs.h |    2 -
+ 4 files changed, 61 insertions(+), 55 deletions(-)
+
+commit 9d4e04082752d4d2d68445c4e6faf33a2613df55
+Author: Jann Horn <jann@thejh.net>
+Date:   Tue Jan 5 18:27:29 2016 +0100
+
+    compat_ioctl: don't look up the fd twice
+    
+    In code in fs/compat_ioctl.c that translates ioctl arguments
+    into a in-kernel structure, then performs sys_ioctl, possibly
+    under set_fs(KERNEL_DS), this commit changes the sys_ioctl
+    calls to do_ioctl calls. do_ioctl is a new function that does
+    the same thing as sys_ioctl, but doesn't look up the fd again.
+    
+    This change is made to avoid (potential) security issues
+    because of ioctl handlers that accept one of the ioctl
+    commands I2C_FUNCS, VIDEO_GET_EVENT, MTIOCPOS, MTIOCGET,
+    TIOCGSERIAL, TIOCSSERIAL, RTC_IRQP_READ, RTC_EPOCH_READ.
+    This can happen for multiple reasons:
+    
+     - The ioctl command number could be reused.
+     - The ioctl handler might not check the full ioctl
+       command. This is e.g. true for drm_ioctl.
+     - The ioctl handler is very special, e.g. cuse_file_ioctl
+    
+    The real issue is that set_fs(KERNEL_DS) is used here,
+    but that's fixed in a separate commit
+    "compat_ioctl: don't call do_ioctl under set_fs(KERNEL_DS)".
+    
+    This change mitigates potential security issues by
+    preventing a race that permits invocation of
+    unlocked_ioctl handlers under KERNEL_DS through compat
+    code even if a corresponding compat_ioctl handler exists.
+    
+    So far, no way has been identified to use this to damage
+    kernel memory without having CAP_SYS_ADMIN in the init ns
+    (with the capability, doing reads/writes at arbitrary
+    kernel addresses should be easy through CUSE's ioctl
+    handler with FUSE_IOCTL_UNRESTRICTED set).
+    
+    [AV: two missed sys_ioctl() taken care of]
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/compat_ioctl.c |  122 +++++++++++++++++++++++++++++-----------------------
+ 1 files changed, 68 insertions(+), 54 deletions(-)
+
+commit 5bf9e1ed4ebb278cd956ba142914fc04a024309c
+Author: Vasily Kulikov <segoon@openwall.com>
+Date:   Fri Jan 15 16:57:55 2016 -0800
+
+    include/linux/poison.h: use POISON_POINTER_DELTA for poison pointers
+    
+    TIMER_ENTRY_STATIC is defined as a poison pointers which
+    should point to nowhere.  Redefine them using POISON_POINTER_DELTA
+    arithmetics to make sure they really point to non-mappable area declared
+    by the target architecture.
+    
+    Signed-off-by: Vasily Kulikov <segoon@openwall.com>
+    Acked-by: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Solar Designer <solar@openwall.com>
+    Cc: "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	include/linux/poison.h
+
+ include/linux/poison.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 60f2e0a05ab8f56c804a9334a23e2b446305d110
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 19 19:41:44 2016 -0500
+
+    Fix ARM compilation, reported by Austin Sepp
+
+ grsecurity/grsec_sig.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit e15383743443dc43460a2fd73e0db0b608610dca
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Mon Jan 18 13:52:47 2016 +0100
+
+    ALSA: hrtimer: Fix stall by hrtimer_cancel()
+    
+    hrtimer_cancel() waits for the completion from the callback, thus it
+    must not be called inside the callback itself.  This was already a
+    problem in the past with ALSA hrtimer driver, and the early commit
+    [fcfdebe70759: ALSA: hrtimer - Fix lock-up] tried to address it.
+    
+    However, the previous fix is still insufficient: it may still cause a
+    lockup when the ALSA timer instance reprograms itself in its callback.
+    Then it invokes the start function even in snd_timer_interrupt() that
+    is called in hrtimer callback itself, results in a CPU stall.  This is
+    no hypothetical problem but actually triggered by syzkaller fuzzer.
+    
+    This patch tries to fix the issue again.  Now we call
+    hrtimer_try_to_cancel() at both start and stop functions so that it
+    won't fall into a deadlock, yet giving some chance to cancel the queue
+    if the functions have been called outside the callback.  The proper
+    hrtimer_cancel() is called in anyway at closing, so this should be
+    enough.
+    
+    Reported-and-tested-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/hrtimer.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 12d874daf706e6e7c1ae709141859c809599297e
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Tue Jan 12 12:38:02 2016 +0100
+
+    ALSA: seq: Fix missing NULL check at remove_events ioctl
+    
+    snd_seq_ioctl_remove_events() calls snd_seq_fifo_clear()
+    unconditionally even if there is no FIFO assigned, and this leads to
+    an Oops due to NULL dereference.  The fix is just to add a proper NULL
+    check.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Tested-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/seq/seq_clientmgr.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 2eb0632df1351378946507e7ef7ba0682632a7b5
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Tue Jan 12 15:36:27 2016 +0100
+
+    ALSA: seq: Fix race at timer setup and close
+    
+    ALSA sequencer code has an open race between the timer setup ioctl and
+    the close of the client.  This was triggered by syzkaller fuzzer, and
+    a use-after-free was caught there as a result.
+    
+    This patch papers over it by adding a proper queue->timer_mutex lock
+    around the timer-related calls in the relevant code path.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Tested-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/seq/seq_queue.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit b9e55ab955e59b4a636d78a748be90334a48b485
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Thu Jan 14 16:30:58 2016 +0100
+
+    ALSA: timer: Harden slave timer list handling
+    
+    A slave timer instance might be still accessible in a racy way while
+    operating the master instance as it lacks of locking.  Since the
+    master operation is mostly protected with timer->lock, we should cope
+    with it while changing the slave instance, too.  Also, some linked
+    lists (active_list and ack_list) of slave instances aren't unlinked
+    immediately at stopping or closing, and this may lead to unexpected
+    accesses.
+    
+    This patch tries to address these issues.  It adds spin lock of
+    timer->lock (either from master or slave, which is equivalent) in a
+    few places.  For avoiding a deadlock, we ensure that the global
+    slave_active_lock is always locked at first before each timer lock.
+    
+    Also, ack and active_list of slave instances are properly unlinked at
+    snd_timer_stop() and snd_timer_close().
+    
+    Last but not least, remove the superfluous call of _snd_timer_stop()
+    at removing slave links.  This is a noop, and calling it may confuse
+    readers wrt locking.  Further cleanup will follow in a later patch.
+    
+    Actually we've got reports of use-after-free by syzkaller fuzzer, and
+    this hopefully fixes these issues.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/timer.c |   18 ++++++++++++++----
+ 1 files changed, 14 insertions(+), 4 deletions(-)
+
+commit f1ce0547bdfda1b42ae8a66c222f2a897cbe1586
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Wed Jan 13 17:48:01 2016 +0100
+
+    ALSA: timer: Fix race among timer ioctls
+    
+    ALSA timer ioctls have an open race and this may lead to a
+    use-after-free of timer instance object.  A simplistic fix is to make
+    each ioctl exclusive.  We have already tread_sem for controlling the
+    tread, and extend this as a global mutex to be applied to each ioctl.
+    
+    The downside is, of course, the worse concurrency.  But these ioctls
+    aren't to be parallel accessible, in anyway, so it should be fine to
+    serialize there.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Tested-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/timer.c |   32 +++++++++++++++++++-------------
+ 1 files changed, 19 insertions(+), 13 deletions(-)
+
+commit 8347d8461ed48a98f9c76cc3cfcdad8217d314bc
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Wed Jan 13 21:35:06 2016 +0100
+
+    ALSA: timer: Fix double unlink of active_list
+    
+    ALSA timer instance object has a couple of linked lists and they are
+    unlinked unconditionally at snd_timer_stop().  Meanwhile
+    snd_timer_interrupt() unlinks it, but it calls list_del() which leaves
+    the element list itself unchanged.  This ends up with unlinking twice,
+    and it was caught by syzkaller fuzzer.
+    
+    The fix is to use list_del_init() variant properly there, too.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Tested-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/timer.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 243aebb7ae71d6e11ea9880faa893d1d0d60cd75
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Jan 18 18:03:48 2016 +0100
+
+    ovs: limit ovs recursions in ovs_execute_actions to not corrupt stack
+    
+    It was seen that defective configurations of openvswitch could overwrite
+    the STACK_END_MAGIC and cause a hard crash of the kernel because of too
+    many recursions within ovs.
+    
+    This problem arises due to the high stack usage of openvswitch. The rest
+    of the kernel is fine with the current limit of 10 (RECURSION_LIMIT).
+    
+    We use the already existing recursion counter in ovs_execute_actions to
+    implement an upper bound of 5 recursions.
+    
+    Cc: Pravin Shelar <pshelar@ovn.org>
+    Cc: Simon Horman <simon.horman@netronome.com>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: Simon Horman <simon.horman@netronome.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/openvswitch/actions.c |   19 ++++++++++++++-----
+ 1 files changed, 14 insertions(+), 5 deletions(-)
+
+commit 8080793479c6d5befe37a67b1dbd9e4e0a61af96
+Author: Ursula Braun <ursula.braun@de.ibm.com>
+Date:   Tue Jan 19 10:41:33 2016 +0100
+
+    af_iucv: Validate socket address length in iucv_sock_bind()
+    
+    Signed-off-by: Ursula Braun <ursula.braun@de.ibm.com>
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Reviewed-by: Evgeny Cherkashin <Eugene.Crosser@ru.ibm.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/iucv/af_iucv.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 50a383c1c91ed7409c3cbdd41e662d6891463d1b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 19 19:32:54 2016 -0500
+
+    Apply the same fix as everyone else for the recent keys vulnerability that is
+    unexploitable under PAX_REFCOUNT
+    
+    Make a couple more changes that no one else can/will
+
+ include/linux/key-type.h     |    4 ++--
+ ipc/msgutil.c                |    4 ++--
+ security/keys/internal.h     |    2 +-
+ security/keys/process_keys.c |    1 +
+ 4 files changed, 6 insertions(+), 5 deletions(-)
+
 commit b56c3a63f431c193400aee17543021950bd14bc4
 Merge: 38b1a3d 470069c
 Author: Brad Spengler <spender@grsecurity.net>
