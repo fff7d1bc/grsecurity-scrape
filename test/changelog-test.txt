@@ -1,3 +1,90 @@
+commit ab86adee64312a2f827dd516cb199521327943ed
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Mon Jan 18 19:23:51 2016 -0500
+
+    netfilter: nf_conntrack: use safer way to lock all buckets
+    
+    When we need to lock all buckets in the connection hashtable we'd attempt to
+    lock 1024 spinlocks, which is way more preemption levels than supported by
+    the kernel. Furthermore, this behavior was hidden by checking if lockdep is
+    enabled, and if it was - use only 8 buckets(!).
+    
+    Fix this by using a global lock and synchronize all buckets on it when we
+    need to lock them all. This is pretty heavyweight, but is only done when we
+    need to resize the hashtable, and that doesn't happen often enough (or at all).
+    
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Acked-by: Jesper Dangaard Brouer <brouer@redhat.com>
+    Reviewed-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+    
+    Conflicts:
+    
+    	net/netfilter/nfnetlink_cttimeout.c
+
+ include/net/netfilter/nf_conntrack_core.h |    8 ++----
+ net/netfilter/nf_conntrack_core.c         |   38 +++++++++++++++++++++-------
+ net/netfilter/nf_conntrack_helper.c       |    2 +-
+ net/netfilter/nf_conntrack_netlink.c      |    2 +-
+ 4 files changed, 33 insertions(+), 17 deletions(-)
+
+commit 37014723527225481c720484bb788a1a6358072f
+Author: Willy Tarreau <w@1wt.eu>
+Date:   Mon Jan 18 16:36:09 2016 +0100
+
+    pipe: limit the per-user amount of pages allocated in pipes
+    
+    On no-so-small systems, it is possible for a single process to cause an
+    OOM condition by filling large pipes with data that are never read. A
+    typical process filling 4000 pipes with 1 MB of data will use 4 GB of
+    memory. On small systems it may be tricky to set the pipe max size to
+    prevent this from happening.
+    
+    This patch makes it possible to enforce a per-user soft limit above
+    which new pipes will be limited to a single page, effectively limiting
+    them to 4 kB each, as well as a hard limit above which no new pipes may
+    be created for this user. This has the effect of protecting the system
+    against memory abuse without hurting other users, and still allowing
+    pipes to work correctly though with less data at once.
+    
+    The limit are controlled by two new sysctls : pipe-user-pages-soft, and
+    pipe-user-pages-hard. Both may be disabled by setting them to zero. The
+    default soft limit allows the default number of FDs per process (1024)
+    to create pipes of the default size (64kB), thus reaching a limit of 64MB
+    before starting to create only smaller pipes. With 256 processes limited
+    to 1024 FDs each, this results in 1024*64kB + (256*1024 - 1024) * 4kB =
+    1084 MB of memory allocated for a user. The hard limit is disabled by
+    default to avoid breaking existing applications that make intensive use
+    of pipes (eg: for splicing).
+    
+    Reported-by: socketpair@gmail.com
+    Reported-by: Tetsuo Handa <penguin-kernel@I-love.SAKURA.ne.jp>
+    Mitigates: CVE-2013-4312 (Linux 2.0+)
+    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: Willy Tarreau <w@1wt.eu>
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ Documentation/sysctl/fs.txt |   23 +++++++++++++++++++++
+ fs/pipe.c                   |   47 +++++++++++++++++++++++++++++++++++++++++-
+ include/linux/pipe_fs_i.h   |    4 +++
+ include/linux/sched.h       |    1 +
+ kernel/sysctl.c             |   14 ++++++++++++
+ 5 files changed, 87 insertions(+), 2 deletions(-)
+
+commit 51645fa198d194f746651dcfbc5f24a4cf8b9fb8
+Merge: 540f2af 7791ecb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 23 10:57:11 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7791ecb84f840343a5646236fd0d34e1fb450793
+Merge: 470069c 399588c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 23 10:56:47 2016 -0500
+
+    Merge branch 'linux-4.3.y' into pax-test
+
 commit 540f2affebd42cdc26a699208ab4f1cb0cb75e33
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jan 19 21:18:47 2016 -0500
