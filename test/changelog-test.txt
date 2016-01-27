@@ -1,3 +1,173 @@
+commit 70636c6ad60fc1db3af764ecc789b827b7497a97
+Author: Yuchung Cheng <ycheng@google.com>
+Date:   Wed Jan 6 12:42:38 2016 -0800
+
+    tcp: fix zero cwnd in tcp_cwnd_reduction
+    
+    Patch 3759824da87b ("tcp: PRR uses CRB mode by default and SS mode
+    conditionally") introduced a bug that cwnd may become 0 when both
+    inflight and sndcnt are 0 (cwnd = inflight + sndcnt). This may lead
+    to a div-by-zero if the connection starts another cwnd reduction
+    phase by setting tp->prior_cwnd to the current cwnd (0) in
+    tcp_init_cwnd_reduction().
+    
+    To prevent this we skip PRR operation when nothing is acked or
+    sacked. Then cwnd must be positive in all cases as long as ssthresh
+    is positive:
+    
+    1) The proportional reduction mode
+       inflight > ssthresh > 0
+    
+    2) The reduction bound mode
+      a) inflight == ssthresh > 0
+    
+      b) inflight < ssthresh
+         sndcnt > 0 since newly_acked_sacked > 0 and inflight < ssthresh
+    
+    Therefore in all cases inflight and sndcnt can not both be 0.
+    We check invalid tp->prior_cwnd to avoid potential div0 bugs.
+    
+    In reality this bug is triggered only with a sequence of less common
+    events.  For example, the connection is terminating an ECN-triggered
+    cwnd reduction with an inflight 0, then it receives reordered/old
+    ACKs or DSACKs from prior transmission (which acks nothing). Or the
+    connection is in fast recovery stage that marks everything lost,
+    but fails to retransmit due to local issues, then receives data
+    packets from other end which acks nothing.
+    
+    Fixes: 3759824da87b ("tcp: PRR uses CRB mode by default and SS mode conditionally")
+    Reported-by: Oleksandr Natalenko <oleksandr@natalenko.name>
+    Signed-off-by: Yuchung Cheng <ycheng@google.com>
+    Signed-off-by: Neal Cardwell <ncardwell@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_input.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit dac1da2bedbb43195d371c7a192cfeeb45683df0
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Sun Jan 24 13:53:50 2016 -0800
+
+    af_unix: fix struct pid memory leak
+    
+    Dmitry reported a struct pid leak detected by a syzkaller program.
+    
+    Bug happens in unix_stream_recvmsg() when we break the loop when a
+    signal is pending, without properly releasing scm.
+    
+    Fixes: b3ca9b02b007 ("net: fix multithreaded signal handling in unix recv routines")
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Rainer Weikusat <rweikusat@mobileactivedefense.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/unix/af_unix.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 15cc47f127520d1ac0c1fe76d993c2c27f0f2571
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Fri Jan 22 01:39:43 2016 +0100
+
+    pptp: fix illegal memory access caused by multiple bind()s
+    
+    Several times already this has been reported as kasan reports caused by
+    syzkaller and trinity and people always looked at RCU races, but it is
+    much more simple. :)
+    
+    In case we bind a pptp socket multiple times, we simply add it to
+    the callid_sock list but don't remove the old binding. Thus the old
+    socket stays in the bucket with unused call_id indexes and doesn't get
+    cleaned up. This causes various forms of kasan reports which were hard
+    to pinpoint.
+    
+    Simply don't allow multiple binds and correct error handling in
+    pptp_bind. Also keep sk_state bits in place in pptp_connect.
+    
+    Fixes: 00959ade36acad ("PPTP: PPP over IPv4 (Point-to-Point Tunneling Protocol)")
+    Cc: Dmitry Kozlov <xeb@mail.ru>
+    Cc: Sasha Levin <sasha.levin@oracle.com>
+    Cc: Dmitry Vyukov <dvyukov@google.com>
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Dave Jones <davej@codemonkey.org.uk>
+    Reported-by: Dave Jones <davej@codemonkey.org.uk>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ppp/pptp.c |   34 ++++++++++++++++++++++++----------
+ 1 files changed, 24 insertions(+), 10 deletions(-)
+
+commit e2b7b8c66851c85188fa6dab2d2b2a6c85bc7332
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 26 18:17:10 2016 -0500
+
+    Add info about cpupower/powertop to GRKERNSEC_KMEM, was present on our
+    wiki but was removed from the config help at some point
+
+ grsecurity/Kconfig |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit ce2e88efa000fc32bfcd84098f57c8ed8310fefc
+Author: Thomas Egerer <hakke_007@gmx.de>
+Date:   Mon Jan 25 12:58:44 2016 +0100
+
+    ipv4+ipv6: Make INET*_ESP select CRYPTO_ECHAINIV
+    
+    The ESP algorithms using CBC mode require echainiv. Hence INET*_ESP have
+    to select CRYPTO_ECHAINIV in order to work properly. This solves the
+    issues caused by a misconfiguration as described in [1].
+    The original approach, patching crypto/Kconfig was turned down by
+    Herbert Xu [2].
+    
+    [1] https://lists.strongswan.org/pipermail/users/2015-December/009074.html
+    [2] http://marc.info/?l=linux-crypto-vger&m=145224655809562&w=2
+    
+    Signed-off-by: Thomas Egerer <hakke_007@gmx.de>
+    Acked-by: Herbert Xu <herbert@gondor.apana.org.au>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/Kconfig |    1 +
+ net/ipv6/Kconfig |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
+
+commit fca5a303155ea67d28aece0caf2b03ffc3b2668d
+Merge: 904114c 6339c1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 26 18:08:40 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6339c1f9a9beafd417bf9f04d4b257e62aeb45b7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 26 18:07:51 2016 -0500
+
+    Update to pax-linux-4.3.4-test25.patch:
+    - fixed incorrect handling of VM_DONTCOPY during fork that would trigger a consistency check in the vma mirroring logic, reported by Mathias Krause <minipli@googlemail.com>
+    - fixed init_new_context on !MODIFY_LDT_SYSCALL configs, reported by tjh (https://forums.grsecurity.net/viewtopic.php?f=3&t=4368)
+    - fixed a few REFCOUNT false positives in SNMP related statistics
+
+ arch/x86/Kconfig                   |    2 +-
+ arch/x86/include/asm/mmu_context.h |   17 +++++++++++++++++
+ include/net/snmp.h                 |   10 +++++-----
+ kernel/fork.c                      |   11 +++++++++--
+ net/ipv4/proc.c                    |    8 ++++----
+ net/ipv6/addrconf.c                |    4 ++--
+ net/ipv6/proc.c                    |   10 +++++-----
+ 7 files changed, 43 insertions(+), 19 deletions(-)
+
+commit 904114c2fce3fdff5d57e763da56a78960db4e19
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Fri Jan 22 18:08:52 2016 -0500
+
+    make sure that freeing shmem fast symlinks is RCU-delayed
+    
+    Cc: stable@vger.kernel.org # v4.2+
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ include/linux/shmem_fs.h |    5 +----
+ mm/shmem.c               |    9 ++++-----
+ 2 files changed, 5 insertions(+), 9 deletions(-)
+
 commit ab86adee64312a2f827dd516cb199521327943ed
 Author: Sasha Levin <sasha.levin@oracle.com>
 Date:   Mon Jan 18 19:23:51 2016 -0500
