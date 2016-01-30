@@ -1,3 +1,56 @@
+commit adb52e95fb9ad4ac9c56cd5d47bd668f47c33096
+Author: Jann Horn <jann@thejh.net>
+Date:   Sat Dec 26 06:00:48 2015 +0100
+
+    seccomp: always propagate NO_NEW_PRIVS on tsync
+    
+    Before this patch, a process with some permissive seccomp filter
+    that was applied by root without NO_NEW_PRIVS was able to add
+    more filters to itself without setting NO_NEW_PRIVS by setting
+    the new filter from a throwaway thread with NO_NEW_PRIVS.
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Kees Cook <keescook@chromium.org>
+
+ kernel/seccomp.c |   22 +++++++++++-----------
+ 1 files changed, 11 insertions(+), 11 deletions(-)
+
+commit b85450498a3bbf269441c8963d7574bb3079c838
+Merge: 59c216f d14af1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 29 20:54:13 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d14af1f1dd66511f3f0674deee2b572972012b39
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 29 20:53:51 2016 -0500
+
+    Update to pax-linux-4.3.4-test26.patch:
+    - Emese fixed a few intentional overflows introduced by gcc, reported by StalkR (https://forums.grsecurity.net/viewtopic.php?f=3&t=4370)
+
+ fs/cifs/file.c                                     |    2 +-
+ fs/gfs2/file.c                                     |    2 +-
+ .../size_overflow_plugin/intentional_overflow.c    |   96 ++++++++++++++++++--
+ tools/gcc/size_overflow_plugin/size_overflow.h     |    2 +
+ .../size_overflow_plugin/size_overflow_plugin.c    |    4 +-
+ .../size_overflow_plugin/size_overflow_transform.c |    6 +-
+ .../size_overflow_transform_core.c                 |    5 +
+ 7 files changed, 102 insertions(+), 15 deletions(-)
+
+commit 59c216f13587eacdd692386b7a403ae78ed84fb6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jan 27 17:57:21 2016 -0500
+
+    Fix a size_overflow report reported by Mathias Krause in our
+    truncation of an loff_t to an unsigned long when being passed
+    to gr_learn_resource() (as all resource checks are against unsigned long
+    values)
+
+ fs/attr.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
 commit 70636c6ad60fc1db3af764ecc789b827b7497a97
 Author: Yuchung Cheng <ycheng@google.com>
 Date:   Wed Jan 6 12:42:38 2016 -0800
