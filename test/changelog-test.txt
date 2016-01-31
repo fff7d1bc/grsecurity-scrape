@@ -1,3 +1,38 @@
+commit bb9a3a9df0d8dfc96d521676e64c42b37ba22aea
+Merge: 682d661 f74425b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 31 15:06:25 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/net/slip/slhc.c
+    	include/linux/sched.h
+    	net/unix/af_unix.c
+    	sound/core/timer.c
+
+commit f74425b5705bfe52aff9e97659ef10c4a14176c3
+Merge: d14af1f 849a2d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 31 15:02:55 2016 -0500
+
+    Merge branch 'linux-4.3.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/include/asm/mmu_context.h
+
+commit 682d6611d75542e351c973c8dd74a99d3966c073
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 30 13:05:03 2016 -0500
+
+    Based on a report from Mathias Krause, fix up a number of additional instances
+    of ulong overflow when passing in values to gr_learn_resource by saturating
+    to ULONG_MAX
+
+ mm/mlock.c |   11 ++++++++---
+ mm/mmap.c  |   16 +++++++++++++---
+ 2 files changed, 21 insertions(+), 6 deletions(-)
+
 commit adb52e95fb9ad4ac9c56cd5d47bd668f47c33096
 Author: Jann Horn <jann@thejh.net>
 Date:   Sat Dec 26 06:00:48 2015 +0100
