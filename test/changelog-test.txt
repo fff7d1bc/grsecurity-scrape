@@ -1,3 +1,225 @@
+commit dda4d2a21914c480750f10bd55c6e3203d415d8d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 3 21:22:40 2016 -0500
+
+    Apply fix for integer truncation in NUMA init code, reported by
+    x14sg1 on the forums:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4374
+
+ arch/x86/mm/numa.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 477505f7c893cb6a2c3e22f83eefd9c985d7b3ca
+Merge: a781740 016d0d8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 3 21:20:58 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 016d0d81a8dd4be1304c82a68e0ccf425868f467
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 3 21:20:10 2016 -0500
+
+    Update to pax-linux-4.3.5-test27.patch:
+    - fixed a bunch of potential REFCOUNT false positives, reported by Emese
+    - restored padding in fpregs_state for storing AVX-512 state in the future
+    - constified netlink_dump_control
+    - added const version of debug_gimple_stmt for gcc plugins, by Emese
+    - Emese fixed a bug in initify that could have initified too much
+    - Emese fixed a false positive intentional integer overflow in xfrm4_extract_header, reported by corsac
+
+ arch/x86/include/asm/fpu/types.h              |    1 +
+ arch/x86/include/asm/mmu_context.h            |    2 +-
+ block/blk-cgroup.c                            |   18 ++--
+ block/cfq-iosched.c                           |    4 +-
+ crypto/crypto_user.c                          |    8 ++-
+ drivers/acpi/apei/ghes.c                      |    6 +-
+ drivers/char/ipmi/ipmi_ssif.c                 |   12 ++--
+ drivers/gpu/drm/amd/scheduler/gpu_scheduler.c |    2 +-
+ drivers/gpu/drm/amd/scheduler/gpu_scheduler.h |    2 +-
+ drivers/gpu/drm/amd/scheduler/sched_fence.c   |    2 +-
+ drivers/infiniband/core/netlink.c             |    5 +-
+ drivers/infiniband/hw/cxgb4/device.c          |    6 +-
+ drivers/infiniband/hw/cxgb4/iw_cxgb4.h        |    2 +-
+ drivers/md/bcache/alloc.c                     |    2 +-
+ drivers/md/bcache/bcache.h                    |   10 +-
+ drivers/md/bcache/btree.c                     |    2 +-
+ drivers/md/bcache/io.c                        |   10 +-
+ drivers/md/bcache/journal.c                   |    2 +-
+ drivers/md/bcache/stats.c                     |   26 +++---
+ drivers/md/bcache/stats.h                     |   16 ++--
+ drivers/md/bcache/super.c                     |    2 +-
+ drivers/md/bcache/sysfs.c                     |   20 +++---
+ drivers/md/dm-cache-target.c                  |   98 ++++++++++++------------
+ drivers/md/dm-raid.c                          |    2 +-
+ drivers/md/md.c                               |    6 +-
+ drivers/md/md.h                               |    2 +-
+ drivers/md/raid1.c                            |    2 +-
+ drivers/md/raid10.c                           |    2 +-
+ drivers/md/raid5.c                            |    4 +-
+ drivers/media/pci/zoran/zoran.h               |    1 -
+ drivers/media/pci/zoran/zoran_driver.c        |    3 -
+ drivers/net/ethernet/sfc/selftest.c           |   20 +++---
+ drivers/net/irda/vlsi_ir.c                    |   18 ++--
+ drivers/net/irda/vlsi_ir.h                    |   14 ++--
+ drivers/net/wireless/ath/carl9170/carl9170.h  |    6 +-
+ drivers/net/wireless/ath/carl9170/debug.c     |    6 +-
+ drivers/net/wireless/ath/carl9170/main.c      |   10 +-
+ drivers/net/wireless/ath/carl9170/tx.c        |    4 +-
+ drivers/net/wireless/iwlwifi/mvm/d3.c         |    4 +-
+ drivers/net/wireless/iwlwifi/mvm/tx.c         |    2 +-
+ drivers/scsi/hptiop.c                         |    2 -
+ drivers/scsi/hptiop.h                         |    1 -
+ drivers/scsi/ipr.c                            |    6 +-
+ drivers/scsi/ipr.h                            |    2 +-
+ drivers/scsi/qla2xxx/qla_target.c             |   10 +-
+ drivers/scsi/qla2xxx/qla_target.h             |    2 +-
+ fs/btrfs/ctree.c                              |    2 +-
+ fs/btrfs/ctree.h                              |    4 +-
+ fs/btrfs/delayed-ref.c                        |    4 +-
+ fs/btrfs/disk-io.c                            |    4 +-
+ fs/btrfs/file.c                               |    4 +-
+ fs/btrfs/raid56.c                             |   32 ++++----
+ fs/btrfs/tests/btrfs-tests.c                  |    2 +-
+ fs/btrfs/transaction.c                        |    2 +-
+ fs/btrfs/tree-log.c                           |    8 +-
+ fs/btrfs/volumes.c                            |   14 ++--
+ fs/btrfs/volumes.h                            |   22 +++---
+ fs/jbd2/commit.c                              |    2 +-
+ fs/jbd2/transaction.c                         |    4 +-
+ fs/ocfs2/dlm/dlmcommon.h                      |    4 +-
+ fs/ocfs2/dlm/dlmdebug.c                       |   10 +-
+ fs/ocfs2/dlm/dlmdomain.c                      |    4 +-
+ fs/ocfs2/dlm/dlmmaster.c                      |    4 +-
+ include/acpi/ghes.h                           |    2 +-
+ include/linux/blk-cgroup.h                    |   24 +++---
+ include/linux/jbd2.h                          |    2 +-
+ include/linux/netlink.h                       |   12 ++--
+ include/net/cfg802154.h                       |    2 +-
+ include/net/mac80211.h                        |    2 +-
+ include/net/neighbour.h                       |    2 +-
+ kernel/rcu/tree_plugin.h                      |    4 +-
+ net/batman-adv/routing.c                      |    4 +-
+ net/batman-adv/soft-interface.c               |    2 +-
+ net/batman-adv/translation-table.c            |   14 ++--
+ net/batman-adv/types.h                        |    2 +-
+ net/core/neighbour.c                          |   14 ++--
+ net/core/rtnetlink.c                          |    2 +-
+ net/ipv4/arp.c                                |    2 +-
+ net/ipv4/inet_diag.c                          |    4 +-
+ net/ipv4/xfrm4_state.c                        |    4 +-
+ net/ipv6/ndisc.c                              |    2 +-
+ net/mac80211/cfg.c                            |    2 +-
+ net/mac80211/debugfs_key.c                    |    2 +-
+ net/mac80211/key.c                            |    4 +-
+ net/mac80211/tx.c                             |    2 +-
+ net/mac80211/wpa.c                            |   10 +-
+ net/mac802154/iface.c                         |    4 +-
+ net/netfilter/ipset/ip_set_core.c             |    2 +-
+ net/netfilter/nf_conntrack_netlink.c          |   22 +++---
+ net/netfilter/nf_tables_api.c                 |   13 ++--
+ net/netfilter/nfnetlink_acct.c                |    7 +-
+ net/netfilter/nfnetlink_cthelper.c            |    2 +-
+ net/netfilter/nfnetlink_cttimeout.c           |    2 +-
+ net/netlink/af_netlink.c                      |   10 ++-
+ net/netlink/diag.c                            |    2 +-
+ net/netlink/genetlink.c                       |   14 ++--
+ net/packet/af_packet.c                        |   18 ++--
+ net/packet/diag.c                             |    2 +-
+ net/packet/internal.h                         |    6 +-
+ net/unix/diag.c                               |    2 +-
+ net/xfrm/xfrm_user.c                          |    2 +-
+ security/apparmor/include/policy.h            |    2 +-
+ security/apparmor/policy.c                    |    4 +-
+ sound/core/seq/seq_clientmgr.c                |    2 +-
+ sound/core/seq/seq_fifo.c                     |    6 +-
+ sound/core/seq/seq_fifo.h                     |    2 +-
+ tools/gcc/gcc-common.h                        |   24 ++++--
+ tools/gcc/initify_plugin.c                    |    7 +-
+ tools/lib/api/Makefile                        |    2 +-
+ 109 files changed, 399 insertions(+), 391 deletions(-)
+
+commit a7817402ac837b1aee07fac42537a02097055098
+Author: Matt Fleming <matt@codeblueprint.co.uk>
+Date:   Fri Jan 29 11:36:10 2016 +0000
+
+    x86/mm/pat: Avoid truncation when converting cpa->numpages to address
+    
+    There are a couple of nasty truncation bugs lurking in the pageattr
+    code that can be triggered when mapping EFI regions, e.g. when we pass
+    a cpa->pgd pointer. Because cpa->numpages is a 32-bit value, shifting
+    left by PAGE_SHIFT will truncate the resultant address to 32-bits.
+    
+    Viorel-Cătălin managed to trigger this bug on his Dell machine that
+    provides a ~5GB EFI region which requires 1236992 pages to be mapped.
+    When calling populate_pud() the end of the region gets calculated
+    incorrectly in the following buggy expression,
+    
+      end = start + (cpa->numpages << PAGE_SHIFT);
+    
+    And only 188416 pages are mapped. Next, populate_pud() gets invoked
+    for a second time because of the loop in __change_page_attr_set_clr(),
+    only this time no pages get mapped because shifting the remaining
+    number of pages (1048576) by PAGE_SHIFT is zero. At which point the
+    loop in __change_page_attr_set_clr() spins forever because we fail to
+    map progress.
+    
+    Hitting this bug depends very much on the virtual address we pick to
+    map the large region at and how many pages we map on the initial run
+    through the loop. This explains why this issue was only recently hit
+    with the introduction of commit
+    
+      a5caa209ba9c ("x86/efi: Fix boot crash by mapping EFI memmap
+       entries bottom-up at runtime, instead of top-down")
+    
+    It's interesting to note that safe uses of cpa->numpages do exist in
+    the pageattr code. If instead of shifting ->numpages we multiply by
+    PAGE_SIZE, no truncation occurs because PAGE_SIZE is a UL value, and
+    so the result is unsigned long.
+    
+    To avoid surprises when users try to convert very large cpa->numpages
+    values to addresses, change the data type from 'int' to 'unsigned
+    long', thereby making it suitable for shifting by PAGE_SHIFT without
+    any type casting.
+    
+    The alternative would be to make liberal use of casting, but that is
+    far more likely to cause problems in the future when someone adds more
+    code and fails to cast properly; this bug was difficult enough to
+    track down in the first place.
+    
+    Reported-and-tested-by: Viorel-Cătălin Răpițeanu <rapiteanu.catalin@gmail.com>
+    Acked-by: Borislav Petkov <bp@alien8.de>
+    Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+    Link: https://bugzilla.kernel.org/show_bug.cgi?id=110131
+    Link: http://lkml.kernel.org/r/1454067370-10374-1-git-send-email-matt@codeblueprint.co.uk
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/mm/pageattr.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 64dd9d7a67a742fda257cdd16510c29e695c34b5
+Author: Jan Beulich <JBeulich@suse.com>
+Date:   Tue Jan 26 04:15:18 2016 -0700
+
+    x86/mm: Fix types used in pgprot cacheability flags translations
+    
+    For PAE kernels "unsigned long" is not suitable to hold page protection
+    flags, since _PAGE_NX doesn't fit there. This is the reason for quite a
+    few W+X pages getting reported as insecure during boot (observed namely
+    for the entire initrd range).
+    
+    Fixes: 281d4078be ("x86: Make page cache mode a real type")
+    Signed-off-by: Jan Beulich <jbeulich@suse.com>
+    Reviewed-by: Juergen Gross <JGross@suse.com>
+    Cc: stable@vger.kernel.org
+    Link: http://lkml.kernel.org/r/56A7635602000078000CAFF1@prv-mh.provo.novell.com
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/include/asm/pgtable_types.h |    6 ++----
+ 1 files changed, 2 insertions(+), 4 deletions(-)
+
 commit bb9a3a9df0d8dfc96d521676e64c42b37ba22aea
 Merge: 682d661 f74425b
 Author: Brad Spengler <spender@grsecurity.net>
