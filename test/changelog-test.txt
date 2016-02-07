@@ -1,3 +1,67 @@
+commit 95b5dcb3c01958502af00b0bc0da1d906aae11a2
+Merge: 438be0b 256aeaf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 7 08:29:33 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 256aeaf87c22de8edf1f03682a572c590ae07771
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 7 08:29:09 2016 -0500
+
+    Update to pax-linux-4.3.5-test28.patch:
+    - fixed an integer truncation bug in numa_clear_kernel_node_hotplug caught by the size overflow plugin, reported by x14sg1 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4374)
+    - spender fixed UDEREF on arm
+
+ arch/arm/Kconfig                   |    1 +
+ arch/arm/include/asm/domain.h      |   21 ++++++++-
+ arch/arm/include/asm/futex.h       |    9 ----
+ arch/arm/include/asm/thread_info.h |    3 +
+ arch/arm/include/asm/uaccess.h     |   81 +++++++++++++++---------------------
+ arch/arm/kernel/entry-armv.S       |    2 +-
+ arch/arm/kernel/process.c          |    2 +-
+ arch/arm/mm/alignment.c            |    8 ----
+ arch/x86/mm/numa.c                 |    2 +-
+ security/Kconfig                   |    1 -
+ 10 files changed, 60 insertions(+), 70 deletions(-)
+
+commit 438be0bd112bd17942b2628c53054dc1007558a1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 6 19:50:31 2016 -0500
+
+    Fix a number of issues caused by the upstream merging of a UDEREF ripoff resulting in unbootable
+    ARM systems reported on the forums
+
+ arch/arm/Kconfig                   |    1 +
+ arch/arm/include/asm/domain.h      |   21 ++++++++-
+ arch/arm/include/asm/futex.h       |    9 ----
+ arch/arm/include/asm/thread_info.h |    3 +
+ arch/arm/include/asm/uaccess.h     |   81 +++++++++++++++---------------------
+ arch/arm/kernel/entry-armv.S       |    2 +-
+ arch/arm/kernel/process.c          |    2 +-
+ arch/arm/mm/alignment.c            |    8 ----
+ security/Kconfig                   |    1 -
+ 9 files changed, 59 insertions(+), 69 deletions(-)
+
+commit 4ffdd5ef1f87e611af1efb4f251ada92abe9f4c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 6 11:21:53 2016 -0500
+
+    Fix another compiler warning
+
+ net/ipv4/tcp_input.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 30b5b7bc0fd67d458bdd5ab35e4689769eabd2ed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 6 11:16:12 2016 -0500
+
+    Fix two compiler warnings
+
+ kernel/pid.c    |    5 ++---
+ kernel/ptrace.c |    3 ++-
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
 commit dda4d2a21914c480750f10bd55c6e3203d415d8d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Feb 3 21:22:40 2016 -0500
