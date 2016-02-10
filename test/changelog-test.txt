@@ -1,3 +1,166 @@
+commit 87790bbd0d8dc2bd7fd86cb947e32886db9e9766
+Author: Matthew Wilcox <willy@linux.intel.com>
+Date:   Tue Feb 2 16:57:52 2016 -0800
+
+    radix-tree: fix race in gang lookup
+    
+    If the indirect_ptr bit is set on a slot, that indicates we need to redo
+    the lookup.  Introduce a new function radix_tree_iter_retry() which
+    forces the loop to retry the lookup by setting 'slot' to NULL and
+    turning the iterator back to point at the problematic entry.
+    
+    This is a pretty rare problem to hit at the moment; the lookup has to
+    race with a grow of the radix tree from a height of 0.  The consequences
+    of hitting this race are that gang lookup could return a pointer to a
+    radix_tree_node instead of a pointer to whatever the user had inserted
+    in the tree.
+    
+    Fixes: cebbd29e1c2f ("radix-tree: rewrite gang lookup using iterator")
+    Signed-off-by: Matthew Wilcox <willy@linux.intel.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Cc: Ohad Ben-Cohen <ohad@wizery.com>
+    Cc: Konstantin Khlebnikov <khlebnikov@openvz.org>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/radix-tree.h |   16 ++++++++++++++++
+ lib/radix-tree.c           |   12 ++++++++++--
+ 2 files changed, 26 insertions(+), 2 deletions(-)
+
+commit bf628043b4589c910919a0f221ae7f42aa8cea93
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Wed Feb 3 02:11:03 2016 +0100
+
+    unix: correctly track in-flight fds in sending process user_struct
+    
+    The commit referenced in the Fixes tag incorrectly accounted the number
+    of in-flight fds over a unix domain socket to the original opener
+    of the file-descriptor. This allows another process to arbitrary
+    deplete the original file-openers resource limit for the maximum of
+    open files. Instead the sending processes and its struct cred should
+    be credited.
+    
+    To do so, we add a reference counted struct user_struct pointer to the
+    scm_fp_list and use it to account for the number of inflight unix fds.
+    
+    Fixes: 712f4aad406bb1 ("unix: properly account for FDs passed over unix sockets")
+    Reported-by: David Herrmann <dh.herrmann@gmail.com>
+    Cc: David Herrmann <dh.herrmann@gmail.com>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/af_unix.h |    4 ++--
+ include/net/scm.h     |    1 +
+ net/core/scm.c        |    7 +++++++
+ net/unix/af_unix.c    |    4 ++--
+ net/unix/garbage.c    |    8 ++++----
+ 5 files changed, 16 insertions(+), 8 deletions(-)
+
+commit e830db443ff78d70b7b63536e688d73907face0c
+Author: Mike Kravetz <mike.kravetz@oracle.com>
+Date:   Fri Jan 15 16:57:37 2016 -0800
+
+    fs/hugetlbfs/inode.c: fix bugs in hugetlb_vmtruncate_list()
+    
+    Hillf Danton noticed bugs in the hugetlb_vmtruncate_list routine.  The
+    argument end is of type pgoff_t.  It was being converted to a vaddr
+    offset and passed to unmap_hugepage_range.  However, end was also being
+    used as an argument to the vma_interval_tree_foreach controlling loop.
+    In addition, the conversion of end to vaddr offset was incorrect.
+    
+    hugetlb_vmtruncate_list is called as part of a file truncate or
+    fallocate hole punch operation.
+    
+    When truncating a hugetlbfs file, this bug could prevent some pages from
+    being unmapped.  This is possible if there are multiple vmas mapping the
+    file, and there is a sufficiently sized hole between the mappings.  The
+    size of the hole between two vmas (A,B) must be such that the starting
+    virtual address of B is greater than (ending virtual address of A <<
+    PAGE_SHIFT).  In this case, the pages in B would not be unmapped.  If
+    pages are not properly unmapped during truncate, the following BUG is
+    hit:
+    
+    	kernel BUG at fs/hugetlbfs/inode.c:428!
+    
+    In the fallocate hole punch case, this bug could prevent pages from
+    being unmapped as in the truncate case.  However, for hole punch the
+    result is that unmapped pages will not be removed during the operation.
+    For hole punch, it is also possible that more pages than desired will be
+    unmapped.  This unnecessary unmapping will cause page faults to
+    reestablish the mappings on subsequent page access.
+    
+    Fixes: 1bfad99ab (" hugetlbfs: hugetlb_vmtruncate_list() needs to take a range")Reported-by: Hillf Danton <hillf.zj@alibaba-inc.com>
+    Signed-off-by: Mike Kravetz <mike.kravetz@oracle.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Cc: Naoya Horiguchi <n-horiguchi@ah.jp.nec.com>
+    Cc: Davidlohr Bueso <dave@stgolabs.net>
+    Cc: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: <stable@vger.kernel.org>	[4.3]
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/hugetlbfs/inode.c |   19 +++++++++++--------
+ 1 files changed, 11 insertions(+), 8 deletions(-)
+
+commit cdb3ba4a9113b779347387f3b6c6ea72dd4db12f
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Thu Feb 4 17:06:13 2016 +0100
+
+    ALSA: timer: Fix leftover link at closing
+    
+    In ALSA timer core, the active timer instance is managed in
+    active_list linked list.  Each element is added / removed dynamically
+    at timer start, stop and in timer interrupt.  The problem is that
+    snd_timer_interrupt() has a thinko and leaves the element in
+    active_list when it's the last opened element.  This eventually leads
+    to list corruption or use-after-free error.
+    
+    This hasn't been revealed because we used to delete the list forcibly
+    in snd_timer_stop() in the past.  However, the recent fix avoids the
+    double-stop behavior (in commit [f784beb75ce8: ALSA: timer: Fix link
+    corruption due to double start or stop]), and this leak hits reality.
+    
+    This patch fixes the link management in snd_timer_interrupt().  Now it
+    simply unlinks no matter which stream is.
+    
+    BugLink: http://lkml.kernel.org/r/CACT4Y+Yy2aukHP-EDp8-ziNqNNmb-NTf=jDWXMP7jB8HDa2vng@mail.gmail.com
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/timer.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 47d9647902f6a2f46a2be1e0140ba0f6f8c06008
+Author: Konstantin Khlebnikov <koct9i@gmail.com>
+Date:   Fri Feb 5 15:37:01 2016 -0800
+
+    radix-tree: fix oops after radix_tree_iter_retry
+    
+    Helper radix_tree_iter_retry() resets next_index to the current index.
+    In following radix_tree_next_slot current chunk size becomes zero.  This
+    isn't checked and it tries to dereference null pointer in slot.
+    
+    Tagged iterator is fine because retry happens only at slot 0 where tag
+    bitmask in iter->tags is filled with single bit.
+    
+    Fixes: 46437f9a554f ("radix-tree: fix race in gang lookup")
+    Signed-off-by: Konstantin Khlebnikov <koct9i@gmail.com>
+    Cc: Matthew Wilcox <willy@linux.intel.com>
+    Cc: Hugh Dickins <hughd@google.com>
+    Cc: Ohad Ben-Cohen <ohad@wizery.com>
+    Cc: Jeremiah Mahler <jmmahler@gmail.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/radix-tree.h |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
 commit 95b5dcb3c01958502af00b0bc0da1d906aae11a2
 Merge: 438be0b 256aeaf
 Author: Brad Spengler <spender@grsecurity.net>
