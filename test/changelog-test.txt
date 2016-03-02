@@ -1,3 +1,45 @@
+commit 335c04c8146a696a6101a9c69dbd47f11383549e
+Merge: 897877e a51cdb8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 1 17:57:24 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a51cdb83569b450858737a30d2be043d87d7ddc1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 1 17:56:43 2016 -0500
+
+    Update to pax-linux-4.4.3-test6.patch:
+    - spender fixed the cftype constification fallout, reported by quasar366 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4391)
+    - fixed a few section mismatches on notifier_block variables
+    - fixed a few REFCOUNT false positives found by Emese's plugin
+    - constified hypervisor_x86
+
+ arch/x86/include/asm/hypervisor.h                |  2 +-
+ arch/x86/kernel/cpu/mshyperv.c                   |  2 +-
+ arch/x86/kernel/cpu/vmware.c                     |  2 +-
+ arch/x86/kernel/kvm.c                            |  2 +-
+ drivers/lightnvm/rrpc.c                          |  4 ++--
+ drivers/lightnvm/rrpc.h                          |  2 +-
+ drivers/net/can/led.c                            |  2 +-
+ drivers/net/ethernet/mellanox/mlxsw/spectrum.c   |  2 +-
+ drivers/net/ethernet/rocker/rocker.c             |  4 ++--
+ drivers/net/ipvlan/ipvlan_main.c                 |  6 +++---
+ drivers/net/vrf.c                                |  2 +-
+ drivers/staging/rtl8188eu/core/rtw_mlme_ext.c    | 12 ++++++------
+ drivers/staging/rtl8188eu/include/rtw_mlme_ext.h |  2 +-
+ drivers/staging/rtl8723au/core/rtw_mlme_ext.c    | 12 ++++++------
+ drivers/staging/rtl8723au/include/drv_types.h    |  2 +-
+ drivers/staging/rtl8723au/include/rtw_mlme_ext.h |  2 +-
+ drivers/staging/rtl8723au/include/usb_ops.h      |  4 ++--
+ drivers/thermal/x86_pkg_temp_thermal.c           |  2 +-
+ fs/proc/kcore.c                                  |  2 +-
+ mm/hugetlb_cgroup.c                              |  8 ++++----
+ mm/mm_init.c                                     |  2 +-
+ mm/slub.c                                        |  2 +-
+ net/mac802154/iface.c                            |  2 +-
+ 23 files changed, 41 insertions(+), 41 deletions(-)
+
 commit 897877e79629a0b854e98cb666a9d898256d45a7
 Merge: 1ffa5d5 4f4b213
 Author: Brad Spengler <spender@grsecurity.net>
