@@ -1,3 +1,26 @@
+commit ba5ee94199b11c1429559a08c2158677dd8f1761
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 3 20:20:19 2016 -0500
+
+    Update size_overflow hash table
+
+ tools/gcc/size_overflow_plugin/size_overflow_hash.data | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 50a5cd726362f0988b81a54d4c962acf8fd34a70
+Merge: 335c04c 1cbae46
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 3 20:04:00 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 1cbae46efa0b111ef2d46502f8d34c4c572a0e00
+Merge: a51cdb8 c252409
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 3 19:57:43 2016 -0500
+
+    Merge branch 'linux-4.4.y' into pax-test
+
 commit 335c04c8146a696a6101a9c69dbd47f11383549e
 Merge: 897877e a51cdb8
 Author: Brad Spengler <spender@grsecurity.net>
