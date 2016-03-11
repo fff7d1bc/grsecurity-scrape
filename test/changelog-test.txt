@@ -1,3 +1,43 @@
+commit 7d02a991213f0b07a3677dcc93cdafc3ac309142
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 10 22:17:16 2016 -0500
+
+    Update size_overflow hash table
+
+ tools/gcc/size_overflow_plugin/size_overflow_hash.data | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 29f25ddda6a5625340df26beb394279fefea2b49
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 10 22:16:04 2016 -0500
+
+    Fix module support
+
+ kernel/module.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit b057a45636b626e7eaf03077ed0916b95fea054c
+Merge: ba5ee94 10d57c1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 10 21:36:10 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 10d57c107e7fabffbe616b14efab73df585576c2
+Merge: 1cbae46 62e2195
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 10 21:34:58 2016 -0500
+
+    Update to pax-linux-4.4.5-test9.patch:
+    - fixed an integer signedness mixup in the old select syscall caught by the size overflow plugin, by Mathias Krause <minipli@ld-linux.so>
+    - Emese cleaned up a few unnecessary type casts in the size overflow plugin
+    - fixed the initify plugin to not trigger a compiler assert with gcc 6 in LTO mode
+    - compile the x86 vdso without plugins, reported by Emese
+    - fixed a REFCOUNT/arm compile error, reported by coadde (https://forums.grsecurity.net/viewtopic.php?f=3&t=4410)
+    - fixed gcc-common.h for gcc 6, reported by psturm (https://forums.grsecurity.net/viewtopic.php?f=3&t=4394)
+    
+    Merge branch 'linux-4.4.y' into pax-test
+
 commit ba5ee94199b11c1429559a08c2158677dd8f1761
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Mar 3 20:20:19 2016 -0500
