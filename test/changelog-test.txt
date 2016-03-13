@@ -1,3 +1,192 @@
+commit 82e7dc61a626c47887d392ff9cd35b104f01fd25
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Tue Mar 8 12:13:39 2016 +0100
+
+    KVM: MMU: fix ept=0/pte.u=1/pte.w=0/CR0.WP=0/CR4.SMEP=1/EFER.NX=0 combo
+    
+    Yes, all of these are needed. :) This is admittedly a bit odd, but
+    kvm-unit-tests access.flat tests this if you run it with "-cpu host"
+    and of course ept=0.
+    
+    KVM runs the guest with CR0.WP=1, so it must handle supervisor writes
+    specially when pte.u=1/pte.w=0/CR0.WP=0.  Such writes cause a fault
+    when U=1 and W=0 in the SPTE, but they must succeed because CR0.WP=0.
+    When KVM gets the fault, it sets U=0 and W=1 in the shadow PTE and
+    restarts execution.  This will still cause a user write to fault, while
+    supervisor writes will succeed.  User reads will fault spuriously now,
+    and KVM will then flip U and W again in the SPTE (U=1, W=0).  User reads
+    will be enabled and supervisor writes disabled, going back to the
+    originary situation where supervisor writes fault spuriously.
+    
+    When SMEP is in effect, however, U=0 will enable kernel execution of
+    this page.  To avoid this, KVM also sets NX=1 in the shadow PTE together
+    with U=0.  If the guest has not enabled NX, the result is a continuous
+    stream of page faults due to the NX bit being reserved.
+    
+    The fix is to force EFER.NX=1 even if the CPU is taking care of the EFER
+    switch.  (All machines with SMEP have the CPU_LOAD_IA32_EFER vm-entry
+    control, so they do not use user-return notifiers for EFER---if they did,
+    EFER.NX would be forced to the same value as the host).
+    
+    There is another bug in the reserved bit check, which I've split to a
+    separate patch for easier application to stable kernels.
+    
+    Cc: stable@vger.kernel.org
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Reviewed-by: Xiao Guangrong <guangrong.xiao@linux.intel.com>
+    Fixes: f6577a5fa15d82217ca73c74cd2dcbc0f6c781dd
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ Documentation/virtual/kvm/mmu.txt |  3 ++-
+ arch/x86/kvm/vmx.c                | 36 +++++++++++++++++++++++-------------
+ 2 files changed, 25 insertions(+), 14 deletions(-)
+
+commit 802a88e57b141e9643e93afb7805813ad8da22f3
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Wed Mar 9 14:28:02 2016 +0100
+
+    KVM: MMU: fix reserved bit check for ept=0/CR0.WP=0/CR4.SMEP=1/EFER.NX=0
+    
+    KVM has special logic to handle pages with pte.u=1 and pte.w=0 when
+    CR0.WP=1.  These pages' SPTEs flip continuously between two states:
+    U=1/W=0 (user and supervisor reads allowed, supervisor writes not allowed)
+    and U=0/W=1 (supervisor reads and writes allowed, user writes not allowed).
+    
+    When SMEP is in effect, however, U=0 will enable kernel execution of
+    this page.  To avoid this, KVM also sets NX=1 in the shadow PTE together
+    with U=0, making the two states U=1/W=0/NX=gpte.NX and U=0/W=1/NX=1.
+    When guest EFER has the NX bit cleared, the reserved bit check thinks
+    that the latter state is invalid; teach it that the smep_andnot_wp case
+    will also use the NX bit of SPTEs.
+    
+    Cc: stable@vger.kernel.org
+    Reviewed-by: Xiao Guangrong <guangrong.xiao@linux.inel.com>
+    Fixes: c258b62b264fdc469b6d3610a907708068145e3b
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/mmu.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit 3925851224428c1d2bca32cf33821befb947c4f3
+Author: Ming Lei <ming.lei@canonical.com>
+Date:   Sat Mar 12 22:56:19 2016 +0800
+
+    block: don't optimize for non-cloned bio in bio_get_last_bvec()
+    
+    For !BIO_CLONED bio, we can use .bi_vcnt safely, but it
+    doesn't mean we can just simply return .bi_io_vec[.bi_vcnt - 1]
+    because the start postion may have been moved in the middle of
+    the bvec, such as splitting in the middle of bvec.
+    
+    Fixes: 7bcd79ac50d9(block: bio: introduce helpers to get the 1st and last bvec)
+    Cc: stable@vger.kernel.org
+    Reported-by: Kent Overstreet <kent.overstreet@gmail.com>
+    Signed-off-by: Ming Lei <ming.lei@canonical.com>
+    Signed-off-by: Jens Axboe <axboe@fb.com>
+
+ include/linux/bio.h | 5 -----
+ 1 file changed, 5 deletions(-)
+
+commit db541463b4a0926bebdbac743c8736fb9e903d58
+Author: Borislav Petkov <bp@alien8.de>
+Date:   Fri Mar 11 12:32:06 2016 +0100
+
+    x86/fpu: Fix eager-FPU handling on legacy FPU machines
+    
+    i486 derived cores like Intel Quark support only the very old,
+    legacy x87 FPU (FSAVE/FRSTOR, CPUID bit FXSR is not set), and
+    our FPU code wasn't handling the saving and restoring there
+    properly in the 'eagerfpu' case.
+    
+    So after we made eagerfpu the default for all CPU types:
+    
+      58122bf1d856 x86/fpu: Default eagerfpu=on on all CPUs
+    
+    these old FPU designs broke. First, Andy Shevchenko reported a splat:
+    
+      WARNING: CPU: 0 PID: 823 at arch/x86/include/asm/fpu/internal.h:163 fpu__clear+0x8c/0x160
+    
+    which was us trying to execute FXRSTOR on those machines even though
+    they don't support it.
+    
+    After taking care of that, Bryan O'Donoghue reported that a simple FPU
+    test still failed because we weren't initializing the FPU state properly
+    on those machines.
+    
+    Take care of all that.
+    
+    Reported-and-tested-by: Bryan O'Donoghue <pure.logic@nexus-software.ie>
+    Reported-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+    Signed-off-by: Borislav Petkov <bp@suse.de>
+    Acked-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: Dave Hansen <dave.hansen@linux.intel.com>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: Fenghua Yu <fenghua.yu@intel.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Quentin Casasnovas <quentin.casasnovas@oracle.com>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Yu-cheng <yu-cheng.yu@intel.com>
+    Link: http://lkml.kernel.org/r/20160311113206.GD4312@pd.tnic
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/kernel/fpu/core.c | 4 +++-
+ arch/x86/kernel/fpu/init.c | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 8fed14e935cb62d2d46e99793d728dc7760dcc87
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 13 11:35:56 2016 -0400
+
+    Compile fixes
+
+ fs/namei.c                 | 2 +-
+ grsecurity/grsec_chroot.c  | 2 +-
+ include/linux/grsecurity.h | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit aab25a3496c4683c5858056960010119fb7d9a5a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 13 10:53:59 2016 -0400
+
+    Use fput instead of put_filp()
+
+ fs/namei.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 928ddec9dfe5415dff82d941c3b3e76ee6f48761
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 13 10:30:54 2016 -0400
+
+    Update MPROTECT_COMPAT config description, disable by default
+
+ security/Kconfig | 18 ++++++------------
+ 1 file changed, 6 insertions(+), 12 deletions(-)
+
+commit 4cc29af2e81e7a4bdfab1afedfdedca6e23362d5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 13 10:35:55 2016 -0400
+
+    As reported by Jann Horn, chroot scenarios where the chrooting application
+    brings in a directory fd can be used to access any file outside of the chroot
+    via *at syscalls.  To maintain compatibility with Chromium and other apps,
+    we specifically only disallow relative accesses off a directory fd when the
+    final path is not located under that directory described by the fd and exists
+    outside of the chroot.  This additional restriction will exist under the
+    current GRKERNSEC_CHROOT_FCHDIR option.
+
+ fs/namei.c                 |  9 +++++++++
+ grsecurity/Kconfig         | 10 ++++++----
+ grsecurity/grsec_chroot.c  | 39 +++++++++++++++++++++++++++++++++++++++
+ include/linux/grmsg.h      |  1 +
+ include/linux/grsecurity.h |  1 +
+ 5 files changed, 56 insertions(+), 4 deletions(-)
+
 commit 7d02a991213f0b07a3677dcc93cdafc3ac309142
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Mar 10 22:17:16 2016 -0500
