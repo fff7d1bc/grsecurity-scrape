@@ -1,3 +1,59 @@
+commit 0d0ec9ee83144ab839710a01cfd746bd78257394
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 14 20:15:47 2016 -0400
+
+    Invert logic to clean up code
+
+ fs/namei.c                | 32 +++++++-------------------------
+ grsecurity/grsec_chroot.c | 10 +++++-----
+ 2 files changed, 12 insertions(+), 30 deletions(-)
+
+commit 39e0e623c84863af7b3ace759b583ff938fde2b7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 14 19:59:36 2016 -0400
+
+    compile fix
+
+ fs/namei.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+commit 2b3ad8bc095fea829275b7fcc7e5671677b8ed33
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 14 19:57:53 2016 -0400
+
+    Also handle renames
+
+ fs/namei.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+commit 54dfd13b19743d4a340de0cd5683b5bde44e7d9c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 14 19:45:56 2016 -0400
+
+    Add additional check to cover lookup family of functions
+
+ fs/namei.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+commit c3df846baa7873fb99401136f220676b87452918
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 14 18:42:37 2016 -0400
+
+    compile fix
+
+ fs/namei.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 384ea9c0ef9df4298dfa3a71948c08e70f1092bf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 14 18:34:40 2016 -0400
+
+    Fix recent chroot check on the create side, as reported by
+    Toralf Foerster
+
+ fs/namei.c | 26 ++++++++++++++++----------
+ 1 file changed, 16 insertions(+), 10 deletions(-)
+
 commit 82e7dc61a626c47887d392ff9cd35b104f01fd25
 Author: Paolo Bonzini <pbonzini@redhat.com>
 Date:   Tue Mar 8 12:13:39 2016 +0100
