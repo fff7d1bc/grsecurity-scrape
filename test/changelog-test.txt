@@ -1,3 +1,13 @@
+commit bb38a61b496a3f09f4d7b93d2f0fe15476918147
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 22 16:59:43 2016 -0400
+
+    Fix size_overflow FP reported by marcan at:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4426
+
+ net/ipv6/xfrm6_mode_transport.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 523a36a9c845da3051e58c6767c2e1a0f640998a
 Merge: 0d0ec9e c0b77a7
 Author: Brad Spengler <spender@grsecurity.net>
