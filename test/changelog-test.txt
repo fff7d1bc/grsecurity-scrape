@@ -1,3 +1,1021 @@
+commit bd893a75ab49f6ea5a216eb334471507337118ba
+Merge: 87b7f1d 4d8fc00
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 2 11:54:20 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 4d8fc00c0066b1921e233123b346efe6ffb27691
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 2 11:53:53 2016 -0400
+
+    Update to pax-linux-4.4.6-test13.patch:
+    - fixed a REFCOUNT related compile regression on mips, reported by Steve Arnold (https://bugs.gentoo.org/show_bug.cgi?id=578394)
+    - worked around an integer signedness mixup in md causing a size overflow false positive, reported by Ã‰tienne Buira (https://bugs.gentoo.org/show_bug.cgi?id=578502)
+
+ arch/mips/include/asm/atomic.h                                 | 4 ----
+ tools/gcc/size_overflow_plugin/disable_size_overflow_hash.data | 1 +
+ tools/gcc/size_overflow_plugin/size_overflow_hash.data         | 1 -
+ 3 files changed, 1 insertion(+), 5 deletions(-)
+
+commit 87b7f1d200023ba826b9d552834a2ee85e67526c
+Merge: 3335266 3abdad0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 2 11:19:17 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3abdad0c3b436c076c88289f07a250b811d6f79d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 2 11:12:56 2016 -0400
+
+    Update to pax-linux-4.4.6-test12.patch:
+    - fixed vmalloc_fault on i386/PAE to use the correct percpu userland pgd table/entry
+    - fixed a size overflow false positive report in pptp, reported by Pinkbyte (https://forums.grsecurity.net/viewtopic.php?f=3&t=4437)
+    - fixed a size overflow false positive report in tbf_segment, reported by audiocricket (https://forums.grsecurity.net/viewtopic.php?f=3&t=4438)
+    - Emese fixed the x86 vdso32 CFLAGS to omit the gcc plugins
+    - Emese simplified the gcc plugin related make rules, suggested by Masahiro Yamada
+    - AndrÃ© Fabian Silva Delgado fixed a compile regression on arm, reported by coadde (https://forums.grsecurity.net/viewtopic.php?f=3&t=4435)
+    - fixed an integer sign conversion error in nfs_super_set_maxbytes caught by the size overflow plugin, reported by Alexey Dvoichenkov <xale@hyperplane.net>
+    - fixed a size overflow false positive in squashfs, reported by Mathias Krause <minipli@ld-linux.so>
+    - fixed a size overflow false positive in xfrm6_transport_output, reported by marcan (https://forums.grsecurity.net/viewtopic.php?f=3&t=4426)
+    - fixed an integer truncation bug in elf_kcore_store_hdr caught by the size overflow plugin
+    - fixed a gratuitous userland dereference in the amd64 stack walker
+    - added latent entropy gathering to a few more functions
+    - constified a few smp_hotplug_thread instances
+
+ arch/x86/entry/vdso/Makefile                            |  1 +
+ arch/x86/include/asm/cpufeature.h                       |  1 -
+ arch/x86/kernel/dumpstack_64.c                          | 17 ++++++-----------
+ arch/x86/kernel/head_32.S                               |  6 +++---
+ arch/x86/mm/fault.c                                     |  2 +-
+ drivers/iommu/arm-smmu.c                                |  2 +-
+ drivers/net/ppp/pptp.c                                  |  1 +
+ drivers/staging/rdma/ehca/ehca_irq.c                    |  2 +-
+ fs/nfs/internal.h                                       |  5 +++--
+ fs/proc/kcore.c                                         |  2 +-
+ kernel/module.c                                         |  6 +++---
+ kernel/rcu/tree.c                                       |  2 +-
+ kernel/softirq.c                                        |  2 +-
+ kernel/stop_machine.c                                   |  2 +-
+ net/ipv6/xfrm6_mode_transport.c                         |  2 +-
+ net/sched/sch_tbf.c                                     |  9 ++++++---
+ scripts/Makefile.gcc-plugins                            | 13 +++----------
+ scripts/Makefile.host                                   |  3 +--
+ .../disable_size_overflow_hash.data                     |  4 +++-
+ tools/gcc/size_overflow_plugin/size_overflow_hash.data  |  6 ++----
+ 20 files changed, 40 insertions(+), 48 deletions(-)
+
+commit 3335266d5bec9bc01580736c0a7026ed96cf25e5
+Author: Mika Penttilä <mika.penttila@nextfour.com>
+Date:   Mon Feb 22 17:56:52 2016 +0100
+
+    ARM: 8544/1: set_memory_xx fixes
+    
+    Allow zero size updates. This makes set_memory_xx() consistent with x86, s390 and arm64 and makes apply_to_page_range() not to BUG() when loading modules.
+    
+    Signed-off-by: Mika Penttilä mika.penttila@nextfour.com
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+
+ arch/arm/mm/pageattr.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit d6d6499b22c0e5593a16f41c516041b23fbf9eeb
+Author: Josh Boyer <jwboyer@fedoraproject.org>
+Date:   Mon Mar 14 10:42:38 2016 -0400
+
+    USB: iowarrior: fix oops with malicious USB descriptors
+    
+    The iowarrior driver expects at least one valid endpoint.  If given
+    malicious descriptors that specify 0 for the number of endpoints,
+    it will crash in the probe function.  Ensure there is at least
+    one endpoint on the interface before using it.
+    
+    The full report of this issue can be found here:
+    http://seclists.org/bugtraq/2016/Mar/87
+    
+    Reported-by: Ralf Spenneberg <ralf@spenneberg.net>
+    Cc: stable <stable@vger.kernel.org>
+    Signed-off-by: Josh Boyer <jwboyer@fedoraproject.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/usb/misc/iowarrior.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit 79a1fb47ab1245e81040bcd45b3e44e65d282684
+Author: Oliver Neukum <oneukum@suse.com>
+Date:   Tue Mar 15 10:14:04 2016 +0100
+
+    USB: cdc-acm: more sanity checking
+    
+    An attack has become available which pretends to be a quirky
+    device circumventing normal sanity checks and crashes the kernel
+    by an insufficient number of interfaces. This patch adds a check
+    to the code path for quirky devices.
+    
+    Signed-off-by: Oliver Neukum <ONeukum@suse.com>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/usb/class/cdc-acm.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+commit 6ee21acdf0da6602671cb50edeca0abfba3955f7
+Author: Oliver Neukum <oneukum@suse.com>
+Date:   Wed Mar 16 13:26:17 2016 +0100
+
+    USB: usb_driver_claim_interface: add sanity checking
+    
+    Attacks that trick drivers into passing a NULL pointer
+    to usb_driver_claim_interface() using forged descriptors are
+    known. This thwarts them by sanity checking.
+    
+    Signed-off-by: Oliver Neukum <ONeukum@suse.com>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/usb/core/driver.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+commit 44247834ddab762509eaaf5c742e15bfadcd9d94
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Mon Mar 21 10:15:25 2016 +0100
+
+    KVM: fix spin_lock_init order on x86
+    
+    Moving the initialization earlier is needed in 4.6 because
+    kvm_arch_init_vm is now using mmu_lock, causing lockdep to
+    complain:
+    
+    [  284.440294] INFO: trying to register non-static key.
+    [  284.445259] the code is fine but needs lockdep annotation.
+    [  284.450736] turning off the locking correctness validator.
+    ...
+    [  284.528318]  [<ffffffff810aecc3>] lock_acquire+0xd3/0x240
+    [  284.533733]  [<ffffffffa0305aa0>] ? kvm_page_track_register_notifier+0x20/0x60 [kvm]
+    [  284.541467]  [<ffffffff81715581>] _raw_spin_lock+0x41/0x80
+    [  284.546960]  [<ffffffffa0305aa0>] ? kvm_page_track_register_notifier+0x20/0x60 [kvm]
+    [  284.554707]  [<ffffffffa0305aa0>] kvm_page_track_register_notifier+0x20/0x60 [kvm]
+    [  284.562281]  [<ffffffffa02ece70>] kvm_mmu_init_vm+0x20/0x30 [kvm]
+    [  284.568381]  [<ffffffffa02dbf7a>] kvm_arch_init_vm+0x1ea/0x200 [kvm]
+    [  284.574740]  [<ffffffffa02bff3f>] kvm_dev_ioctl+0xbf/0x4d0 [kvm]
+    
+    However, it also helps fixing a preexisting problem, which is why this
+    patch is also good for stable kernels: kvm_create_vm was incrementing
+    current->mm->mm_count but not decrementing it at the out_err label (in
+    case kvm_init_mmu_notifier failed).  The new initialization order makes
+    it possible to add the required mmdrop without adding a new error label.
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Borislav Petkov <bp@alien8.de>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ virt/kvm/kvm_main.c | 21 +++++++++++----------
+ 1 file changed, 11 insertions(+), 10 deletions(-)
+
+commit 9d0cf281d74a9fe490f3ba5ca3d0e57eac066e1c
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Fri Mar 18 16:53:42 2016 +0100
+
+    KVM: VMX: avoid guest hang on invalid invvpid instruction
+    
+    A guest executing an invalid invvpid instruction would hang
+    because the instruction pointer was not updated.
+    
+    Reported-by: jmontleo@redhat.com
+    Tested-by: jmontleo@redhat.com
+    Cc: stable@vger.kernel.org
+    Fixes: 99b83ac893b84ed1a62ad6d1f2b6cc32026b9e85
+    Reviewed-by: David Matlack <dmatlack@google.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/vmx.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 602caaece277e5e21ae43771398bbf7778061beb
+Author: Paolo Bonzini <pbonzini@redhat.com>
+Date:   Fri Mar 18 16:53:29 2016 +0100
+
+    KVM: VMX: avoid guest hang on invalid invept instruction
+    
+    A guest executing an invalid invept instruction would hang
+    because the instruction pointer was not updated.
+    
+    Cc: stable@vger.kernel.org
+    Fixes: bfd0a56b90005f8c8a004baf407ad90045c2b11e
+    Reviewed-by: David Matlack <dmatlack@google.com>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/vmx.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 3309ac82d6596de8abc6ea51dd0a942416da1cc1
+Author: Jann Horn <jann@thejh.net>
+Date:   Tue Mar 22 14:25:36 2016 -0700
+
+    fs/coredump: prevent fsuid=0 dumps into user-controlled directories
+    
+    This commit fixes the following security hole affecting systems where
+    all of the following conditions are fulfilled:
+    
+     - The fs.suid_dumpable sysctl is set to 2.
+     - The kernel.core_pattern sysctl's value starts with "/". (Systems
+       where kernel.core_pattern starts with "|/" are not affected.)
+     - Unprivileged user namespace creation is permitted. (This is
+       true on Linux >=3.8, but some distributions disallow it by
+       default using a distro patch.)
+    
+    Under these conditions, if a program executes under secure exec rules,
+    causing it to run with the SUID_DUMP_ROOT flag, then unshares its user
+    namespace, changes its root directory and crashes, the coredump will be
+    written using fsuid=0 and a path derived from kernel.core_pattern - but
+    this path is interpreted relative to the root directory of the process,
+    allowing the attacker to control where a coredump will be written with
+    root privileges.
+    
+    To fix the security issue, always interpret core_pattern for dumps that
+    are written under SUID_DUMP_ROOT relative to the root directory of init.
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Acked-by: Kees Cook <keescook@chromium.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: "Eric W. Biederman" <ebiederm@xmission.com>
+    Cc: Andy Lutomirski <luto@kernel.org>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/um/drivers/mconsole_kern.c |  2 +-
+ fs/coredump.c                   | 31 +++++++++++++++++++++++++++----
+ fs/fhandle.c                    |  2 +-
+ fs/open.c                       |  6 ++----
+ include/linux/fs.h              |  2 +-
+ kernel/sysctl_binary.c          |  2 +-
+ 6 files changed, 33 insertions(+), 12 deletions(-)
+
+commit a7c8d3c91a3e50d0873942f09afbb5071382d5e7
+Author: Takashi Iwai <tiwai@suse.de>
+Date:   Fri Apr 1 12:28:16 2016 +0200
+
+    ALSA: timer: Use mod_timer() for rearming the system timer
+    
+    ALSA system timer backend stops the timer via del_timer() without sync
+    and leaves del_timer_sync() at the close instead.  This is because of
+    the restriction by the design of ALSA timer: namely, the stop callback
+    may be called from the timer handler, and calling the sync shall lead
+    to a hangup.  However, this also triggers a kernel BUG() when the
+    timer is rearmed immediately after stopping without sync:
+     kernel BUG at kernel/time/timer.c:966!
+     Call Trace:
+      <IRQ>
+      [<ffffffff8239c94e>] snd_timer_s_start+0x13e/0x1a0
+      [<ffffffff8239e1f4>] snd_timer_interrupt+0x504/0xec0
+      [<ffffffff8122fca0>] ? debug_check_no_locks_freed+0x290/0x290
+      [<ffffffff8239ec64>] snd_timer_s_function+0xb4/0x120
+      [<ffffffff81296b72>] call_timer_fn+0x162/0x520
+      [<ffffffff81296add>] ? call_timer_fn+0xcd/0x520
+      [<ffffffff8239ebb0>] ? snd_timer_interrupt+0xec0/0xec0
+      ....
+    
+    It's the place where add_timer() checks the pending timer.  It's clear
+    that this may happen after the immediate restart without sync in our
+    cases.
+    
+    So, the workaround here is just to use mod_timer() instead of
+    add_timer().  This looks like a band-aid fix, but it's a right move,
+    as snd_timer_interrupt() takes care of the continuous rearm of timer.
+    
+    Reported-by: Jiri Slaby <jslaby@suse.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/timer.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 2de05c5fc90b461d78a54a7240b664a068844c8c
+Author: Daniel Vetter <daniel.vetter@ffwll.ch>
+Date:   Wed Mar 30 11:40:43 2016 +0200
+
+    drm/udl: Use unlocked gem unreferencing
+    
+    For drm_gem_object_unreference callers are required to hold
+    dev->struct_mutex, which these paths don't. Enforcing this requirement
+    has become a bit more strict with
+    
+    commit ef4c6270bf2867e2f8032e9614d1a8cfc6c71663
+    Author: Daniel Vetter <daniel.vetter@ffwll.ch>
+    Date:   Thu Oct 15 09:36:25 2015 +0200
+    
+        drm/gem: Check locking in drm_gem_object_unreference
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Daniel Vetter <daniel.vetter@intel.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+ drivers/gpu/drm/udl/udl_fb.c  | 2 +-
+ drivers/gpu/drm/udl/udl_gem.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit c8153b6b1731b8fee33966dd8d148643240f1dc0
+Author: Jan Kara <jack@suse.com>
+Date:   Mon Dec 7 14:34:49 2015 -0500
+
+    ext4: fix races of writeback with punch hole and zero range
+    
+    When doing delayed allocation, update of on-disk inode size is postponed
+    until IO submission time. However hole punch or zero range fallocate
+    calls can end up discarding the tail page cache page and thus on-disk
+    inode size would never be properly updated.
+    
+    Make sure the on-disk inode size is updated before truncating page
+    cache.
+    
+    Signed-off-by: Jan Kara <jack@suse.com>
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+ fs/ext4/ext4.h    |  3 +++
+ fs/ext4/extents.c |  5 +++++
+ fs/ext4/inode.c   | 35 ++++++++++++++++++++++++++++++++++-
+ 3 files changed, 42 insertions(+), 1 deletion(-)
+
+commit d64beb441579f2667e99eb9d4d6e83deb88bf59b
+Author: Jan Kara <jack@suse.com>
+Date:   Mon Dec 7 14:31:11 2015 -0500
+
+    ext4: fix races between buffered IO and collapse / insert range
+    
+    Current code implementing FALLOC_FL_COLLAPSE_RANGE and
+    FALLOC_FL_INSERT_RANGE is prone to races with buffered writes and page
+    faults. If buffered write or write via mmap manages to squeeze between
+    filemap_write_and_wait_range() and truncate_pagecache() in the fallocate
+    implementations, the written data is simply discarded by
+    truncate_pagecache() although it should have been shifted.
+    
+    Fix the problem by moving filemap_write_and_wait_range() call inside
+    i_mutex and i_mmap_sem. That way we are protected against races with
+    both buffered writes and page faults.
+    
+    Signed-off-by: Jan Kara <jack@suse.com>
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+ fs/ext4/extents.c | 59 +++++++++++++++++++++++++++++--------------------------
+ 1 file changed, 31 insertions(+), 28 deletions(-)
+
+commit b1ae49aa4dad39233b16456e0765a23ba4e0546c
+Author: Jan Kara <jack@suse.com>
+Date:   Mon Dec 7 14:29:17 2015 -0500
+
+    ext4: move unlocked dio protection from ext4_alloc_file_blocks()
+    
+    Currently ext4_alloc_file_blocks() was handling protection against
+    unlocked DIO. However we now need to sometimes call it under i_mmap_sem
+    and sometimes not and DIO protection ranks above it (although strictly
+    speaking this cannot currently create any deadlocks). Also
+    ext4_zero_range() was actually getting & releasing unlocked DIO
+    protection twice in some cases. Luckily it didn't introduce any real bug
+    but it was a land mine waiting to be stepped on.  So move DIO protection
+    out from ext4_alloc_file_blocks() into the two callsites.
+    
+    Signed-off-by: Jan Kara <jack@suse.com>
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+ fs/ext4/extents.c | 21 ++++++++++-----------
+ 1 file changed, 10 insertions(+), 11 deletions(-)
+
+commit f9329a4ec30a26f0fababf809c5f1a3ef851b625
+Author: Jan Kara <jack@suse.com>
+Date:   Mon Dec 7 14:28:03 2015 -0500
+
+    ext4: fix races between page faults and hole punching
+    
+    Currently, page faults and hole punching are completely unsynchronized.
+    This can result in page fault faulting in a page into a range that we
+    are punching after truncate_pagecache_range() has been called and thus
+    we can end up with a page mapped to disk blocks that will be shortly
+    freed. Filesystem corruption will shortly follow. Note that the same
+    race is avoided for truncate by checking page fault offset against
+    i_size but there isn't similar mechanism available for punching holes.
+    
+    Fix the problem by creating new rw semaphore i_mmap_sem in inode and
+    grab it for writing over truncate, hole punching, and other functions
+    removing blocks from extent tree and for read over page faults. We
+    cannot easily use i_data_sem for this since that ranks below transaction
+    start and we need something ranking above it so that it can be held over
+    the whole truncate / hole punching operation. Also remove various
+    workarounds we had in the code to reduce race window when page fault
+    could have created pages with stale mapping information.
+    
+    Signed-off-by: Jan Kara <jack@suse.com>
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+ fs/ext4/ext4.h     | 10 +++++++++
+ fs/ext4/extents.c  | 54 ++++++++++++++++++++++++--------------------
+ fs/ext4/file.c     | 66 ++++++++++++++++++++++++++++++++++++++++++++++--------
+ fs/ext4/inode.c    | 36 +++++++++++++++++++++--------
+ fs/ext4/super.c    |  1 +
+ fs/ext4/truncate.h |  2 ++
+ 6 files changed, 127 insertions(+), 42 deletions(-)
+
+commit 572a615b85c1d5c8aeea4ffd24ab428775a1cca9
+Author: Guenter Roeck <linux@roeck-us.net>
+Date:   Sat Mar 26 12:28:05 2016 -0700
+
+    hwmon: (max1111) Return -ENODEV from max1111_read_channel if not instantiated
+    
+    arm:pxa_defconfig can result in the following crash if the max1111 driver
+    is not instantiated.
+    
+    Unhandled fault: page domain fault (0x01b) at 0x00000000
+    pgd = c0004000
+    [00000000] *pgd=00000000
+    Internal error: : 1b [#1] PREEMPT ARM
+    Modules linked in:
+    CPU: 0 PID: 300 Comm: kworker/0:1 Not tainted 4.5.0-01301-g1701f680407c #10
+    Hardware name: SHARP Akita
+    Workqueue: events sharpsl_charge_toggle
+    task: c390a000 ti: c391e000 task.ti: c391e000
+    PC is at max1111_read_channel+0x20/0x30
+    LR is at sharpsl_pm_pxa_read_max1111+0x2c/0x3c
+    pc : [<c03aaab0>]    lr : [<c0024b50>]    psr: 20000013
+    ...
+    [<c03aaab0>] (max1111_read_channel) from [<c0024b50>]
+    					(sharpsl_pm_pxa_read_max1111+0x2c/0x3c)
+    [<c0024b50>] (sharpsl_pm_pxa_read_max1111) from [<c00262e0>]
+    					(spitzpm_read_devdata+0x5c/0xc4)
+    [<c00262e0>] (spitzpm_read_devdata) from [<c0024094>]
+    					(sharpsl_check_battery_temp+0x78/0x110)
+    [<c0024094>] (sharpsl_check_battery_temp) from [<c0024f9c>]
+    					(sharpsl_charge_toggle+0x48/0x110)
+    [<c0024f9c>] (sharpsl_charge_toggle) from [<c004429c>]
+    					(process_one_work+0x14c/0x48c)
+    [<c004429c>] (process_one_work) from [<c0044618>] (worker_thread+0x3c/0x5d4)
+    [<c0044618>] (worker_thread) from [<c004a238>] (kthread+0xd0/0xec)
+    [<c004a238>] (kthread) from [<c000a670>] (ret_from_fork+0x14/0x24)
+    
+    This can occur because the SPI controller driver (SPI_PXA2XX) is built as
+    module and thus not necessarily loaded. While building SPI_PXA2XX into the
+    kernel would make the problem disappear, it appears prudent to ensure that
+    the driver is instantiated before accessing its data structures.
+    
+    Cc: Arnd Bergmann <arnd@arndb.de>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+
+ drivers/hwmon/max1111.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit f75f1af7a0b4be055855ca5120ee78174f3370f2
+Author: Nicolai Stange <nicstange@gmail.com>
+Date:   Sun Mar 20 23:23:46 2016 +0100
+
+    PKCS#7: pkcs7_validate_trust(): initialize the _trusted output argument
+    
+    Despite what the DocBook comment to pkcs7_validate_trust() says, the
+    *_trusted argument is never set to false.
+    
+    pkcs7_validate_trust() only positively sets *_trusted upon encountering
+    a trusted PKCS#7 SignedInfo block.
+    
+    This is quite unfortunate since its callers, system_verify_data() for
+    example, depend on pkcs7_validate_trust() clearing *_trusted on non-trust.
+    
+    Indeed, UBSAN splats when attempting to load the uninitialized local
+    variable 'trusted' from system_verify_data() in pkcs7_validate_trust():
+    
+      UBSAN: Undefined behaviour in crypto/asymmetric_keys/pkcs7_trust.c:194:14
+      load of value 82 is not a valid value for type '_Bool'
+      [...]
+      Call Trace:
+        [<ffffffff818c4d35>] dump_stack+0xbc/0x117
+        [<ffffffff818c4c79>] ? _atomic_dec_and_lock+0x169/0x169
+        [<ffffffff8194113b>] ubsan_epilogue+0xd/0x4e
+        [<ffffffff819419fa>] __ubsan_handle_load_invalid_value+0x111/0x158
+        [<ffffffff819418e9>] ? val_to_string.constprop.12+0xcf/0xcf
+        [<ffffffff818334a4>] ? x509_request_asymmetric_key+0x114/0x370
+        [<ffffffff814b83f0>] ? kfree+0x220/0x370
+        [<ffffffff818312c2>] ? public_key_verify_signature_2+0x32/0x50
+        [<ffffffff81835e04>] pkcs7_validate_trust+0x524/0x5f0
+        [<ffffffff813c391a>] system_verify_data+0xca/0x170
+        [<ffffffff813c3850>] ? top_trace_array+0x9b/0x9b
+        [<ffffffff81510b29>] ? __vfs_read+0x279/0x3d0
+        [<ffffffff8129372f>] mod_verify_sig+0x1ff/0x290
+        [...]
+    
+    The implication is that pkcs7_validate_trust() effectively grants trust
+    when it really shouldn't have.
+    
+    Fix this by explicitly setting *_trusted to false at the very beginning
+    of pkcs7_validate_trust().
+    
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Nicolai Stange <nicstange@gmail.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ crypto/asymmetric_keys/pkcs7_trust.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 1052826f7352ccc98167129b0b83222f45d50046
+Author: Florian Westphal <fw@strlen.de>
+Date:   Tue Mar 22 18:02:49 2016 +0100
+
+    netfilter: x_tables: validate e->target_offset early
+    
+    We should check that e->target_offset is sane before
+    mark_source_chains gets called since it will fetch the target entry
+    for loop detection.
+    
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/ipv4/netfilter/arp_tables.c | 17 ++++++++---------
+ net/ipv4/netfilter/ip_tables.c  | 17 ++++++++---------
+ net/ipv6/netfilter/ip6_tables.c | 17 ++++++++---------
+ 3 files changed, 24 insertions(+), 27 deletions(-)
+
+commit b35d19509e8dab157214e46dd24314663ccf554f
+Author: Florian Westphal <fw@strlen.de>
+Date:   Tue Mar 22 18:02:50 2016 +0100
+
+    netfilter: x_tables: make sure e->next_offset covers remaining blob size
+    
+    Otherwise this function may read data beyond the ruleset blob.
+    
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/ipv4/netfilter/arp_tables.c | 6 ++++--
+ net/ipv4/netfilter/ip_tables.c  | 6 ++++--
+ net/ipv6/netfilter/ip6_tables.c | 6 ++++--
+ 3 files changed, 12 insertions(+), 6 deletions(-)
+
+commit 4d7642ed66b69140733a7b51fcd6d37ce4d4514c
+Author: Florian Westphal <fw@strlen.de>
+Date:   Tue Mar 22 18:02:52 2016 +0100
+
+    netfilter: x_tables: fix unconditional helper
+    
+    Ben Hawkes says:
+    
+     In the mark_source_chains function (net/ipv4/netfilter/ip_tables.c) it
+     is possible for a user-supplied ipt_entry structure to have a large
+     next_offset field. This field is not bounds checked prior to writing a
+     counter value at the supplied offset.
+    
+    Problem is that mark_source_chains should not have been called --
+    the rule doesn't have a next entry, so its supposed to return
+    an absolute verdict of either ACCEPT or DROP.
+    
+    However, the function conditional() doesn't work as the name implies.
+    It only checks that the rule is using wildcard address matching.
+    
+    However, an unconditional rule must also not be using any matches
+    (no -m args).
+    
+    The underflow validator only checked the addresses, therefore
+    passing the 'unconditional absolute verdict' test, while
+    mark_source_chains also tested for presence of matches, and thus
+    proceeeded to the next (not-existent) rule.
+    
+    Unify this so that all the callers have same idea of 'unconditional rule'.
+    
+    Reported-by: Ben Hawkes <hawkes@google.com>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/ipv4/netfilter/arp_tables.c | 18 +++++++++---------
+ net/ipv4/netfilter/ip_tables.c  | 23 +++++++++++------------
+ net/ipv6/netfilter/ip6_tables.c | 23 +++++++++++------------
+ 3 files changed, 31 insertions(+), 33 deletions(-)
+
+commit e3e51682563f1453dfc4b9ef88b29af4d1a78e78
+Author: Pablo Neira Ayuso <pablo@netfilter.org>
+Date:   Thu Mar 24 21:29:53 2016 +0100
+
+    netfilter: x_tables: enforce nul-terminated table name from getsockopt GET_ENTRIES
+    
+    Make sure the table names via getsockopt GET_ENTRIES is nul-terminated
+    in ebtables and all the x_tables variants and their respective compat
+    code. Uncovered by KASAN.
+    
+    Reported-by: Baozeng Ding <sploving1@gmail.com>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ net/bridge/netfilter/ebtables.c | 4 ++++
+ net/ipv4/netfilter/arp_tables.c | 2 ++
+ net/ipv4/netfilter/ip_tables.c  | 2 ++
+ net/ipv6/netfilter/ip6_tables.c | 2 ++
+ 4 files changed, 10 insertions(+)
+
+commit 7742471b674597627f8f608f6a89c6e5bbd6533d
+Author: Nicolai Stange <nicstange@gmail.com>
+Date:   Fri Mar 25 14:22:14 2016 -0700
+
+    mm/filemap: generic_file_read_iter(): check for zero reads unconditionally
+    
+    If
+     - generic_file_read_iter() gets called with a zero read length,
+     - the read offset is at a page boundary,
+     - IOCB_DIRECT is not set
+    -  and the page in question hasn't made it into the page cache yet,
+    then do_generic_file_read() will trigger a readahead with a req_size hint
+    of zero.
+    
+    Since roundup_pow_of_two(0) is undefined, UBSAN reports
+    
+      UBSAN: Undefined behaviour in include/linux/log2.h:63:13
+      shift exponent 64 is too large for 64-bit type 'long unsigned int'
+      CPU: 3 PID: 1017 Comm: sa1 Tainted: G L 4.5.0-next-20160318+ #14
+      [...]
+      Call Trace:
+       [...]
+       [<ffffffff813ef61a>] ondemand_readahead+0x3aa/0x3d0
+       [<ffffffff813ef61a>] ? ondemand_readahead+0x3aa/0x3d0
+       [<ffffffff813c73bd>] ? find_get_entry+0x2d/0x210
+       [<ffffffff813ef9c3>] page_cache_sync_readahead+0x63/0xa0
+       [<ffffffff813cc04d>] do_generic_file_read+0x80d/0xf90
+       [<ffffffff813cc955>] generic_file_read_iter+0x185/0x420
+       [...]
+       [<ffffffff81510b06>] __vfs_read+0x256/0x3d0
+       [...]
+    
+    when get_init_ra_size() gets called from ondemand_readahead().
+    
+    The net effect is that the initial readahead size is arch dependent for
+    requested read lengths of zero: for example, since
+    
+      1UL << (sizeof(unsigned long) * 8)
+    
+    evaluates to 1 on x86 while its result is 0 on ARMv7, the initial readahead
+    size becomes 4 on the former and 0 on the latter.
+    
+    What's more, whether or not the file access timestamp is updated for zero
+    length reads is decided differently for the two cases of IOCB_DIRECT
+    being set or cleared: in the first case, generic_file_read_iter()
+    explicitly skips updating that timestamp while in the latter case, it is
+    always updated through the call to do_generic_file_read().
+    
+    According to POSIX, zero length reads "do not modify the last data access
+    timestamp" and thus, the IOCB_DIRECT behaviour is POSIXly correct.
+    
+    Let generic_file_read_iter() unconditionally check the requested read
+    length at its entry and return immediately with success if it is zero.
+    
+    Signed-off-by: Nicolai Stange <nicstange@gmail.com>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Reviewed-by: Jan Kara <jack@suse.cz>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/filemap.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+commit 604785419da498d7e876a0191b2e11626db706bb
+Author: Oliver Neukum <oneukum@suse.com>
+Date:   Thu Mar 17 14:00:17 2016 -0700
+
+    Input: ims-pcu - sanity check against missing interfaces
+    
+    A malicious device missing interface can make the driver oops.
+    Add sanity checking.
+    
+    Signed-off-by: Oliver Neukum <ONeukum@suse.com>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+
+ drivers/input/misc/ims-pcu.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit 24c3f4f6652f07eb2c3deea1488ff4de00592e80
+Author: Vladis Dronov <vdronov@redhat.com>
+Date:   Wed Mar 23 11:53:46 2016 -0700
+
+    Input: ati_remote2 - fix crashes on detecting device with invalid descriptor
+    
+    The ati_remote2 driver expects at least two interfaces with one
+    endpoint each. If given malicious descriptor that specify one
+    interface or no endpoints, it will crash in the probe function.
+    Ensure there is at least two interfaces and one endpoint for each
+    interface before using it.
+    
+    The full disclosure: http://seclists.org/bugtraq/2016/Mar/90
+    
+    Reported-by: Ralf Spenneberg <ralf@spenneberg.net>
+    Signed-off-by: Vladis Dronov <vdronov@redhat.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+
+ drivers/input/misc/ati_remote2.c | 36 ++++++++++++++++++++++++++++++------
+ 1 file changed, 30 insertions(+), 6 deletions(-)
+
+commit 262df604d00e72a4b930fbf7fe3a770f0196a5a5
+Author: Oliver Neukum <oneukum@suse.com>
+Date:   Wed Mar 23 14:36:56 2016 -0700
+
+    Input: sur40 - fix DMA on stack
+    
+    During the initialisation the driver uses a buffer on the stack for DMA.
+    That violates the cache coherency rules. The fix is to allocate the buffer
+    with kmalloc().
+    
+    Signed-off-by: Oliver Neukum <ONeukum@suse.com>
+    Signed-off-by: Dmitry Torokhov <dmitry.torokhov@gmail.com>
+
+ drivers/input/touchscreen/sur40.c | 21 ++++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
+
+commit 015dd03669b2ab646723f6b123377e4ef5694a10
+Author: Haiyang Zhang <haiyangz@microsoft.com>
+Date:   Wed Mar 23 09:43:10 2016 -0700
+
+    hv_netvsc: Fix the array sizes to be max supported channels
+    
+    The VRSS_CHANNEL_MAX is the max number of channels supported by Hyper-V
+    hosts. We use it for the related array sizes instead of using NR_CPUS,
+    which may be set to several thousands.
+    This patch reduces possible memory allocation failures.
+    
+    Signed-off-by: Haiyang Zhang <haiyangz@microsoft.com>
+    Reviewed-by: K. Y. Srinivasan <kys@microsoft.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hyperv/hyperv_net.h   | 7 ++++---
+ drivers/net/hyperv/rndis_filter.c | 4 ++--
+ 2 files changed, 6 insertions(+), 5 deletions(-)
+
+commit a850a78d6393ef22a970266cbbefdf3dba0267b5
+Author: Haiyang Zhang <haiyangz@microsoft.com>
+Date:   Wed Mar 23 09:43:09 2016 -0700
+
+    hv_netvsc: Fix accessing freed memory in netvsc_change_mtu()
+    
+    struct netvsc_device is freed in rndis_filter_device_remove(). So we save
+    the nvdev->num_chn into a temp variable for later usage.
+    
+    (Please also include this patch into stable branch.)
+    
+    Signed-off-by: Haiyang Zhang <haiyangz@microsoft.com>
+    Reviewed-by: K. Y. Srinivasan <kys@microsoft.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hyperv/netvsc_drv.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+commit 7409626e43fe871cede30ac926425938f3ccddaf
+Author: Guillaume Nault <g.nault@alphalink.fr>
+Date:   Wed Mar 23 16:38:55 2016 +0100
+
+    ppp: take reference on channels netns
+    
+    Let channels hold a reference on their network namespace.
+    Some channel types, like ppp_async and ppp_synctty, can have their
+    userspace controller running in a different namespace. Therefore they
+    can't rely on them to preclude their netns from being removed from
+    under them.
+    
+    ==================================================================
+    BUG: KASAN: use-after-free in ppp_unregister_channel+0x372/0x3a0 at
+    addr ffff880064e217e0
+    Read of size 8 by task syz-executor/11581
+    =============================================================================
+    BUG net_namespace (Not tainted): kasan: bad access detected
+    -----------------------------------------------------------------------------
+    
+    Disabling lock debugging due to kernel taint
+    INFO: Allocated in copy_net_ns+0x6b/0x1a0 age=92569 cpu=3 pid=6906
+    [<      none      >] ___slab_alloc+0x4c7/0x500 kernel/mm/slub.c:2440
+    [<      none      >] __slab_alloc+0x4c/0x90 kernel/mm/slub.c:2469
+    [<     inline     >] slab_alloc_node kernel/mm/slub.c:2532
+    [<     inline     >] slab_alloc kernel/mm/slub.c:2574
+    [<      none      >] kmem_cache_alloc+0x23a/0x2b0 kernel/mm/slub.c:2579
+    [<     inline     >] kmem_cache_zalloc kernel/include/linux/slab.h:597
+    [<     inline     >] net_alloc kernel/net/core/net_namespace.c:325
+    [<      none      >] copy_net_ns+0x6b/0x1a0 kernel/net/core/net_namespace.c:360
+    [<      none      >] create_new_namespaces+0x2f6/0x610 kernel/kernel/nsproxy.c:95
+    [<      none      >] copy_namespaces+0x297/0x320 kernel/kernel/nsproxy.c:150
+    [<      none      >] copy_process.part.35+0x1bf4/0x5760 kernel/kernel/fork.c:1451
+    [<     inline     >] copy_process kernel/kernel/fork.c:1274
+    [<      none      >] _do_fork+0x1bc/0xcb0 kernel/kernel/fork.c:1723
+    [<     inline     >] SYSC_clone kernel/kernel/fork.c:1832
+    [<      none      >] SyS_clone+0x37/0x50 kernel/kernel/fork.c:1826
+    [<      none      >] entry_SYSCALL_64_fastpath+0x16/0x7a kernel/arch/x86/entry/entry_64.S:185
+    
+    INFO: Freed in net_drop_ns+0x67/0x80 age=575 cpu=2 pid=2631
+    [<      none      >] __slab_free+0x1fc/0x320 kernel/mm/slub.c:2650
+    [<     inline     >] slab_free kernel/mm/slub.c:2805
+    [<      none      >] kmem_cache_free+0x2a0/0x330 kernel/mm/slub.c:2814
+    [<     inline     >] net_free kernel/net/core/net_namespace.c:341
+    [<      none      >] net_drop_ns+0x67/0x80 kernel/net/core/net_namespace.c:348
+    [<      none      >] cleanup_net+0x4e5/0x600 kernel/net/core/net_namespace.c:448
+    [<      none      >] process_one_work+0x794/0x1440 kernel/kernel/workqueue.c:2036
+    [<      none      >] worker_thread+0xdb/0xfc0 kernel/kernel/workqueue.c:2170
+    [<      none      >] kthread+0x23f/0x2d0 kernel/drivers/block/aoe/aoecmd.c:1303
+    [<      none      >] ret_from_fork+0x3f/0x70 kernel/arch/x86/entry/entry_64.S:468
+    INFO: Slab 0xffffea0001938800 objects=3 used=0 fp=0xffff880064e20000
+    flags=0x5fffc0000004080
+    INFO: Object 0xffff880064e20000 @offset=0 fp=0xffff880064e24200
+    
+    CPU: 1 PID: 11581 Comm: syz-executor Tainted: G    B           4.4.0+
+    Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS
+    rel-1.8.2-0-g33fbe13 by qemu-project.org 04/01/2014
+     00000000ffffffff ffff8800662c7790 ffffffff8292049d ffff88003e36a300
+     ffff880064e20000 ffff880064e20000 ffff8800662c77c0 ffffffff816f2054
+     ffff88003e36a300 ffffea0001938800 ffff880064e20000 0000000000000000
+    Call Trace:
+     [<     inline     >] __dump_stack kernel/lib/dump_stack.c:15
+     [<ffffffff8292049d>] dump_stack+0x6f/0xa2 kernel/lib/dump_stack.c:50
+     [<ffffffff816f2054>] print_trailer+0xf4/0x150 kernel/mm/slub.c:654
+     [<ffffffff816f875f>] object_err+0x2f/0x40 kernel/mm/slub.c:661
+     [<     inline     >] print_address_description kernel/mm/kasan/report.c:138
+     [<ffffffff816fb0c5>] kasan_report_error+0x215/0x530 kernel/mm/kasan/report.c:236
+     [<     inline     >] kasan_report kernel/mm/kasan/report.c:259
+     [<ffffffff816fb4de>] __asan_report_load8_noabort+0x3e/0x40 kernel/mm/kasan/report.c:280
+     [<     inline     >] ? ppp_pernet kernel/include/linux/compiler.h:218
+     [<ffffffff83ad71b2>] ? ppp_unregister_channel+0x372/0x3a0 kernel/drivers/net/ppp/ppp_generic.c:2392
+     [<     inline     >] ppp_pernet kernel/include/linux/compiler.h:218
+     [<ffffffff83ad71b2>] ppp_unregister_channel+0x372/0x3a0 kernel/drivers/net/ppp/ppp_generic.c:2392
+     [<     inline     >] ? ppp_pernet kernel/drivers/net/ppp/ppp_generic.c:293
+     [<ffffffff83ad6f26>] ? ppp_unregister_channel+0xe6/0x3a0 kernel/drivers/net/ppp/ppp_generic.c:2392
+     [<ffffffff83ae18f3>] ppp_asynctty_close+0xa3/0x130 kernel/drivers/net/ppp/ppp_async.c:241
+     [<ffffffff83ae1850>] ? async_lcp_peek+0x5b0/0x5b0 kernel/drivers/net/ppp/ppp_async.c:1000
+     [<ffffffff82c33239>] tty_ldisc_close.isra.1+0x99/0xe0 kernel/drivers/tty/tty_ldisc.c:478
+     [<ffffffff82c332c0>] tty_ldisc_kill+0x40/0x170 kernel/drivers/tty/tty_ldisc.c:744
+     [<ffffffff82c34943>] tty_ldisc_release+0x1b3/0x260 kernel/drivers/tty/tty_ldisc.c:772
+     [<ffffffff82c1ef21>] tty_release+0xac1/0x13e0 kernel/drivers/tty/tty_io.c:1901
+     [<ffffffff82c1e460>] ? release_tty+0x320/0x320 kernel/drivers/tty/tty_io.c:1688
+     [<ffffffff8174de36>] __fput+0x236/0x780 kernel/fs/file_table.c:208
+     [<ffffffff8174e405>] ____fput+0x15/0x20 kernel/fs/file_table.c:244
+     [<ffffffff813595ab>] task_work_run+0x16b/0x200 kernel/kernel/task_work.c:115
+     [<     inline     >] exit_task_work kernel/include/linux/task_work.h:21
+     [<ffffffff81307105>] do_exit+0x8b5/0x2c60 kernel/kernel/exit.c:750
+     [<ffffffff813fdd20>] ? debug_check_no_locks_freed+0x290/0x290 kernel/kernel/locking/lockdep.c:4123
+     [<ffffffff81306850>] ? mm_update_next_owner+0x6f0/0x6f0 kernel/kernel/exit.c:357
+     [<ffffffff813215e6>] ? __dequeue_signal+0x136/0x470 kernel/kernel/signal.c:550
+     [<ffffffff8132067b>] ? recalc_sigpending_tsk+0x13b/0x180 kernel/kernel/signal.c:145
+     [<ffffffff81309628>] do_group_exit+0x108/0x330 kernel/kernel/exit.c:880
+     [<ffffffff8132b9d4>] get_signal+0x5e4/0x14f0 kernel/kernel/signal.c:2307
+     [<     inline     >] ? kretprobe_table_lock kernel/kernel/kprobes.c:1113
+     [<ffffffff8151d355>] ? kprobe_flush_task+0xb5/0x450 kernel/kernel/kprobes.c:1158
+     [<ffffffff8115f7d3>] do_signal+0x83/0x1c90 kernel/arch/x86/kernel/signal.c:712
+     [<ffffffff8151d2a0>] ? recycle_rp_inst+0x310/0x310 kernel/include/linux/list.h:655
+     [<ffffffff8115f750>] ? setup_sigcontext+0x780/0x780 kernel/arch/x86/kernel/signal.c:165
+     [<ffffffff81380864>] ? finish_task_switch+0x424/0x5f0 kernel/kernel/sched/core.c:2692
+     [<     inline     >] ? finish_lock_switch kernel/kernel/sched/sched.h:1099
+     [<ffffffff81380560>] ? finish_task_switch+0x120/0x5f0 kernel/kernel/sched/core.c:2678
+     [<     inline     >] ? context_switch kernel/kernel/sched/core.c:2807
+     [<ffffffff85d794e9>] ? __schedule+0x919/0x1bd0 kernel/kernel/sched/core.c:3283
+     [<ffffffff81003901>] exit_to_usermode_loop+0xf1/0x1a0 kernel/arch/x86/entry/common.c:247
+     [<     inline     >] prepare_exit_to_usermode kernel/arch/x86/entry/common.c:282
+     [<ffffffff810062ef>] syscall_return_slowpath+0x19f/0x210 kernel/arch/x86/entry/common.c:344
+     [<ffffffff85d88022>] int_ret_from_sys_call+0x25/0x9f kernel/arch/x86/entry/entry_64.S:281
+    Memory state around the buggy address:
+     ffff880064e21680: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+     ffff880064e21700: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+    >ffff880064e21780: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+                                                           ^
+     ffff880064e21800: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+     ffff880064e21880: fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb fb
+    ==================================================================
+    
+    Fixes: 273ec51dd7ce ("net: ppp_generic - introduce net-namespace functionality v2")
+    Reported-by: Baozeng Ding <sploving1@gmail.com>
+    Signed-off-by: Guillaume Nault <g.nault@alphalink.fr>
+    Reviewed-by: Cyrill Gorcunov <gorcunov@openvz.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ppp/ppp_generic.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit bfb890c1ac9d29b377f6bec4a5aab51d053114c4
+Author: Herbert Xu <herbert@gondor.apana.org.au>
+Date:   Wed Mar 16 17:06:01 2016 +0800
+
+    eCryptfs: Use skcipher and shash
+    
+    eCryptfs: Fix null pointer dereference on kzalloc error path
+    
+    The conversion to skcipher and shash added a couple of null pointer
+    dereference bugs on the kzalloc failure path.  This patch fixes them.
+    
+    Fixes: 3095e8e366b4 ("eCryptfs: Use skcipher and shash")
+    Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ fs/ecryptfs/keystore.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+commit 58a8421ae537e0609c4ff59bf6b11be869a43cc6
+Author: Boris BREZILLON <boris.brezillon@free-electrons.com>
+Date:   Thu Mar 17 10:21:34 2016 +0100
+
+    crypto: marvell/cesa - fix memory leak
+    
+    Crypto requests are not guaranteed to be finalized (->final() call),
+    and can be freed at any moment, without getting any notification from
+    the core. This can lead to memory leaks of the ->cache buffer.
+    
+    Make this buffer part of the request object, and allocate an extra buffer
+    from the DMA cache pool when doing DMA operations.
+    
+    As a side effect, this patch also fixes another bug related to cache
+    allocation and DMA operations. When the core allocates a new request and
+    import an existing state, a cache buffer can be allocated (depending
+    on the state). The problem is, at that very moment, we don't know yet
+    whether the request will use DMA or not, and since everything is
+    likely to be initialized to zero, mv_cesa_ahash_alloc_cache() thinks it
+    should allocate a buffer for standard operation. But when
+    mv_cesa_ahash_free_cache() is called, req->type has been set to
+    CESA_DMA_REQ in the meantime, thus leading to an invalind dma_pool_free()
+    call (the buffer passed in argument has not been allocated from the pool).
+    
+    Signed-off-by: Boris Brezillon <boris.brezillon@free-electrons.com>
+    Reported-by: Gregory CLEMENT <gregory.clement@free-electrons.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ drivers/crypto/marvell/cesa.h |  3 +-
+ drivers/crypto/marvell/hash.c | 86 +++++++++----------------------------------
+ 2 files changed, 20 insertions(+), 69 deletions(-)
+
+commit 1ec604f99895b9c37f26a692ff83a7da02d667fd
+Author: Boris BREZILLON <boris.brezillon@free-electrons.com>
+Date:   Thu Mar 17 10:21:35 2016 +0100
+
+    crypto: marvell/cesa - initialize hash states
+    
+    ->export() might be called before we have done an update operation,
+    and in this case the ->state field is left uninitialized.
+    Put the correct default value when initializing the request.
+    
+    Signed-off-by: Boris Brezillon <boris.brezillon@free-electrons.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ drivers/crypto/marvell/hash.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+commit 23879f055d23e82c2f78cceca22c33e631973977
+Author: David S. Miller <davem@davemloft.net>
+Date:   Sun Mar 13 23:28:00 2016 -0400
+
+    ipv4: Don't do expensive useless work during inetdev destroy.
+    
+    When an inetdev is destroyed, every address assigned to the interface
+    is removed.  And in this scenerio we do two pointless things which can
+    be very expensive if the number of assigned interfaces is large:
+    
+    1) Address promotion.  We are deleting all addresses, so there is no
+       point in doing this.
+    
+    2) A full nf conntrack table purge for every address.  We only need to
+       do this once, as is already caught by the existing
+       masq_dev_notifier so masq_inet_event() can skip this.
+    
+    Reported-by: Solar Designer <solar@openwall.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    Tested-by: Cyrill Gorcunov <gorcunov@openvz.org>
+
+ net/ipv4/devinet.c                          |  4 ++++
+ net/ipv4/fib_frontend.c                     |  4 ++++
+ net/ipv4/netfilter/nf_nat_masquerade_ipv4.c | 12 ++++++++++--
+ 3 files changed, 18 insertions(+), 2 deletions(-)
+
+commit 60394231e840e884024592a76a6c5612433d3756
+Author: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+Date:   Tue Mar 8 10:34:28 2016 -0300
+
+    sctp: fix copying more bytes than expected in sctp_add_bind_addr
+    
+    Dmitry reported that sctp_add_bind_addr may read more bytes than
+    expected in case the parameter is a IPv4 addr supplied by the user
+    through calls such as sctp_bindx_add(), because it always copies
+    sizeof(union sctp_addr) while the buffer may be just a struct
+    sockaddr_in, which is smaller.
+    
+    This patch then fixes it by limiting the memcpy to the min between the
+    union size and a (new parameter) provided addr size. Where possible this
+    parameter still is the size of that union, except for reading from
+    user-provided buffers, which then it accounts for protocol type.
+    
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Tested-by: Dmitry Vyukov <dvyukov@google.com>
+    Signed-off-by: Marcelo Ricardo Leitner <marcelo.leitner@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ include/net/sctp/structs.h |  2 +-
+ net/sctp/bind_addr.c       | 14 ++++++++------
+ net/sctp/protocol.c        |  1 +
+ net/sctp/sm_make_chunk.c   |  3 ++-
+ net/sctp/socket.c          |  4 +++-
+ 5 files changed, 15 insertions(+), 9 deletions(-)
+
+commit 9831caa50e1453818c5ec618890291f028b7992f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 28 19:20:28 2016 -0400
+
+    Also allow /bin/false as needed by systemd
+
+ kernel/kmod.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit bb38a61b496a3f09f4d7b93d2f0fe15476918147
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Mar 22 16:59:43 2016 -0400
