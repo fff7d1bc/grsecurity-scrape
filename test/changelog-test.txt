@@ -1,3 +1,116 @@
+commit 92771d60677d68e8f6ea7a91ff34dd6e24b6d4cf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 10 07:18:03 2016 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: netdev@vger.kernel.org, "Eric W. Biederman" <ebiederm@xmission.com>, Pavel
+            Emelyanov <xemul@parallels.com>
+    Subject: [PATCH net] packet: fix heap info leak in PACKET_DIAG_MCLIST sock_diag
+            interface
+    
+    Because we miss to wipe the remainder of i->addr[] in packet_mc_add(),
+    pdiag_put_mclist() leaks uninitialized heap bytes via the
+    PACKET_DIAG_MCLIST netlink attribute.
+    
+    Fix this by explicitly memset(0)ing the remaining bytes in i->addr[].
+    
+    Fixes: eea68e2f1a00 ("packet: Report socket mclist info via diag module")
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    Cc: Eric W. Biederman <ebiederm@xmission.com>
+    Cc: Pavel Emelyanov <xemul@parallels.com>
+    ---
+    The bug itself precedes commit eea68e2f1a00 but the list wasn't exposed
+    to userland before the introduction of the packet_diag interface.
+    Therefore the "Fixes:" line on that commit.
+
+ net/packet/af_packet.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 4286ce3f9e9db4d68870af46ae1d5f9b90b920dd
+Author: Jakub Sitnicki <jkbs@redhat.com>
+Date:   Tue Apr 5 18:41:08 2016 +0200
+
+    ipv6: Count in extension headers in skb->network_header
+    
+    When sending a UDPv6 message longer than MTU, account for the length
+    of fragmentable IPv6 extension headers in skb->network_header offset.
+    Same as we do in alloc_new_skb path in __ip6_append_data().
+    
+    This ensures that later on __ip6_make_skb() will make space in
+    headroom for fragmentable extension headers:
+    
+    	/* move skb->data to ip header from ext header */
+    	if (skb->data < skb_network_header(skb))
+    		__skb_pull(skb, skb_network_offset(skb));
+    
+    Prevents a splat due to skb_under_panic:
+    
+    skbuff: skb_under_panic: text:ffffffff8143397b len:2126 put:14 \
+    head:ffff880005bacf50 data:ffff880005bacf4a tail:0x48 end:0xc0 dev:lo
+    ------------[ cut here ]------------
+    kernel BUG at net/core/skbuff.c:104!
+    invalid opcode: 0000 [#1] KASAN
+    CPU: 0 PID: 160 Comm: reproducer Not tainted 4.6.0-rc2 #65
+    [...]
+    Call Trace:
+     [<ffffffff813eb7b9>] skb_push+0x79/0x80
+     [<ffffffff8143397b>] eth_header+0x2b/0x100
+     [<ffffffff8141e0d0>] neigh_resolve_output+0x210/0x310
+     [<ffffffff814eab77>] ip6_finish_output2+0x4a7/0x7c0
+     [<ffffffff814efe3a>] ip6_output+0x16a/0x280
+     [<ffffffff815440c1>] ip6_local_out+0xb1/0xf0
+     [<ffffffff814f1115>] ip6_send_skb+0x45/0xd0
+     [<ffffffff81518836>] udp_v6_send_skb+0x246/0x5d0
+     [<ffffffff8151985e>] udpv6_sendmsg+0xa6e/0x1090
+    [...]
+    
+    Reported-by: Ji Jianwen <jiji@redhat.com>
+    Signed-off-by: Jakub Sitnicki <jkbs@redhat.com>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_output.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit 638dad49a9ba3d86f627adb58b2f4636ed253685
+Author: Thadeu Lima de Souza Cascardo <cascardo@redhat.com>
+Date:   Fri Apr 1 17:17:50 2016 -0300
+
+    ip6_tunnel: set rtnl_link_ops before calling register_netdevice
+    
+    When creating an ip6tnl tunnel with ip tunnel, rtnl_link_ops is not set
+    before ip6_tnl_create2 is called. When register_netdevice is called, there
+    is no linkinfo attribute in the NEWLINK message because of that.
+    
+    Setting rtnl_link_ops before calling register_netdevice fixes that.
+    
+    Fixes: 0b112457229d ("ip6tnl: add support of link creation via rtnl")
+    Signed-off-by: Thadeu Lima de Souza Cascardo <cascardo@redhat.com>
+    Acked-by: Nicolas Dichtel <nicolas.dichtel@6wind.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/ip6_tunnel.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 14146a0bfaf2ced0055fe549c8fa0941c61e2457
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 5 21:12:44 2016 -0400
+
+    Code cleanups to RANDSTRUCT based on feedback from the PaX Team
+
+ tools/gcc/randomize_layout_plugin.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+commit 3f7dea5e59b0bb34f6bdb628c87251f0105b3d57
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 3 20:10:10 2016 -0400
+
+    Fix RANDSTRUCT support on ARM
+
+ tools/gcc/randomize_layout_plugin.c | 54 +++++++++++++++++++++++++++++++++++--
+ 1 file changed, 52 insertions(+), 2 deletions(-)
+
 commit bd893a75ab49f6ea5a216eb334471507337118ba
 Merge: 87b7f1d 4d8fc00
 Author: Brad Spengler <spender@grsecurity.net>
