@@ -1,3 +1,53 @@
+commit 1d376287aeba7a53c91d5ee49ef0a11d02193964
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 15 21:31:07 2016 -0400
+
+    Use proper type for function pointer
+
+ drivers/gpu/drm/gma500/mdfld_dsi_output.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 0a4104a2fa32904102fac07245426d78a1e9dfab
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 15 21:24:04 2016 -0400
+
+    Fix skylake cstates compat with constify
+
+ drivers/idle/intel_idle.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit f433f8fd372253c9e78e307afe5b800c5ab0ea61
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 15 21:10:44 2016 -0400
+
+    Update size_overflow hash table
+
+ tools/gcc/size_overflow_plugin/size_overflow_hash.data | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit ef7804da81cb3c6b6a4c985a3c14ee230a03f26a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 15 20:52:37 2016 -0400
+
+    compile fix
+
+ fs/coredump.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+commit 967224da52bd98d078b1237aea5ec9e622238fba
+Merge: 92771d6 a107ba2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 15 20:30:23 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a107ba25214d9694eb836fb04c782ad694977b91
+Merge: 4d8fc00 b40108b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 15 20:18:26 2016 -0400
+
+    Merge branch 'linux-4.4.y' into pax-test
+
 commit 92771d60677d68e8f6ea7a91ff34dd6e24b6d4cf
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Apr 10 07:18:03 2016 -0400
