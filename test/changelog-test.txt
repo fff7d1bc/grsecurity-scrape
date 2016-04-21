@@ -1,3 +1,126 @@
+commit 7957d30730bb26a4aef54ab484dc3b4108f1fdb1
+Merge: 463149f ff26083
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 20 17:55:53 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ff260839e610d2bc1b0c579edd7deb0028198f01
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 20 17:55:24 2016 -0400
+
+    Update to pax-linux-4.4.8-test14.patch:
+    - Emese fixed some CodingStyle issues in the latent entropy plugin
+    - fixed some build problems on mips, reported by Steve Arnold (https://bugs.gentoo.org/show_bug.cgi?id=578394)
+
+ arch/mips/include/asm/cache.h     |  3 ++-
+ arch/mips/lib/ashldi3.c           | 21 ++++++++++++++-------
+ arch/mips/lib/ashrdi3.c           | 19 +++++++++++++------
+ arch/mips/lib/libgcc.h            | 12 +++++++++---
+ drivers/idle/intel_idle.c         |  6 ++++--
+ tools/gcc/latent_entropy_plugin.c | 29 +++++++++++++++--------------
+ 6 files changed, 57 insertions(+), 33 deletions(-)
+
+commit 463149f47a64db4b26a13009f83ed73d393a209c
+Author: Xiaodong Liu <xiaodong.liu@intel.com>
+Date:   Tue Apr 12 09:45:51 2016 +0000
+
+    crypto: sha1-mb - use corrcet pointer while completing jobs
+    
+    In sha_complete_job, incorrect mcryptd_hash_request_ctx pointer is used
+    when check and complete other jobs. If the memory of first completed req
+    is freed, while still completing other jobs in the func, kernel will
+    crash since NULL pointer is assigned to RIP.
+    
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Xiaodong Liu <xiaodong.liu@intel.com>
+    Acked-by: Tim Chen <tim.c.chen@linux.intel.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ arch/x86/crypto/sha-mb/sha1_mb.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit b4e6484e67b917afb77478cab1260f41dbbc92fc
+Author: Tom Lendacky <thomas.lendacky@amd.com>
+Date:   Wed Apr 13 10:52:25 2016 -0500
+
+    crypto: ccp - Prevent information leakage on export
+    
+    Prevent information from leaking to userspace by doing a memset to 0 of
+    the export state structure before setting the structure values and copying
+    it. This prevents un-initialized padding areas from being copied into the
+    export area.
+    
+    Cc: <stable@vger.kernel.org> # 3.14.x-
+    Reported-by: Ben Hutchings <ben@decadent.org.uk>
+    Signed-off-by: Tom Lendacky <thomas.lendacky@amd.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ drivers/crypto/ccp/ccp-crypto-aes-cmac.c | 3 +++
+ drivers/crypto/ccp/ccp-crypto-sha.c      | 3 +++
+ 2 files changed, 6 insertions(+)
+
+commit 7d7e961d3f4e4614b22518d8e410e6cf4108f1b0
+Author: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+Date:   Mon Apr 18 14:33:54 2016 +0300
+
+    net/mlx4_en: allocate non 0-order pages for RX ring with __GFP_NOMEMALLOC
+    
+    High order pages are optional here since commit 51151a16a60f ("mlx4: allow
+    order-0 memory allocations in RX path"), so here is no reason for depleting
+    reserves. Generic __netdev_alloc_frag() implements the same logic.
+    
+    Signed-off-by: Konstantin Khlebnikov <khlebnikov@yandex-team.ru>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/mellanox/mlx4/en_rx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6b80edde2edc7fd055f9be8ec42b88abbe328639
+Author: Ignat Korchagin <ignat.korchagin@gmail.com>
+Date:   Thu Mar 17 18:00:29 2016 +0000
+
+    USB: usbip: fix potential out-of-bounds write
+    
+    Fix potential out-of-bounds write to urb->transfer_buffer
+    usbip handles network communication directly in the kernel. When receiving a
+    packet from its peer, usbip code parses headers according to protocol. As
+    part of this parsing urb->actual_length is filled. Since the input for
+    urb->actual_length comes from the network, it should be treated as untrusted.
+    Any entity controlling the network may put any value in the input and the
+    preallocated urb->transfer_buffer may not be large enough to hold the data.
+    Thus, the malicious entity is able to write arbitrary data to kernel memory.
+    
+    Signed-off-by: Ignat Korchagin <ignat.korchagin@gmail.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/usb/usbip/usbip_common.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+commit 0ce101ec9e74c2cfcd28cbcd18b0626e3d9a2482
+Merge: d60a24d f5fe5fd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 20 17:35:58 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f5fe5fddf49f1b81a2a3bb43b1e0a8c087aba438
+Merge: a107ba2 8c9aef0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 20 17:35:29 2016 -0400
+
+    Merge branch 'linux-4.4.y' into pax-test
+
+commit d60a24d6e4f61072d0bd1dc12be1177181fa8c2b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 18 17:48:10 2016 -0400
+
+    fix cast for constify change, reported by pipacs
+
+ drivers/idle/intel_idle.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
 commit 1d376287aeba7a53c91d5ee49ef0a11d02193964
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Apr 15 21:31:07 2016 -0400
