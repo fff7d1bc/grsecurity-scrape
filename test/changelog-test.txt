@@ -1,3 +1,67 @@
+commit 5988c8dba8a5da45e35d71f4a8fec34c267258c5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 25 20:40:53 2016 -0400
+
+    Fix DoS in n_tty_receive_buf_common reported by marcan at:
+    https://forums.grsecurity.net/viewtopic.php?t=4342&p=16222
+    and via lengthy diatribe on Twitter:
+    https://twitter.com/marcan42/status/724740708104474626
+    https://twitter.com/marcan42/status/724740985146609664
+    https://twitter.com/marcan42/status/724741270325760000
+    https://twitter.com/marcan42/status/724742465199050752
+    https://twitter.com/marcan42/status/724745886794833920
+    https://twitter.com/marcan42/status/724749571495075840
+    https://twitter.com/marcan42/status/724746427285409796
+    https://twitter.com/marcan42/status/724743150263095296
+    https://twitter.com/marcan42/status/724757473433808896
+    
+    Fix it correctly instead of using the incorrect fix suggested
+    by marcan (aka "try reading the code next time")
+    The original code was meant to fix an integer truncation issue
+    that would also have caused a SIZE_OVERFLOW "DoS".
+
+ drivers/tty/n_tty.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+commit 5459ff57d8987389fa17d5d6f55b70a789347c2f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 25 19:52:33 2016 -0400
+
+    Avoid overflow in environ_read() caught by SIZE_OVERFLOW,
+    reported by jotik at:
+    https://forums.grsecurity.net/viewtopic.php?t=4363&p=16217
+    patch from Mathias Krause
+
+ fs/proc/base.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 24a5c92e147af1e739e9eeca020c61ad2674e784
+Author: Jiri Benc <jbenc@redhat.com>
+Date:   Fri Apr 22 13:09:13 2016 +0200
+
+    cxgbi: fix uninitialized flowi6
+    
+    ip6_route_output looks into different fields in the passed flowi6 structure,
+    yet cxgbi passes garbage in nearly all those fields. Zero the structure out
+    first.
+    
+    Fixes: fc8d0590d9142 ("libcxgbi: Add ipv6 api to driver")
+    Signed-off-by: Jiri Benc <jbenc@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/scsi/cxgbi/libcxgbi.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit ec65caa32652841a5be21d6e73146921af16d7a8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 20 20:59:43 2016 -0400
+
+    Make /proc/sched_debug only readable by root, mentioned in
+    recent NCC Group paper on Linux containers
+
+ kernel/sched/debug.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
 commit 7957d30730bb26a4aef54ab484dc3b4108f1fdb1
 Merge: 463149f ff26083
 Author: Brad Spengler <spender@grsecurity.net>
