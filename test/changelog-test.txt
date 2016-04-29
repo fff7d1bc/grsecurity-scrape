@@ -1,3 +1,28 @@
+commit fe375f07d31c5d561fcca4016f7c33e885fa3586
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 29 06:22:29 2016 -0400
+
+    Revert change to regmap_access_show()
+
+ drivers/base/regmap/regmap-debugfs.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit 3f5df6e7cf9716b4854fb282b6eb22cb1e52e92a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 29 06:20:12 2016 -0400
+
+    Merge a number of fixes from Mathias Krause
+
+ arch/x86/entry/entry_32.S              | 2 +-
+ drivers/base/regmap/regmap-debugfs.c   | 3 ++-
+ drivers/cpufreq/intel_pstate.c         | 2 +-
+ drivers/gpu/drm/gma500/mdfld_dsi_dpi.c | 7 ++++++-
+ drivers/oprofile/oprofilefs.c          | 4 ++--
+ drivers/platform/x86/thinkpad_acpi.c   | 1 -
+ init/Kconfig                           | 1 -
+ kernel/module.c                        | 4 +---
+ 8 files changed, 13 insertions(+), 11 deletions(-)
+
 commit 127927d7e57793eca299226cb31ecd9d235bbd62
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Apr 28 20:58:04 2016 -0400
