@@ -1,3 +1,117 @@
+commit 5ecb84f55a9bdf8b39054c23d90646ba0591ce1c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 6 08:51:58 2016 -0400
+
+    Remove !PARAVIRT dependency on RAP
+
+ security/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit eecd10d7c579d2601c384c1e9e0f062a8dda40e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 6 06:34:48 2016 -0400
+
+    Update copyright year
+
+ tools/gcc/randomize_layout_plugin.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 7d7e01439c2601abcae2ecfc66a883be258a2691
+Merge: 3315e83 c2aa83b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 6 06:34:25 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c2aa83bf2d65989c262ff33312874ee7fe38606a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 6 06:34:04 2016 -0400
+
+    Update to pax-linux-4.5.2-test2.patch:
+    - minipli fixed a few missing hunks left out from the 4.5 port
+    - fixed a regression in handling user.pax.flags on tmpfs, reported by blueness and Stebalien (https://forums.grsecurity.net/viewtopic.php?f=3&t=4462)
+    - fixed a few compile regressions on arm, reported by Wizzup
+    - fixed PARAVIRT for RAP, reported by spender
+    - fixed the very old PAGEEXEC/i386 TLB reload code for SMAP (not that it could work there), reported by spender
+    - Emese fixed a false positive size overflow report caused by gcc-5 and newer, reported by quasar366 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4455)
+
+ arch/arm/Kconfig                                   |   2 +-
+ arch/arm/include/asm/domain.h                      |   2 +-
+ arch/arm/kernel/process.c                          |   6 +
+ arch/mips/mm/mmap.c                                |  27 ++++
+ arch/powerpc/kernel/process.c                      |  39 +++++
+ arch/s390/kernel/process.c                         |  13 ++
+ arch/x86/entry/entry_32.S                          |   2 +-
+ arch/x86/include/asm/fixmap.h                      |   2 +-
+ arch/x86/kernel/paravirt.c                         |  90 +++++++++--
+ arch/x86/mm/fault.c                                |   2 +
+ arch/x86/mm/pgtable.c                              |   2 +-
+ drivers/cpufreq/intel_pstate.c                     |   2 +-
+ drivers/gpu/drm/gma500/mdfld_dsi_dpi.c             |   7 +-
+ drivers/net/ethernet/8390/ax88796.c                |   4 +-
+ drivers/oprofile/oprofilefs.c                      |   4 +-
+ drivers/platform/x86/thinkpad_acpi.c               |   1 -
+ fs/xattr.c                                         |   2 +-
+ include/asm-generic/atomic-long.h                  |   4 +
+ include/uapi/linux/xattr.h                         |   3 +-
+ kernel/module.c                                    |   2 +-
+ mm/shmem.c                                         |   2 -
+ security/Kconfig                                   |   2 +
+ .../insert_size_overflow_asm.c                     |   2 +-
+ .../size_overflow_plugin/intentional_overflow.c    |  80 ++++++++--
+ .../size_overflow_plugin/remove_unnecessary_dup.c  |   2 +-
+ tools/gcc/size_overflow_plugin/size_overflow.h     |   8 +-
+ .../gcc/size_overflow_plugin/size_overflow_debug.c |   2 +-
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |   2 +-
+ .../gcc/size_overflow_plugin/size_overflow_misc.c  |   2 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |   2 +-
+ .../size_overflow_plugin_hash.c                    |   2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |  34 ++---
+ .../size_overflow_transform_core.c                 | 170 +++++++++++----------
+ 33 files changed, 370 insertions(+), 156 deletions(-)
+
+commit 3315e83c1e9738784da3c1c5836dd13b7593a8f1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 4 21:03:36 2016 -0400
+
+    Add PAGEEXEC support for i386 !PAE on SMAP-capable processors
+    (won't be used by anyone, just for correctness sake)
+
+ arch/x86/mm/fault.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit b9e96108d2092c12e42e1810a62aec85f6ddc501
+Merge: 6d98323 a3273aa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 4 19:06:44 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a3273aa2488f9e201620ee53af1acfd99c58650a
+Merge: e0e4c2c fbc310e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 4 19:06:36 2016 -0400
+
+    Merge branch 'linux-4.5.y' into pax-test
+
+commit 6d98323e0b511bdb77b9ef11d84207219331ac69
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 3 21:58:09 2016 -0400
+
+    Backport fix from http://www.spinics.net/lists/linux-usb/msg140243.html
+
+ drivers/usb/core/devio.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+commit b003c68f96dd6a483b515290756816b6c909f34f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 1 12:06:48 2016 -0400
+
+    Add note about RANDSTRUCT and the gcc runtime library exception
+
+ tools/gcc/randomize_layout_plugin.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
 commit fe375f07d31c5d561fcca4016f7c33e885fa3586
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Apr 29 06:22:29 2016 -0400
