@@ -1,3 +1,35 @@
+commit e5983fd19799feb3bf947cd0dc2b5435deee3332
+Merge: 5ecb84f a235ecd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 7 00:00:42 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a235ecd8bdece417e83f9cf89c76607bf15955dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 6 23:59:34 2016 -0400
+
+    Update to pax-linux-4.5.3-test3.patch:
+    - fixed some more of PARAVIRT for RAP, reported by hunger
+    - Emese increased the coverage of initify by marking up str* and mem* functions
+    - added error reporting for refusing to load modules incompatible with KERNEXEC's 'or' method, reported by Martin VÃ¤th (https://bugs.gentoo.org/show_bug.cgi?id=581726)
+
+ arch/arm/include/asm/string.h          | 10 ++---
+ arch/arm64/include/asm/string.h        | 22 +++++------
+ arch/x86/boot/string.h                 |  4 +-
+ arch/x86/include/asm/string_32.h       | 20 +++++-----
+ arch/x86/include/asm/string_64.h       | 16 ++++----
+ arch/x86/kernel/paravirt-spinlocks.c   | 22 +++++++++--
+ arch/x86/xen/mmu.c                     |  6 ++-
+ drivers/gpu/drm/gma500/mdfld_dsi_dpi.c | 10 ++---
+ include/linux/string.h                 | 70 +++++++++++++++++-----------------
+ include/linux/syscalls.h               |  2 +-
+ kernel/module.c                        |  4 +-
+ mm/fadvise.c                           |  2 +-
+ tools/gcc/randomize_layout_seed.h      |  1 -
+ tools/gcc/rap_plugin/rap_plugin.c      |  7 +++-
+ 14 files changed, 109 insertions(+), 87 deletions(-)
+
 commit 5ecb84f55a9bdf8b39054c23d90646ba0591ce1c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri May 6 08:51:58 2016 -0400
