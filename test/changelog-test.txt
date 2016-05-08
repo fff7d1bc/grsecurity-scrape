@@ -1,3 +1,59 @@
+commit 9e3e5ae3e9ed69452d4133490dd1831376b9a1e8
+Merge: e5983fd cfcaa03
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 8 08:04:18 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit cfcaa036dd3756fc32e083a7c486c1143d93fd22
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 8 08:03:53 2016 -0400
+
+    Update to pax-linux-4.5.3-test4.patch:
+    - fixed a few incorrect function types (mostly start_xmit callbacks) found by RAP, reported by cinder (https://forums.grsecurity.net/viewtopic.php?f=3&t=4466)
+
+ drivers/char/tpm/tpm-chip.c                           |  7 ++++++-
+ drivers/net/can/bfin_can.c                            |  2 +-
+ drivers/net/can/flexcan.c                             |  2 +-
+ drivers/net/ethernet/adi/bfin_mac.c                   |  2 +-
+ drivers/net/ethernet/allwinner/sun4i-emac.c           |  2 +-
+ drivers/net/ethernet/amd/7990.c                       |  2 +-
+ drivers/net/ethernet/amd/7990.h                       |  2 +-
+ drivers/net/ethernet/amd/atarilance.c                 |  4 ++--
+ drivers/net/ethernet/amd/declance.c                   |  2 +-
+ drivers/net/ethernet/amd/sun3lance.c                  |  4 ++--
+ drivers/net/ethernet/amd/sunlance.c                   |  2 +-
+ drivers/net/ethernet/broadcom/bcm63xx_enet.c          |  2 +-
+ drivers/net/ethernet/davicom/dm9000.c                 |  2 +-
+ drivers/net/ethernet/faraday/ftgmac100.c              |  2 +-
+ drivers/net/ethernet/faraday/ftmac100.c               |  2 +-
+ drivers/net/ethernet/freescale/fec_mpc52xx.c          |  2 +-
+ drivers/net/ethernet/freescale/fs_enet/fs_enet-main.c |  2 +-
+ drivers/net/ethernet/freescale/gianfar.c              |  4 ++--
+ drivers/net/ethernet/freescale/ucc_geth.c             |  2 +-
+ drivers/net/ethernet/i825xx/lib82596.c                |  4 ++--
+ drivers/net/ethernet/ibm/ehea/ehea_main.c             |  2 +-
+ drivers/net/ethernet/ibm/emac/core.c                  |  4 ++--
+ drivers/net/ethernet/micrel/ks8695net.c               |  2 +-
+ drivers/net/ethernet/moxa/moxart_ether.c              |  2 +-
+ drivers/net/ethernet/netx-eth.c                       |  2 +-
+ drivers/net/ethernet/nuvoton/w90p910_ether.c          |  2 +-
+ drivers/net/ethernet/nxp/lpc_eth.c                    |  2 +-
+ drivers/net/ethernet/seeq/sgiseeq.c                   |  2 +-
+ drivers/net/ethernet/sgi/ioc3-eth.c                   |  4 ++--
+ drivers/net/ethernet/smsc/smc911x.c                   |  2 +-
+ drivers/net/ethernet/smsc/smc91x.c                    |  2 +-
+ drivers/net/ethernet/sun/sunbmac.c                    |  2 +-
+ drivers/net/ethernet/sun/sunqe.c                      |  2 +-
+ drivers/net/ethernet/sun/sunvnet.c                    | 10 +++++-----
+ drivers/net/ethernet/ti/cpmac.c                       |  2 +-
+ drivers/net/ethernet/ti/netcp_core.c                  |  2 +-
+ drivers/net/ethernet/xilinx/ll_temac_main.c           |  2 +-
+ drivers/net/ethernet/xilinx/xilinx_axienet_main.c     |  2 +-
+ drivers/net/xen-netback/interface.c                   |  2 +-
+ drivers/net/xen-netfront.c                            |  2 +-
+ 40 files changed, 55 insertions(+), 50 deletions(-)
+
 commit e5983fd19799feb3bf947cd0dc2b5435deee3332
 Merge: 5ecb84f a235ecd
 Author: Brad Spengler <spender@grsecurity.net>
