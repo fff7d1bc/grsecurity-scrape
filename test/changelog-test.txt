@@ -1,3 +1,13 @@
+commit 735f14a2b5562cd1329b263a81781d59dacffd3e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 11 06:57:40 2016 -0400
+
+    Fix typo in nfsd RAP changes causing oops reported by Carlos Carvalho
+    at: https://forums.grsecurity.net/viewtopic.php?f=3&t=4471
+
+ fs/nfsd/nfsproc.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 35e1e615072d0bb885b38ee1b2ada7a0a6a91f9d
 Merge: 9e3e5ae3e f5bd134
 Author: Brad Spengler <spender@grsecurity.net>
