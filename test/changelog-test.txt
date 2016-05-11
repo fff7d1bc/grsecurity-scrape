@@ -1,3 +1,33 @@
+commit 35e1e615072d0bb885b38ee1b2ada7a0a6a91f9d
+Merge: 9e3e5ae3e f5bd134
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 10 20:56:54 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f5bd1342fa631bb3b69a2e8919785c827c4edf74
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 10 20:55:57 2016 -0400
+
+    Update to pax-linux-4.5.3-test5.patch:
+    - marked all indirectly callable x86 asm crypto functions, reported by Dwokfur and minipli (https://forums.grsecurity.net/viewtopic.php?f=3&t=4468)
+    - worked around an intentional integer overflow introduced by gcc-6 that triggered a size overflow false positive, reported by hooruD, chron and Fen (https://forums.grsecurity.net/viewtopic.php?f=3&t=4469)
+    - made some preparations for enabling RAP on i386 as well, will have to wait due to KERNEXEC
+
+ arch/x86/crypto/aesni-intel_asm.S                  |  6 +++---
+ arch/x86/crypto/sha-mb/sha1_mb_mgr_flush_avx2.S    |  4 ++--
+ arch/x86/crypto/sha-mb/sha1_mb_mgr_submit_avx2.S   |  2 +-
+ arch/x86/crypto/sha256_ni_asm.S                    |  2 +-
+ arch/x86/crypto/twofish-i586-asm_32.S              |  2 +-
+ arch/x86/entry/common.c                            |  1 -
+ include/linux/linkage.h                            | 22 +++++++++++++++-------
+ tools/gcc/rap_plugin/rap_fptr_pass.c               |  2 +-
+ tools/gcc/rap_plugin/rap_hash.c                    |  1 +
+ tools/gcc/rap_plugin/rap_plugin.c                  | 18 +++++++++---------
+ .../disable_size_overflow_hash.data                |  1 +
+ .../size_overflow_plugin/size_overflow_hash.data   |  1 -
+ 12 files changed, 35 insertions(+), 27 deletions(-)
+
 commit 9e3e5ae3e9ed69452d4133490dd1831376b9a1e8
 Merge: e5983fd cfcaa03
 Author: Brad Spengler <spender@grsecurity.net>
