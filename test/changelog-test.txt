@@ -1,3 +1,41 @@
+commit fbc84d202d311b4dc09bcc922678df60b6e76614
+Merge: 84fa82c 238dfca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 13 18:00:06 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 238dfca3ffe87f4410e67c8ceb554b9ce4f3132b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 13 17:59:42 2016 -0400
+
+    Compile fix for older gcc
+
+ tools/gcc/size_overflow_plugin/intentional_overflow.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 84fa82c59fa5051e1485a3dcc857b87b70dbc18d
+Merge: 2cece8e 4654023
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 13 17:31:49 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 4654023e72b0834142594eee879e657664498443
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 13 17:29:38 2016 -0400
+
+    Update to pax-linux-4.5.4-test7.patch:
+    - changed the RAP hash emission code to accomodate x86 disassemblers, suggested by Mathias Krause <minipli@ld-linux.so>
+    - fixed a few size overflow false positives in JFS due to the lack of endian conversion macros for signed types, reported by ryonaloli via hunger
+    - fixed a compiler assert triggered by the size overflow plugin
+
+ tools/gcc/rap_plugin/rap_plugin.c                  | 39 ++++++++++++++++++----
+ .../disable_size_overflow_hash.data                |  3 ++
+ .../size_overflow_plugin/intentional_overflow.c    |  2 +-
+ .../size_overflow_plugin/size_overflow_hash.data   |  3 --
+ 4 files changed, 36 insertions(+), 11 deletions(-)
+
 commit 2cece8e8e0e2fce9943345c0ebebd7436929868e
 Merge: 6df0471 ea68d2e
 Author: Brad Spengler <spender@grsecurity.net>
