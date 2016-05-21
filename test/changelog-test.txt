@@ -1,3 +1,70 @@
+commit 5e7a47f06420603b0f26f1b45fe2ab02838795c9
+Merge: f844209 5929595
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 20 20:19:27 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5929595ec558e9282901842bdf9e4a981751fb08
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 20 20:18:58 2016 -0400
+
+    Update to pax-linux-4.5.5-test9.patch:
+    - fixed a few more incorrect fptr casts for RAP
+
+ arch/x86/math-emu/fpu_etc.c             |  9 +++++++--
+ arch/x86/math-emu/fpu_trig.c            | 13 +++++++++----
+ arch/x86/math-emu/reg_constant.c        |  7 ++++++-
+ drivers/isdn/hisax/hfc_2bds0.c          |  4 ++--
+ drivers/isdn/hisax/hfcscard.c           |  6 ++++--
+ drivers/isdn/hisax/saphir.c             |  5 +++--
+ drivers/isdn/hisax/teleint.c            |  5 +++--
+ drivers/media/pci/sta2x11/sta2x11_vip.c |  5 +++--
+ drivers/net/hamradio/baycom_epp.c       |  2 +-
+ 9 files changed, 38 insertions(+), 18 deletions(-)
+
+commit f84420916698cdf33a81f046206d050e2c3e6966
+Merge: fa18ce2 445754e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 20 18:52:20 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 445754e5717176c2b3431a0cde1e90df51cc43e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 20 18:51:52 2016 -0400
+
+    Update to pax-linux-4.5.4-test8.patch:
+    - fixed a USERCOPY report in the mwifiex driver, by Dennis Wassenberg <dennis.wassenberg@secunet.com> and Mathias Krause <minipli@ld-linux.so>
+
+ drivers/net/wireless/marvell/mwifiex/11n_aggr.c |  2 +-
+ drivers/net/wireless/marvell/mwifiex/pcie.c     |  4 ++--
+ drivers/net/wireless/marvell/mwifiex/sdio.c     | 10 ++++------
+ 3 files changed, 7 insertions(+), 9 deletions(-)
+
+commit fa18ce2d37a92442162fb72b8f85ee86120ffacb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 19 18:30:08 2016 -0400
+
+    Update size_overflow hash, from Dr. Toth
+
+ tools/gcc/size_overflow_plugin/size_overflow_hash.data | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 61c487965dbc34618fe292663759d6fa0515bcad
+Merge: fbc84d2 a734dbd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 19 06:26:52 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a734dbda8b785c38baa1858df2bffc89b45d070a
+Merge: 238dfca 3b41b7e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 19 06:24:25 2016 -0400
+
+    Merge branch 'linux-4.5.y' into pax-test
+
 commit fbc84d202d311b4dc09bcc922678df60b6e76614
 Merge: 84fa82c 238dfca
 Author: Brad Spengler <spender@grsecurity.net>
