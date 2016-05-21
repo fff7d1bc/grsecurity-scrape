@@ -1,3 +1,13 @@
+commit b0b41430a8c9e6e5067c896c07d361e527e298e8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 21 13:59:19 2016 -0400
+
+    Fix gcc assert properly, from Emese Revfy
+
+ tools/gcc/size_overflow_plugin/intentional_overflow.c | 2 +-
+ tools/gcc/size_overflow_plugin/size_overflow_plugin.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 5e7a47f06420603b0f26f1b45fe2ab02838795c9
 Merge: f844209 5929595
 Author: Brad Spengler <spender@grsecurity.net>
