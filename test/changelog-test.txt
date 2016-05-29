@@ -1,3 +1,307 @@
+commit 2fad2bb3392409d98498b3af53cf39f2475e4b70
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 29 10:11:27 2016 -0400
+
+    Fix another harmless warning
+
+ fs/proc/proc_sysctl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d62f996e40c87e46b20f45e16819f92d49f3e926
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 29 09:56:32 2016 -0400
+
+    Fix more harmless compiler warnings
+
+ grsecurity/gracl_policy.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit 558b784a2b87e337d12bae07d60f435c2f06d849
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 29 09:47:50 2016 -0400
+
+    Fix more harmless warnings
+
+ grsecurity/gracl.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit 32ec63339ab130758e6941d7f1d8993e41956980
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 29 09:41:23 2016 -0400
+
+    Fix another warning
+
+ include/linux/sched.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 789369de0dbde1fedd2d5cb0ee3474e160af187c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 29 09:22:05 2016 -0400
+
+    Fix some harmless compiler warnings
+
+ grsecurity/grsum.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit ed18543a205c206d0aa8ee6b04c606579823b7b3
+Merge: b0b4143 89f00c3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 29 08:34:18 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 89f00c3b596a62ae5bcfe4920e9d05b9a94be7fa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 29 08:26:37 2016 -0400
+
+    Update to pax-linux-4.5.5-test11.patch:
+    - fixed arm kuser helper emulation for thumb mode userland, reported by Wizzup(https://forums.grsecurity.net/viewtopic.php?f=3&t=4479)
+    - fixed incorrect function pointer casts in bcache caught by RAP, reported by torsten (https://forums.grsecurity.net/viewtopic.php?f=3&t=4482)
+    - worked around a few intentional integer underflows in the xhci driver caught by the size overflow plugin, reported by Dennis Wassenberg <dennis.wassenberg@secunet.com>
+    - moved gcc plugins from tools/gcc to scripts/gcc-plugins and simplified the plugin build system, by Emese
+    - changed the constify and latent entropy plugins to use a consistent command line switch for compile-time disabling
+    - cleaned up a few unusued macros, whitespace, inline asm constraints, etc
+    - hid the lvalue casts needed for constify behind the const_cast macro, by Mathias Krause <minipli@ld-linux.so>
+
+ Makefile                                           |    50 +-
+ arch/Kconfig                                       |    14 +
+ arch/arm/Kconfig                                   |     1 +
+ arch/arm/boot/compressed/Makefile                  |     2 +
+ arch/arm/mach-exynos/suspend.c                     |     4 +-
+ arch/arm/mach-omap2/powerdomains43xx_data.c        |     2 +-
+ arch/arm/mach-shmobile/platsmp-apmu.c              |     2 +-
+ arch/arm/mm/fault.c                                |    14 +
+ arch/arm64/Kconfig                                 |     1 +
+ arch/mips/Kconfig                                  |     1 +
+ arch/powerpc/Kconfig                               |     1 +
+ arch/powerpc/include/asm/atomic.h                  |     7 +-
+ arch/powerpc/kernel/Makefile                       |     8 +-
+ arch/sparc/Kconfig                                 |     1 +
+ arch/um/Makefile                                   |     4 +-
+ arch/x86/Kconfig                                   |     1 +
+ arch/x86/boot/Makefile                             |     3 -
+ arch/x86/boot/compressed/Makefile                  |     3 -
+ arch/x86/entry/common.c                            |     2 +-
+ arch/x86/include/asm/thread_info.h                 |    27 -
+ arch/x86/kernel/cpu/perf_event_intel_cqm.c         |     2 +-
+ arch/x86/kernel/cpu/perf_event_intel_pt.c          |    10 +-
+ arch/x86/kernel/i8259.c                            |     4 +-
+ arch/x86/kernel/paravirt-spinlocks.c               |     2 +-
+ arch/x86/oprofile/nmi_int.c                        |     2 +-
+ arch/x86/oprofile/op_model_amd.c                   |     6 +-
+ arch/x86/oprofile/op_model_ppro.c                  |     4 +-
+ arch/x86/pci/vmd.c                                 |     2 +-
+ arch/x86/realmode/rm/Makefile                      |     3 -
+ drivers/acpi/bgrt.c                                |     4 +-
+ drivers/ata/libata-core.c                          |     2 +-
+ drivers/ata/pata_arasan_cf.c                       |     2 +-
+ drivers/base/platform-msi.c                        |    14 +-
+ drivers/base/power/domain.c                        |     4 +-
+ drivers/bus/arm-cci.c                              |     6 +-
+ drivers/cdrom/cdrom.c                              |     2 +-
+ drivers/clk/socfpga/clk-gate.c                     |     4 +-
+ drivers/clk/socfpga/clk-pll.c                      |     4 +-
+ drivers/clk/ti/clk.c                               |     4 +-
+ drivers/cpufreq/acpi-cpufreq.c                     |     8 +-
+ drivers/cpufreq/cpufreq-dt.c                       |     2 +-
+ drivers/cpufreq/cpufreq.c                          |     8 +-
+ drivers/cpufreq/cpufreq_ondemand.c                 |     4 +-
+ drivers/cpufreq/p4-clockmod.c                      |     6 +-
+ drivers/cpufreq/speedstep-centrino.c               |     2 +-
+ drivers/firmware/dmi_scan.c                        |     8 +-
+ drivers/firmware/efi/efi.c                         |    10 +-
+ drivers/firmware/google/memconsole.c               |     2 +-
+ drivers/gpio/gpiolib.c                             |     8 +-
+ drivers/gpu/drm/amd/amdgpu/amdgpu_drv.c            |     2 +-
+ drivers/gpu/drm/i810/i810_drv.c                    |     2 +-
+ drivers/gpu/drm/i915/i915_irq.c                    |    86 +-
+ drivers/gpu/drm/i915/intel_display.c               |     6 +-
+ drivers/gpu/drm/mga/mga_drv.c                      |     2 +-
+ drivers/gpu/drm/omapdrm/dss/display.c              |     6 +-
+ drivers/gpu/drm/qxl/qxl_drv.c                      |     2 +-
+ drivers/gpu/drm/qxl/qxl_ttm.c                      |     4 +-
+ drivers/gpu/drm/r128/r128_drv.c                    |     2 +-
+ drivers/gpu/drm/radeon/radeon_drv.c                |     2 +-
+ drivers/gpu/drm/savage/savage_drv.c                |     2 +-
+ drivers/gpu/drm/sis/sis_drv.c                      |     2 +-
+ drivers/gpu/drm/tegra/dc.c                         |     2 +-
+ drivers/gpu/drm/tegra/sor.c                        |     2 +-
+ drivers/gpu/drm/via/via_drv.c                      |     2 +-
+ drivers/idle/intel_idle.c                          |     4 +-
+ drivers/infiniband/hw/qib/qib.h                    |     1 -
+ drivers/iommu/arm-smmu.c                           |     4 +-
+ drivers/isdn/hardware/eicon/mntfunc.c              |     2 +-
+ drivers/md/bcache/btree.c                          |    11 +-
+ drivers/md/bcache/closure.c                        |     4 +-
+ drivers/md/bcache/closure.h                        |     8 +-
+ drivers/md/bcache/journal.c                        |    16 +-
+ drivers/md/bcache/movinggc.c                       |    12 +-
+ drivers/md/bcache/request.c                        |    54 +-
+ drivers/md/bcache/request.h                        |     2 +-
+ drivers/md/bcache/super.c                          |    30 +-
+ drivers/md/bcache/writeback.c                      |    12 +-
+ drivers/media/platform/am437x/am437x-vpfe.c        |     2 +-
+ drivers/mfd/twl4030-irq.c                          |     4 +-
+ drivers/misc/c2port/core.c                         |     2 +-
+ drivers/misc/mic/scif/scif_api.c                   |     8 +-
+ drivers/mmc/host/mmci.c                            |     2 +-
+ drivers/mmc/host/omap_hsmmc.c                      |     2 +-
+ drivers/mmc/host/sdhci-esdhc-imx.c                 |     2 +-
+ drivers/mmc/host/sdhci-s3c.c                       |     6 +-
+ drivers/net/ethernet/cavium/liquidio/lio_main.c    |     2 +-
+ drivers/net/ethernet/hisilicon/hns/hns_ae_adapt.c  |     4 +-
+ .../net/ethernet/qlogic/qlcnic/qlcnic_83xx_init.c  |     2 +-
+ .../net/ethernet/qlogic/qlcnic/qlcnic_83xx_vnic.c  |     6 +-
+ drivers/net/macvlan.c                              |    14 +-
+ drivers/net/wireless/ath/ath9k/main.c              |    20 +-
+ drivers/net/wireless/intel/iwlegacy/3945-mac.c     |     2 +-
+ drivers/net/wireless/mac80211_hwsim.c              |    22 +-
+ drivers/net/wireless/ti/wl1251/sdio.c              |     8 +-
+ drivers/net/wireless/ti/wl12xx/main.c              |     4 +-
+ drivers/net/wireless/ti/wl18xx/main.c              |     4 +-
+ drivers/of/fdt.c                                   |     2 +-
+ drivers/pci/hotplug/acpiphp_ibm.c                  |     2 +-
+ drivers/pci/hotplug/cpcihp_zt5550.c                |     6 +-
+ drivers/pci/hotplug/pci_hotplug_core.c             |     4 +-
+ drivers/pci/msi.c                                  |    12 +-
+ drivers/pinctrl/pinctrl-at91.c                     |     2 +-
+ drivers/platform/x86/msi-laptop.c                  |    12 +-
+ drivers/power/reset/at91-reset.c                   |     2 +-
+ drivers/powercap/powercap_sys.c                    |     6 +-
+ drivers/regulator/max8660.c                        |     4 +-
+ drivers/regulator/max8973-regulator.c              |    12 +-
+ drivers/regulator/mc13892-regulator.c              |     4 +-
+ drivers/rtc/rtc-armada38x.c                        |     4 +-
+ drivers/rtc/rtc-cmos.c                             |     2 +-
+ drivers/rtc/rtc-m48t59.c                           |     2 +-
+ drivers/rtc/rtc-rx8010.c                           |     6 +-
+ drivers/rtc/rtc-test.c                             |     4 +-
+ drivers/scsi/aacraid/aachba.c                      |     4 +-
+ drivers/scsi/lpfc/lpfc_init.c                      |     4 +-
+ drivers/scsi/qla2xxx/qla_os.c                      |     4 +-
+ drivers/staging/sm750fb/sm750.c                    |     8 +-
+ drivers/thermal/cpu_cooling.c                      |     6 +-
+ drivers/thermal/int340x_thermal/int3400_thermal.c  |     4 +-
+ drivers/thermal/of-thermal.c                       |    12 +-
+ drivers/tty/pty.c                                  |     2 +-
+ drivers/tty/serial/8250/8250_core.c                |     6 +-
+ drivers/tty/serial/kgdb_nmi.c                      |     2 +-
+ drivers/usb/host/xhci-ring.c                       |    52 +-
+ drivers/video/fbdev/aty/atyfb_base.c               |     4 +-
+ drivers/video/fbdev/aty/mach64_cursor.c            |     2 +-
+ drivers/video/fbdev/core/fb_defio.c                |     6 +-
+ drivers/video/fbdev/mb862xx/mb862xxfb_accel.c      |    12 +-
+ drivers/video/fbdev/nvidia/nvidia.c                |    18 +-
+ drivers/video/fbdev/omap2/omapfb/dss/display.c     |     6 +-
+ drivers/video/fbdev/s1d13xxxfb.c                   |     4 +-
+ drivers/video/fbdev/smscufx.c                      |     2 +-
+ drivers/video/fbdev/udlfb.c                        |     2 +-
+ drivers/video/fbdev/uvesafb.c                      |     4 +-
+ drivers/video/fbdev/vesafb.c                       |     2 +-
+ fs/fuse/cuse.c                                     |     6 +-
+ fs/jffs2/file.c                                    |     2 +-
+ fs/nls/nls_base.c                                  |     4 +-
+ fs/nls/nls_euc-jp.c                                |     4 +-
+ fs/nls/nls_koi8-ru.c                               |     4 +-
+ fs/proc/proc_sysctl.c                              |     4 +-
+ fs/tracefs/inode.c                                 |     4 +-
+ include/linux/compiler-gcc.h                       |     1 +
+ include/linux/compiler.h                           |     4 +
+ include/linux/seq_buf.h                            |     2 +-
+ include/linux/sysfs.h                              |     2 +-
+ kernel/cgroup.c                                    |    14 +-
+ kernel/irq/msi.c                                   |    12 +-
+ kernel/notifier.c                                  |     4 +-
+ kernel/pid.c                                       |     2 +-
+ kernel/trace/trace_output.c                        |     8 +-
+ net/core/rtnetlink.c                               |     2 +-
+ net/xfrm/xfrm_state.c                              |     2 +-
+ scripts/Makefile                                   |     1 +
+ scripts/Makefile.gcc-plugins                       |   138 +-
+ scripts/Makefile.host                              |     6 +-
+ scripts/gcc-plugin.sh                              |     4 +-
+ scripts/gcc-plugins/Makefile                       |    45 +
+ scripts/gcc-plugins/checker_plugin.c               |   496 +
+ scripts/gcc-plugins/colorize_plugin.c              |   162 +
+ scripts/gcc-plugins/constify_plugin.c              |   521 +
+ scripts/gcc-plugins/gcc-common.h                   |   879 +
+ scripts/gcc-plugins/gcc-generate-gimple-pass.h     |   175 +
+ scripts/gcc-plugins/gcc-generate-ipa-pass.h        |   289 +
+ scripts/gcc-plugins/gcc-generate-rtl-pass.h        |   175 +
+ scripts/gcc-plugins/gcc-generate-simple_ipa-pass.h |   175 +
+ scripts/gcc-plugins/initify_plugin.c               |   536 +
+ scripts/gcc-plugins/kallocstat_plugin.c            |   135 +
+ scripts/gcc-plugins/kernexec_plugin.c              |   407 +
+ scripts/gcc-plugins/latent_entropy_plugin.c        |   438 +
+ scripts/gcc-plugins/rap_plugin/Makefile            |     4 +
+ scripts/gcc-plugins/rap_plugin/rap.h               |    36 +
+ scripts/gcc-plugins/rap_plugin/rap_fptr_pass.c     |   220 +
+ scripts/gcc-plugins/rap_plugin/rap_hash.c          |   382 +
+ scripts/gcc-plugins/rap_plugin/rap_plugin.c        |   511 +
+ scripts/gcc-plugins/rap_plugin/sip.c               |    96 +
+ .../gcc-plugins/size_overflow_plugin/.gitignore    |     3 +
+ scripts/gcc-plugins/size_overflow_plugin/Makefile  |    28 +
+ .../disable_size_overflow_hash.data                | 12444 +++++++++++
+ .../generate_size_overflow_hash.sh                 |   103 +
+ .../insert_size_overflow_asm.c                     |   369 +
+ .../size_overflow_plugin/intentional_overflow.c    |  1166 +
+ .../size_overflow_plugin/remove_unnecessary_dup.c  |   137 +
+ .../size_overflow_plugin/size_overflow.h           |   331 +
+ .../size_overflow_plugin/size_overflow_debug.c     |   194 +
+ .../size_overflow_plugin/size_overflow_hash.data   | 21504 +++++++++++++++++++
+ .../size_overflow_hash_aux.data                    |    92 +
+ .../size_overflow_plugin/size_overflow_ipa.c       |  1163 +
+ .../size_overflow_plugin/size_overflow_misc.c      |   505 +
+ .../size_overflow_plugin/size_overflow_plugin.c    |   290 +
+ .../size_overflow_plugin_hash.c                    |   352 +
+ .../size_overflow_plugin/size_overflow_transform.c |   743 +
+ .../size_overflow_transform_core.c                 |  1025 +
+ scripts/gcc-plugins/stackleak_plugin.c             |   350 +
+ scripts/gcc-plugins/structleak_plugin.c            |   239 +
+ scripts/package/builddeb                           |     2 +-
+ security/Kconfig                                   |     8 +-
+ sound/soc/codecs/sti-sas.c                         |     8 +-
+ sound/soc/soc-ac97.c                               |     4 +-
+ tools/gcc/Makefile                                 |    46 -
+ tools/gcc/checker_plugin.c                         |   496 -
+ tools/gcc/colorize_plugin.c                        |   162 -
+ tools/gcc/constify_plugin.c                        |   521 -
+ tools/gcc/gcc-common.h                             |   879 -
+ tools/gcc/gcc-generate-gimple-pass.h               |   175 -
+ tools/gcc/gcc-generate-ipa-pass.h                  |   289 -
+ tools/gcc/gcc-generate-rtl-pass.h                  |   175 -
+ tools/gcc/gcc-generate-simple_ipa-pass.h           |   175 -
+ tools/gcc/initify_plugin.c                         |   536 -
+ tools/gcc/kallocstat_plugin.c                      |   135 -
+ tools/gcc/kernexec_plugin.c                        |   407 -
+ tools/gcc/latent_entropy_plugin.c                  |   422 -
+ tools/gcc/rap_plugin/Makefile                      |     4 -
+ tools/gcc/rap_plugin/rap.h                         |    36 -
+ tools/gcc/rap_plugin/rap_fptr_pass.c               |   220 -
+ tools/gcc/rap_plugin/rap_hash.c                    |   382 -
+ tools/gcc/rap_plugin/rap_plugin.c                  |   511 -
+ tools/gcc/rap_plugin/sip.c                         |    96 -
+ tools/gcc/size_overflow_plugin/.gitignore          |     3 -
+ tools/gcc/size_overflow_plugin/Makefile            |    28 -
+ .../disable_size_overflow_hash.data                | 12444 -----------
+ .../generate_size_overflow_hash.sh                 |   103 -
+ .../insert_size_overflow_asm.c                     |   369 -
+ .../size_overflow_plugin/intentional_overflow.c    |  1166 -
+ .../size_overflow_plugin/remove_unnecessary_dup.c  |   137 -
+ tools/gcc/size_overflow_plugin/size_overflow.h     |   331 -
+ .../gcc/size_overflow_plugin/size_overflow_debug.c |   194 -
+ .../size_overflow_plugin/size_overflow_hash.data   | 21504 -------------------
+ .../size_overflow_hash_aux.data                    |    92 -
+ tools/gcc/size_overflow_plugin/size_overflow_ipa.c |  1163 -
+ .../gcc/size_overflow_plugin/size_overflow_misc.c  |   505 -
+ .../size_overflow_plugin/size_overflow_plugin.c    |   290 -
+ .../size_overflow_plugin_hash.c                    |   352 -
+ .../size_overflow_plugin/size_overflow_transform.c |   743 -
+ .../size_overflow_transform_core.c                 |  1025 -
+ tools/gcc/stackleak_plugin.c                       |   350 -
+ tools/gcc/structleak_plugin.c                      |   239 -
+ 237 files changed, 47340 insertions(+), 47276 deletions(-)
+
 commit b0b41430a8c9e6e5067c896c07d361e527e298e8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat May 21 13:59:19 2016 -0400
