@@ -1,3 +1,56 @@
+commit 11150b92c4cd78ec6a22ad0ff682faf2354b4445
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 5 14:18:34 2016 -0400
+
+    compile fix
+
+ grsecurity/grsec_tpe.c | 4 ++--
+ include/linux/uidgid.h | 1 +
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 6e548aad3425733ed443e4a3232205935f0d4939
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 5 08:19:09 2016 -0400
+
+    Workaround some Debian bike-shedding so that group-writable /bin dirs
+    (with group ownership of root) don't trigger TPE violations
+    Reported by jvoisin
+
+ grsecurity/grsec_tpe.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 735ea2028ce017246358d22ec81dc6db73499770
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 5 04:23:15 2016 -0400
+
+    move another instance of is_privileged_binary outside of atomic
+
+ grsecurity/gracl_segv.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+commit e08a7bcc7b7a1e423b5346bcef85d9a92185f65f
+Merge: d094457 85a5882
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 5 04:09:29 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 85a588299f41d6a116b8d07d902de986968a84b0
+Merge: 89f00c3 ec2a755
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 5 04:08:42 2016 -0400
+
+    Merge branch 'linux-4.5.y' into pax-test
+
+commit d094457eb90a693f7007b7f4b26c2132137c7ed2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 30 10:15:11 2016 -0400
+
+    move privilege/xattr check outside of locks to prevent warning, reported by shadowdaemon
+
+ grsecurity/grsec_sig.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
 commit 2fad2bb3392409d98498b3af53cf39f2475e4b70
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun May 29 10:11:27 2016 -0400
