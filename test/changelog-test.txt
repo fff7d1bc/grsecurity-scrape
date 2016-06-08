@@ -1,3 +1,17 @@
+commit 1ee24693e22a535dbede927beba7b90cd8559eb4
+Merge: 11150b9 dec4686
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 8 07:39:26 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit dec468678ead461fc786adfbb2505b6ef66a371a
+Merge: 85a5882 8c596d1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 8 07:39:18 2016 -0400
+
+    Merge branch 'linux-4.5.y' into pax-test
+
 commit 11150b92c4cd78ec6a22ad0ff682faf2354b4445
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 5 14:18:34 2016 -0400
