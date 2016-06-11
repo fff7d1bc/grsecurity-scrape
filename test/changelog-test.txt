@@ -1,3 +1,216 @@
+commit 1646af929d2465bc7a21a3c180de677e0b0b7950
+Author: Dave Chinner <dchinner@redhat.com>
+Date:   Wed May 18 14:09:12 2016 +1000
+
+    xfs: mark reclaimed inodes invalid earlier
+    
+    The last thing we do before using call_rcu() on an xfs_inode to be
+    freed is mark it as invalid. This means there is a window between
+    when we know for certain that the inode is going to be freed and
+    when we do actually mark it as "freed".
+    
+    This is important in the context of RCU lookups - we can look up the
+    inode, find that it is valid, and then use it as such not realising
+    that it is in the final stages of being freed.
+    
+    As such, mark the inode as being invalid the moment we know it is
+    going to be reclaimed. This can be done while we still hold the
+    XFS_ILOCK_EXCL and the flush lock in xfs_inode_reclaim, meaning that
+    it occurs well before we remove it from the radix tree, and that
+    the i_flags_lock, the XFS_ILOCK and the inode flush lock all act as
+    synchronisation points for detecting that an inode is about to go
+    away.
+    
+    For defensive purposes, this allows us to add a further check to
+    xfs_iflush_cluster to ensure we skip inodes that are being freed
+    after we grab the XFS_ILOCK_SHARED and the flush lock - we know that
+    if the inode number if valid while we have these locks held we know
+    that it has not progressed through reclaim to the point where it is
+    clean and is about to be freed.
+    
+    [bfoster: fixed __xfs_inode_clear_reclaim() using ip->i_ino after it
+    	  had already been zeroed.]
+    
+    Signed-off-by: Dave Chinner <dchinner@redhat.com>
+    Reviewed-by: Brian Foster <bfoster@redhat.com>
+    Signed-off-by: Dave Chinner <david@fromorbit.com>
+
+ fs/xfs/xfs_icache.c | 46 ++++++++++++++++++++++++++++++++++------------
+ fs/xfs/xfs_inode.c  | 13 +++++++++++++
+ 2 files changed, 47 insertions(+), 12 deletions(-)
+
+commit 096f3d24e77f4cd8fe50008623b26c89cb00ccda
+Author: Dave Chinner <dchinner@redhat.com>
+Date:   Wed May 18 14:01:53 2016 +1000
+
+    xfs: xfs_inode_free() isn't RCU safe
+    
+    The xfs_inode freed in xfs_inode_free() has multiple allocated
+    structures attached to it. We free these in xfs_inode_free() before
+    we mark the inode as invalid, and before we run call_rcu() to queue
+    the structure for freeing.
+    
+    Unfortunately, this freeing can race with other accesses that are in
+    the RCU current grace period that have found the inode in the radix
+    tree with a valid state.  This includes xfs_iflush_cluster(), which
+    calls xfs_inode_clean(), and that accesses the inode log item on the
+    xfs_inode.
+    
+    The log item structure is freed in xfs_inode_free(), so there is the
+    possibility we can be accessing freed memory in xfs_iflush_cluster()
+    after validating the xfs_inode structure as being valid for this RCU
+    context. Hence we can get spuriously incorrect clean state returned
+    from such checks. This can lead to use thinking the inode is dirty
+    when it is, in fact, clean, and so incorrectly attaching it to the
+    buffer for IO and completion processing.
+    
+    This then leads to use-after-free situations on the xfs_inode itself
+    if the IO completes after the current RCU grace period expires. The
+    buffer callbacks will access the xfs_inode and try to do all sorts
+    of things it shouldn't with freed memory.
+    
+    IOWs, xfs_iflush_cluster() only works correctly when racing with
+    inode reclaim if the inode log item is present and correctly stating
+    the inode is clean. If the inode is being freed, then reclaim has
+    already made sure the inode is clean, and hence xfs_iflush_cluster
+    can skip it. However, we are accessing the inode inode under RCU
+    read lock protection and so also must ensure that all dynamically
+    allocated memory we reference in this context is not freed until the
+    RCU grace period expires.
+    
+    To fix this, move all the potential memory freeing into
+    xfs_inode_free_callback() so that we are guarantee RCU protected
+    lookup code will always have the memory structures it needs
+    available during the RCU grace period that lookup races can occur
+    in.
+    
+    Discovered-by: Brain Foster <bfoster@redhat.com>
+    Signed-off-by: Dave Chinner <dchinner@redhat.com>
+    Reviewed-by: Christoph Hellwig <hch@lst.de>
+    Signed-off-by: Dave Chinner <david@fromorbit.com>
+
+ fs/xfs/xfs_icache.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+commit eaec09dbc18fe0ae7905b33b4c819a467a0e801d
+Author: Jann Horn <jannh@google.com>
+Date:   Wed Jun 1 11:55:07 2016 +0200
+
+    sched: panic on corrupted stack end
+    
+    Until now, hitting this BUG_ON caused a recursive oops (because oops
+    handling involves do_exit(), which calls into the scheduler, which in
+    turn raises an oops), which caused stuff below the stack to be
+    overwritten until a panic happened (e.g.  via an oops in interrupt
+    context, caused by the overwritten CPU index in the thread_info).
+    
+    Just panic directly.
+    
+    Signed-off-by: Jann Horn <jannh@google.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/sched/core.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit 96894afd3cbd735ed9230f058a32865dec270da2
+Author: Jann Horn <jannh@google.com>
+Date:   Wed Jun 1 11:55:06 2016 +0200
+
+    ecryptfs: forbid opening files without mmap handler
+    
+    This prevents users from triggering a stack overflow through a recursive
+    invocation of pagefault handling that involves mapping procfs files into
+    virtual memory.
+    
+    Signed-off-by: Jann Horn <jannh@google.com>
+    Acked-by: Tyler Hicks <tyhicks@canonical.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/ecryptfs/kthread.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+commit 06608cb36ab8329c7cf03fdabc86fb7f64a2656d
+Author: Jann Horn <jannh@google.com>
+Date:   Wed Jun 1 11:55:05 2016 +0200
+
+    proc: prevent stacking filesystems on top
+    
+    This prevents stacking filesystems (ecryptfs and overlayfs) from using
+    procfs as lower filesystem.  There is too much magic going on inside
+    procfs, and there is no good reason to stack stuff on top of procfs.
+    
+    (For example, procfs does access checks in VFS open handlers, and
+    ecryptfs by design calls open handlers from a kernel thread that doesn't
+    drop privileges or so.)
+    
+    Signed-off-by: Jann Horn <jannh@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/proc/root.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+commit 7cff8ffababda8d77e7e3a3f2621b26269279b9a
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Wed May 4 14:04:13 2016 -0400
+
+    ecryptfs: fix handling of directory opening
+    
+    First of all, trying to open them r/w is idiocy; it's guaranteed to fail.
+    Moreover, assigning ->f_pos and assuming that everything will work is
+    blatantly broken - try that with e.g. tmpfs as underlying layer and watch
+    the fireworks.  There may be a non-trivial amount of state associated with
+    current IO position, well beyond the numeric offset.  Using the single
+    struct file associated with underlying inode is really not a good idea;
+    we ought to open one for each ecryptfs directory struct file.
+    
+    Additionally, file_operations both for directories and non-directories are
+    full of pointless methods; non-directories should *not* have ->iterate(),
+    directories should not have ->flush(), ->fasync() and ->splice_read().
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/ecryptfs/file.c | 71 ++++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 55 insertions(+), 16 deletions(-)
+
+commit b690dcd62ad1433e69d391a267ce01534c19d20a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 8 20:59:28 2016 -0400
+
+    fix compiler warnings
+
+ fs/exec.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 5d43ec1fb9c94f0c2644e0d09a8257442134a0ce
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 8 20:52:00 2016 -0400
+
+    Avoid some UB
+
+ fs/exec.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit d34347de1cae1f7bd8ea4223d5baca5da8ea4529
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 8 20:23:27 2016 -0400
+
+    compile fix
+
+ kernel/smpboot.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 4dfdd6b803d58fec94306a4ff437d500a9c80908
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 8 20:13:34 2016 -0400
+
+    Add open/close around cpumask modification, reported by shadowdaemon
+    Triggered by writing to /proc/sys/kernel/watchdog_cpumask
+
+ kernel/smpboot.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
 commit 1ee24693e22a535dbede927beba7b90cd8559eb4
 Merge: 11150b9 dec4686
 Author: Brad Spengler <spender@grsecurity.net>
