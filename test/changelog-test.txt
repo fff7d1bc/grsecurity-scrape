@@ -1,3 +1,118 @@
+commit 39c61be367e5f1e1e0a08592ab3b23e71779ac9f
+Merge: c63d655 66f9687
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 14 18:19:37 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 66f968756cfcc3ab040ad99deb570fb445108fb9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 14 18:19:04 2016 -0400
+
+    Update to pax-linux-4.5.5-test12.patch:
+    - fixed a KERNEXEC regression when writing to /proc/sys/kernel/watchdog_cpumask, reported by shadowdaemon
+    - Emese worked around a gcc induced intentional integer overflow in jfs that triggered a size overflow report, reported by g66 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4486)
+    - Emese relicensed the size overflow plugin to GPLv2 only
+    - Emese added size overflow coverage for vmnet in the hash tables, reported by Shawn <citypw@gmail.com>
+    - Emese enhanced the latent entropy in various ways (https://github.com/ephox-gcc-plugins/latent_entropy/commits/master)
+    - fixed pax_sanitize_slab=off for kmalloc and boot caches, by Mathias Krause <minipli@ld-linux.so>
+    - eliminated the memory overhead of SLUB sanitization, by Mathias Krause <minipli@ld-linux.so>
+
+ kernel/smpboot.c                                   |   3 +
+ mm/slab.c                                          |   2 +
+ mm/slab.h                                          |  15 +
+ mm/slab_common.c                                   |   7 -
+ mm/slob.c                                          |   2 +
+ mm/slub.c                                          |   8 +-
+ scripts/gcc-plugins/latent_entropy_plugin.c        | 361 +++++++++++++++------
+ .../disable_size_overflow_hash.data                |   1 +
+ .../insert_size_overflow_asm.c                     |   2 +-
+ .../size_overflow_plugin/intentional_overflow.c    |   2 +-
+ .../size_overflow_plugin/remove_unnecessary_dup.c  |   2 +-
+ .../size_overflow_plugin/size_overflow_debug.c     |   2 +-
+ .../size_overflow_plugin/size_overflow_hash.data   |   1 -
+ .../size_overflow_hash_aux.data                    |   5 +
+ .../size_overflow_plugin/size_overflow_ipa.c       |   2 +-
+ .../size_overflow_plugin/size_overflow_misc.c      |   2 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |   2 +-
+ .../size_overflow_plugin_hash.c                    |   2 +-
+ .../size_overflow_plugin/size_overflow_transform.c |   2 +-
+ .../size_overflow_transform_core.c                 |   2 +-
+ 20 files changed, 310 insertions(+), 115 deletions(-)
+
+commit c63d655907910533ed9d50671e98774b4b797578
+Author: Tejun Heo <tj@kernel.org>
+Date:   Wed May 25 11:48:25 2016 -0400
+
+    percpu: fix synchronization between synchronous map extension and chunk destruction
+    
+    For non-atomic allocations, pcpu_alloc() can try to extend the area
+    map synchronously after dropping pcpu_lock; however, the extension
+    wasn't synchronized against chunk destruction and the chunk might get
+    freed while extension is in progress.
+    
+    This patch fixes the bug by putting most of non-atomic allocations
+    under pcpu_alloc_mutex to synchronize against pcpu_balance_work which
+    is responsible for async chunk management including destruction.
+    
+    Signed-off-by: Tejun Heo <tj@kernel.org>
+    Reported-and-tested-by: Alexei Starovoitov <alexei.starovoitov@gmail.com>
+    Reported-by: Vlastimil Babka <vbabka@suse.cz>
+    Reported-by: Sasha Levin <sasha.levin@oracle.com>
+    Cc: stable@vger.kernel.org # v3.18+
+    Fixes: 1a4d76076cda ("percpu: implement asynchronous chunk population")
+
+ mm/percpu.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+commit 63442a31da7b33c5d6ab80254a2af78616b91aa8
+Author: Tejun Heo <tj@kernel.org>
+Date:   Wed May 25 11:48:25 2016 -0400
+
+    percpu: fix synchronization between chunk->map_extend_work and chunk destruction
+    
+    Atomic allocations can trigger async map extensions which is serviced
+    by chunk->map_extend_work.  pcpu_balance_work which is responsible for
+    destroying idle chunks wasn't synchronizing properly against
+    chunk->map_extend_work and may end up freeing the chunk while the work
+    item is still in flight.
+    
+    This patch fixes the bug by rolling async map extension operations
+    into pcpu_balance_work.
+    
+    Signed-off-by: Tejun Heo <tj@kernel.org>
+    Reported-and-tested-by: Alexei Starovoitov <alexei.starovoitov@gmail.com>
+    Reported-by: Vlastimil Babka <vbabka@suse.cz>
+    Reported-by: Sasha Levin <sasha.levin@oracle.com>
+    Cc: stable@vger.kernel.org # v3.18+
+    Fixes: 9c824b6a172c ("percpu: make sure chunk->map array has available space")
+
+ mm/percpu.c | 57 ++++++++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 36 insertions(+), 21 deletions(-)
+
+commit 7187611ba0d834ec7db27904c0cdf07bc9bc7d8f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 11 19:54:40 2016 -0400
+
+    Only bother establishing the PTEs for the vmap'd stack on creation
+
+ fs/exec.c             | 1 -
+ include/linux/sched.h | 9 ++++-----
+ kernel/fork.c         | 3 ++-
+ kernel/sched/core.c   | 2 --
+ 4 files changed, 6 insertions(+), 9 deletions(-)
+
+commit a6e150dfb383fcb4c8d5294c59f2d21425ff9f72
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 11 13:18:33 2016 -0400
+
+    Work around upstream's use of probe_kernel_address in alignment handling
+    which uses KERNEL_DS but wants to access userland memory directly --
+    not allowed by PaX.  Reported by jotik
+
+ arch/arm/mm/alignment.c | 24 ++++++++++++++++++++----
+ 1 file changed, 20 insertions(+), 4 deletions(-)
+
 commit 1646af929d2465bc7a21a3c180de677e0b0b7950
 Author: Dave Chinner <dchinner@redhat.com>
 Date:   Wed May 18 14:09:12 2016 +1000
