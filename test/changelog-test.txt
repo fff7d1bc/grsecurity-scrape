@@ -1,3 +1,21 @@
+commit 33e588f130c19cac089c2b0d70c939bee84ba812
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 17 20:15:46 2016 -0400
+
+    Update KSTACKOVERFLOW dependency, update documentation
+
+ grsecurity/Kconfig | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+commit d877624a8034129afc61dcc0f6127d69ee7a08d5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 15 06:28:18 2016 -0400
+
+    Backport fix for http://seclists.org/oss-sec/2016/q2/553
+
+ security/keys/key.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 39c61be367e5f1e1e0a08592ab3b23e71779ac9f
 Merge: c63d655 66f9687
 Author: Brad Spengler <spender@grsecurity.net>
