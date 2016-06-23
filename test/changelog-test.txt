@@ -1,3 +1,64 @@
+commit c881b58ba51680e30758c1ea12058cd76c578672
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 22 19:27:11 2016 -0400
+
+    compile fix
+
+ arch/x86/mm/init.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 6f889875e9f23d3d5a4751d09cc47f6e39eb9e1b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 22 17:37:53 2016 -0400
+
+    Don't bother further restricting /dev/mem when GRKERNSEC_KMEM is disabled,
+    fixes tboot use
+    Reported by Mark van Dijk
+    Previous MSR problem was also reported by Mark van Dijk
+
+ arch/x86/mm/init.c | 16 +++++-----------
+ 1 file changed, 5 insertions(+), 11 deletions(-)
+
+commit 1b99e76b8f41a8495ff085ffccab0e1bc8abed59
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 22 17:22:14 2016 -0400
+
+    Whitelist writes to MSR_IA32_ENERGY_PERF_BIAS
+
+ arch/x86/kernel/msr.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+commit 8c013d99d311850cade58ed5f9da05fb7f2c2873
+Merge: 33e588f 9b2decf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 22 07:46:27 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9b2decf0bccddae6e630a2548d53d2a9718891a3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 22 07:46:03 2016 -0400
+
+    Update to pax-linux-4.5.7-test13.patch:
+    - fixed a bad function pointer cast in dma_buf_show caught by RAP, by Mathias Krause <minipli@googlemail.com>
+    - fixed a bad function type in the intel cstate sysfs code caught by RAP, reported by sth0R (https://forums.grsecurity.net/viewtopic.php?f=3&t=4497)
+    - worked around an intentional integer overflow in the PCI resource sizing code caught by the size overflow plugin, reported by kysse/Ville Vuorinen
+    - fixed an integer underflow in the ELF coredump code caught by the size overflow plugin, reported by Dwokfur (https://forums.grsecurity.net/viewtopic.php?f=3&t=4495)
+    - fixed Hyper-V's hypercall page allocation to work under !KERNEXEC as well, reported by btnet (https://forums.grsecurity.net/viewtopic.php?f=3&t=3911), based on an idea by Pablo Sole (https://bugs.alpinelinux.org/issues/1021#note-27)
+    - fixed a REFCOUNT false positive in wpan_phy_new
+
+ arch/x86/include/asm/pgtable_64.h             |  2 +-
+ arch/x86/kernel/cpu/perf_event_intel_cstate.c |  6 +++---
+ arch/x86/kernel/head_64.S                     | 10 ++++++++--
+ arch/x86/xen/mmu.c                            | 10 ++++++++--
+ drivers/dma-buf/dma-buf.c                     |  5 ++---
+ drivers/hv/hv.c                               | 23 +++++++----------------
+ drivers/pci/setup-bus.c                       |  8 ++++++--
+ fs/exec.c                                     |  4 ++--
+ include/linux/types.h                         |  2 ++
+ net/ieee802154/core.c                         |  6 +++---
+ 10 files changed, 42 insertions(+), 34 deletions(-)
+
 commit 33e588f130c19cac089c2b0d70c939bee84ba812
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Jun 17 20:15:46 2016 -0400
