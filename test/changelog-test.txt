@@ -1,3 +1,40 @@
+commit 489fa0be1ea2ce2665611bc315f229486c64dbc5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 27 23:19:52 2016 -0400
+
+    Historically we did not trigger a BUG() on REFCOUNT violations due to the risk
+    of false positives, some of which took months or longer to exhibit themselves.
+    Initially, in fact, there was no task killing at all involved due to the risk of
+    a legitimate increment following a full set of intentional "leaky" increments
+    causing the wrong process to be killed and the wrong user to be banned (or a
+    panic ensuing).  These risks were also weighed against the risk documented in
+    the REFCOUNT blog and elsewhere of a race on x86 where the refcount could
+    surpass INT_MAX.  Regardless of whether the race is practical or not (and ways
+    of addressing that race are already mentioned in the REFCOUNT blog) given the
+    recent development of a GCC plugin to proactively tease out false positives
+    mentioned above, it's safe enough now to simply BUG() on refcount overflow
+    attempts.  This handles both the race case as well as the case of atomic_t being
+    used when atomic64_t is really necessary to be able to express the full amount
+    of object references (when grsecurity's kernel bruteforce defense is enabled as
+    it is by default).
+    
+    Suggested by Jann Horn at: http://www.openwall.com/lists/kernel-hardening/2016/06/25/2
+
+ fs/exec.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+commit 0fb349e90e9de1d35ab4e7cd33b0f230b30c340f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 27 17:14:06 2016 -0400
+
+    Fix a UAF only triggerable by privileged root processes on the
+    short-lived delayed_cred pointer by grabbing a reference where
+    applicable at fork time -- not a security issue
+    Thanks to Jann Horn for the report
+
+ kernel/fork.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
 commit 6eb392861c72839f7af44d0e57927f362a2a0df5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 26 18:07:05 2016 -0400
