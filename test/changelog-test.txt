@@ -1,3 +1,90 @@
+commit 86572f86f379b0e6e22bf5dacb327ed0f4b43fbf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 28 21:29:02 2016 -0400
+
+    Fix section conflict caught by recent constify plugin improvements
+
+ drivers/hwmon/dell-smm-hwmon.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit f6702b62ac3f7b94968ccebbfef7b33d16752926
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 28 20:55:33 2016 -0400
+
+    Mark some ARM _ops __read_only for consistency
+
+ drivers/clk/socfpga/clk-gate-a10.c | 2 +-
+ drivers/clk/socfpga/clk-pll-a10.c  | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 4766cd23999675173175ff7563bdf2c785ecb9de
+Merge: a256990 791e52d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 28 20:52:20 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 791e52d5d1ef361e6f2fdf2dc3cf51ca712788b2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 28 20:51:37 2016 -0400
+
+    Update to pax-linux-4.5.7-test18.patch:
+    - fixed a compile error of the constify plugin under older gcc versions
+    - Emese added a few nocapture attributes to powerpc as well
+    - fixed a few compile errors due to writes to constified fptrs on arm, reported by blake and spender
+    - fixed compile error with certain gcc versions when plugins were passed twice, reported by spender
+    - fixed regression causing random execve failures under UDEREF/amd64 and with ASLR disabled, reported by jotik
+    - taught the constify plugin to detect section mismatches of constified objects
+    - fixed a few section mismatches of constified objects that triggered LTO compilation errors
+    - changed the recent hyperv fix to be LTO compatible
+
+ arch/powerpc/include/asm/string.h         |  18 ++--
+ arch/x86/Kconfig                          |   6 +-
+ arch/x86/boot/string.h                    |   4 +-
+ drivers/clk/socfpga/clk-gate-a10.c        |   7 +-
+ drivers/clk/socfpga/clk-pll-a10.c         |   7 +-
+ drivers/hv/hv.c                           |   3 +-
+ drivers/hwmon/applesmc.c                  |   2 +-
+ drivers/hwmon/dell-smm-hwmon.c            |   2 +-
+ drivers/iommu/io-pgtable-arm.c            |   2 +-
+ drivers/leds/leds-clevo-mail.c            |   2 +-
+ drivers/leds/leds-ss4200.c                |   2 +-
+ drivers/platform/chrome/chromeos_laptop.c |   2 +-
+ drivers/platform/chrome/cros_ec_lpc.c     |   2 +-
+ include/linux/memory.h                    |   2 +-
+ init/Makefile                             |   3 -
+ scripts/Makefile.gcc-plugins              |   2 +
+ scripts/gcc-plugins/constify_plugin.c     | 131 +++++++++++++++++++++---------
+ scripts/gcc-plugins/gcc-common.h          |  13 +++
+ 18 files changed, 141 insertions(+), 69 deletions(-)
+
+commit a256990dcb829c5a2f7ef5935dccb5f5faf5b5aa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 28 19:16:51 2016 -0400
+
+    !GRKERNSEC compile fixes
+
+ fs/proc/base.c       | 2 ++
+ fs/proc/task_mmu.c   | 4 ++++
+ fs/proc/task_nommu.c | 2 +-
+ 3 files changed, 7 insertions(+), 1 deletion(-)
+
+commit ed27bdf50d7ab1ed254e12e71639b5da9bc7981c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 28 18:51:23 2016 -0400
+
+    Allow active ptracers access to /proc/pid/maps and /proc/pid/mem for tasks
+    they are ptracing.  Also clean up the maps code to avoid duplicate PaX flag
+    checks.  Thanks to ekleog for reporting and testing, and Robert O'Callahan
+    for collaborating on changes/cleanups to rr to fix support for grsecurity.
+
+ fs/proc/base.c        | 24 +++++++++++++++++++-----
+ fs/proc/internal.h    |  7 +++++--
+ fs/proc/task_mmu.c    | 45 +++++++++++++++++++++------------------------
+ fs/proc/task_nommu.c  |  2 +-
+ include/linux/sched.h | 21 +++++++++++++++++++++
+ 5 files changed, 67 insertions(+), 32 deletions(-)
+
 commit 489fa0be1ea2ce2665611bc315f229486c64dbc5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jun 27 23:19:52 2016 -0400
