@@ -1,3 +1,72 @@
+commit ae14b26dc8becf26b63cbcbe1ff865ee332699a6
+Merge: 9d9a962 0e82a4c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 29 21:59:37 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0e82a4c62fbaea6bb193c8aa0bd9968325d4f28f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 29 21:58:53 2016 -0400
+
+    Backport from pax-linux-4.6.3-test9.patch:
+    - fixed a compile error with the brcmnand driver under CONSTIFY, reported by blake and spender
+    - fixed a few sections on constified pernet_operations objects
+
+ drivers/mtd/nand/brcmnand/brcmnand.h | 2 +-
+ drivers/net/loopback.c               | 2 +-
+ fs/proc/proc_net.c                   | 2 +-
+ include/linux/netdevice.h            | 2 +-
+ kernel/audit.c                       | 2 +-
+ net/core/dev.c                       | 4 ++--
+ net/core/net-procfs.c                | 4 ++--
+ net/core/net_namespace.c             | 2 +-
+ net/core/sock.c                      | 2 +-
+ net/ipv4/af_inet.c                   | 4 ++--
+ net/ipv4/devinet.c                   | 2 +-
+ net/ipv4/icmp.c                      | 2 +-
+ net/ipv4/proc.c                      | 2 +-
+ net/ipv4/raw.c                       | 2 +-
+ net/ipv4/route.c                     | 8 ++++----
+ net/ipv4/sysctl_net_ipv4.c           | 2 +-
+ net/ipv4/tcp_ipv4.c                  | 2 +-
+ net/ipv4/tcp_metrics.c               | 2 +-
+ net/ipv4/xfrm4_policy.c              | 2 +-
+ net/netlink/af_netlink.c             | 2 +-
+ net/xfrm/xfrm_policy.c               | 2 +-
+ scripts/gcc-plugins/gcc-common.h     | 4 ++--
+ 22 files changed, 29 insertions(+), 29 deletions(-)
+
+commit 9d9a962d41feb6c669e922dc745274d6837e65a0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 29 09:37:24 2016 -0400
+
+    Fix section conflict
+
+ drivers/hwmon/dell-smm-hwmon.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit da933a642cfedfd5c8aeea6b639b7c4281c09ac0
+Merge: 86572f86 cf76181
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 29 09:23:24 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit cf761817d0edbf2b54534346ad3db500202c9f78
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jun 29 09:22:59 2016 -0400
+
+    Update to pax-linux-4.5.7-test19.patch:
+    - fixed constify compile regression that triggered on aliases of certain constified variables, reported by Yves-Alexis Perez <corsac@corsac.net>
+
+ drivers/clk/socfpga/clk-gate-a10.c    |  2 +-
+ drivers/clk/socfpga/clk-pll-a10.c     |  2 +-
+ drivers/hwmon/dell-smm-hwmon.c        |  2 +-
+ scripts/gcc-plugins/constify_plugin.c | 11 ++++++++++-
+ scripts/gcc-plugins/gcc-common.h      |  1 +
+ 5 files changed, 14 insertions(+), 4 deletions(-)
+
 commit 86572f86f379b0e6e22bf5dacb327ed0f4b43fbf
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 28 21:29:02 2016 -0400
