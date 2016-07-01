@@ -1,3 +1,39 @@
+commit cc5fa2f058fdfb4fe6e0e7b8e16766e839163b3d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 30 17:39:11 2016 -0400
+
+    compile fix
+
+ arch/x86/mm/init.c | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
+
+commit 67a4e5ea21f50a40a96ab6d486e589dfa58a75c3
+Merge: ae14b26 97ed08d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 30 17:30:57 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 97ed08d8aa41b452ab3835343852cd388c2044e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 30 17:26:41 2016 -0400
+
+    Update to pax-linux-4.5.7-test20.patch:
+    - fixed a compile error with the brcmnand driver under CONSTIFY, reported by blake and spender
+    - fixed a few sections on constified pernet_operations objects
+    - merged some KERNEXEC/x86 boot time setup code with DEBUG_RODATA
+
+ arch/x86/Kconfig.debug        |  1 -
+ arch/x86/kernel/head_32.S     | 21 ++++------
+ arch/x86/kernel/head_64.S     |  9 +++--
+ arch/x86/kernel/vmlinux.lds.S | 12 ------
+ arch/x86/mm/init.c            | 92 -------------------------------------------
+ arch/x86/mm/init_32.c         | 46 ++++++++++++++++------
+ arch/x86/mm/init_64.c         | 54 +++++++++++++++++++++++--
+ include/linux/init.h          |  6 +++
+ security/Kconfig              |  1 +
+ 9 files changed, 104 insertions(+), 138 deletions(-)
+
 commit ae14b26dc8becf26b63cbcbe1ff865ee332699a6
 Merge: 9d9a962 0e82a4c
 Author: Brad Spengler <spender@grsecurity.net>
