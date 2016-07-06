@@ -1,0 +1,2580 @@
+diff --git a/.gitignore b/.gitignore
+index fd3a355..c47e86a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -37,6 +37,7 @@ modules.builtin
+ Module.symvers
+ *.dwo
+ *.su
++*.c.[012]*.*
+ 
+ #
+ # Top-level generic files
+diff --git a/Documentation/dontdiff b/Documentation/dontdiff
+index 8ea834f..1462492 100644
+--- a/Documentation/dontdiff
++++ b/Documentation/dontdiff
+@@ -3,9 +3,11 @@
+ *.bc
+ *.bin
+ *.bz2
++*.c.[012]*.*
+ *.cis
+ *.cpio
+ *.csp
++*.dbg
+ *.dsp
+ *.dvi
+ *.elf
+@@ -15,6 +17,7 @@
+ *.gcov
+ *.gen.S
+ *.gif
++*.gmo
+ *.grep
+ *.grp
+ *.gz
+@@ -51,14 +54,17 @@
+ *.tab.h
+ *.tex
+ *.ver
++*.vim
+ *.xml
+ *.xz
+ *_MODULES
++*_reg_safe.h
+ *_vga16.c
+ *~
+ \#*#
+ *.9
+-.*
++.[^g]*
++.gen*
+ .*.d
+ .mm
+ 53c700_d.h
+@@ -72,9 +78,11 @@ Image
+ Module.markers
+ Module.symvers
+ PENDING
++PERF*
+ SCCS
+ System.map*
+ TAGS
++TRACEEVENT-CFLAGS
+ aconf
+ af_names.h
+ aic7*reg.h*
+@@ -83,6 +91,7 @@ aic7*seq.h*
+ aicasm
+ aicdb.h*
+ altivec*.c
++ashldi3.S
+ asm-offsets.h
+ asm_offsets.h
+ autoconf.h*
+@@ -95,32 +104,40 @@ bounds.h
+ bsetup
+ btfixupprep
+ build
++builtin-policy.h
+ bvmlinux
+ bzImage*
+ capability_names.h
+ capflags.c
+ classlist.h*
++clut_vga16.c
++common-cmds.h
+ comp*.log
+ compile.h*
+ conf
+ config
+ config-*
+ config_data.h*
++config.c
+ config.mak
+ config.mak.autogen
++config.tmp
+ conmakehash
+ consolemap_deftbl.c*
+ cpustr.h
+ crc32table.h*
+ cscope.*
+ defkeymap.c
++devicetable-offsets.h
+ devlist.h*
+ dnotify_test
+ docproc
+ dslm
++dtc-lexer.lex.c
+ elf2ecoff
+ elfconfig.h*
+ evergreen_reg_safe.h
++exception_policy.conf
+ fixdep
+ flask.h
+ fore200e_mkfirm
+@@ -128,12 +145,15 @@ fore200e_pca_fw.c*
+ gconf
+ gconf.glade.h
+ gen-devlist
++gen-kdb_cmds.c
+ gen_crc32table
+ gen_init_cpio
+ generated
+ genheaders
+ genksyms
+ *_gray256.c
++hash
++hid-example
+ hpet_example
+ hugepage-mmap
+ hugepage-shm
+@@ -148,14 +168,14 @@ int32.c
+ int4.c
+ int8.c
+ kallsyms
+-kconfig
++kern_constants.h
+ keywords.c
+ ksym.c*
+ ksym.h*
+ kxgettext
+ lex.c
+ lex.*.c
+-linux
++lib1funcs.S
+ logo_*.c
+ logo_*_clut224.c
+ logo_*_mono.c
+@@ -166,12 +186,14 @@ machtypes.h
+ map
+ map_hugetlb
+ mconf
++mdp
+ miboot*
+ mk_elfconfig
+ mkboot
+ mkbugboot
+ mkcpustr
+ mkdep
++mkpiggy
+ mkprep
+ mkregtable
+ mktables
+@@ -187,6 +209,8 @@ oui.c*
+ page-types
+ parse.c
+ parse.h
++parse-events*
++pasyms.h
+ patches*
+ pca200e.bin
+ pca200e_ecd.bin2
+@@ -196,6 +220,7 @@ perf-archive
+ piggyback
+ piggy.gzip
+ piggy.S
++pmu-*
+ pnmtologo
+ ppc_defs.h*
+ pss_boot.h
+@@ -205,7 +230,12 @@ r200_reg_safe.h
+ r300_reg_safe.h
+ r420_reg_safe.h
+ r600_reg_safe.h
++randomize_layout_hash.h
++randomize_layout_seed.h
++realmode.lds
++realmode.relocs
+ recordmcount
++regdb.c
+ relocs
+ rlim_names.h
+ rn50_reg_safe.h
+@@ -215,8 +245,12 @@ series
+ setup
+ setup.bin
+ setup.elf
++signing_key*
++size_overflow_hash.h
+ sImage
++slabinfo
+ sm_tbl*
++sortextable
+ split-include
+ syscalltab.h
+ tables.c
+@@ -226,6 +260,7 @@ tftpboot.img
+ timeconst.h
+ times.h*
+ trix_boot.h
++user_constants.h
+ utsrelease.h*
+ vdso-syms.lds
+ vdso.lds
+@@ -237,13 +272,17 @@ vdso32.lds
+ vdso32.so.dbg
+ vdso64.lds
+ vdso64.so.dbg
++vdsox32.lds
++vdsox32-syms.lds
+ version.h*
+ vmImage
+ vmlinux
+ vmlinux-*
+ vmlinux.aout
+ vmlinux.bin.all
++vmlinux.bin.bz2
+ vmlinux.lds
++vmlinux.relocs
+ vmlinuz
+ voffset.h
+ vsyscall.lds
+@@ -251,9 +290,12 @@ vsyscall_32.lds
+ wanxlfw.inc
+ uImage
+ unifdef
++utsrelease.h
+ wakeup.bin
+ wakeup.elf
+ wakeup.lds
++x509*
+ zImage*
+ zconf.hash.c
++zconf.lex.c
+ zoffset.h
+diff --git a/Documentation/kbuild/makefiles.txt b/Documentation/kbuild/makefiles.txt
+index 13f888a..250729b 100644
+--- a/Documentation/kbuild/makefiles.txt
++++ b/Documentation/kbuild/makefiles.txt
+@@ -23,10 +23,11 @@ This document describes the Linux kernel Makefiles.
+ 	=== 4 Host Program support
+ 	   --- 4.1 Simple Host Program
+ 	   --- 4.2 Composite Host Programs
+-	   --- 4.3 Using C++ for host programs
+-	   --- 4.4 Controlling compiler options for host programs
+-	   --- 4.5 When host programs are actually built
+-	   --- 4.6 Using hostprogs-$(CONFIG_FOO)
++	   --- 4.3 Defining shared libraries
++	   --- 4.4 Using C++ for host programs
++	   --- 4.5 Controlling compiler options for host programs
++	   --- 4.6 When host programs are actually built
++	   --- 4.7 Using hostprogs-$(CONFIG_FOO)
+ 
+ 	=== 5 Kbuild clean infrastructure
+ 
+@@ -643,7 +644,29 @@ Both possibilities are described in the following.
+ 	Finally, the two .o files are linked to the executable, lxdialog.
+ 	Note: The syntax <executable>-y is not permitted for host-programs.
+ 
+---- 4.3 Using C++ for host programs
++--- 4.3 Defining shared libraries
++
++	Objects with extension .so are considered shared libraries, and
++	will be compiled as position independent objects.
++	Kbuild provides support for shared libraries, but the usage
++	shall be restricted.
++	In the following example the libkconfig.so shared library is used
++	to link the executable conf.
++
++	Example:
++		#scripts/kconfig/Makefile
++		hostprogs-y     := conf
++		conf-objs       := conf.o libkconfig.so
++		libkconfig-objs := expr.o type.o
++
++	Shared libraries always require a corresponding -objs line, and
++	in the example above the shared library libkconfig is composed by
++	the two objects expr.o and type.o.
++	expr.o and type.o will be built as position independent code and
++	linked as a shared library libkconfig.so. C++ is not supported for
++	shared libraries.
++
++--- 4.4 Using C++ for host programs
+ 
+ 	kbuild offers support for host programs written in C++. This was
+ 	introduced solely to support kconfig, and is not recommended
+@@ -666,7 +689,7 @@ Both possibilities are described in the following.
+ 		qconf-cxxobjs := qconf.o
+ 		qconf-objs    := check.o
+ 
+---- 4.4 Controlling compiler options for host programs
++--- 4.5 Controlling compiler options for host programs
+ 
+ 	When compiling host programs, it is possible to set specific flags.
+ 	The programs will always be compiled utilising $(HOSTCC) passed
+@@ -694,7 +717,7 @@ Both possibilities are described in the following.
+ 	When linking qconf, it will be passed the extra option
+ 	"-L$(QTDIR)/lib".
+ 
+---- 4.5 When host programs are actually built
++--- 4.6 When host programs are actually built
+ 
+ 	Kbuild will only build host-programs when they are referenced
+ 	as a prerequisite.
+@@ -725,7 +748,7 @@ Both possibilities are described in the following.
+ 	This will tell kbuild to build lxdialog even if not referenced in
+ 	any rule.
+ 
+---- 4.6 Using hostprogs-$(CONFIG_FOO)
++--- 4.7 Using hostprogs-$(CONFIG_FOO)
+ 
+ 	A typical pattern in a Kbuild file looks like this:
+ 
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index 0b3de80..550d8e8 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -1320,6 +1320,12 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			[KNL] Should the hard-lockup detector generate
+ 			backtraces on all cpus.
+ 			Format: <integer>
++	grsec_proc_gid= [GRKERNSEC_PROC_USERGROUP] Chooses GID to
++			ignore grsecurity's /proc restrictions
++
++	grsec_sysfs_restrict= Format: 0 | 1
++			Default: 1
++			Disables GRKERNSEC_SYSFS_RESTRICT if enabled in config
+ 
+ 	hashdist=	[KNL,NUMA] Large hashes allocated during boot
+ 			are distributed across NUMA nodes.  Defaults on
+@@ -2515,6 +2521,10 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			noexec=on: enable non-executable mappings (default)
+ 			noexec=off: disable non-executable mappings
+ 
++	nopcid		[X86-64]
++			Disable PCID (Process-Context IDentifier) even if it
++			is supported by the processor.
++
+ 	nosmap		[X86]
+ 			Disable SMAP (Supervisor Mode Access Prevention)
+ 			even if it is supported by processor.
+@@ -2818,6 +2828,35 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 			the specified number of seconds.  This is to be used if
+ 			your oopses keep scrolling off the screen.
+ 
++	pax_nouderef	[X86] disables UDEREF.  Most likely needed under certain
++			virtualization environments that don't cope well with the
++			expand down segment used by UDEREF on X86-32 or the frequent
++			page table updates on X86-64.
++
++	pax_sanitize_slab=
++			Format: { 0 | 1 | off | fast | full }
++			Options '0' and '1' are only provided for backward
++			compatibility, 'off' or 'fast' should be used instead.
++			0|off : disable slab object sanitization
++			1|fast: enable slab object sanitization excluding
++				whitelisted slabs (default)
++			full  : sanitize all slabs, even the whitelisted ones
++
++	pax_softmode=	0/1 to disable/enable PaX softmode on boot already.
++
++	pax_extra_latent_entropy
++			Enable a very simple form of latent entropy extraction
++			from the first 4GB of memory as the bootmem allocator
++			passes the memory pages to the buddy allocator.
++
++	pax_size_overflow_report_only
++			Enables rate-limited logging of size_overflow plugin
++			violations while disabling killing of the violating
++			task.
++
++	pax_weakuderef	[X86-64] enables the weaker but faster form of UDEREF
++			when the processor supports PCID.
++
+ 	pcbit=		[HW,ISDN]
+ 
+ 	pcd.		[PARIDE]
+diff --git a/Documentation/sysctl/kernel.txt b/Documentation/sysctl/kernel.txt
+index fcddfd5..71afd6b 100644
+--- a/Documentation/sysctl/kernel.txt
++++ b/Documentation/sysctl/kernel.txt
+@@ -42,6 +42,7 @@ show up in /proc/sys/kernel:
+ - kptr_restrict
+ - kstack_depth_to_print       [ X86 only ]
+ - l2cr                        [ PPC only ]
++- modify_ldt                  [ X86 only ]
+ - modprobe                    ==> Documentation/debugging-modules.txt
+ - modules_disabled
+ - msg_next_id		      [ sysv ipc ]
+@@ -406,6 +407,20 @@ This flag controls the L2 cache of G3 processor boards. If
+ 
+ ==============================================================
+ 
++modify_ldt: (X86 only)
++
++Enables (1) or disables (0) the modify_ldt syscall. Modifying the LDT
++(Local Descriptor Table) may be needed to run a 16-bit or segmented code
++such as Dosemu or Wine. This is done via a system call which is not needed
++to run portable applications, and which can sometimes be abused to exploit
++some weaknesses of the architecture, opening new vulnerabilities.
++
++This sysctl allows one to increase the system's security by disabling the
++system call, or to restore compatibility with specific applications when it
++was already disabled.
++
++==============================================================
++
+ modules_disabled:
+ 
+ A toggle value indicating if modules are allowed to be loaded
+diff --git a/Makefile b/Makefile
+index c62b531..e158b54 100644
+--- a/Makefile
++++ b/Makefile
+@@ -298,7 +298,9 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
+ HOSTCC       = gcc
+ HOSTCXX      = g++
+ HOSTCFLAGS   = -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 -fomit-frame-pointer -std=gnu89
+-HOSTCXXFLAGS = -O2
++HOSTCFLAGS   = -W -Wno-unused-parameter -Wno-missing-field-initializers -fno-delete-null-pointer-checks
++HOSTCFLAGS  += $(call cc-option, -Wno-empty-body)
++HOSTCXXFLAGS = -O2 -Wall -W -Wno-array-bounds
+ 
+ ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
+ HOSTCFLAGS  += -Wno-unused-value -Wno-unused-parameter \
+@@ -548,7 +550,7 @@ ifeq ($(KBUILD_EXTMOD),)
+ # in parallel
+ PHONY += scripts
+ scripts: scripts_basic include/config/auto.conf include/config/tristate.conf \
+-	 asm-generic
++	 asm-generic gcc-plugins
+ 	$(Q)$(MAKE) $(build)=$(@)
+ 
+ # Objects we will link into vmlinux / subdirs we need to visit
+@@ -623,6 +625,8 @@ endif
+ # Tell gcc to never replace conditional load with a non-conditional one
+ KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
+ 
++include scripts/Makefile.gcc-plugins
++
+ ifdef CONFIG_READABLE_ASM
+ # Disable optimizations that make assembler listings hard to read.
+ # reorder blocks reorders the control in the function
+@@ -724,7 +728,7 @@ KBUILD_CFLAGS   += $(call cc-option, -gsplit-dwarf, -g)
+ else
+ KBUILD_CFLAGS	+= -g
+ endif
+-KBUILD_AFLAGS	+= -Wa,-gdwarf-2
++KBUILD_AFLAGS	+= -Wa,--gdwarf-2
+ endif
+ ifdef CONFIG_DEBUG_INFO_DWARF4
+ KBUILD_CFLAGS	+= $(call cc-option, -gdwarf-4,)
+@@ -899,7 +903,7 @@ export mod_sign_cmd
+ 
+ 
+ ifeq ($(KBUILD_EXTMOD),)
+-core-y		+= kernel/ certs/ mm/ fs/ ipc/ security/ crypto/ block/
++core-y		+= kernel/ certs/ mm/ fs/ ipc/ security/ crypto/ block/ grsecurity/
+ 
+ vmlinux-dirs	:= $(patsubst %/,%,$(filter %/, $(init-y) $(init-m) \
+ 		     $(core-y) $(core-m) $(drivers-y) $(drivers-m) \
+@@ -1002,7 +1006,7 @@ prepare1: prepare2 $(version_h) include/generated/utsrelease.h \
+ 
+ archprepare: archheaders archscripts prepare1 scripts_basic
+ 
+-prepare0: archprepare FORCE
++prepare0: archprepare gcc-plugins FORCE
+ 	$(Q)$(MAKE) $(build)=.
+ 
+ # All the preparing..
+@@ -1220,7 +1224,11 @@ MRPROPER_FILES += .config .config.old .version .old_version \
+ 		  Module.symvers tags TAGS cscope* GPATH GTAGS GRTAGS GSYMS \
+ 		  signing_key.pem signing_key.priv signing_key.x509	\
+ 		  x509.genkey extra_certificates signing_key.x509.keyid	\
+-		  signing_key.x509.signer vmlinux-gdb.py
++		  signing_key.x509.signer vmlinux-gdb.py \
++		  tools/gcc/size_overflow_plugin/size_overflow_hash_aux.h \
++		  tools/gcc/size_overflow_plugin/size_overflow_hash.h \
++		  tools/gcc/size_overflow_plugin/disable_size_overflow_hash.h \
++		  tools/gcc/randomize_layout_seed.h
+ 
+ # clean - Delete most, but leave enough to build external modules
+ #
+@@ -1259,7 +1267,7 @@ distclean: mrproper
+ 	@find $(srctree) $(RCS_FIND_IGNORE) \
+ 		\( -name '*.orig' -o -name '*.rej' -o -name '*~' \
+ 		-o -name '*.bak' -o -name '#*#' -o -name '.*.orig' \
+-		-o -name '.*.rej' -o -name '*%'  -o -name 'core' \) \
++		-o -name '.*.rej' -o -name '*.so' -o -name '*%' -o -name 'core' \) \
+ 		-type f -print | xargs rm -f
+ 
+ 
+@@ -1480,6 +1488,7 @@ clean: $(clean-dirs)
+ 		-o -name '.*.d' -o -name '.*.tmp' -o -name '*.mod.c' \
+ 		-o -name '*.symtypes' -o -name 'modules.order' \
+ 		-o -name modules.builtin -o -name '.tmp_*.o.*' \
++		-o -name '*.c.[012]*.*' \
+ 		-o -name '*.gcno' \) -type f -print | xargs rm -f
+ 
+ # Generate tags for editors
+diff --git a/arch/Kconfig b/arch/Kconfig
+index 81869a5..b10fc6c 100644
+--- a/arch/Kconfig
++++ b/arch/Kconfig
+@@ -353,6 +353,20 @@ config SECCOMP_FILTER
+ 
+ 	  See Documentation/prctl/seccomp_filter.txt for details.
+ 
++config HAVE_GCC_PLUGINS
++	bool
++	help
++	  An arch should select this symbol if it supports building with
++	  GCC plugins.
++
++menuconfig GCC_PLUGINS
++	bool "GCC plugins"
++	depends on HAVE_GCC_PLUGINS
++	default y
++	help
++	  GCC plugins are loadable modules that provide extra features to the
++	  compiler. They are useful for runtime instrumentation and static analysis.
++
+ config HAVE_CC_STACKPROTECTOR
+ 	bool
+ 	help
+diff --git a/arch/alpha/include/asm/atomic.h b/arch/alpha/include/asm/atomic.h
+index 572b228..e03acdd 100644
+--- a/arch/alpha/include/asm/atomic.h
++++ b/arch/alpha/include/asm/atomic.h
+@@ -251,4 +251,14 @@ static inline long atomic64_dec_if_positive(atomic64_t *v)
+ #define atomic_dec(v) atomic_sub(1,(v))
+ #define atomic64_dec(v) atomic64_sub(1,(v))
+ 
++#define atomic64_read_unchecked(v)		atomic64_read(v)
++#define atomic64_set_unchecked(v, i)		atomic64_set((v), (i))
++#define atomic64_add_unchecked(a, v)		atomic64_add((a), (v))
++#define atomic64_add_return_unchecked(a, v)	atomic64_add_return((a), (v))
++#define atomic64_sub_unchecked(a, v)		atomic64_sub((a), (v))
++#define atomic64_inc_unchecked(v)		atomic64_inc(v)
++#define atomic64_inc_return_unchecked(v)	atomic64_inc_return(v)
++#define atomic64_dec_unchecked(v)		atomic64_dec(v)
++#define atomic64_cmpxchg_unchecked(v, o, n)	atomic64_cmpxchg((v), (o), (n))
++
+ #endif /* _ALPHA_ATOMIC_H */
+diff --git a/arch/alpha/include/asm/cache.h b/arch/alpha/include/asm/cache.h
+index ad368a9..fbe0f25 100644
+--- a/arch/alpha/include/asm/cache.h
++++ b/arch/alpha/include/asm/cache.h
+@@ -4,19 +4,19 @@
+ #ifndef __ARCH_ALPHA_CACHE_H
+ #define __ARCH_ALPHA_CACHE_H
+ 
++#include <linux/const.h>
+ 
+ /* Bytes per L1 (data) cache line. */
+ #if defined(CONFIG_ALPHA_GENERIC) || defined(CONFIG_ALPHA_EV6)
+-# define L1_CACHE_BYTES     64
+ # define L1_CACHE_SHIFT     6
+ #else
+ /* Both EV4 and EV5 are write-through, read-allocate,
+    direct-mapped, physical.
+ */
+-# define L1_CACHE_BYTES     32
+ # define L1_CACHE_SHIFT     5
+ #endif
+ 
++#define L1_CACHE_BYTES     (_AC(1,UL) << L1_CACHE_SHIFT)
+ #define SMP_CACHE_BYTES    L1_CACHE_BYTES
+ 
+ #endif
+diff --git a/arch/alpha/include/asm/elf.h b/arch/alpha/include/asm/elf.h
+index 968d999..d36b2df 100644
+--- a/arch/alpha/include/asm/elf.h
++++ b/arch/alpha/include/asm/elf.h
+@@ -91,6 +91,13 @@ typedef elf_fpreg_t elf_fpregset_t[ELF_NFPREG];
+ 
+ #define ELF_ET_DYN_BASE		(TASK_UNMAPPED_BASE + 0x1000000)
+ 
++#ifdef CONFIG_PAX_ASLR
++#define PAX_ELF_ET_DYN_BASE	(current->personality & ADDR_LIMIT_32BIT ? 0x10000 : 0x120000000UL)
++
++#define PAX_DELTA_MMAP_LEN	(current->personality & ADDR_LIMIT_32BIT ? 14 : 28)
++#define PAX_DELTA_STACK_LEN	(current->personality & ADDR_LIMIT_32BIT ? 14 : 19)
++#endif
++
+ /* $0 is set by ld.so to a pointer to a function which might be 
+    registered using atexit.  This provides a mean for the dynamic
+    linker to call DT_FINI functions for shared libraries that have
+diff --git a/arch/alpha/include/asm/pgalloc.h b/arch/alpha/include/asm/pgalloc.h
+index aab14a0..b4fa3e7 100644
+--- a/arch/alpha/include/asm/pgalloc.h
++++ b/arch/alpha/include/asm/pgalloc.h
+@@ -29,6 +29,12 @@ pgd_populate(struct mm_struct *mm, pgd_t *pgd, pmd_t *pmd)
+ 	pgd_set(pgd, pmd);
+ }
+ 
++static inline void
++pgd_populate_kernel(struct mm_struct *mm, pgd_t *pgd, pmd_t *pmd)
++{
++	pgd_populate(mm, pgd, pmd);
++}
++
+ extern pgd_t *pgd_alloc(struct mm_struct *mm);
+ 
+ static inline void
+diff --git a/arch/alpha/include/asm/pgtable.h b/arch/alpha/include/asm/pgtable.h
+index a9a1195..e9b8417 100644
+--- a/arch/alpha/include/asm/pgtable.h
++++ b/arch/alpha/include/asm/pgtable.h
+@@ -101,6 +101,17 @@ struct vm_area_struct;
+ #define PAGE_SHARED	__pgprot(_PAGE_VALID | __ACCESS_BITS)
+ #define PAGE_COPY	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW)
+ #define PAGE_READONLY	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW)
++
++#ifdef CONFIG_PAX_PAGEEXEC
++# define PAGE_SHARED_NOEXEC	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOE)
++# define PAGE_COPY_NOEXEC	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW | _PAGE_FOE)
++# define PAGE_READONLY_NOEXEC	__pgprot(_PAGE_VALID | __ACCESS_BITS | _PAGE_FOW | _PAGE_FOE)
++#else
++# define PAGE_SHARED_NOEXEC	PAGE_SHARED
++# define PAGE_COPY_NOEXEC	PAGE_COPY
++# define PAGE_READONLY_NOEXEC	PAGE_READONLY
++#endif
++
+ #define PAGE_KERNEL	__pgprot(_PAGE_VALID | _PAGE_ASM | _PAGE_KRE | _PAGE_KWE)
+ 
+ #define _PAGE_NORMAL(x) __pgprot(_PAGE_VALID | __ACCESS_BITS | (x))
+diff --git a/arch/alpha/kernel/module.c b/arch/alpha/kernel/module.c
+index 936bc8f..bb1859f 100644
+--- a/arch/alpha/kernel/module.c
++++ b/arch/alpha/kernel/module.c
+@@ -160,7 +160,7 @@ apply_relocate_add(Elf64_Shdr *sechdrs, const char *strtab,
+ 
+ 	/* The small sections were sorted to the end of the segment.
+ 	   The following should definitely cover them.  */
+-	gp = (u64)me->core_layout.base + me->core_layout.size - 0x8000;
++	gp = (u64)me->core_layout.base_rw + me->core_layout.size_rw - 0x8000;
+ 	got = sechdrs[me->arch.gotsecindex].sh_addr;
+ 
+ 	for (i = 0; i < n; i++) {
+diff --git a/arch/alpha/kernel/osf_sys.c b/arch/alpha/kernel/osf_sys.c
+index 6cc0816..3dd424d 100644
+--- a/arch/alpha/kernel/osf_sys.c
++++ b/arch/alpha/kernel/osf_sys.c
+@@ -1300,10 +1300,11 @@ SYSCALL_DEFINE1(old_adjtimex, struct timex32 __user *, txc_p)
+    generic version except that we know how to honor ADDR_LIMIT_32BIT.  */
+ 
+ static unsigned long
+-arch_get_unmapped_area_1(unsigned long addr, unsigned long len,
+-		         unsigned long limit)
++arch_get_unmapped_area_1(struct file *filp, unsigned long addr, unsigned long len,
++		         unsigned long limit, unsigned long flags)
+ {
+ 	struct vm_unmapped_area_info info;
++	unsigned long offset = gr_rand_threadstack_offset(current->mm, filp, flags);
+ 
+ 	info.flags = 0;
+ 	info.length = len;
+@@ -1311,6 +1312,7 @@ arch_get_unmapped_area_1(unsigned long addr, unsigned long len,
+ 	info.high_limit = limit;
+ 	info.align_mask = 0;
+ 	info.align_offset = 0;
++	info.threadstack_offset = offset;
+ 	return vm_unmapped_area(&info);
+ }
+ 
+@@ -1343,20 +1345,24 @@ arch_get_unmapped_area(struct file *filp, unsigned long addr,
+ 	   merely specific addresses, but regions of memory -- perhaps
+ 	   this feature should be incorporated into all ports?  */
+ 
++#ifdef CONFIG_PAX_RANDMMAP
++	if (!(current->mm->pax_flags & MF_PAX_RANDMMAP))
++#endif
++
+ 	if (addr) {
+-		addr = arch_get_unmapped_area_1 (PAGE_ALIGN(addr), len, limit);
++		addr = arch_get_unmapped_area_1 (filp, PAGE_ALIGN(addr), len, limit, flags);
+ 		if (addr != (unsigned long) -ENOMEM)
+ 			return addr;
+ 	}
+ 
+ 	/* Next, try allocating at TASK_UNMAPPED_BASE.  */
+-	addr = arch_get_unmapped_area_1 (PAGE_ALIGN(TASK_UNMAPPED_BASE),
+-					 len, limit);
++	addr = arch_get_unmapped_area_1 (filp, PAGE_ALIGN(current->mm->mmap_base), len, limit, flags);
++
+ 	if (addr != (unsigned long) -ENOMEM)
+ 		return addr;
+ 
+ 	/* Finally, try allocating in low memory.  */
+-	addr = arch_get_unmapped_area_1 (PAGE_SIZE, len, limit);
++	addr = arch_get_unmapped_area_1 (filp, PAGE_SIZE, len, limit, flags);
+ 
+ 	return addr;
+ }
+diff --git a/arch/alpha/mm/fault.c b/arch/alpha/mm/fault.c
+index 4a905bd..0a4da53 100644
+--- a/arch/alpha/mm/fault.c
++++ b/arch/alpha/mm/fault.c
+@@ -52,6 +52,124 @@ __load_new_mm_context(struct mm_struct *next_mm)
+ 	__reload_thread(pcb);
+ }
+ 
++#ifdef CONFIG_PAX_PAGEEXEC
++/*
++ * PaX: decide what to do with offenders (regs->pc = fault address)
++ *
++ * returns 1 when task should be killed
++ *         2 when patched PLT trampoline was detected
++ *         3 when unpatched PLT trampoline was detected
++ */
++static int pax_handle_fetch_fault(struct pt_regs *regs)
++{
++
++#ifdef CONFIG_PAX_EMUPLT
++	int err;
++
++	do { /* PaX: patched PLT emulation #1 */
++		unsigned int ldah, ldq, jmp;
++
++		err = get_user(ldah, (unsigned int *)regs->pc);
++		err |= get_user(ldq, (unsigned int *)(regs->pc+4));
++		err |= get_user(jmp, (unsigned int *)(regs->pc+8));
++
++		if (err)
++			break;
++
++		if ((ldah & 0xFFFF0000U) == 0x277B0000U &&
++		    (ldq & 0xFFFF0000U) == 0xA77B0000U &&
++		    jmp == 0x6BFB0000U)
++		{
++			unsigned long r27, addr;
++			unsigned long addrh = (ldah | 0xFFFFFFFFFFFF0000UL) << 16;
++			unsigned long addrl = ldq | 0xFFFFFFFFFFFF0000UL;
++
++			addr = regs->r27 + ((addrh ^ 0x80000000UL) + 0x80000000UL) + ((addrl ^ 0x8000UL) + 0x8000UL);
++			err = get_user(r27, (unsigned long *)addr);
++			if (err)
++				break;
++
++			regs->r27 = r27;
++			regs->pc = r27;
++			return 2;
++		}
++	} while (0);
++
++	do { /* PaX: patched PLT emulation #2 */
++		unsigned int ldah, lda, br;
++
++		err = get_user(ldah, (unsigned int *)regs->pc);
++		err |= get_user(lda, (unsigned int *)(regs->pc+4));
++		err |= get_user(br, (unsigned int *)(regs->pc+8));
++
++		if (err)
++			break;
++
++		if ((ldah & 0xFFFF0000U) == 0x277B0000U &&
++		    (lda & 0xFFFF0000U) == 0xA77B0000U &&
++		    (br & 0xFFE00000U) == 0xC3E00000U)
++		{
++			unsigned long addr = br | 0xFFFFFFFFFFE00000UL;
++			unsigned long addrh = (ldah | 0xFFFFFFFFFFFF0000UL) << 16;
++			unsigned long addrl = lda | 0xFFFFFFFFFFFF0000UL;
++
++			regs->r27 += ((addrh ^ 0x80000000UL) + 0x80000000UL) + ((addrl ^ 0x8000UL) + 0x8000UL);
++			regs->pc += 12 + (((addr ^ 0x00100000UL) + 0x00100000UL) << 2);
++			return 2;
++		}
++	} while (0);
++
++	do { /* PaX: unpatched PLT emulation */
++		unsigned int br;
++
++		err = get_user(br, (unsigned int *)regs->pc);
++
++		if (!err && (br & 0xFFE00000U) == 0xC3800000U) {
++			unsigned int br2, ldq, nop, jmp;
++			unsigned long addr = br | 0xFFFFFFFFFFE00000UL, resolver;
++
++			addr = regs->pc + 4 + (((addr ^ 0x00100000UL) + 0x00100000UL) << 2);
++			err = get_user(br2, (unsigned int *)addr);
++			err |= get_user(ldq, (unsigned int *)(addr+4));
++			err |= get_user(nop, (unsigned int *)(addr+8));
++			err |= get_user(jmp, (unsigned int *)(addr+12));
++			err |= get_user(resolver, (unsigned long *)(addr+16));
++
++			if (err)
++				break;
++
++			if (br2 == 0xC3600000U &&
++			    ldq == 0xA77B000CU &&
++			    nop == 0x47FF041FU &&
++			    jmp == 0x6B7B0000U)
++			{
++				regs->r28 = regs->pc+4;
++				regs->r27 = addr+16;
++				regs->pc = resolver;
++				return 3;
++			}
++		}
++	} while (0);
++#endif
++
++	return 1;
++}
++
++void pax_report_insns(struct pt_regs *regs, void *pc, void *sp)
++{
++	unsigned long i;
++
++	printk(KERN_ERR "PAX: bytes at PC: ");
++	for (i = 0; i < 5; i++) {
++		unsigned int c;
++		if (get_user(c, (unsigned int *)pc+i))
++			printk(KERN_CONT "???????? ");
++		else
++			printk(KERN_CONT "%08x ", c);
++	}
++	printk("\n");
++}
++#endif
+ 
+ /*
+  * This routine handles page faults.  It determines the address,
+@@ -132,8 +250,29 @@ retry:
+  good_area:
+ 	si_code = SEGV_ACCERR;
+ 	if (cause < 0) {
+-		if (!(vma->vm_flags & VM_EXEC))
++		if (!(vma->vm_flags & VM_EXEC)) {
++
++#ifdef CONFIG_PAX_PAGEEXEC
++			if (!(mm->pax_flags & MF_PAX_PAGEEXEC) || address != regs->pc)
++				goto bad_area;
++
++			up_read(&mm->mmap_sem);
++			switch (pax_handle_fetch_fault(regs)) {
++
++#ifdef CONFIG_PAX_EMUPLT
++			case 2:
++			case 3:
++				return;
++#endif
++
++			}
++			pax_report_fault(regs, (void *)regs->pc, (void *)rdusp());
++			do_group_exit(SIGKILL);
++#else
+ 			goto bad_area;
++#endif
++
++		}
+ 	} else if (!cause) {
+ 		/* Allow reads even for write-only mappings */
+ 		if (!(vma->vm_flags & (VM_READ | VM_WRITE)))
+diff --git a/arch/arc/Kconfig b/arch/arc/Kconfig
+index a876743..fe2a193 100644
+--- a/arch/arc/Kconfig
++++ b/arch/arc/Kconfig
+@@ -549,6 +549,7 @@ config ARC_DBG_TLB_MISS_COUNT
+ 	bool "Profile TLB Misses"
+ 	default n
+ 	select DEBUG_FS
++	depends on !GRKERNSEC_KMEM
+ 	help
+ 	  Counts number of I and D TLB Misses and exports them via Debugfs
+ 	  The counters can be cleared via Debugfs as well
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index cdfa6c2..aba8354 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -53,6 +53,7 @@ config ARM
+ 	select HAVE_FTRACE_MCOUNT_RECORD if (!XIP_KERNEL)
+ 	select HAVE_FUNCTION_GRAPH_TRACER if (!THUMB2_KERNEL)
+ 	select HAVE_FUNCTION_TRACER if (!XIP_KERNEL)
++	select HAVE_GCC_PLUGINS
+ 	select HAVE_GENERIC_DMA_COHERENT
+ 	select HAVE_HW_BREAKPOINT if (PERF_EVENTS && (CPU_V6 || CPU_V6K || CPU_V7))
+ 	select HAVE_IDE if PCI || ISA || PCMCIA
+@@ -1629,6 +1630,7 @@ config HIGHPTE
+ config CPU_SW_DOMAIN_PAN
+ 	bool "Enable use of CPU domains to implement privileged no-access"
+ 	depends on MMU && !ARM_LPAE
++	depends on !PAX_KERNEXEC && !PAX_MEMORY_UDEREF
+ 	default y
+ 	help
+ 	  Increase kernel security by ensuring that normal kernel accesses
+@@ -1705,7 +1707,7 @@ config ALIGNMENT_TRAP
+ 
+ config UACCESS_WITH_MEMCPY
+ 	bool "Use kernel mem{cpy,set}() for {copy_to,clear}_user()"
+-	depends on MMU
++	depends on MMU && !PAX_MEMORY_UDEREF
+ 	default y if CPU_FEROCEON
+ 	help
+ 	  Implement faster copy_to_user and clear_user methods for CPU
+@@ -1960,6 +1962,7 @@ config KEXEC
+ 	depends on (!SMP || PM_SLEEP_SMP)
+ 	depends on !CPU_V7M
+ 	select KEXEC_CORE
++	depends on !GRKERNSEC_KMEM
+ 	help
+ 	  kexec is a system call that implements the ability to shutdown your
+ 	  current kernel, and to start another kernel.  It is like a reboot
+@@ -2004,7 +2007,7 @@ config EFI_STUB
+ 
+ config EFI
+ 	bool "UEFI runtime support"
+-	depends on OF && !CPU_BIG_ENDIAN && MMU && AUTO_ZRELADDR && !XIP_KERNEL
++	depends on OF && !CPU_BIG_ENDIAN && MMU && AUTO_ZRELADDR && !XIP_KERNEL && !PAX_KERNEXEC
+ 	select UCS2_STRING
+ 	select EFI_PARAMS_FROM_FDT
+ 	select EFI_STUB
+diff --git a/arch/arm/Kconfig.debug b/arch/arm/Kconfig.debug
+index 1098e91..d6415c8 100644
+--- a/arch/arm/Kconfig.debug
++++ b/arch/arm/Kconfig.debug
+@@ -7,6 +7,7 @@ config ARM_PTDUMP
+ 	depends on DEBUG_KERNEL
+ 	depends on MMU
+ 	select DEBUG_FS
++	depends on !GRKERNSEC_KMEM
+ 	---help---
+ 	  Say Y here if you want to show the kernel pagetable layout in a
+ 	  debugfs file. This information is only useful for kernel developers
+diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+index d50430c..01cc53b 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -103,6 +103,8 @@ ORIG_CFLAGS := $(KBUILD_CFLAGS)
+ KBUILD_CFLAGS = $(subst -pg, , $(ORIG_CFLAGS))
+ endif
+ 
++KBUILD_CFLAGS := $(filter-out $(GCC_PLUGINS_CFLAGS),$(KBUILD_CFLAGS))
++
+ # -fstack-protector-strong triggers protection checks in this code,
+ # but it is being used too early to link to meaningful stack_chk logic.
+ nossp_flags := $(call cc-option, -fno-stack-protector)
+diff --git a/arch/arm/include/asm/atomic.h b/arch/arm/include/asm/atomic.h
+index 9e10c45..24a14ce 100644
+--- a/arch/arm/include/asm/atomic.h
++++ b/arch/arm/include/asm/atomic.h
+@@ -18,17 +18,41 @@
+ #include <asm/barrier.h>
+ #include <asm/cmpxchg.h>
+ 
++#ifdef CONFIG_GENERIC_ATOMIC64
++#include <asm-generic/atomic64.h>
++#endif
++
+ #define ATOMIC_INIT(i)	{ (i) }
+ 
+ #ifdef __KERNEL__
+ 
++#ifdef CONFIG_THUMB2_KERNEL
++#define REFCOUNT_TRAP_INSN "bkpt	0xf1"
++#else
++#define REFCOUNT_TRAP_INSN "bkpt	0xf103"
++#endif
++
++#define _ASM_EXTABLE(from, to)		\
++"	.pushsection __ex_table,\"a\"\n"\
++"	.align	3\n"			\
++"	.long	" #from ", " #to"\n"	\
++"	.popsection"
++
+ /*
+  * On ARM, ordinary assignment (str instruction) doesn't clear the local
+  * strex/ldrex monitor on some implementations. The reason we can use it for
+  * atomic_set() is the clrex or dummy strex done on every exception return.
+  */
+ #define atomic_read(v)	READ_ONCE((v)->counter)
++static inline int atomic_read_unchecked(const atomic_unchecked_t *v)
++{
++	return READ_ONCE(v->counter);
++}
+ #define atomic_set(v,i)	WRITE_ONCE(((v)->counter), (i))
++static inline void atomic_set_unchecked(atomic_unchecked_t *v, int i)
++{
++	WRITE_ONCE(v->counter, i);
++}
+ 
+ #if __LINUX_ARM_ARCH__ >= 6
+ 
+@@ -38,38 +62,64 @@
+  * to ensure that the update happens.
+  */
+ 
+-#define ATOMIC_OP(op, c_op, asm_op)					\
+-static inline void atomic_##op(int i, atomic_t *v)			\
++#ifdef CONFIG_PAX_REFCOUNT
++#define __OVERFLOW_POST			\
++	"	bvc	3f\n"		\
++	"2:	" REFCOUNT_TRAP_INSN "\n"\
++	"3:\n"
++#define __OVERFLOW_POST_RETURN		\
++	"	bvc	3f\n"		\
++"	mov	%0, %1\n"		\
++	"2:	" REFCOUNT_TRAP_INSN "\n"\
++	"3:\n"
++#define __OVERFLOW_EXTABLE		\
++	"4:\n"				\
++	_ASM_EXTABLE(2b, 4b)
++#else
++#define __OVERFLOW_POST
++#define __OVERFLOW_POST_RETURN
++#define __OVERFLOW_EXTABLE
++#endif
++
++#define __ATOMIC_OP(op, suffix, c_op, asm_op, post_op, extable)		\
++static inline void atomic_##op##suffix(int i, atomic##suffix##_t *v)	\
+ {									\
+ 	unsigned long tmp;						\
+ 	int result;							\
+ 									\
+ 	prefetchw(&v->counter);						\
+-	__asm__ __volatile__("@ atomic_" #op "\n"			\
++	__asm__ __volatile__("@ atomic_" #op #suffix "\n"		\
+ "1:	ldrex	%0, [%3]\n"						\
+ "	" #asm_op "	%0, %0, %4\n"					\
++	post_op								\
+ "	strex	%1, %0, [%3]\n"						\
+ "	teq	%1, #0\n"						\
+-"	bne	1b"							\
++"	bne	1b\n"							\
++	extable								\
+ 	: "=&r" (result), "=&r" (tmp), "+Qo" (v->counter)		\
+ 	: "r" (&v->counter), "Ir" (i)					\
+ 	: "cc");							\
+ }									\
+ 
+-#define ATOMIC_OP_RETURN(op, c_op, asm_op)				\
+-static inline int atomic_##op##_return_relaxed(int i, atomic_t *v)	\
++#define ATOMIC_OP(op, c_op, asm_op) __ATOMIC_OP(op, _unchecked, c_op, asm_op, , )\
++				    __ATOMIC_OP(op, , c_op, asm_op##s, __OVERFLOW_POST, __OVERFLOW_EXTABLE)
++
++#define __ATOMIC_OP_RETURN(op, suffix, c_op, asm_op, post_op, extable)	\
++static inline int atomic_##op##_return##suffix##_relaxed(int i, atomic##suffix##_t *v)\
+ {									\
+ 	unsigned long tmp;						\
+ 	int result;							\
+ 									\
+ 	prefetchw(&v->counter);						\
+ 									\
+-	__asm__ __volatile__("@ atomic_" #op "_return\n"		\
++	__asm__ __volatile__("@ atomic_" #op "_return" #suffix "\n"	\
+ "1:	ldrex	%0, [%3]\n"						\
+ "	" #asm_op "	%0, %0, %4\n"					\
++	post_op								\
+ "	strex	%1, %0, [%3]\n"						\
+ "	teq	%1, #0\n"						\
+-"	bne	1b"							\
++"	bne	1b\n"							\
++	extable								\
+ 	: "=&r" (result), "=&r" (tmp), "+Qo" (v->counter)		\
+ 	: "r" (&v->counter), "Ir" (i)					\
+ 	: "cc");							\
+@@ -78,8 +128,12 @@ static inline int atomic_##op##_return_relaxed(int i, atomic_t *v)	\
+ }
+ 
+ #define atomic_add_return_relaxed	atomic_add_return_relaxed
++#define atomic_add_return_unchecked	atomic_add_return_unchecked_relaxed
+ #define atomic_sub_return_relaxed	atomic_sub_return_relaxed
+ 
++#define ATOMIC_OP_RETURN(op, c_op, asm_op) __ATOMIC_OP_RETURN(op, _unchecked, c_op, asm_op, , )\
++					   __ATOMIC_OP_RETURN(op, , c_op, asm_op##s, __OVERFLOW_POST_RETURN, __OVERFLOW_EXTABLE)
++
+ static inline int atomic_cmpxchg_relaxed(atomic_t *ptr, int old, int new)
+ {
+ 	int oldval;
+@@ -113,12 +167,24 @@ static inline int __atomic_add_unless(atomic_t *v, int a, int u)
+ 	__asm__ __volatile__ ("@ atomic_add_unless\n"
+ "1:	ldrex	%0, [%4]\n"
+ "	teq	%0, %5\n"
+-"	beq	2f\n"
+-"	add	%1, %0, %6\n"
++"	beq	4f\n"
++"	adds	%1, %0, %6\n"
++
++#ifdef CONFIG_PAX_REFCOUNT
++"	bvc	3f\n"
++"2:	" REFCOUNT_TRAP_INSN "\n"
++"3:\n"
++#endif
++
+ "	strex	%2, %1, [%4]\n"
+ "	teq	%2, #0\n"
+ "	bne	1b\n"
+-"2:"
++"4:"
++
++#ifdef CONFIG_PAX_REFCOUNT
++	_ASM_EXTABLE(2b, 4b)
++#endif
++
+ 	: "=&r" (oldval), "=&r" (newval), "=&r" (tmp), "+Qo" (v->counter)
+ 	: "r" (&v->counter), "r" (u), "r" (a)
+ 	: "cc");
+@@ -129,14 +195,36 @@ static inline int __atomic_add_unless(atomic_t *v, int a, int u)
+ 	return oldval;
+ }
+ 
++static inline int atomic_cmpxchg_unchecked(atomic_unchecked_t *ptr, int old, int new)
++{
++	unsigned long oldval, res;
++
++	smp_mb();
++
++	do {
++		__asm__ __volatile__("@ atomic_cmpxchg_unchecked\n"
++		"ldrex	%1, [%3]\n"
++		"mov	%0, #0\n"
++		"teq	%1, %4\n"
++		"strexeq %0, %5, [%3]\n"
++		    : "=&r" (res), "=&r" (oldval), "+Qo" (ptr->counter)
++		    : "r" (&ptr->counter), "Ir" (old), "r" (new)
++		    : "cc");
++	} while (res);
++
++	smp_mb();
++
++	return oldval;
++}
++
+ #else /* ARM_ARCH_6 */
+ 
+ #ifdef CONFIG_SMP
+ #error SMP not supported on pre-ARMv6 CPUs
+ #endif
+ 
+-#define ATOMIC_OP(op, c_op, asm_op)					\
+-static inline void atomic_##op(int i, atomic_t *v)			\
++#define __ATOMIC_OP(op, suffix, c_op, asm_op)				\
++static inline void atomic_##op##suffix(int i, atomic##suffix##_t *v)	\
+ {									\
+ 	unsigned long flags;						\
+ 									\
+@@ -145,8 +233,11 @@ static inline void atomic_##op(int i, atomic_t *v)			\
+ 	raw_local_irq_restore(flags);					\
+ }									\
+ 
+-#define ATOMIC_OP_RETURN(op, c_op, asm_op)				\
+-static inline int atomic_##op##_return(int i, atomic_t *v)		\
++#define ATOMIC_OP(op, c_op, asm_op) __ATOMIC_OP(op, , c_op, asm_op)	\
++				    __ATOMIC_OP(op, _unchecked, c_op, asm_op)
++
++#define __ATOMIC_OP_RETURN(op, suffix, c_op, asm_op)			\
++static inline int atomic_##op##_return##suffix(int i, atomic##suffix##_t *v)\
+ {									\
+ 	unsigned long flags;						\
+ 	int val;							\
+@@ -159,6 +250,9 @@ static inline int atomic_##op##_return(int i, atomic_t *v)		\
+ 	return val;							\
+ }
+ 
++#define ATOMIC_OP_RETURN(op, c_op, asm_op) __ATOMIC_OP_RETURN(op, , c_op, asm_op)\
++					   __ATOMIC_OP_RETURN(op, _unchecked, c_op, asm_op)
++
+ static inline int atomic_cmpxchg(atomic_t *v, int old, int new)
+ {
+ 	int ret;
+@@ -173,6 +267,11 @@ static inline int atomic_cmpxchg(atomic_t *v, int old, int new)
+ 	return ret;
+ }
+ 
++static inline int atomic_cmpxchg_unchecked(atomic_unchecked_t *v, int old, int new)
++{
++	return atomic_cmpxchg((atomic_t *)v, old, new);
++}
++
+ static inline int __atomic_add_unless(atomic_t *v, int a, int u)
+ {
+ 	int c, old;
+@@ -201,16 +300,38 @@ ATOMIC_OP(xor, ^=, eor)
+ 
+ #undef ATOMIC_OPS
+ #undef ATOMIC_OP_RETURN
++#undef __ATOMIC_OP_RETURN
+ #undef ATOMIC_OP
++#undef __ATOMIC_OP
+ 
+ #define atomic_xchg(v, new) (xchg(&((v)->counter), new))
++static inline int atomic_xchg_unchecked(atomic_unchecked_t *v, int new)
++{
++	return xchg_relaxed(&v->counter, new);
++}
+ 
+ #define atomic_inc(v)		atomic_add(1, v)
++static inline void atomic_inc_unchecked(atomic_unchecked_t *v)
++{
++	atomic_add_unchecked(1, v);
++}
+ #define atomic_dec(v)		atomic_sub(1, v)
++static inline void atomic_dec_unchecked(atomic_unchecked_t *v)
++{
++	atomic_sub_unchecked(1, v);
++}
+ 
+ #define atomic_inc_and_test(v)	(atomic_add_return(1, v) == 0)
++static inline int atomic_inc_and_test_unchecked(atomic_unchecked_t *v)
++{
++	return atomic_add_return_unchecked(1, v) == 0;
++}
+ #define atomic_dec_and_test(v)	(atomic_sub_return(1, v) == 0)
+ #define atomic_inc_return_relaxed(v)    (atomic_add_return_relaxed(1, v))
++static inline int atomic_inc_return_unchecked_relaxed(atomic_unchecked_t *v)
++{
++	return atomic_add_return_unchecked_relaxed(1, v);
++}
+ #define atomic_dec_return_relaxed(v)    (atomic_sub_return_relaxed(1, v))
+ #define atomic_sub_and_test(i, v) (atomic_sub_return(i, v) == 0)
+ 
+@@ -221,6 +342,14 @@ typedef struct {
+ 	long long counter;
+ } atomic64_t;
+ 
++#ifdef CONFIG_PAX_REFCOUNT
++typedef struct {
++	long long counter;
++} atomic64_unchecked_t;
++#else
++typedef atomic64_t atomic64_unchecked_t;
++#endif
++
+ #define ATOMIC64_INIT(i) { (i) }
+ 
+ #ifdef CONFIG_ARM_LPAE
+@@ -237,6 +366,19 @@ static inline long long atomic64_read(const atomic64_t *v)
+ 	return result;
+ }
+ 
++static inline long long atomic64_read_unchecked(const atomic64_unchecked_t *v)
++{
++	long long result;
++
++	__asm__ __volatile__("@ atomic64_read_unchecked\n"
++"	ldrd	%0, %H0, [%1]"
++	: "=&r" (result)
++	: "r" (&v->counter), "Qo" (v->counter)
++	);
++
++	return result;
++}
++
+ static inline void atomic64_set(atomic64_t *v, long long i)
+ {
+ 	__asm__ __volatile__("@ atomic64_set\n"
+@@ -245,6 +387,15 @@ static inline void atomic64_set(atomic64_t *v, long long i)
+ 	: "r" (&v->counter), "r" (i)
+ 	);
+ }
++
++static inline void atomic64_set_unchecked(atomic64_unchecked_t *v, long long i)
++{
++	__asm__ __volatile__("@ atomic64_set_unchecked\n"
++"	strd	%2, %H2, [%1]"
++	: "=Qo" (v->counter)
++	: "r" (&v->counter), "r" (i)
++	);
++}
+ #else
+ static inline long long atomic64_read(const atomic64_t *v)
+ {
+@@ -259,6 +410,19 @@ static inline long long atomic64_read(const atomic64_t *v)
+ 	return result;
+ }
+ 
++static inline long long atomic64_read_unchecked(const atomic64_unchecked_t *v)
++{
++	long long result;
++
++	__asm__ __volatile__("@ atomic64_read_unchecked\n"
++"	ldrexd	%0, %H0, [%1]"
++	: "=&r" (result)
++	: "r" (&v->counter), "Qo" (v->counter)
++	);
++
++	return result;
++}
++
+ static inline void atomic64_set(atomic64_t *v, long long i)
+ {
+ 	long long tmp;
+@@ -273,43 +437,73 @@ static inline void atomic64_set(atomic64_t *v, long long i)
+ 	: "r" (&v->counter), "r" (i)
+ 	: "cc");
+ }
++
++static inline void atomic64_set_unchecked(atomic64_unchecked_t *v, long long i)
++{
++	long long tmp;
++
++	prefetchw(&v->counter);
++	__asm__ __volatile__("@ atomic64_set_unchecked\n"
++"1:	ldrexd	%0, %H0, [%2]\n"
++"	strexd	%0, %3, %H3, [%2]\n"
++"	teq	%0, #0\n"
++"	bne	1b"
++	: "=&r" (tmp), "=Qo" (v->counter)
++	: "r" (&v->counter), "r" (i)
++	: "cc");
++}
+ #endif
+ 
+-#define ATOMIC64_OP(op, op1, op2)					\
+-static inline void atomic64_##op(long long i, atomic64_t *v)		\
++#undef __OVERFLOW_POST_RETURN
++#define __OVERFLOW_POST_RETURN		\
++	"	bvc	3f\n"		\
++"	mov	%0, %1\n"		\
++"	mov	%H0, %H1\n"		\
++	"2:	" REFCOUNT_TRAP_INSN "\n"\
++	"3:\n"
++
++#define __ATOMIC64_OP(op, suffix, op1, op2, post_op, extable)		\
++static inline void atomic64_##op##suffix(long long i, atomic64##suffix##_t *v)\
+ {									\
+ 	long long result;						\
+ 	unsigned long tmp;						\
+ 									\
+ 	prefetchw(&v->counter);						\
+-	__asm__ __volatile__("@ atomic64_" #op "\n"			\
++	__asm__ __volatile__("@ atomic64_" #op #suffix "\n"		\
+ "1:	ldrexd	%0, %H0, [%3]\n"					\
+ "	" #op1 " %Q0, %Q0, %Q4\n"					\
+ "	" #op2 " %R0, %R0, %R4\n"					\
++	post_op								\
+ "	strexd	%1, %0, %H0, [%3]\n"					\
+ "	teq	%1, #0\n"						\
+-"	bne	1b"							\
++"	bne	1b\n"							\
++	extable								\
+ 	: "=&r" (result), "=&r" (tmp), "+Qo" (v->counter)		\
+ 	: "r" (&v->counter), "r" (i)					\
+ 	: "cc");							\
+ }									\
+ 
+-#define ATOMIC64_OP_RETURN(op, op1, op2)				\
++#define ATOMIC64_OP(op, op1, op2) __ATOMIC64_OP(op, _unchecked, op1, op2, , ) \
++				  __ATOMIC64_OP(op, , op1, op2##s, __OVERFLOW_POST, __OVERFLOW_EXTABLE)
++
++#define __ATOMIC64_OP_RETURN(op, suffix, op1, op2, post_op, extable)	\
+ static inline long long							\
+-atomic64_##op##_return_relaxed(long long i, atomic64_t *v)		\
++atomic64_##op##_return##suffix##_relaxed(long long i, atomic64##suffix##_t *v) \
+ {									\
+ 	long long result;						\
+ 	unsigned long tmp;						\
+ 									\
+ 	prefetchw(&v->counter);						\
+ 									\
+-	__asm__ __volatile__("@ atomic64_" #op "_return\n"		\
++	__asm__ __volatile__("@ atomic64_" #op "_return" #suffix "\n"	\
+ "1:	ldrexd	%0, %H0, [%3]\n"					\
+ "	" #op1 " %Q0, %Q0, %Q4\n"					\
+ "	" #op2 " %R0, %R0, %R4\n"					\
++	post_op								\
+ "	strexd	%1, %0, %H0, [%3]\n"					\
+ "	teq	%1, #0\n"						\
+-"	bne	1b"							\
++"	bne	1b\n"							\
++	extable								\
+ 	: "=&r" (result), "=&r" (tmp), "+Qo" (v->counter)		\
+ 	: "r" (&v->counter), "r" (i)					\
+ 	: "cc");							\
+@@ -317,6 +511,9 @@ atomic64_##op##_return_relaxed(long long i, atomic64_t *v)		\
+ 	return result;							\
+ }
+ 
++#define ATOMIC64_OP_RETURN(op, op1, op2) __ATOMIC64_OP_RETURN(op, _unchecked, op1, op2, , ) \
++					 __ATOMIC64_OP_RETURN(op, , op1, op2##s, __OVERFLOW_POST_RETURN, __OVERFLOW_EXTABLE)
++
+ #define ATOMIC64_OPS(op, op1, op2)					\
+ 	ATOMIC64_OP(op, op1, op2)					\
+ 	ATOMIC64_OP_RETURN(op, op1, op2)
+@@ -325,6 +522,7 @@ ATOMIC64_OPS(add, adds, adc)
+ ATOMIC64_OPS(sub, subs, sbc)
+ 
+ #define atomic64_add_return_relaxed	atomic64_add_return_relaxed
++#define atomic64_add_return_unchecked	atomic64_add_return_unchecked_relaxed
+ #define atomic64_sub_return_relaxed	atomic64_sub_return_relaxed
+ 
+ #define atomic64_andnot atomic64_andnot
+@@ -336,7 +534,12 @@ ATOMIC64_OP(xor, eor, eor)
+ 
+ #undef ATOMIC64_OPS
+ #undef ATOMIC64_OP_RETURN
++#undef __ATOMIC64_OP_RETURN
+ #undef ATOMIC64_OP
++#undef __ATOMIC64_OP
++#undef __OVERFLOW_EXTABLE
++#undef __OVERFLOW_POST_RETURN
++#undef __OVERFLOW_POST
+ 
+ static inline long long
+ atomic64_cmpxchg_relaxed(atomic64_t *ptr, long long old, long long new)
+@@ -361,6 +564,33 @@ atomic64_cmpxchg_relaxed(atomic64_t *ptr, long long old, long long new)
+ 	return oldval;
+ }
+ #define atomic64_cmpxchg_relaxed	atomic64_cmpxchg_relaxed
++#define atomic64_cmpxchg_unchecked	atomic64_cmpxchg_unchecked_relaxed
++
++static inline long long
++atomic64_cmpxchg_unchecked_relaxed(atomic64_unchecked_t *ptr, long long old,
++					long long new)
++{
++	long long oldval;
++	unsigned long res;
++
++	smp_mb();
++
++	do {
++		__asm__ __volatile__("@ atomic64_cmpxchg_unchecked\n"
++		"ldrexd		%1, %H1, [%3]\n"
++		"mov		%0, #0\n"
++		"teq		%1, %4\n"
++		"teqeq		%H1, %H4\n"
++		"strexdeq	%0, %5, %H5, [%3]"
++		: "=&r" (res), "=&r" (oldval), "+Qo" (ptr->counter)
++		: "r" (&ptr->counter), "r" (old), "r" (new)
++		: "cc");
++	} while (res);
++
++	smp_mb();
++
++	return oldval;
++}
+ 
+ static inline long long atomic64_xchg_relaxed(atomic64_t *ptr, long long new)
+ {
+@@ -385,21 +615,35 @@ static inline long long atomic64_xchg_relaxed(atomic64_t *ptr, long long new)
+ static inline long long atomic64_dec_if_positive(atomic64_t *v)
+ {
+ 	long long result;
+-	unsigned long tmp;
++	u64 tmp;
+ 
+ 	smp_mb();
+ 	prefetchw(&v->counter);
+ 
+ 	__asm__ __volatile__("@ atomic64_dec_if_positive\n"
+-"1:	ldrexd	%0, %H0, [%3]\n"
+-"	subs	%Q0, %Q0, #1\n"
+-"	sbc	%R0, %R0, #0\n"
++"1:	ldrexd	%1, %H1, [%3]\n"
++"	subs	%Q0, %Q1, #1\n"
++"	sbcs	%R0, %R1, #0\n"
++
++#ifdef CONFIG_PAX_REFCOUNT
++"	bvc	3f\n"
++"	mov	%Q0, %Q1\n"
++"	mov	%R0, %R1\n"
++"2:	" REFCOUNT_TRAP_INSN "\n"
++"3:\n"
++#endif
++
+ "	teq	%R0, #0\n"
+-"	bmi	2f\n"
++"	bmi	4f\n"
+ "	strexd	%1, %0, %H0, [%3]\n"
+ "	teq	%1, #0\n"
+ "	bne	1b\n"
+-"2:"
++"4:\n"
++
++#ifdef CONFIG_PAX_REFCOUNT
++	_ASM_EXTABLE(2b, 4b)
++#endif
++
+ 	: "=&r" (result), "=&r" (tmp), "+Qo" (v->counter)
+ 	: "r" (&v->counter)
+ 	: "cc");
+@@ -423,13 +667,25 @@ static inline int atomic64_add_unless(atomic64_t *v, long long a, long long u)
+ "	teq	%0, %5\n"
+ "	teqeq	%H0, %H5\n"
+ "	moveq	%1, #0\n"
+-"	beq	2f\n"
++"	beq	4f\n"
+ "	adds	%Q0, %Q0, %Q6\n"
+-"	adc	%R0, %R0, %R6\n"
++"	adcs	%R0, %R0, %R6\n"
++
++#ifdef CONFIG_PAX_REFCOUNT
++"	bvc	3f\n"
++"2:	" REFCOUNT_TRAP_INSN "\n"
++"3:\n"
++#endif
++
+ "	strexd	%2, %0, %H0, [%4]\n"
+ "	teq	%2, #0\n"
+ "	bne	1b\n"
+-"2:"
++"4:\n"
++
++#ifdef CONFIG_PAX_REFCOUNT
++	_ASM_EXTABLE(2b, 4b)
++#endif
++
+ 	: "=&r" (val), "+r" (ret), "=&r" (tmp), "+Qo" (v->counter)
+ 	: "r" (&v->counter), "r" (u), "r" (a)
+ 	: "cc");
+@@ -442,10 +698,13 @@ static inline int atomic64_add_unless(atomic64_t *v, long long a, long long u)
+ 
+ #define atomic64_add_negative(a, v)	(atomic64_add_return((a), (v)) < 0)
+ #define atomic64_inc(v)			atomic64_add(1LL, (v))
++#define atomic64_inc_unchecked(v)	atomic64_add_unchecked(1LL, (v))
+ #define atomic64_inc_return_relaxed(v)	atomic64_add_return_relaxed(1LL, (v))
++#define atomic64_inc_return_unchecked_relaxed(v)	atomic64_add_return_unchecked_relaxed(1LL, (v))
+ #define atomic64_inc_and_test(v)	(atomic64_inc_return(v) == 0)
+ #define atomic64_sub_and_test(a, v)	(atomic64_sub_return((a), (v)) == 0)
+ #define atomic64_dec(v)			atomic64_sub(1LL, (v))
++#define atomic64_dec_unchecked(v)	atomic64_sub_unchecked(1LL, (v))
+ #define atomic64_dec_return_relaxed(v)	atomic64_sub_return_relaxed(1LL, (v))
+ #define atomic64_dec_and_test(v)	(atomic64_dec_return((v)) == 0)
+ #define atomic64_inc_not_zero(v)	atomic64_add_unless((v), 1LL, 0LL)
+diff --git a/arch/arm/include/asm/cache.h b/arch/arm/include/asm/cache.h
+index 75fe66b..2255c86 100644
+--- a/arch/arm/include/asm/cache.h
++++ b/arch/arm/include/asm/cache.h
+@@ -4,8 +4,10 @@
+ #ifndef __ASMARM_CACHE_H
+ #define __ASMARM_CACHE_H
+ 
++#include <linux/const.h>
++
+ #define L1_CACHE_SHIFT		CONFIG_ARM_L1_CACHE_SHIFT
+-#define L1_CACHE_BYTES		(1 << L1_CACHE_SHIFT)
++#define L1_CACHE_BYTES		(_AC(1,UL) << L1_CACHE_SHIFT)
+ 
+ /*
+  * Memory returned by kmalloc() may be used for DMA, so we must make
+diff --git a/arch/arm/include/asm/cacheflush.h b/arch/arm/include/asm/cacheflush.h
+index 9156fc3..9791d17 100644
+--- a/arch/arm/include/asm/cacheflush.h
++++ b/arch/arm/include/asm/cacheflush.h
+@@ -116,7 +116,7 @@ struct cpu_cache_fns {
+ 	void (*dma_unmap_area)(const void *, size_t, int);
+ 
+ 	void (*dma_flush_range)(const void *, const void *);
+-};
++} __no_const;
+ 
+ /*
+  * Select the calling method
+diff --git a/arch/arm/include/asm/checksum.h b/arch/arm/include/asm/checksum.h
+index 524692f..a8871ec 100644
+--- a/arch/arm/include/asm/checksum.h
++++ b/arch/arm/include/asm/checksum.h
+@@ -37,7 +37,19 @@ __wsum
+ csum_partial_copy_nocheck(const void *src, void *dst, int len, __wsum sum);
+ 
+ __wsum
+-csum_partial_copy_from_user(const void __user *src, void *dst, int len, __wsum sum, int *err_ptr);
++__csum_partial_copy_from_user(const void __user *src, void *dst, int len, __wsum sum, int *err_ptr);
++
++static inline __wsum
++csum_partial_copy_from_user(const void __user *src, void *dst, int len, __wsum sum, int *err_ptr)
++{
++	__wsum ret;
++	pax_open_userland();
++	ret = __csum_partial_copy_from_user(src, dst, len, sum, err_ptr);
++	pax_close_userland();
++	return ret;
++}
++
++
+ 
+ /*
+  * 	Fold a partial checksum without adding pseudo headers
+diff --git a/arch/arm/include/asm/cmpxchg.h b/arch/arm/include/asm/cmpxchg.h
+index 97882f9..0cc6ef1 100644
+--- a/arch/arm/include/asm/cmpxchg.h
++++ b/arch/arm/include/asm/cmpxchg.h
+@@ -117,6 +117,10 @@ static inline unsigned long __xchg(unsigned long x, volatile void *ptr, int size
+ 	(__typeof__(*(ptr)))__xchg((unsigned long)(x), (ptr),		\
+ 				   sizeof(*(ptr)));			\
+ })
++#define xchg_unchecked(ptr, x) ({					\
++	(__typeof__(*(ptr)))__xchg((unsigned long)(x), (ptr),		\
++				   sizeof(*(ptr)));			\
++})
+ 
+ #include <asm-generic/cmpxchg-local.h>
+ 
+diff --git a/arch/arm/include/asm/cpuidle.h b/arch/arm/include/asm/cpuidle.h
+index 3848259..bee9d84 100644
+--- a/arch/arm/include/asm/cpuidle.h
++++ b/arch/arm/include/asm/cpuidle.h
+@@ -32,7 +32,7 @@ struct device_node;
+ struct cpuidle_ops {
+ 	int (*suspend)(unsigned long arg);
+ 	int (*init)(struct device_node *, int cpu);
+-};
++} __no_const;
+ 
+ struct of_cpuidle_method {
+ 	const char *method;
+diff --git a/arch/arm/include/asm/domain.h b/arch/arm/include/asm/domain.h
+index 99d9f63..e3e4da6 100644
+--- a/arch/arm/include/asm/domain.h
++++ b/arch/arm/include/asm/domain.h
+@@ -42,7 +42,6 @@
+ #define DOMAIN_USER	1
+ #define DOMAIN_IO	0
+ #endif
+-#define DOMAIN_VECTORS	3
+ 
+ /*
+  * Domain types
+@@ -51,9 +50,27 @@
+ #define DOMAIN_CLIENT	1
+ #ifdef CONFIG_CPU_USE_DOMAINS
+ #define DOMAIN_MANAGER	3
++#define DOMAIN_VECTORS	3
+ #else
++
++#ifdef CONFIG_PAX_KERNEXEC
+ #define DOMAIN_MANAGER	1
++#define DOMAIN_KERNEXEC	3
++#else
++#define DOMAIN_MANAGER	1
++#endif
++
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++#define DOMAIN_USERCLIENT	0
++#define DOMAIN_UDEREF		1
++#define DOMAIN_VECTORS		DOMAIN_KERNEL
++#else
++#define DOMAIN_USERCLIENT	1
++#define DOMAIN_VECTORS		DOMAIN_USER
++#endif
++
+ #endif
++#define DOMAIN_KERNELCLIENT	1
+ 
+ #define domain_mask(dom)	((3) << (2 * (dom)))
+ #define domain_val(dom,type)	((type) << (2 * (dom)))
+@@ -62,13 +79,19 @@
+ #define DACR_INIT \
+ 	(domain_val(DOMAIN_USER, DOMAIN_NOACCESS) | \
+ 	 domain_val(DOMAIN_KERNEL, DOMAIN_MANAGER) | \
+-	 domain_val(DOMAIN_IO, DOMAIN_CLIENT) | \
++	 domain_val(DOMAIN_IO, DOMAIN_KERNELCLIENT) | \
+ 	 domain_val(DOMAIN_VECTORS, DOMAIN_CLIENT))
++#elif defined(CONFIG_PAX_MEMORY_UDEREF)
++	/* DOMAIN_VECTORS is defined to DOMAIN_KERNEL */
++#define DACR_INIT \
++	(domain_val(DOMAIN_USER, DOMAIN_USERCLIENT) | \
++	 domain_val(DOMAIN_KERNEL, DOMAIN_MANAGER) | \
++	 domain_val(DOMAIN_IO, DOMAIN_KERNELCLIENT))
+ #else
+ #define DACR_INIT \
+-	(domain_val(DOMAIN_USER, DOMAIN_CLIENT) | \
++	(domain_val(DOMAIN_USER, DOMAIN_USERCLIENT) | \
+ 	 domain_val(DOMAIN_KERNEL, DOMAIN_MANAGER) | \
+-	 domain_val(DOMAIN_IO, DOMAIN_CLIENT) | \
++	 domain_val(DOMAIN_IO, DOMAIN_KERNELCLIENT) | \
+ 	 domain_val(DOMAIN_VECTORS, DOMAIN_CLIENT))
+ #endif
+ 
+@@ -124,6 +147,17 @@ static inline void set_domain(unsigned val)
+ 		set_domain(domain);				\
+ 	} while (0)
+ 
++#elif defined(CONFIG_PAX_KERNEXEC) || defined(CONFIG_PAX_MEMORY_UDEREF)
++#define modify_domain(dom,type)					\
++	do {							\
++		struct thread_info *thread = current_thread_info(); \
++		unsigned int domain = get_domain();		\
++		domain &= ~domain_mask(dom);			\
++		domain = domain | domain_val(dom, type);	\
++		thread->cpu_domain = domain;			\
++		set_domain(domain);				\
++	} while (0)
++
+ #else
+ static inline void modify_domain(unsigned dom, unsigned type)	{ }
+ #endif
+diff --git a/arch/arm/include/asm/elf.h b/arch/arm/include/asm/elf.h
+index d2315ff..f60b47b 100644
+--- a/arch/arm/include/asm/elf.h
++++ b/arch/arm/include/asm/elf.h
+@@ -117,7 +117,14 @@ int dump_task_regs(struct task_struct *t, elf_gregset_t *elfregs);
+    the loader.  We need to make sure that it is out of the way of the program
+    that it will "exec", and that there is sufficient room for the brk.  */
+ 
+-#define ELF_ET_DYN_BASE	(TASK_SIZE / 3 * 2)
++#define ELF_ET_DYN_BASE		(TASK_SIZE / 3 * 2)
++
++#ifdef CONFIG_PAX_ASLR
++#define PAX_ELF_ET_DYN_BASE	0x00008000UL
++
++#define PAX_DELTA_MMAP_LEN	((current->personality == PER_LINUX_32BIT) ? 16 : 10)
++#define PAX_DELTA_STACK_LEN	((current->personality == PER_LINUX_32BIT) ? 16 : 10)
++#endif
+ 
+ /* When the program starts, a1 contains a pointer to a function to be 
+    registered with atexit, as per the SVR4 ABI.  A value of 0 means we 
+diff --git a/arch/arm/include/asm/fncpy.h b/arch/arm/include/asm/fncpy.h
+index de53547..52b9a28 100644
+--- a/arch/arm/include/asm/fncpy.h
++++ b/arch/arm/include/asm/fncpy.h
+@@ -81,7 +81,9 @@
+ 	BUG_ON((uintptr_t)(dest_buf) & (FNCPY_ALIGN - 1) ||		\
+ 		(__funcp_address & ~(uintptr_t)1 & (FNCPY_ALIGN - 1)));	\
+ 									\
++	pax_open_kernel();						\
+ 	memcpy(dest_buf, (void const *)(__funcp_address & ~1), size);	\
++	pax_close_kernel();						\
+ 	flush_icache_range((unsigned long)(dest_buf),			\
+ 		(unsigned long)(dest_buf) + (size));			\
+ 									\
+diff --git a/arch/arm/include/asm/futex.h b/arch/arm/include/asm/futex.h
+index 6795368..6c4d749 100644
+--- a/arch/arm/include/asm/futex.h
++++ b/arch/arm/include/asm/futex.h
+@@ -107,6 +107,7 @@ futex_atomic_cmpxchg_inatomic(u32 *uval, u32 __user *uaddr,
+ 		return -EFAULT;
+ 
+ 	preempt_disable();
++
+ 	__ua_flags = uaccess_save_and_enable();
+ 	__asm__ __volatile__("@futex_atomic_cmpxchg_inatomic\n"
+ 	"1:	" TUSER(ldr) "	%1, [%4]\n"
+diff --git a/arch/arm/include/asm/kmap_types.h b/arch/arm/include/asm/kmap_types.h
+index 83eb2f7..ed77159 100644
+--- a/arch/arm/include/asm/kmap_types.h
++++ b/arch/arm/include/asm/kmap_types.h
+@@ -4,6 +4,6 @@
+ /*
+  * This is the "bare minimum".  AIO seems to require this.
+  */
+-#define KM_TYPE_NR 16
++#define KM_TYPE_NR 17
+ 
+ #endif
+diff --git a/arch/arm/include/asm/mach/dma.h b/arch/arm/include/asm/mach/dma.h
+index 9e614a1..3302cca 100644
+--- a/arch/arm/include/asm/mach/dma.h
++++ b/arch/arm/include/asm/mach/dma.h
+@@ -22,7 +22,7 @@ struct dma_ops {
+ 	int	(*residue)(unsigned int, dma_t *);		/* optional */
+ 	int	(*setspeed)(unsigned int, dma_t *, int);	/* optional */
+ 	const char *type;
+-};
++} __do_const;
+ 
+ struct dma_struct {
+ 	void		*addr;		/* single DMA address		*/
+diff --git a/arch/arm/include/asm/mach/map.h b/arch/arm/include/asm/mach/map.h
+index 9b7c328..2dfe68b 100644
+--- a/arch/arm/include/asm/mach/map.h
++++ b/arch/arm/include/asm/mach/map.h
+@@ -23,17 +23,19 @@ struct map_desc {
+ 
+ /* types 0-3 are defined in asm/io.h */
+ enum {
+-	MT_UNCACHED = 4,
+-	MT_CACHECLEAN,
+-	MT_MINICLEAN,
++	MT_UNCACHED_RW = 4,
++	MT_CACHECLEAN_RO,
++	MT_MINICLEAN_RO,
+ 	MT_LOW_VECTORS,
+ 	MT_HIGH_VECTORS,
+-	MT_MEMORY_RWX,
++	__MT_MEMORY_RWX,
+ 	MT_MEMORY_RW,
+-	MT_ROM,
+-	MT_MEMORY_RWX_NONCACHED,
++	MT_MEMORY_RX,
++	MT_ROM_RX,
++	MT_MEMORY_RW_NONCACHED,
++	MT_MEMORY_RX_NONCACHED,
+ 	MT_MEMORY_RW_DTCM,
+-	MT_MEMORY_RWX_ITCM,
++	MT_MEMORY_RX_ITCM,
+ 	MT_MEMORY_RW_SO,
+ 	MT_MEMORY_DMA_READY,
+ };
+diff --git a/arch/arm/include/asm/outercache.h b/arch/arm/include/asm/outercache.h
+index c2bf24f..69e437c 100644
+--- a/arch/arm/include/asm/outercache.h
++++ b/arch/arm/include/asm/outercache.h
+@@ -39,7 +39,7 @@ struct outer_cache_fns {
+ 	/* This is an ARM L2C thing */
+ 	void (*write_sec)(unsigned long, unsigned);
+ 	void (*configure)(const struct l2x0_regs *);
+-};
++} __no_const;
+ 
+ extern struct outer_cache_fns outer_cache;
+ 
+diff --git a/arch/arm/include/asm/page.h b/arch/arm/include/asm/page.h
+index 4355f0e..cd9168e 100644
+--- a/arch/arm/include/asm/page.h
++++ b/arch/arm/include/asm/page.h
+@@ -23,6 +23,7 @@
+ 
+ #else
+ 
++#include <linux/compiler.h>
+ #include <asm/glue.h>
+ 
+ /*
+@@ -114,7 +115,7 @@ struct cpu_user_fns {
+ 	void (*cpu_clear_user_highpage)(struct page *page, unsigned long vaddr);
+ 	void (*cpu_copy_user_highpage)(struct page *to, struct page *from,
+ 			unsigned long vaddr, struct vm_area_struct *vma);
+-};
++} __no_const;
+ 
+ #ifdef MULTI_USER
+ extern struct cpu_user_fns cpu_user;
+diff --git a/arch/arm/include/asm/pgalloc.h b/arch/arm/include/asm/pgalloc.h
+index 19cfab5..3f5c7e9 100644
+--- a/arch/arm/include/asm/pgalloc.h
++++ b/arch/arm/include/asm/pgalloc.h
+@@ -17,6 +17,7 @@
+ #include <asm/processor.h>
+ #include <asm/cacheflush.h>
+ #include <asm/tlbflush.h>
++#include <asm/system_info.h>
+ 
+ #define check_pgt_cache()		do { } while (0)
+ 
+@@ -43,6 +44,11 @@ static inline void pud_populate(struct mm_struct *mm, pud_t *pud, pmd_t *pmd)
+ 	set_pud(pud, __pud(__pa(pmd) | PMD_TYPE_TABLE));
+ }
+ 
++static inline void pud_populate_kernel(struct mm_struct *mm, pud_t *pud, pmd_t *pmd)
++{
++	pud_populate(mm, pud, pmd);
++}
++
+ #else	/* !CONFIG_ARM_LPAE */
+ 
+ /*
+@@ -51,6 +57,7 @@ static inline void pud_populate(struct mm_struct *mm, pud_t *pud, pmd_t *pmd)
+ #define pmd_alloc_one(mm,addr)		({ BUG(); ((pmd_t *)2); })
+ #define pmd_free(mm, pmd)		do { } while (0)
+ #define pud_populate(mm,pmd,pte)	BUG()
++#define pud_populate_kernel(mm,pmd,pte)	BUG()
+ 
+ #endif	/* CONFIG_ARM_LPAE */
+ 
+@@ -128,6 +135,19 @@ static inline void pte_free(struct mm_struct *mm, pgtable_t pte)
+ 	__free_page(pte);
+ }
+ 
++static inline void __section_update(pmd_t *pmdp, unsigned long addr, pmdval_t prot)
++{
++#ifdef CONFIG_ARM_LPAE
++	pmdp[0] = __pmd(pmd_val(pmdp[0]) | prot);
++#else
++	if (addr & SECTION_SIZE)
++		pmdp[1] = __pmd(pmd_val(pmdp[1]) | prot);
++	else
++		pmdp[0] = __pmd(pmd_val(pmdp[0]) | prot);
++#endif
++	flush_pmd_entry(pmdp);
++}
++
+ static inline void __pmd_populate(pmd_t *pmdp, phys_addr_t pte,
+ 				  pmdval_t prot)
+ {
+diff --git a/arch/arm/include/asm/pgtable-2level-hwdef.h b/arch/arm/include/asm/pgtable-2level-hwdef.h
+index d0131ee..23a0939 100644
+--- a/arch/arm/include/asm/pgtable-2level-hwdef.h
++++ b/arch/arm/include/asm/pgtable-2level-hwdef.h
+@@ -28,7 +28,7 @@
+ /*
+  *   - section
+  */
+-#define PMD_SECT_PXN    (_AT(pmdval_t, 1) << 0)     /* v7 */
++#define PMD_SECT_PXN		(_AT(pmdval_t, 1) << 0)     /* v7 */
+ #define PMD_SECT_BUFFERABLE	(_AT(pmdval_t, 1) << 2)
+ #define PMD_SECT_CACHEABLE	(_AT(pmdval_t, 1) << 3)
+ #define PMD_SECT_XN		(_AT(pmdval_t, 1) << 4)		/* v6 */
+@@ -40,6 +40,7 @@
+ #define PMD_SECT_nG		(_AT(pmdval_t, 1) << 17)	/* v6 */
+ #define PMD_SECT_SUPER		(_AT(pmdval_t, 1) << 18)	/* v6 */
+ #define PMD_SECT_AF		(_AT(pmdval_t, 0))
++#define PMD_SECT_RDONLY		(_AT(pmdval_t, 0))
+ 
+ #define PMD_SECT_UNCACHED	(_AT(pmdval_t, 0))
+ #define PMD_SECT_BUFFERED	(PMD_SECT_BUFFERABLE)
+@@ -69,6 +70,7 @@
+  *   - extended small page/tiny page
+  */
+ #define PTE_EXT_XN		(_AT(pteval_t, 1) << 0)		/* v6 */
++#define PTE_EXT_PXN		(_AT(pteval_t, 1) << 2)		/* v7 */
+ #define PTE_EXT_AP_MASK		(_AT(pteval_t, 3) << 4)
+ #define PTE_EXT_AP0		(_AT(pteval_t, 1) << 4)
+ #define PTE_EXT_AP1		(_AT(pteval_t, 2) << 4)
+diff --git a/arch/arm/include/asm/pgtable-2level.h b/arch/arm/include/asm/pgtable-2level.h
+index aeddd28..207745c 100644
+--- a/arch/arm/include/asm/pgtable-2level.h
++++ b/arch/arm/include/asm/pgtable-2level.h
+@@ -127,6 +127,9 @@
+ #define L_PTE_SHARED		(_AT(pteval_t, 1) << 10)	/* shared(v6), coherent(xsc3) */
+ #define L_PTE_NONE		(_AT(pteval_t, 1) << 11)
+ 
++/* Two-level page tables only have PXN in the PGD, not in the PTE. */
++#define L_PTE_PXN		(_AT(pteval_t, 0))
++
+ /*
+  * These are the memory types, defined to be compatible with
+  * pre-ARMv6 CPUs cacheable and bufferable bits: n/a,n/a,C,B
+diff --git a/arch/arm/include/asm/pgtable-3level.h b/arch/arm/include/asm/pgtable-3level.h
+index dc46398..70dab92 100644
+--- a/arch/arm/include/asm/pgtable-3level.h
++++ b/arch/arm/include/asm/pgtable-3level.h
+@@ -80,6 +80,7 @@
+ #define L_PTE_USER		(_AT(pteval_t, 1) << 6)		/* AP[1] */
+ #define L_PTE_SHARED		(_AT(pteval_t, 3) << 8)		/* SH[1:0], inner shareable */
+ #define L_PTE_YOUNG		(_AT(pteval_t, 1) << 10)	/* AF */
++#define L_PTE_PXN		(_AT(pteval_t, 1) << 53)	/* PXN */
+ #define L_PTE_XN		(_AT(pteval_t, 1) << 54)	/* XN */
+ #define L_PTE_DIRTY		(_AT(pteval_t, 1) << 55)
+ #define L_PTE_SPECIAL		(_AT(pteval_t, 1) << 56)
+@@ -90,10 +91,12 @@
+ #define L_PMD_SECT_DIRTY	(_AT(pmdval_t, 1) << 55)
+ #define L_PMD_SECT_NONE		(_AT(pmdval_t, 1) << 57)
+ #define L_PMD_SECT_RDONLY	(_AT(pteval_t, 1) << 58)
++#define PMD_SECT_RDONLY		PMD_SECT_AP2
+ 
+ /*
+  * To be used in assembly code with the upper page attributes.
+  */
++#define L_PTE_PXN_HIGH		(1 << (53 - 32))
+ #define L_PTE_XN_HIGH		(1 << (54 - 32))
+ #define L_PTE_DIRTY_HIGH	(1 << (55 - 32))
+ 
+diff --git a/arch/arm/include/asm/pgtable.h b/arch/arm/include/asm/pgtable.h
+index 348caab..306b62d 100644
+--- a/arch/arm/include/asm/pgtable.h
++++ b/arch/arm/include/asm/pgtable.h
+@@ -33,6 +33,9 @@
+ #include <asm/pgtable-2level.h>
+ #endif
+ 
++#define ktla_ktva(addr)		(addr)
++#define ktva_ktla(addr)		(addr)
++
+ /*
+  * Just any arbitrary offset to the start of the vmalloc VM area: the
+  * current 8MB value just means that there will be a 8MB "hole" after the
+@@ -48,6 +51,9 @@
+ #define LIBRARY_TEXT_START	0x0c000000
+ 
+ #ifndef __ASSEMBLY__
++extern pteval_t __supported_pte_mask;
++extern pmdval_t __supported_pmd_mask;
++
+ extern void __pte_error(const char *file, int line, pte_t);
+ extern void __pmd_error(const char *file, int line, pmd_t);
+ extern void __pgd_error(const char *file, int line, pgd_t);
+@@ -56,6 +62,48 @@ extern void __pgd_error(const char *file, int line, pgd_t);
+ #define pmd_ERROR(pmd)		__pmd_error(__FILE__, __LINE__, pmd)
+ #define pgd_ERROR(pgd)		__pgd_error(__FILE__, __LINE__, pgd)
+ 
++#define  __HAVE_ARCH_PAX_OPEN_KERNEL
++#define  __HAVE_ARCH_PAX_CLOSE_KERNEL
++
++#if defined(CONFIG_PAX_KERNEXEC) || defined(CONFIG_PAX_MEMORY_UDEREF)
++#include <asm/domain.h>
++#include <linux/thread_info.h>
++#include <linux/preempt.h>
++
++static inline int test_domain(int domain, int domaintype)
++{
++	return ((current_thread_info()->cpu_domain) & domain_val(domain, 3)) == domain_val(domain, domaintype);
++}
++#endif
++
++#ifdef CONFIG_PAX_KERNEXEC
++static inline unsigned long pax_open_kernel(void) {
++#ifdef CONFIG_ARM_LPAE
++	/* TODO */
++#else
++	preempt_disable();
++	BUG_ON(test_domain(DOMAIN_KERNEL, DOMAIN_KERNEXEC));
++	modify_domain(DOMAIN_KERNEL, DOMAIN_KERNEXEC);
++#endif
++	return 0;
++}
++
++static inline unsigned long pax_close_kernel(void) {
++#ifdef CONFIG_ARM_LPAE
++	/* TODO */
++#else
++	BUG_ON(test_domain(DOMAIN_KERNEL, DOMAIN_MANAGER));
++	/* DOMAIN_MANAGER = "client" under KERNEXEC */
++	modify_domain(DOMAIN_KERNEL, DOMAIN_MANAGER);
++	preempt_enable_no_resched();
++#endif
++	return 0;
++}
++#else
++static inline unsigned long pax_open_kernel(void) { return 0; }
++static inline unsigned long pax_close_kernel(void) { return 0; }
++#endif
++
+ /*
+  * This is the lowest virtual address we can permit any user space
+  * mapping to be mapped at.  This is particularly important for
+@@ -75,8 +123,8 @@ extern void __pgd_error(const char *file, int line, pgd_t);
+ /*
+  * The pgprot_* and protection_map entries will be fixed up in runtime
+  * to include the cachable and bufferable bits based on memory policy,
+- * as well as any architecture dependent bits like global/ASID and SMP
+- * shared mapping bits.
++ * as well as any architecture dependent bits like global/ASID, PXN,
++ * and SMP shared mapping bits.
+  */
+ #define _L_PTE_DEFAULT	L_PTE_PRESENT | L_PTE_YOUNG
+ 
+@@ -307,7 +355,7 @@ static inline pte_t pte_mknexec(pte_t pte)
+ static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)
+ {
+ 	const pteval_t mask = L_PTE_XN | L_PTE_RDONLY | L_PTE_USER |
+-		L_PTE_NONE | L_PTE_VALID;
++		L_PTE_NONE | L_PTE_VALID | __supported_pte_mask;
+ 	pte_val(pte) = (pte_val(pte) & ~mask) | (pgprot_val(newprot) & mask);
+ 	return pte;
+ }
+diff --git a/arch/arm/include/asm/smp.h b/arch/arm/include/asm/smp.h
+index 3d6dc8b..1262ad3 100644
+--- a/arch/arm/include/asm/smp.h
++++ b/arch/arm/include/asm/smp.h
+@@ -108,7 +108,7 @@ struct smp_operations {
+ 	int  (*cpu_disable)(unsigned int cpu);
+ #endif
+ #endif
+-};
++} __no_const;
+ 
+ struct of_cpu_method {
+ 	const char *method;
+diff --git a/arch/arm/include/asm/string.h b/arch/arm/include/asm/string.h
+index cf4f3aa..3f68273 100644
+--- a/arch/arm/include/asm/string.h
++++ b/arch/arm/include/asm/string.h
+@@ -7,19 +7,19 @@
+  */
+ 
+ #define __HAVE_ARCH_STRRCHR
+-extern char * strrchr(const char * s, int c);
++extern char * strrchr(const char * s, int c) __nocapture(1);
+ 
+ #define __HAVE_ARCH_STRCHR
+-extern char * strchr(const char * s, int c);
++extern char * strchr(const char * s, int c) __nocapture(1);
+ 
+ #define __HAVE_ARCH_MEMCPY
+-extern void * memcpy(void *, const void *, __kernel_size_t);
++extern void * memcpy(void *, const void *, __kernel_size_t) __nocapture(2);
+ 
+ #define __HAVE_ARCH_MEMMOVE
+-extern void * memmove(void *, const void *, __kernel_size_t);
++extern void * memmove(void *, const void *, __kernel_size_t) __nocapture(2);
+ 
+ #define __HAVE_ARCH_MEMCHR
+-extern void * memchr(const void *, int, __kernel_size_t);
++extern void * memchr(const void *, int, __kernel_size_t) __nocapture(1);
+ 
+ #define __HAVE_ARCH_MEMSET
+ extern void * memset(void *, int, __kernel_size_t);
+diff --git a/arch/arm/include/asm/thread_info.h b/arch/arm/include/asm/thread_info.h
+index 776757d..a552c1d 100644
+--- a/arch/arm/include/asm/thread_info.h
++++ b/arch/arm/include/asm/thread_info.h
+@@ -73,6 +73,9 @@ struct thread_info {
+ 	.flags		= 0,						\
+ 	.preempt_count	= INIT_PREEMPT_COUNT,				\
+ 	.addr_limit	= KERNEL_DS,					\
++	.cpu_domain	= domain_val(DOMAIN_USER, DOMAIN_USERCLIENT) |	\
++			  domain_val(DOMAIN_KERNEL, DOMAIN_KERNELCLIENT) | \
++			  domain_val(DOMAIN_IO, DOMAIN_KERNELCLIENT),	\
+ }
+ 
+ #define init_thread_info	(init_thread_union.thread_info)
+@@ -143,6 +146,10 @@ extern int vfp_restore_user_hwstate(struct user_vfp __user *,
+ #define TIF_SYSCALL_AUDIT	5	/* syscall auditing active */
+ #define TIF_SYSCALL_TRACEPOINT	6	/* syscall tracepoint instrumentation */
+ #define TIF_SECCOMP		7	/* seccomp syscall filtering active */
++/* within 8 bits of TIF_SYSCALL_TRACE
++ *  to meet flexible second operand requirements
++ */
++#define TIF_GRSEC_SETXID	8
+ 
+ #define TIF_NOHZ		12	/* in adaptive nohz mode */
+ #define TIF_USING_IWMMXT	17
+@@ -158,10 +165,11 @@ extern int vfp_restore_user_hwstate(struct user_vfp __user *,
+ #define _TIF_SYSCALL_TRACEPOINT	(1 << TIF_SYSCALL_TRACEPOINT)
+ #define _TIF_SECCOMP		(1 << TIF_SECCOMP)
+ #define _TIF_USING_IWMMXT	(1 << TIF_USING_IWMMXT)
++#define _TIF_GRSEC_SETXID	(1 << TIF_GRSEC_SETXID)
+ 
+ /* Checks for any syscall work in entry-common.S */
+ #define _TIF_SYSCALL_WORK (_TIF_SYSCALL_TRACE | _TIF_SYSCALL_AUDIT | \
+-			   _TIF_SYSCALL_TRACEPOINT | _TIF_SECCOMP)
++			   _TIF_SYSCALL_TRACEPOINT | _TIF_SECCOMP | _TIF_GRSEC_SETXID)
+ 
+ /*
+  * Change these and you break ASM code in entry-common.S
+diff --git a/arch/arm/include/asm/tls.h b/arch/arm/include/asm/tls.h
+index 5f833f7..76e6644 100644
+--- a/arch/arm/include/asm/tls.h
++++ b/arch/arm/include/asm/tls.h
+@@ -3,6 +3,7 @@
+ 
+ #include <linux/compiler.h>
+ #include <asm/thread_info.h>
++#include <asm/pgtable.h>
+ 
+ #ifdef __ASSEMBLY__
+ #include <asm/asm-offsets.h>
+@@ -89,7 +90,9 @@ static inline void set_tls(unsigned long val)
+ 			 * at 0xffff0fe0 must be used instead.  (see
+ 			 * entry-armv.S for details)
+ 			 */
++			pax_open_kernel();
+ 			*((unsigned int *)0xffff0ff0) = val;
++			pax_close_kernel();
+ #endif
+ 		}
+ 
+diff --git a/arch/arm/include/asm/uaccess.h b/arch/arm/include/asm/uaccess.h
+index 35c9db8..400e490 100644
+--- a/arch/arm/include/asm/uaccess.h
++++ b/arch/arm/include/asm/uaccess.h
+@@ -18,6 +18,7 @@
+ #include <asm/domain.h>
+ #include <asm/unified.h>
+ #include <asm/compiler.h>
++#include <asm/pgtable.h>
+ 
+ #ifndef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS
+ #include <asm-generic/uaccess-unaligned.h>
+@@ -50,6 +51,59 @@ struct exception_table_entry
+ extern int fixup_exception(struct pt_regs *regs);
+ 
+ /*
++ * These two are intentionally not defined anywhere - if the kernel
++ * code generates any references to them, that's a bug.
++ */
++extern int __get_user_bad(void);
++extern int __put_user_bad(void);
++
++/*
++ * Note that this is actually 0x1,0000,0000
++ */
++#define KERNEL_DS	0x00000000
++#define get_ds()	(KERNEL_DS)
++
++#ifdef CONFIG_MMU
++
++#define USER_DS		TASK_SIZE
++#define get_fs()	(current_thread_info()->addr_limit)
++
++static inline void set_fs(mm_segment_t fs)
++{
++	current_thread_info()->addr_limit = fs;
++	modify_domain(DOMAIN_KERNEL, fs ? DOMAIN_KERNELCLIENT : DOMAIN_MANAGER);
++}
++
++#define segment_eq(a, b)	((a) == (b))
++
++#define __HAVE_ARCH_PAX_OPEN_USERLAND
++#define __HAVE_ARCH_PAX_CLOSE_USERLAND
++
++static inline void pax_open_userland(void)
++{
++
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++	if (segment_eq(get_fs(), USER_DS)) {
++		BUG_ON(test_domain(DOMAIN_USER, DOMAIN_UDEREF));
++		modify_domain(DOMAIN_USER, DOMAIN_UDEREF);
++	}
++#endif
++
++}
++
++static inline void pax_close_userland(void)
++{
++
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++	if (segment_eq(get_fs(), USER_DS)) {
++		BUG_ON(test_domain(DOMAIN_USER, DOMAIN_NOACCESS));
++		modify_domain(DOMAIN_USER, DOMAIN_NOACCESS);
++	}
++#endif
++
++}
++
++/*
+  * These two functions allow hooking accesses to userspace to increase
+  * system integrity by ensuring that the kernel can not inadvertantly
+  * perform such accesses (eg, via list poison values) which could then
+@@ -66,6 +120,7 @@ static inline unsigned int uaccess_save_and_enable(void)
+ 
+ 	return old_domain;
+ #else
++	pax_open_userland();
+ 	return 0;
+ #endif
+ }
+@@ -75,35 +130,11 @@ static inline void uaccess_restore(unsigned int flags)
+ #ifdef CONFIG_CPU_SW_DOMAIN_PAN
+ 	/* Restore the user access mask */
+ 	set_domain(flags);
++#else
++	pax_close_userland();
+ #endif
+ }
+ 
+-/*
+- * These two are intentionally not defined anywhere - if the kernel
+- * code generates any references to them, that's a bug.
+- */
+-extern int __get_user_bad(void);
+-extern int __put_user_bad(void);
+-
+-/*
+- * Note that this is actually 0x1,0000,0000
+- */
+-#define KERNEL_DS	0x00000000
+-#define get_ds()	(KERNEL_DS)
+-
+-#ifdef CONFIG_MMU
+-
+-#define USER_DS		TASK_SIZE
+-#define get_fs()	(current_thread_info()->addr_limit)
+-
+-static inline void set_fs(mm_segment_t fs)
+-{
+-	current_thread_info()->addr_limit = fs;
+-	modify_domain(DOMAIN_KERNEL, fs ? DOMAIN_CLIENT : DOMAIN_MANAGER);
+-}
+-
+-#define segment_eq(a, b)	((a) == (b))
+-
+ #define __addr_ok(addr) ({ \
+ 	unsigned long flag; \
+ 	__asm__("cmp %2, %0; movlo %0, #0" \
+@@ -302,6 +333,7 @@ static inline void set_fs(mm_segment_t fs)
+ 
+ #endif /* CONFIG_MMU */
+ 
++#define access_ok_noprefault(type, addr, size) access_ok((type), (addr), (size))
+ #define access_ok(type, addr, size)	(__range_ok(addr, size) == 0)
+ 
+ #define user_addr_max() \
+@@ -490,39 +522,46 @@ do {									\
+ 
+ 
+ #ifdef CONFIG_MMU
+-extern unsigned long __must_check
++extern unsigned long __must_check __size_overflow(3)
+ arm_copy_from_user(void *to, const void __user *from, unsigned long n);
+ 
+-static inline unsigned long __must_check
++static inline unsigned long __must_check __size_overflow(3)
+ __copy_from_user(void *to, const void __user *from, unsigned long n)
+ {
+-	unsigned int __ua_flags = uaccess_save_and_enable();
++	unsigned int __ua_flags;
++
++	check_object_size(to, n, false);
++	__ua_flags = uaccess_save_and_enable();
+ 	n = arm_copy_from_user(to, from, n);
+ 	uaccess_restore(__ua_flags);
+ 	return n;
+ }
+ 
+-extern unsigned long __must_check
++extern unsigned long __must_check __size_overflow(3)
+ arm_copy_to_user(void __user *to, const void *from, unsigned long n);
+-extern unsigned long __must_check
++extern unsigned long __must_check __size_overflow(3)
+ __copy_to_user_std(void __user *to, const void *from, unsigned long n);
+ 
+ static inline unsigned long __must_check
+ __copy_to_user(void __user *to, const void *from, unsigned long n)
+ {
+ #ifndef CONFIG_UACCESS_WITH_MEMCPY
+-	unsigned int __ua_flags = uaccess_save_and_enable();
++	unsigned int __ua_flags;
++
++	check_object_size(from, n, true);
++	__ua_flags = uaccess_save_and_enable();
+ 	n = arm_copy_to_user(to, from, n);
+ 	uaccess_restore(__ua_flags);
+ 	return n;
+ #else
++	check_object_size(from, n, true);
+ 	return arm_copy_to_user(to, from, n);
+ #endif
+ }
+ 
+-extern unsigned long __must_check
++extern unsigned long __must_check __size_overflow(2)
+ arm_clear_user(void __user *addr, unsigned long n);
+-extern unsigned long __must_check
++extern unsigned long __must_check __size_overflow(2)
+ __clear_user_std(void __user *addr, unsigned long n);
+ 
+ static inline unsigned long __must_check
+@@ -542,6 +581,9 @@ __clear_user(void __user *addr, unsigned long n)
+ 
+ static inline unsigned long __must_check copy_from_user(void *to, const void __user *from, unsigned long n)
+ {
++	if ((long)n < 0)
++		return n;
++
+ 	if (access_ok(VERIFY_READ, from, n))
+ 		n = __copy_from_user(to, from, n);
+ 	else /* security hole - plug it */
+@@ -551,6 +593,9 @@ static inline unsigned long __must_check copy_from_user(void *to, const void __u
+ 
+ static inline unsigned long __must_check copy_to_user(void __user *to, const void *from, unsigned long n)
+ {
++	if ((long)n < 0)
++		return n;
++
+ 	if (access_ok(VERIFY_WRITE, to, n))
+ 		n = __copy_to_user(to, from, n);
+ 	return n;
+diff --git a/arch/arm/include/uapi/asm/ptrace.h b/arch/arm/include/uapi/asm/ptrace.h
+index 5af0ed1..cea83883 100644
+--- a/arch/arm/include/uapi/asm/ptrace.h
++++ b/arch/arm/include/uapi/asm/ptrace.h
+@@ -92,7 +92,7 @@
+  * ARMv7 groups of PSR bits
+  */
+ #define APSR_MASK	0xf80f0000	/* N, Z, C, V, Q and GE flags */
+-#define PSR_ISET_MASK	0x01000010	/* ISA state (J, T) mask */
++#define PSR_ISET_MASK	0x01000020	/* ISA state (J, T) mask */
+ #define PSR_IT_MASK	0x0600fc00	/* If-Then execution state mask */
+ #define PSR_ENDIAN_MASK	0x00000200	/* Endianness state mask */
+ 
+diff --git a/arch/arm/kernel/armksyms.c b/arch/arm/kernel/armksyms.c
+index 7e45f69..2c047db 100644
+--- a/arch/arm/kernel/armksyms.c
++++ b/arch/arm/kernel/armksyms.c
+@@ -59,7 +59,7 @@ EXPORT_SYMBOL(arm_delay_ops);
+ 
+ 	/* networking */
+ EXPORT_SYMBOL(csum_partial);
+-EXPORT_SYMBOL(csum_partial_copy_from_user);
++EXPORT_SYMBOL(__csum_partial_copy_from_user);
+ EXPORT_SYMBOL(csum_partial_copy_nocheck);
+ EXPORT_SYMBOL(__csum_ipv6_magic);
+ 
+diff --git a/arch/arm/kernel/cpuidle.c b/arch/arm/kernel/cpuidle.c
+index 703926e..39aa432 100644
+--- a/arch/arm/kernel/cpuidle.c
++++ b/arch/arm/kernel/cpuidle.c
+@@ -19,7 +19,7 @@ extern struct of_cpuidle_method __cpuidle_method_of_table[];
+ static const struct of_cpuidle_method __cpuidle_method_of_table_sentinel
+ 	__used __section(__cpuidle_method_of_table_end);
+ 
+-static struct cpuidle_ops cpuidle_ops[NR_CPUS];
++static struct cpuidle_ops cpuidle_ops[NR_CPUS] __read_only;
+ 
+ /**
+  * arm_cpuidle_simple_enter() - a wrapper to cpu_do_idle()
+diff --git a/arch/arm/kernel/entry-armv.S b/arch/arm/kernel/entry-armv.S
+index e255050..51e1b59 100644
+--- a/arch/arm/kernel/entry-armv.S
++++ b/arch/arm/kernel/entry-armv.S
+@@ -50,6 +50,87 @@
+ 9997:
+ 	.endm
+ 
++	.macro	pax_enter_kernel
++#if defined(CONFIG_PAX_KERNEXEC) || defined(CONFIG_PAX_MEMORY_UDEREF)
++	@ make aligned space for saved DACR
++	sub	sp, sp, #8
++	@ save regs
++	stmdb	sp!, {r1, r2}
++	@ read DACR from cpu_domain into r1
++	mov	r2, sp
++	@ assume 8K pages, since we have to split the immediate in two
++	bic	r2, r2, #(0x1fc0)
++	bic	r2, r2, #(0x3f)
++	ldr	r1, [r2, #TI_CPU_DOMAIN]
++	@ store old DACR on stack
++	str	r1, [sp, #8]
++#ifdef CONFIG_PAX_KERNEXEC
++	@ set type of DOMAIN_KERNEL to DOMAIN_KERNELCLIENT
++	bic	r1, r1, #(domain_val(DOMAIN_KERNEL, 3))
++	orr	r1, r1, #(domain_val(DOMAIN_KERNEL, DOMAIN_KERNELCLIENT))
++#endif
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++	@ set current DOMAIN_USER to DOMAIN_NOACCESS
++	bic	r1, r1, #(domain_val(DOMAIN_USER, 3))
++#endif
++	@ write r1 to current_thread_info()->cpu_domain
++	str	r1, [r2, #TI_CPU_DOMAIN]
++	@ write r1 to DACR
++	mcr	p15, 0, r1, c3, c0, 0
++	@ instruction sync
++	instr_sync
++	@ restore regs
++	ldmia	sp!, {r1, r2}
++#endif
++	.endm
++
++	.macro	pax_open_userland
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++	@ save regs
++	stmdb	sp!, {r0, r1}
++	@ read DACR from cpu_domain into r1
++	mov	r0, sp
++	@ assume 8K pages, since we have to split the immediate in two
++	bic	r0, r0, #(0x1fc0)
++	bic	r0, r0, #(0x3f)
++	ldr	r1, [r0, #TI_CPU_DOMAIN]
++	@ set current DOMAIN_USER to DOMAIN_CLIENT
++	bic	r1, r1, #(domain_val(DOMAIN_USER, 3))
++	orr	r1, r1, #(domain_val(DOMAIN_USER, DOMAIN_UDEREF))
++	@ write r1 to current_thread_info()->cpu_domain
++	str	r1, [r0, #TI_CPU_DOMAIN]
++	@ write r1 to DACR
++	mcr	p15, 0, r1, c3, c0, 0
++	@ instruction sync
++	instr_sync
++	@ restore regs
++	ldmia	sp!, {r0, r1}
++#endif
++	.endm
++
++	.macro	pax_close_userland
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++	@ save regs
++	stmdb	sp!, {r0, r1}
++	@ read DACR from cpu_domain into r1
++	mov	r0, sp
++	@ assume 8K pages, since we have to split the immediate in two
++	bic	r0, r0, #(0x1fc0)
++	bic	r0, r0, #(0x3f)
++	ldr	r1, [r0, #TI_CPU_DOMAIN]
++	@ set current DOMAIN_USER to DOMAIN_NOACCESS
++	bic	r1, r1, #(domain_val(DOMAIN_USER, 3))
++	@ write r1 to current_thread_info()->cpu_domain
++	str	r1, [r0, #TI_CPU_DOMAIN]
++	@ write r1 to DACR
++	mcr	p15, 0, r1, c3, c0, 0
++	@ instruction sync
++	instr_sync
++	@ restore regs
++	ldmia	sp!, {r0, r1}
++#endif
++	.endm
++
+ 	.macro	pabt_helper
+ 	@ PABORT handler takes pt_regs in r2, fault address in r4 and psr in r5
+ #ifdef MULTI_PABORT
+@@ -92,11 +173,15 @@
+  * Invalid mode handlers
+  */
+ 	.macro	inv_entry, reason
++
++	pax_enter_kernel
++
+ 	sub	sp, sp, #S_FRAME_SIZE
+  ARM(	stmib	sp, {r1 - lr}		)
+  THUMB(	stmia	sp, {r0 - r12}		)
+  THUMB(	str	sp, [sp, #S_SP]		)
+  THUMB(	str	lr, [sp, #S_LR]		)
++
+ 	mov	r1, #\reason
+ 	.endm
+ 
+@@ -152,6 +237,9 @@ ENDPROC(__und_invalid)
+ 	.macro	svc_entry, stack_hole=0, trace=1, uaccess=1
+  UNWIND(.fnstart		)
+  UNWIND(.save {r0 - pc}		)
++
++	pax_enter_kernel
++
+ 	sub	sp, sp, #(S_FRAME_SIZE + 8 + \stack_hole - 4)
+ #ifdef CONFIG_THUMB2_KERNEL
+  SPFIX(	str	r0, [sp]	)	@ temporarily saved
+@@ -167,7 +255,12 @@ ENDPROC(__und_invalid)
+ 	ldmia	r0, {r3 - r5}
+ 	add	r7, sp, #S_SP - 4	@ here for interlock avoidance
+ 	mov	r6, #-1			@  ""  ""      ""       ""
++#if defined(CONFIG_PAX_KERNEXEC) || defined(CONFIG_PAX_MEMORY_UDEREF)
++	@ offset sp by 8 as done in pax_enter_kernel
++	add	r2, sp, #(S_FRAME_SIZE + 8 + \stack_hole + 4)
++#else
+ 	add	r2, sp, #(S_FRAME_SIZE + 8 + \stack_hole - 4)
++#endif
+  SPFIX(	addeq	r2, r2, #4	)
+ 	str	r3, [sp, #-4]!		@ save the "real" r0 copied
+ 					@ from the exception stack
+@@ -376,6 +469,9 @@ ENDPROC(__fiq_abt)
+ 	.macro	usr_entry, trace=1, uaccess=1
+  UNWIND(.fnstart	)
+  UNWIND(.cantunwind	)	@ don't unwind the user space
++
++	pax_enter_kernel_user
++
+ 	sub	sp, sp, #S_FRAME_SIZE
+  ARM(	stmib	sp, {r1 - r12}	)
+  THUMB(	stmia	sp, {r0 - r12}	)
+@@ -489,7 +585,9 @@ __und_usr:
+ 	tst	r3, #PSR_T_BIT			@ Thumb mode?
+ 	bne	__und_usr_thumb
+ 	sub	r4, r2, #4			@ ARM instr at LR - 4
++	pax_open_userland
+ 1:	ldrt	r0, [r4]
++	pax_close_userland
+  ARM_BE8(rev	r0, r0)				@ little endian instruction
+ 
+ 	uaccess_disable ip
+@@ -525,11 +623,15 @@ __und_usr_thumb:
+  */
+ 	.arch	armv6t2
+ #endif
++	pax_open_userland
+ 2:	ldrht	r5, [r4]
++	pax_close_userland
+ ARM_BE8(rev16	r5, r5)				@ little endian instruction
+ 	cmp	r5, #0xe800			@ 32bit instruction if xx != 0
+ 	blo	__und_usr_fault_16_pan		@ 16bit undefined instruction
++	pax_open_userland
+ 3:	ldrht	r0, [r2]
++	pax_close_userland
+ ARM_BE8(rev16	r0, r0)				@ little endian instruction
+ 	uaccess_disable ip
+ 	add	r2, r2, #2			@ r2 is PC + 2, make it PC + 4
+@@ -560,7 +662,8 @@ ENDPROC(__und_usr)
+  */
+ 	.pushsection .text.fixup, "ax"
+ 	.align	2
+-4:	str     r4, [sp, #S_PC]			@ retry current instruction
++4:	pax_close_userland
++	str     r4, [sp, #S_PC]			@ retry current instruction
+ 	ret	r9
+ 	.popsection
+ 	.pushsection __ex_table,"a"
+@@ -782,7 +885,7 @@ ENTRY(__switch_to)
+  THUMB(	str	lr, [ip], #4		   )
+ 	ldr	r4, [r2, #TI_TP_VALUE]
+ 	ldr	r5, [r2, #TI_TP_VALUE + 4]
+-#ifdef CONFIG_CPU_USE_DOMAINS
++#if defined(CONFIG_CPU_USE_DOMAINS) || defined(CONFIG_PAX_KERNEXEC) || defined(CONFIG_PAX_MEMORY_UDEREF)
+ 	mrc	p15, 0, r6, c3, c0, 0		@ Get domain register
+ 	str	r6, [r1, #TI_CPU_DOMAIN]	@ Save old domain register
+ 	ldr	r6, [r2, #TI_CPU_DOMAIN]
+@@ -793,7 +896,7 @@ ENTRY(__switch_to)
+ 	ldr	r8, =__stack_chk_guard
+ 	ldr	r7, [r7, #TSK_STACK_CANARY]
+ #endif
+-#ifdef CONFIG_CPU_USE_DOMAINS
++#if defined(CONFIG_CPU_USE_DOMAINS) || defined(CONFIG_PAX_KERNEXEC) || defined(CONFIG_PAX_MEMORY_UDEREF)
+ 	mcr	p15, 0, r6, c3, c0, 0		@ Set domain register
+ #endif
+ 	mov	r5, r0
+diff --git a/arch/arm/kernel/entry-common.S b/arch/arm/kernel/entry-common.S
+index 30a7228..d071196 100644
+--- a/arch/arm/kernel/entry-common.S
++++ b/arch/arm/kernel/entry-common.S
+@@ -11,18 +11,46 @@

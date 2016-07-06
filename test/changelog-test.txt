@@ -1,3 +1,15 @@
+commit 244fda357c13b44ac2d174713205863c552eb30d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 6 07:19:26 2016 -0400
+
+    Compile fix for recent /proc/pid/mem changes, reported by adminwset at
+    https://forums.grsecurity.net/viewtopic.php?t=4505&p=16415#p16415
+
+ fs/proc/base.c        | 2 +-
+ fs/proc/internal.h    | 2 +-
+ include/linux/sched.h | 2 ++
+ 3 files changed, 4 insertions(+), 2 deletions(-)
+
 commit 5bd1344d3f28c5402bcd85972bb520a5baaf612c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jul 3 21:27:25 2016 -0400
