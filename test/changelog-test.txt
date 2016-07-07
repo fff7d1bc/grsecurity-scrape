@@ -1,3 +1,13 @@
+commit 7765cd90c911e58959451529995ea44b7a2271d6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 7 07:12:54 2016 -0400
+
+    Compile fix reported by adminwset on the forums:
+    https://forums.grsecurity.net/viewtopic.php?t=4507&p=16420#p16420
+
+ fs/proc/task_mmu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit c94fbc6f47fdae9a2dcf29d3048c8da8752dbbdf
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jul 6 21:11:33 2016 -0400
