@@ -1,3 +1,172 @@
+commit c94fbc6f47fdae9a2dcf29d3048c8da8752dbbdf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 6 21:11:33 2016 -0400
+
+    compile fix
+
+ arch/x86/mm/init_32.c | 1 -
+ 1 file changed, 1 deletion(-)
+
+commit ee4f4cdd26864ac40ac22b4a3b88f284a6d057d0
+Author: Miklos Szeredi <mszeredi@redhat.com>
+Date:   Wed Jun 29 16:03:55 2016 +0200
+
+    ovl: get_write_access() in truncate
+    
+    When truncating a file we should check write access on the underlying
+    inode.  And we should do so on the lower file as well (before copy-up) for
+    consistency.
+    
+    Original patch and test case by Aihua Zhang.
+    
+     - - >o >o - - test.c - - >o >o - -
+    #include <stdio.h>
+    #include <errno.h>
+    #include <unistd.h>
+    
+    int main(int argc, char *argv[])
+    {
+    	int ret;
+    
+    	ret = truncate(argv[0], 4096);
+    	if (ret != -1) {
+    		fprintf(stderr, "truncate(argv[0]) should have failed\n");
+    		return 1;
+    	}
+    	if (errno != ETXTBSY) {
+    		perror("truncate(argv[0])");
+    		return 1;
+    	}
+    
+    	return 0;
+    }
+     - - >o >o - - >o >o - - >o >o - -
+    
+    Reported-by: Aihua Zhang <zhangaihua1@huawei.com>
+    Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+    Cc: <stable@vger.kernel.org>
+
+ fs/overlayfs/inode.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+commit 4585d082282707fbe91025c987bd8cef4152196d
+Author: Vivek Goyal <vgoyal@redhat.com>
+Date:   Fri Jul 1 10:02:44 2016 -0400
+
+    ovl: warn instead of error if d_type is not supported
+    
+    overlay needs underlying fs to support d_type. Recently I put in a
+    patch in to detect this condition and started failing mount if
+    underlying fs did not support d_type.
+    
+    But this breaks existing configurations over kernel upgrade. Those who
+    are running docker (partially broken configuration) with xfs not
+    supporting d_type, are surprised that after kernel upgrade docker does
+    not run anymore.
+    
+    https://github.com/docker/docker/issues/22937#issuecomment-229881315
+    
+    So instead of erroring out, detect broken configuration and warn
+    about it. This should allow existing docker setups to continue
+    working after kernel upgrade.
+    
+    Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+    Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+    Fixes: 45aebeaf4f67 ("ovl: Ensure upper filesystem supports d_type")
+    Cc: <stable@vger.kernel.org> 4.6
+
+ fs/overlayfs/super.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+commit 97bb95801d1ce86dafd1a59483803aba5b93e7c0
+Author: Randy Dunlap <rdunlap@infradead.org>
+Date:   Wed Jul 6 16:06:53 2016 -0700
+
+    init/Kconfig: keep Expert users menu together
+    
+    The "expert" menu was broken (split) such that all entries in it after
+    KALLSYMS were displayed in the "General setup" area instead of in the
+    "Expert users" area.  Fix this by adding one kconfig dependency.
+    
+    Yes, the Expert users menu is fragile.  Problems like this have happened
+    several times in the past.  I will attempt to isolate the Expert users
+    menu if there is interest in that.
+    
+    Fixes: 4d5d5664c900 ("x86: kallsyms: disable absolute percpu symbols on !SMP")
+    Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+    Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+    Cc: stable@vger.kernel.org  # 4.6
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ init/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 616a19ea32197667494240e8afc0de98d28fdd47
+Merge: 769cc1b 98d6186
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 6 20:41:51 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 98d61867ac6a18500bbd9771678138154869cec3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 6 20:29:35 2016 -0400
+
+    Update to pax-linux-4.6.3-test10.patch:
+    - fixed a size overflow false positive in xfrm4_beet_output and xfrm6_beet_output, by Mathias Krause <minipli@ld-linux.so>
+    - fixed UEFI boot regression under KERNEXEC, reported by Yves-Alexis Perez <corsac@corsac.net> and x14sg1 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4502)
+    - fixed a few constification related compile errors on arm/mips, by spender
+    - updated the size overflow hash table from grsecurity
+    - fixed an integer truncation bug in __ioremap_caller caught by the size overflow plugin
+
+ arch/arm/mach-mmp/mmp2.c                           |   4 +-
+ arch/arm/mach-mmp/pxa910.c                         |   4 +-
+ arch/arm/mach-s3c64xx/mach-smdk6410.c              |   2 +-
+ arch/arm/mm/fault.c                                |   2 +-
+ arch/x86/include/asm/efi.h                         |   5 +
+ arch/x86/include/asm/pgtable.h                     |   2 +-
+ arch/x86/mm/dump_pagetables.c                      |  32 +++-
+ arch/x86/mm/init_32.c                              |  55 +++---
+ arch/x86/mm/init_64.c                              |  12 +-
+ arch/x86/mm/ioremap.c                              |   2 +-
+ arch/x86/mm/pageattr.c                             |   2 +-
+ drivers/gpu/drm/sti/sti_cursor.c                   |   4 +-
+ drivers/gpu/drm/sti/sti_dvo.c                      |   4 +-
+ drivers/gpu/drm/sti/sti_gdp.c                      |  12 +-
+ drivers/gpu/drm/sti/sti_hdmi.c                     |   4 +-
+ drivers/gpu/drm/sti/sti_mixer.c                    |   8 +-
+ drivers/gpu/drm/sti/sti_vid.c                      |   4 +-
+ drivers/irqchip/irq-mmp.c                          |   2 +-
+ drivers/net/ethernet/broadcom/bnxt/bnxt.c          |   2 +-
+ include/linux/irqchip/mmp.h                        |   2 +-
+ net/ipv4/xfrm4_mode_beet.c                         |   2 +-
+ net/ipv6/xfrm6_mode_beet.c                         |   2 +-
+ .../size_overflow_plugin/size_overflow_hash.data   | 203 +++++++++++++++++----
+ 23 files changed, 280 insertions(+), 91 deletions(-)
+
+commit 769cc1b850f164d9fd9284898295eb616896d66b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 6 20:08:29 2016 -0400
+
+    Fix bug in RBAC learning reported by Andrew Flannery
+    Nolog/noaudit-type capability checks were handled in a separate
+    function which did not check if the requestor had the capability in
+    their effective set.  This would cause privileged processes to be
+    denied use of their capabilities in the small number of instances
+    these kinds of checks were used (for ptrace_may_access() etc, which
+    get used in deciding if privileged processes can bypass /proc
+    restrictions) only when RBAC learning was enabled on the process.
+    
+    Remove some code duplication in the process of fixing the bug.
+
+ grsecurity/gracl_cap.c      | 49 +++++++++------------------------------------
+ grsecurity/grsec_disabled.c |  2 +-
+ grsecurity/grsec_exec.c     |  9 ++++-----
+ include/linux/grsecurity.h  |  4 ++--
+ kernel/capability.c         |  2 +-
+ kernel/sys.c                |  4 ++--
+ 6 files changed, 19 insertions(+), 51 deletions(-)
+
 commit 244fda357c13b44ac2d174713205863c552eb30d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jul 6 07:19:26 2016 -0400
