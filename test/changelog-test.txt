@@ -1,3 +1,93 @@
+commit 58c0443674275163e4d488f890ba1b985d13a4b0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 11 21:30:57 2016 -0400
+
+    Temporary workaround for size_overflow detection reported at:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4510
+    by brainatwork
+
+ drivers/block/drbd/drbd_int.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit aa1f32f7a62f394d1f90c2d9952befdd5294c088
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 11 21:18:20 2016 -0400
+
+    Update size_overflow hash table
+
+ scripts/gcc-plugins/size_overflow_plugin/size_overflow_hash.data | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 329fa438e13041fda3dcd292adf2aeb1c008c72c
+Author: Jeff Mahoney <jeffm@suse.com>
+Date:   Tue Jul 5 17:32:30 2016 -0400
+
+    ecryptfs: don't allow mmap when the lower fs doesn't support it
+    
+    There are legitimate reasons to disallow mmap on certain files, notably
+    in sysfs or procfs.  We shouldn't emulate mmap support on file systems
+    that don't offer support natively.
+    
+    CVE-2016-1583
+    
+    Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+    Cc: stable@vger.kernel.org
+    [tyhicks: clean up f_op check by using ecryptfs_file_to_lower()]
+    Signed-off-by: Tyler Hicks <tyhicks@canonical.com>
+
+ fs/ecryptfs/file.c | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+commit 5b86b77c32a55ebc8b441ac71839bb50012e505a
+Author: Vegard Nossum <vegard.nossum@oracle.com>
+Date:   Thu Jul 7 13:41:11 2016 -0700
+
+    apparmor: fix oops, validate buffer size in apparmor_setprocattr()
+    
+    When proc_pid_attr_write() was changed to use memdup_user apparmor's
+    (interface violating) assumption that the setprocattr buffer was always
+    a single page was violated.
+    
+    The size test is not strictly speaking needed as proc_pid_attr_write()
+    will reject anything larger, but for the sake of robustness we can keep
+    it in.
+    
+    SMACK and SELinux look safe to me, but somebody else should probably
+    have a look just in case.
+    
+    Based on original patch from Vegard Nossum <vegard.nossum@oracle.com>
+    modified for the case that apparmor provides null termination.
+    
+    Fixes: bb646cdb12e75d82258c2f2e7746d5952d3e321a
+    Reported-by: Vegard Nossum <vegard.nossum@oracle.com>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: John Johansen <john.johansen@canonical.com>
+    Cc: Paul Moore <paul@paul-moore.com>
+    Cc: Stephen Smalley <sds@tycho.nsa.gov>
+    Cc: Eric Paris <eparis@parisplace.org>
+    Cc: Casey Schaufler <casey@schaufler-ca.com>
+    Cc: stable@kernel.org
+    Signed-off-by: John Johansen <john.johansen@canonical.com>
+    Reviewed-by: Tyler Hicks <tyhicks@canonical.com>
+    Signed-off-by: James Morris <james.l.morris@oracle.com>
+
+ security/apparmor/lsm.c | 36 +++++++++++++++++++-----------------
+ 1 file changed, 19 insertions(+), 17 deletions(-)
+
+commit cf7f94ad6c32ff91363641573a64c85f4877e290
+Merge: 7765cd9 50212d6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 11 18:39:35 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 50212d610aeb6ced453e1835c169c46acdf3940d
+Merge: 98d6186 310ca59
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 11 18:39:08 2016 -0400
+
+    Merge branch 'linux-4.6.y' into pax-test
+
 commit 7765cd90c911e58959451529995ea44b7a2271d6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jul 7 07:12:54 2016 -0400
