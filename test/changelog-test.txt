@@ -1,3 +1,136 @@
+commit e52044e34a92f944b99e9219147617dc7449a675
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 18 21:25:15 2016 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   | 466 +++++++++++++++++----
+ 1 file changed, 382 insertions(+), 84 deletions(-)
+
+commit 27ed9167fb98fe9f9e75aace6f651ff814a189a5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 18 21:04:42 2016 -0400
+
+    Update size_overflow hash table
+
+ .../gcc-plugins/size_overflow_plugin/size_overflow_hash.data | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+commit b0a1f25a251b7c1c582fa3a95605654f8da33193
+Author: Jann Horn <jann@thejh.net>
+Date:   Fri Sep 11 21:39:33 2015 +0200
+
+    xfs: fix type confusion in xfs_ioc_swapext
+    
+    Without this check, the following XFS_I invocations would return bad
+    pointers when used on non-XFS inodes (perhaps pointers into preceding
+    allocator chunks).
+    
+    This could be used by an attacker to trick xfs_swap_extents into
+    performing locking operations on attacker-chosen structures in kernel
+    memory, potentially leading to code execution in the kernel.  (I have
+    not investigated how likely this is to be usable for an attack in
+    practice.)
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Dave Chinner <david@fromorbit.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/xfs/xfs_ioctl.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+commit 01e9e48be783cefbe69ff9241ab678de69eaab5b
+Merge: bd6d599 c421d76
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 18 20:18:27 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c421d76c43d1840ab72bf2cd414e61ee0581e80b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 18 20:04:22 2016 -0400
+
+    Update to pax-linux-4.6.4-test14.patch:
+    - Emese regenerated the size overflow hash table
+    - fixed a few more section mismatches detected in LTO mode
+    - reworked how KERNEXEC coexists with upstream's DEBUG_RODATA
+    - reworked the KERNEXEC plugin configuration, read the Kconfig help!
+    - simplified the constify plugin a bit
+    - fixed an integer truncation bug in pnp_add_dma_resource caught by the size overflow plugin, reported by Thore BÃ¶decker (https://forums.grsecurity.net/viewtopic.php?f=3&t=4511 and https://bugzilla.kernel.org/show_bug.cgi?id=123211)
+    - worked around an integer conversion problem in drbd caught by the size overflow plugin, reported by Georg Weiss (https://forums.grsecurity.net/viewtopic.php?f=3&t=4510 and https://bugs.gentoo.org/show_bug.cgi?id=588624)
+    - fixed !KERNEXEC boot crash on x86, reported by peetaur (https://forums.grsecurity.net/viewtopic.php?f=3&t=4512)
+    - fixed compile warnings triggered by the __SYSCALL_DEFINEx macro
+
+ arch/mips/Kbuild                                   |     2 +-
+ arch/mips/include/asm/irq.h                        |     1 -
+ arch/sparc/include/asm/atomic_64.h                 |     6 +
+ arch/sparc/kernel/prom_common.c                    |     2 +-
+ arch/sparc/lib/atomic_64.S                         |     2 +-
+ arch/sparc/lib/ksyms.c                             |     4 +-
+ arch/x86/entry/entry_64.S                          |     2 +-
+ arch/x86/entry/vsyscall/vsyscall_emu_64.S          |     3 +-
+ arch/x86/kernel/alternative.c                      |    21 +
+ arch/x86/kernel/cpu/common.c                       |     4 +
+ arch/x86/platform/olpc/olpc_dt.c                   |     2 +-
+ drivers/block/drbd/drbd_int.h                      |     4 +-
+ drivers/gpu/drm/sti/sti_hda.c                      |     4 +-
+ drivers/gpu/drm/sti/sti_hqvdp.c                    |     4 +-
+ drivers/gpu/drm/sti/sti_tvout.c                    |     4 +-
+ drivers/gpu/drm/tilcdc/tilcdc_external.c           |     2 +-
+ drivers/hwmon/applesmc.c                           |     2 +-
+ drivers/iommu/io-pgtable-arm.c                     |     2 +-
+ drivers/isdn/gigaset/usb-gigaset.c                 |     2 +-
+ drivers/leds/leds-clevo-mail.c                     |     2 +-
+ drivers/leds/leds-ss4200.c                         |     2 +-
+ drivers/mtd/nand/brcmnand/bcm63138_nand.c          |     2 +
+ drivers/mtd/nand/brcmnand/iproc_nand.c             |     2 +
+ drivers/platform/chrome/chromeos_laptop.c          |     2 +-
+ drivers/platform/chrome/cros_ec_lpc.c              |     2 +-
+ drivers/pnp/base.h                                 |     2 +-
+ drivers/pnp/resource.c                             |     4 +-
+ fs/exec.c                                          |    20 +-
+ include/drm/drm_modeset_helper_vtables.h           |     1 +
+ include/linux/syscalls.h                           |     8 +-
+ mm/slab_common.c                                   |     6 +
+ mm/slob.c                                          |    44 +-
+ mm/slub.c                                          |     7 +
+ scripts/Makefile.gcc-plugins                       |     4 +-
+ scripts/gcc-plugins/constify_plugin.c              |    10 +-
+ .../size_overflow_plugin/size_overflow_hash.data   | 13633 +++++++++----------
+ security/Kconfig                                   |    63 +-
+ 37 files changed, 6934 insertions(+), 6953 deletions(-)
+
+commit bd6d599943a777b93600dd4a43bbeea5dde2dfa0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 17 17:18:15 2016 -0400
+
+    Ensure current state is set to TASK_RUNNING before doing a copy on the RBAC learning read side
+
+ grsecurity/gracl_learn.c | 6 ++++--
+ kernel/sched/core.c      | 2 +-
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+commit 0f2e7d90efc7eeff655d7cc2c15838497f8c0513
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jul 15 15:29:41 2016 -0400
+
+    Force that BUG() be enabled in the kernel config if grsecurity is enabled
+    Suggested by Kees Cook
+
+ security/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 3efe62268d831fc5c89a64b8ff1496d2b912ebf6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 14 21:14:55 2016 -0400
+
+    randomize layout of two more structs
+
+ include/linux/cdev.h | 2 +-
+ include/linux/fs.h   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 58c0443674275163e4d488f890ba1b985d13a4b0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jul 11 21:30:57 2016 -0400
