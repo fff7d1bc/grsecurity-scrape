@@ -1,3 +1,33 @@
+commit 84f2bc67492f30f06520497a9bb16c0a2e3103df
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 19 20:13:30 2016 -0400
+
+    Revert to previous size_overflow hash table temporarily while the
+    root causes of recent FPs are worked out
+
+ .../disable_size_overflow_hash.data                |     7 +-
+ .../size_overflow_plugin/size_overflow_hash.data   | 13743 +++++++++----------
+ 2 files changed, 6845 insertions(+), 6905 deletions(-)
+
+commit ea2b9616253f017edf97e4b86e82d6c89df17c4d
+Merge: e52044e cd66132
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 19 19:21:52 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit cd661322f3b91c6fd6fee4a6a5907b054a70a5f7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 19 19:14:36 2016 -0400
+
+    Update to pax-linux-4.6.4-test15.patch:
+    - updated the size overflow hash table from grsecurity
+    - fixed a few size overflow false positives in the tcp timestamp code, reported by Toralf FÃ¶rster and debrouxl (https://forums.grsecurity.net/viewtopic.php?f=3&t=4514)
+
+ .../disable_size_overflow_hash.data                |   7 +-
+ .../size_overflow_plugin/size_overflow_hash.data   | 850 +++++++++++++++++----
+ 2 files changed, 694 insertions(+), 163 deletions(-)
+
 commit e52044e34a92f944b99e9219147617dc7449a675
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jul 18 21:25:15 2016 -0400
