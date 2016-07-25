@@ -1,3 +1,58 @@
+commit d1085b0354e32d2b030ca38bf0fa854129b6f381
+Merge: 59774b1 48edba8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 24 19:36:43 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 48edba86de9569aef6faad21075b501c5023a66f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 24 19:34:05 2016 -0400
+
+    Update to pax-linux-4.6.4-test16.patch:
+    - limited prefaulting in access_ok to 256 pages to reduce its performance impact, reported by Matthew Stapleton (https://bugs.gentoo.org/show_bug.cgi?id=589046)
+    - reverted back to the old size overflow hash table until Emese tames the data flow analysis a bit
+    - fixed the constify plugin to properly build the type for pointers to deconstified structs
+
+ arch/x86/include/asm/uaccess.h                     |     2 +-
+ arch/x86/kernel/kgdb.c                             |     4 +-
+ scripts/gcc-plugins/constify_plugin.c              |     9 +-
+ .../disable_size_overflow_hash.data                |     7 +-
+ .../size_overflow_plugin/size_overflow_hash.data   | 13545 +++++++++----------
+ 5 files changed, 6580 insertions(+), 6987 deletions(-)
+
+commit 59774b19cbe7ea87915d659d4711c830ce360e36
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 23 18:47:31 2016 -0400
+
+    Allow 'perf' to be used as a privileged user by making the default
+    kptr_restrict setting 1 with HIDESYM (rather than the previous 2).
+    To prevent abuse from loggers (like the adb case) add CAP_SYS_ADMIN
+    to the kptr_restrict=1 case.  It can always be set to 2 if the user
+    wishes.
+
+ kernel/sysctl.c | 2 +-
+ lib/vsprintf.c  | 5 ++++-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+commit 191fac3a4900d3e033969952d99b79cfa2525f30
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 23 14:56:39 2016 -0400
+
+    Force OABI_COMPAT off, it's full of privesc vulns
+
+ arch/arm/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 4a983bdd1886eb2068c3fccd0d95358ff3b3eee1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 23 10:44:43 2016 -0400
+
+    Stop logging RLIMIT_NICE denials, just produces log spam
+
+ grsecurity/gracl_res.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
 commit 84f2bc67492f30f06520497a9bb16c0a2e3103df
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jul 19 20:13:30 2016 -0400
