@@ -1,3 +1,43 @@
+commit 0e2289fa07be544a2f72d3eebd1d2c76e435f5c5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 27 20:30:01 2016 -0400
+
+    Update size_overflow hash table
+
+ scripts/gcc-plugins/size_overflow_plugin/size_overflow_hash.data | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 50d051c5af8ea45fc8465ccbfda3530e95d2b97a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 27 20:14:26 2016 -0400
+
+    Update size_overflow hash table
+
+ scripts/gcc-plugins/size_overflow_plugin/size_overflow_hash.data | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit aff6427a6baa489e210f6951f90bf29c4bf7a5f6
+Merge: d1085b0 8f83873
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 27 19:53:16 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8f838734fe795a77eef1807e804b8bbae857201f
+Merge: 48edba8 bed4c61
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 27 19:40:39 2016 -0400
+
+    Update to pax-linux-4.6.5-test18.patch:
+    - fixed a few non-refcount atomic uses found by static analysis
+    - plugins no longer export symbols except for those required by gcc
+    - moved a few instrumentation passes after other analysis passes to prevent interference
+    - got rid of the use of paravirt_enabled on amd64 which is gone in 4.7 anyway
+    - repurposed the unusued skip_heap_stack_gap to simplify the unmapped area lookup code
+    - fixed a few compile warnings related to constification and function type fixes
+    
+    Merge branch 'linux-4.6.y' into pax-test
+
 commit d1085b0354e32d2b030ca38bf0fa854129b6f381
 Merge: 59774b1 48edba8
 Author: Brad Spengler <spender@grsecurity.net>
