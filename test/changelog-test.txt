@@ -1,3 +1,32 @@
+commit b2d3123595e9bd771c1292b03b82e47127b416c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 31 21:40:39 2016 -0400
+
+    ARM compile fixes
+
+ arch/arm/include/asm/atomic.h     | 40 +++++++++++++++++++++++++--------------
+ arch/arm/include/asm/domain.h     |  1 +
+ include/asm-generic/atomic-long.h |  2 ++
+ include/asm-generic/atomic64.h    |  1 +
+ include/linux/atomic.h            | 23 ++++++++++++++++++++++
+ 5 files changed, 53 insertions(+), 14 deletions(-)
+
+commit 439d240094e132ce7455a12267340a15ff45a6bf
+Author: Scott Bauer <sbauer@plzdonthack.me>
+Date:   Wed Jul 27 19:11:29 2016 -0600
+
+    vfs: ioctl: prevent double-fetch in dedupe ioctl
+    
+    This prevents a double-fetch from user space that can lead to to an
+    undersized allocation and heap overflow.
+    
+    Fixes: 54dbc1517237 ("vfs: hoist the btrfs deduplication ioctl to the vfs")
+    Signed-off-by: Scott Bauer <sbauer@plzdonthack.me>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/ioctl.c | 1 +
+ 1 file changed, 1 insertion(+)
+
 commit 0e2289fa07be544a2f72d3eebd1d2c76e435f5c5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jul 27 20:30:01 2016 -0400
