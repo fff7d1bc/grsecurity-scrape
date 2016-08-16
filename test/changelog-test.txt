@@ -1,3 +1,25 @@
+commit a144f0f806ea8a109483a945d2e92474b57ef03c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 15 17:54:00 2016 -0400
+
+    Temporary workaround for cloned functions in the initify plugin, prevents
+    an ICE-from-assertion reported by xeaforz and gg on IRC
+
+ scripts/gcc-plugins/initify_plugin.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit f68bc3565a314bea45c58a9ee0c025fad19af76d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 15 17:50:24 2016 -0400
+
+    Fix arm/ppc compilation, reported by Wizzup
+
+ arch/arm/include/asm/atomic.h     | 2 +-
+ arch/powerpc/include/asm/atomic.h | 2 +-
+ include/asm-generic/atomic-long.h | 3 ++-
+ include/linux/atomic.h            | 4 ++++
+ 4 files changed, 8 insertions(+), 3 deletions(-)
+
 commit 30f09e2a7b1590febfb028aad55f3e4b74d92c87
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Aug 13 12:28:25 2016 -0400
