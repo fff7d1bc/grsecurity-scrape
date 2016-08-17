@@ -1,3 +1,26 @@
+commit 5cbf4905a069cf66895ff7a06673f8102e3faab5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 16 17:23:45 2016 -0400
+
+    forward-port !PAX_ASLR change
+
+ arch/x86/mm/mmap.c | 16 +++-------------
+ 1 file changed, 3 insertions(+), 13 deletions(-)
+
+commit c7d89a55e70af76005662d4a4c9c7db3a4cb7998
+Merge: a144f0f8 7be9261
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 16 17:14:06 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7be92610b9cff4e90a4f84a385086c5f643004a0
+Merge: cb11f67 95f15f5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 16 17:13:54 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
 commit a144f0f806ea8a109483a945d2e92474b57ef03c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Aug 15 17:54:00 2016 -0400
