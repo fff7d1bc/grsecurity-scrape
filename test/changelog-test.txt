@@ -1,3 +1,91 @@
+commit b84727ffa19c4ec06a04502219f8e15b6887d401
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 31 20:22:42 2016 -0400
+
+    Use the correct branch prediction
+
+ arch/x86/include/asm/uaccess.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit a8411c5faefe2708a5998f484ed6ca65c9ccf971
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon Aug 22 16:41:46 2016 -0700
+
+    binfmt_elf: switch to new creds when switching to new mm
+    
+    We used to delay switching to the new credentials until after we had
+    mapped the executable (and possible elf interpreter).  That was kind of
+    odd to begin with, since the new executable will actually then _run_
+    with the new creds, but whatever.
+    
+    The bigger problem was that we also want to make sure that we turn off
+    prof events and tracing before we start mapping the new executable
+    state.  So while this is a cleanup, it's also a fix for a possible
+    information leak.
+    
+    Reported-by: Robert Święcki <robert@swiecki.net>
+    Tested-by: Peter Zijlstra <peterz@infradead.org>
+    Acked-by: David Howells <dhowells@redhat.com>
+    Acked-by: Oleg Nesterov <oleg@redhat.com>
+    Acked-by: Andy Lutomirski <luto@amacapital.net>
+    Acked-by: Eric W. Biederman <ebiederm@xmission.com>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Cc: Kees Cook <keescook@chromium.org>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/binfmt_elf.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 18fe03a1a1ce3b59208ecc7bb90be5724ec1d1aa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 31 20:01:48 2016 -0400
+
+    Two USERCOPY fixes from Mathias Krause
+
+ net/iucv/af_iucv.c       | 7 +++----
+ net/netlink/af_netlink.c | 5 +++--
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 4830a253a94494524d9ebb3bed7118c2b746f5a2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Aug 31 19:58:53 2016 -0400
+
+    From 7e13821dd59b17382bba8707c1a9b73569db5535 Mon Sep 17 00:00:00 2001
+    From: Mathias Krause <mathias.krause@secunet.com>
+    Date: Thu, 18 Aug 2016 17:03:19 +0200
+    Subject: [PATCH] [pax] fix page frame number compare in static_protections()
+    
+    The KERNEXEC specific memory range check is comparing a page frame
+    number against physical addresses while it should compare page frame
+    numbers instead.
+    
+    This leads to "false positives" for systems with 64GB+ of RAM, leading
+    to missing memory protection changes, leading various access errors,
+    like failing to release module init code when using the RCU path in
+    vunmap().
+    
+    Fix this by converting the physical addresses to page frame numbers
+    before doing the range check.
+    
+    Signed-off-by: Mathias Krause <mathias.krause@secunet.com>
+
+ arch/x86/mm/pageattr.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 8cd264e31562d39c034c35256dcb4eff8ab2fc66
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 18 17:57:25 2016 -0400
+
+    Remove a warning that is (under the specific instance where we triggered it)
+    erroneous.  Avoiding triggering the warning will require reworking some of
+    our APIs, so this will be fixed at a later time.
+    
+    Thanks to Ed Swierk of Skyport Systems for the report.
+
+ fs/dcache.c | 2 --
+ 1 file changed, 2 deletions(-)
+
 commit 7276656b983ed5e39010c54908005e0574a2d3fd
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Aug 21 17:36:48 2016 -0400
