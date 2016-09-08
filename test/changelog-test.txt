@@ -1,3 +1,76 @@
+commit f2ceab4fbaec0cd5c127345dbce3e033b74fe826
+Author: WANG Cong <xiyou.wangcong@gmail.com>
+Date:   Sun Aug 28 21:28:26 2016 -0700
+
+    kcm: fix a socket double free
+    
+    Dmitry reported a double free on kcm socket, which could
+    be easily reproduced by:
+    
+    	#include <unistd.h>
+    	#include <sys/syscall.h>
+    
+    	int main()
+    	{
+    	  int fd = syscall(SYS_socket, 0x29ul, 0x5ul, 0x0ul, 0, 0, 0);
+    	  syscall(SYS_ioctl, fd, 0x89e2ul, 0x20a98000ul, 0, 0, 0);
+    	  return 0;
+    	}
+    
+    This is because on the error path, after we install
+    the new socket file, we call sock_release() to clean
+    up the socket, which leaves the fd pointing to a freed
+    socket. Fix this by calling sys_close() on that fd
+    directly.
+    
+    Fixes: ab7ac4eb9832 ("kcm: Kernel Connection Multiplexor module")
+    Reported-by: Dmitry Vyukov <dvyukov@google.com>
+    Cc: Tom Herbert <tom@herbertland.com>
+    Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/kcm/kcmsock.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+commit f3ddf560233f0ec26493522fc1c2b1b8f764f16e
+Merge: 9e43620 168b0e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 7 08:26:50 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 168b0e38caaf436f7c5345fe20a92b7f391ccad5
+Merge: 2a27d24 d7f6728
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 7 08:26:41 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
+commit 9e43620d71b42e65cb12642b240a6e638531aa65
+Author: Daeho Jeong <daeho.jeong@samsung.com>
+Date:   Sun Jul 3 17:51:39 2016 -0400
+
+    ext4: avoid modifying checksum fields directly during checksum verification
+    
+    We temporally change checksum fields in buffers of some types of
+    metadata into '0' for verifying the checksum values. By doing this
+    without locking the buffer, some metadata's checksums, which are
+    being committed or written back to the storage, could be damaged.
+    In our test, several metadata blocks were found with damaged metadata
+    checksum value during recovery process. When we only verify the
+    checksum value, we have to avoid modifying checksum fields directly.
+    
+    Signed-off-by: Daeho Jeong <daeho.jeong@samsung.com>
+    Signed-off-by: Youngjin Gil <youngjin.gil@samsung.com>
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+    Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+ fs/ext4/inode.c | 38 ++++++++++++++++++++++----------------
+ fs/ext4/namei.c |  9 ++++-----
+ fs/ext4/super.c | 18 +++++++++---------
+ fs/ext4/xattr.c | 13 +++++++------
+ 4 files changed, 42 insertions(+), 36 deletions(-)
+
 commit b84727ffa19c4ec06a04502219f8e15b6887d401
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Aug 31 20:22:42 2016 -0400
