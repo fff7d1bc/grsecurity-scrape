@@ -1,3 +1,163 @@
+commit 01ca858fb54c3406db13ace327798610b1cdec10
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 21:28:25 2016 -0400
+
+    compile fixes
+
+ arch/x86/crypto/crc32-pclmul_asm.S | 4 ++--
+ arch/x86/include/asm/uaccess.h     | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit aeed418bbabf465cfa2bd5463b4ee26ddfdee99c
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Thu Sep 15 02:35:29 2016 +0100
+
+    fix minor infoleak in get_user_ex()
+    
+    get_user_ex(x, ptr) should zero x on failure.  It's not a lot of a leak
+    (at most we are leaking uninitialized 64bit value off the kernel stack,
+    and in a fairly constrained situation, at that), but the fix is trivial,
+    so...
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    [ This sat in different branch from the uaccess fixes since mid-August ]
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/x86/include/asm/uaccess.h | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+commit 4ec72305c579df587c9c31f18fbc3ceba14045a5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 20:02:01 2016 -0400
+
+    compile fix
+
+ fs/proc/task_mmu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ed3d3716625f0c04c9a07dc6c6c7537be22cee07
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 20:01:31 2016 -0400
+
+    Resync with PaX
+
+ fs/proc/task_mmu.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 36300fe10dd78430f8e84c42b665c0154f88dd5a
+Merge: 14e5235 4552781
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 18:36:02 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 4552781643cf8a01376539bf0bf469c8dbc69701
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 18:35:49 2016 -0400
+
+    Resync with PaX
+
+ fs/proc/task_mmu.c   | 5 +++--
+ include/linux/init.h | 4 +++-
+ include/linux/mm.h   | 2 +-
+ mm/util.c            | 2 +-
+ 4 files changed, 8 insertions(+), 5 deletions(-)
+
+commit 14e523564a0a84ece93b04a2b375f33cce806c8b
+Merge: 402a024 6740d15
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 18:18:19 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6740d1535fb0208f329eda7aeeee2c6f0fbe09d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 18:16:18 2016 -0400
+
+    Update to pax-linux-4.7.3-test4.patch:
+    - fixed atomic_xchg_unchecked on arm, reported by wizzup
+    - temporary workaround for cloned functions in the initify plugin, prevents an ICE-from-assertion reported by xeaforz and gg
+    - fixed hugetlb compile error on arm64
+    - fixed branch prediction hints in copy*user on x86, by spender
+    - fixed the invocation of gcc-plugin.sh while reporting errors, by spender
+    - fixed long-standing regression in non-exec page support on powerpc32/book3s
+    - fixed inefficient PIC in crc32_pclmul* on i386 to also work under KERNEXEC, reported by minipli
+    - fixed pfn/physical address mixup in static_protections on amd64, by Mathias Krause <mathias.krause@secunet.com>
+    - fixed latent bug on module loading exposed by the fix for static_protections, reported by minipli
+    - fixed two USERCOPY violations in iucv and netlink, by Mathias Krause <minipli@ld-linux.so>
+    - fixed a xen boot regression with ssp-strong, reported by biergaizi and d-u (https://forums.grsecurity.net/viewtopic.php?f=3&t=4441)
+    - fixed module symbol resolution and extable handling on i386/KERNEXEC when KASLR is enabled
+
+ arch/arm/include/asm/atomic.h                | 12 +++--------
+ arch/arm/include/asm/cmpxchg.h               |  3 ++-
+ arch/arm64/mm/dma-mapping.c                  |  2 +-
+ arch/mips/cavium-octeon/dma-octeon.c         |  2 +-
+ arch/powerpc/include/asm/book3s/32/hash.h    |  2 +-
+ arch/powerpc/include/asm/book3s/32/pgtable.h |  2 +-
+ arch/powerpc/include/asm/pte-common.h        | 30 +++++++++++++---------------
+ arch/x86/crypto/crc32-pclmul_asm.S           | 19 +++++++++++-------
+ arch/x86/include/asm/setup.h                 |  3 ++-
+ arch/x86/include/asm/uaccess.h               |  4 ++--
+ arch/x86/kernel/module.c                     |  2 +-
+ arch/x86/kernel/pci-swiotlb.c                |  2 +-
+ arch/x86/kvm/x86.c                           |  2 +-
+ arch/x86/mm/extable.c                        | 18 ++---------------
+ arch/x86/mm/pageattr.c                       |  5 +++--
+ arch/x86/xen/enlighten.c                     | 18 ++++++++---------
+ arch/x86/xen/pmu.c                           |  1 +
+ include/asm-generic/atomic-long.h            |  2 ++
+ include/asm-generic/atomic64.h               |  1 +
+ include/linux/atomic.h                       |  4 ++++
+ include/linux/llist.h                        |  9 +++++++++
+ include/linux/swiotlb.h                      |  3 +--
+ kernel/extable.c                             | 17 ++++++++++++++--
+ kernel/module.c                              |  9 ++++++++-
+ lib/extable.c                                | 11 +---------
+ lib/llist.c                                  | 17 ++++++++++++++++
+ lib/swiotlb.c                                |  2 +-
+ mm/hugetlb.c                                 | 12 +++++++++++
+ mm/vmalloc.c                                 |  2 +-
+ net/iucv/af_iucv.c                           |  7 +++----
+ net/netlink/af_netlink.c                     |  5 +++--
+ scripts/Makefile.gcc-plugins                 |  2 +-
+ scripts/gcc-plugins/initify_plugin.c         |  4 +++-
+ 33 files changed, 139 insertions(+), 95 deletions(-)
+
+commit 402a02454512e83be868e83529b04c0ccde687a9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 08:25:18 2016 -0400
+
+    Update size_overflow hash
+
+ scripts/gcc-plugins/size_overflow_plugin/size_overflow_hash.data | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit e1d3996c7486a0985846423711dd5c05401144c1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 07:48:33 2016 -0400
+
+    compile fix
+
+ kernel/capability.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+commit a668b9edff65c3c2eb134e1c7edfbc4142f1e678
+Merge: f2ceab4 4f9be5c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 07:24:15 2016 -0400
+
+    Rename our existing ns_capable_nolog to suit upstream's bikeshedded ns_capable_noaudit
+    
+    Merge branch 'pax-test' into grsec-test
+
+commit 4f9be5c8326f08df59ef7df521acac91e9e6c3d5
+Merge: 168b0e3 bd333da
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 15 07:12:12 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
 commit f2ceab4fbaec0cd5c127345dbce3e033b74fe826
 Author: WANG Cong <xiyou.wangcong@gmail.com>
 Date:   Sun Aug 28 21:28:26 2016 -0700
