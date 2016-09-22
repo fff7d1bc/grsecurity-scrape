@@ -1,3 +1,146 @@
+commit 16919c7208e7ad9bc5f6df2f151b84cede110c15
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 21 18:40:32 2016 -0400
+
+    compile fix
+
+ drivers/net/tun.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit bafd12998265ed2c32792e117e4227f757cfa18f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 21 18:39:39 2016 -0400
+
+    From: Mathias Krause <mathias.krause@secunet.com>
+    Date: Wed, 21 Sep 2016 14:42:43 +0200
+    Subject: [PATCH] pax: net/tun - explicitly test for negative values in tun_set_headroom()
+    
+    Because of a type change for the NET_SKB_PAD macro in the PaX patch from
+    (implicit) int to unsigned long, negative values for new_hr will be sign
+    extended and wrongly pass the minimal size test. Such a value will,
+    later on, trigger the size_overflow plugin instrumentation in
+    tun_get_user().
+    
+    Fix this by testing new_hr for negative values explicitly to restore the
+    intended minimal size test.
+    
+    Signed-off-by: Mathias Krause <mathias.krause@secunet.com>
+
+ drivers/net/tun.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 74fbeac25af78b5f621d8acffb9158dd959078d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Sep 20 18:37:08 2016 -0400
+
+    Make CONSTIFY depend on GCC_PLUGINS
+
+ security/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit e9e87520569e66d710dadebddac33428c666249a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 19 18:43:50 2016 -0400
+
+    Fix up atomic64_cmpxchg_unchecked on ARM with REFCOUNT
+
+ arch/arm/include/asm/atomic.h | 39 ++++-----------------------------------
+ include/linux/atomic.h        |  9 +++++++++
+ 2 files changed, 13 insertions(+), 35 deletions(-)
+
+commit a1afe597f5731963416233b274144d7c57ce538d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 19 17:58:58 2016 -0400
+
+    Backport upstream iscsi memory corruption fix:
+    http://marc.info/?l=linux-scsi&m=147394713328707&w=2
+
+ drivers/scsi/arcmsr/arcmsr_hba.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+commit e6e0b270a18e4ee19460f7dc72bb46d441adf3c4
+Author: Chuck Lever <chuck.lever@oracle.com>
+Date:   Thu Sep 1 10:50:38 2016 -0400
+
+    svcauth_gss: Revert 64c59a3726f2 ("Remove unnecessary allocation")
+    
+    rsc_lookup steals the passed-in memory to avoid doing an allocation of
+    its own, so we can't just pass in a pointer to memory that someone else
+    is using.
+    
+    If we really want to avoid allocation there then maybe we should
+    preallocate somwhere, or reference count these handles.
+    
+    For now we should revert.
+    
+    On occasion I see this on my server:
+    
+    kernel: kernel BUG at /home/cel/src/linux/linux-2.6/mm/slub.c:3851!
+    kernel: invalid opcode: 0000 [#1] SMP
+    kernel: Modules linked in: cts rpcsec_gss_krb5 sb_edac edac_core x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel kvm irqbypass crct10dif_pclmul crc32_pclmul ghash_clmulni_intel aesni_intel lrw gf128mul glue_helper ablk_helper cryptd btrfs xor iTCO_wdt iTCO_vendor_support raid6_pq pcspkr i2c_i801 i2c_smbus lpc_ich mfd_core mei_me sg mei shpchp wmi ioatdma ipmi_si ipmi_msghandler acpi_pad acpi_power_meter rpcrdma ib_ipoib rdma_ucm ib_ucm ib_uverbs ib_umad rdma_cm ib_cm iw_cm nfsd nfs_acl lockd grace auth_rpcgss sunrpc ip_tables xfs libcrc32c mlx4_ib mlx4_en ib_core sr_mod cdrom sd_mod ast drm_kms_helper syscopyarea sysfillrect sysimgblt fb_sys_fops ttm drm crc32c_intel igb mlx4_core ahci libahci libata ptp pps_core dca i2c_algo_bit i2c_core dm_mirror dm_region_hash dm_log dm_mod
+    kernel: CPU: 7 PID: 145 Comm: kworker/7:2 Not tainted 4.8.0-rc4-00006-g9d06b0b #15
+    kernel: Hardware name: Supermicro Super Server/X10SRL-F, BIOS 1.0c 09/09/2015
+    kernel: Workqueue: events do_cache_clean [sunrpc]
+    kernel: task: ffff8808541d8000 task.stack: ffff880854344000
+    kernel: RIP: 0010:[<ffffffff811e7075>]  [<ffffffff811e7075>] kfree+0x155/0x180
+    kernel: RSP: 0018:ffff880854347d70  EFLAGS: 00010246
+    kernel: RAX: ffffea0020fe7660 RBX: ffff88083f9db064 RCX: 146ff0f9d5ec5600
+    kernel: RDX: 000077ff80000000 RSI: ffff880853f01500 RDI: ffff88083f9db064
+    kernel: RBP: ffff880854347d88 R08: ffff8808594ee000 R09: ffff88087fdd8780
+    kernel: R10: 0000000000000000 R11: ffffea0020fe76c0 R12: ffff880853f01500
+    kernel: R13: ffffffffa013cf76 R14: ffffffffa013cff0 R15: ffffffffa04253a0
+    kernel: FS:  0000000000000000(0000) GS:ffff88087fdc0000(0000) knlGS:0000000000000000
+    kernel: CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+    kernel: CR2: 00007fed60b020c3 CR3: 0000000001c06000 CR4: 00000000001406e0
+    kernel: Stack:
+    kernel: ffff8808589f2f00 ffff880853f01500 0000000000000001 ffff880854347da0
+    kernel: ffffffffa013cf76 ffff8808589f2f00 ffff880854347db8 ffffffffa013d006
+    kernel: ffff8808589f2f20 ffff880854347e00 ffffffffa0406f60 0000000057c7044f
+    kernel: Call Trace:
+    kernel: [<ffffffffa013cf76>] rsc_free+0x16/0x90 [auth_rpcgss]
+    kernel: [<ffffffffa013d006>] rsc_put+0x16/0x30 [auth_rpcgss]
+    kernel: [<ffffffffa0406f60>] cache_clean+0x2e0/0x300 [sunrpc]
+    kernel: [<ffffffffa04073ee>] do_cache_clean+0xe/0x70 [sunrpc]
+    kernel: [<ffffffff8109a70f>] process_one_work+0x1ff/0x3b0
+    kernel: [<ffffffff8109b15c>] worker_thread+0x2bc/0x4a0
+    kernel: [<ffffffff8109aea0>] ? rescuer_thread+0x3a0/0x3a0
+    kernel: [<ffffffff810a0ba4>] kthread+0xe4/0xf0
+    kernel: [<ffffffff8169c47f>] ret_from_fork+0x1f/0x40
+    kernel: [<ffffffff810a0ac0>] ? kthread_stop+0x110/0x110
+    kernel: Code: f7 ff ff eb 3b 65 8b 05 da 30 e2 7e 89 c0 48 0f a3 05 a0 38 b8 00 0f 92 c0 84 c0 0f 85 d1 fe ff ff 0f 1f 44 00 00 e9 f5 fe ff ff <0f> 0b 49 8b 03 31 f6 f6 c4 40 0f 85 62 ff ff ff e9 61 ff ff ff
+    kernel: RIP  [<ffffffff811e7075>] kfree+0x155/0x180
+    kernel: RSP <ffff880854347d70>
+    kernel: ---[ end trace 3fdec044969def26 ]---
+    
+    It seems to be most common after a server reboot where a client has been
+    using a Kerberos mount, and reconnects to continue its workload.
+    
+    Signed-off-by: Chuck Lever <chuck.lever@oracle.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: J. Bruce Fields <bfields@redhat.com>
+
+ net/sunrpc/auth_gss/svcauth_gss.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit 6e83144022a8e3cd00a7d0ca3916354ea3336f5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 19 17:44:04 2016 -0400
+
+    fix whitespace
+
+ mm/mmap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit ffb1a4cfdce65f581265612878fd136d76b132ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 19 17:07:34 2016 -0400
+
+    Remove optional dependency on USERCOPY for pax_check_alloca
+
+ arch/x86/kernel/dumpstack_32.c | 2 +-
+ arch/x86/kernel/dumpstack_64.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
 commit 01ca858fb54c3406db13ace327798610b1cdec10
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Sep 15 21:28:25 2016 -0400
