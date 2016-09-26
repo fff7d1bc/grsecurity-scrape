@@ -1,3 +1,66 @@
+commit 39d7aa87f8bd225bc3ac099a2046e334191c90b3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 26 11:28:09 2016 -0400
+
+    Backport upstream commit which allows PAX_MEMORY_SANITIZE to work
+    with hibernation:
+    https://patchwork.kernel.org/patch/9322709/
+
+ kernel/power/Kconfig     |  1 -
+ kernel/power/hibernate.c |  4 +++-
+ kernel/power/power.h     |  2 ++
+ kernel/power/snapshot.c  | 20 ++++++++++++++++++++
+ 4 files changed, 25 insertions(+), 2 deletions(-)
+
+commit e5944827e8a1cb6938ed75cccf05f354344b3fa9
+Author: Herbert Xu <herbert@gondor.apana.org.au>
+Date:   Tue Sep 20 20:35:55 2016 +0800
+
+    KEYS: Fix skcipher IV clobbering
+    
+    The IV must not be modified by the skcipher operation so we need
+    to duplicate it.
+    
+    Fixes: c3917fd9dfbc ("KEYS: Use skcipher")
+    Cc: stable@vger.kernel.org
+    Reported-by: Mimi Zohar <zohar@linux.vnet.ibm.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ security/keys/encrypted-keys/encrypted.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+commit 17d91a9781b8c4558433cee3e7de8d44a6c2d89b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 25 18:10:01 2016 -0400
+
+    Make vti_notifier_block read_only
+
+ net/ipv4/ip_vti.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d2eba293dd946c7686080602a2e24ddb5358cfcf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 25 17:30:32 2016 -0400
+
+    compile fix
+
+ net/unix/af_unix.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 47cca6342f665fa1b4b755723b843ac41ebb9178
+Merge: 16919c7 674c5b2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 25 17:25:45 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 674c5b28e7dfe651caf71d1cdec395205ed9f526
+Merge: 4552781 6c21842
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 25 17:24:44 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
 commit 16919c7208e7ad9bc5f6df2f151b84cede110c15
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Sep 21 18:40:32 2016 -0400
