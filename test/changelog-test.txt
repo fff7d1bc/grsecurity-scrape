@@ -1,3 +1,27 @@
+commit b48dade7b67aa153367dc38d6f3b513b93da2b07
+Merge: 14d3459 a16b512
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 30 07:56:46 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a16b51212ca70e45554cecf7d3b67335d4c847ff
+Merge: 674c5b2 f849d45
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Sep 30 07:56:04 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
+commit 14d3459a64f15c168c7783d46f690c0ee1283ef2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Sep 27 17:07:31 2016 -0400
+
+    Fix arm/MULTI_CACHE incompatibility with RANDSTRUCT, reported by radegand:
+    https://forums.grsecurity.net/viewtopic.php?t=4545&p=1659
+
+ arch/arm/include/asm/cacheflush.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 39d7aa87f8bd225bc3ac099a2046e334191c90b3
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Sep 26 11:28:09 2016 -0400
