@@ -1,3 +1,222 @@
+commit 37e00aa150c7861f77e69fe361bf19dee467dc0a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 10 18:27:38 2016 -0400
+
+    RAP compile fix
+
+ drivers/isdn/hisax/config.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 00736455939143023205fdd8957421c73868e975
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 10 18:09:55 2016 -0400
+
+    Mark initify broken for the time being due to some recent changes
+
+ security/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 64458bae539de9ac5cd2ba7cad0bd0c0510e6f37
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 10 17:11:40 2016 -0400
+
+    compile fix
+
+ scripts/gcc-plugins/size_overflow_plugin/size_overflow_plugin_hash.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 9f5f1d1d7f120c1c85b16412e6b75ab221c2cdba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 10 17:10:22 2016 -0400
+
+    Fix makefiles and .gitignore for new size_overflow plugin
+
+ Makefile                                           |  7 +-
+ .../gcc-plugins/size_overflow_plugin/.gitignore    |  5 +-
+ scripts/gcc-plugins/size_overflow_plugin/Makefile  | 35 ++++++--
+ scripts/gcc-plugins/size_overflow_plugin/aux.data  | 97 ----------------------
+ .../gcc-plugins/size_overflow_plugin/e_aux.data    | 97 ++++++++++++++++++++++
+ 5 files changed, 128 insertions(+), 113 deletions(-)
+
+commit cb66e251f9c9880a1365c87b4a42d2885a2fb6ef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 9 09:28:14 2016 -0400
+
+    Enable PAX_SIZE_OVERFLOW_EXTRA by default in auto-config
+
+ security/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit cd690739e0fb999002075161a032072cf4e4c458
+Merge: 555de68 0e7a060
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 8 18:29:48 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0e7a060de797ec4e837533146d38e8793e30f84f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 8 18:01:07 2016 -0400
+
+    Update to pax-linux-4.7.6-test6.patch:
+    - updated the fields hash table of the size overflow plugin to remove a few false positives
+    - fixed SANITIZE/HIBERNATION incompatibility, by Anisse Astier <anisse@astier.eu>
+    - backported a few fixes and cleanups from grsecurity
+      - fixed compile errors on some arm/arm64/powerpc/sparc configs for REFCOUNT, KERNEXEC and CONSTIFY
+      - worked around a compile regression in crc32-pclmul_asm.S on some toolchains that define __i686
+      - updated the size overflow hash table
+      - added pax_size_overflow_report_only to disable the reaction mechanism on size overflows
+      - added a few preemptive buffer size checks
+    - fixed integer signedness mixup in tun_set_headroom, by Mathias Krause <mathias.krause@secunet.com>
+    - Emese changed the size overflow plugin to enable the more risky instrumentation under its own config option
+    - Emese greatly increased the coverage of the initify plugin
+    - added BROKEN_SECURITY to disable upstream features as necessary
+
+ Documentation/dontdiff                             |     7 +-
+ Documentation/kernel-parameters.txt                |     5 +
+ arch/arm/include/asm/atomic.h                      |    41 +-
+ arch/arm/include/asm/domain.h                      |     1 +
+ arch/arm/include/asm/string.h                      |     6 +-
+ arch/arm/kernel/efi.c                              |     4 +-
+ arch/arm/mach-mvebu/coherency.c                    |     2 +-
+ arch/arm/mm/alignment.c                            |    24 +-
+ arch/arm64/Kconfig                                 |     1 +
+ arch/arm64/include/asm/atomic.h                    |     3 +
+ arch/arm64/include/asm/cache.h                     |     4 +-
+ arch/arm64/include/asm/pgalloc.h                   |     5 +
+ arch/arm64/include/asm/pgtable.h                   |     3 +
+ arch/arm64/include/asm/string.h                    |    10 +-
+ arch/arm64/kernel/process.c                        |     9 +-
+ arch/arm64/kernel/stacktrace.c                     |     4 +-
+ arch/arm64/kernel/traps.c                          |     2 +-
+ arch/ia64/include/asm/uaccess.h                    |    11 +-
+ arch/mips/Kconfig                                  |     2 +-
+ arch/parisc/include/asm/uaccess.h                  |   108 +-
+ arch/powerpc/include/asm/atomic.h                  |    23 +-
+ arch/powerpc/include/asm/cache.h                   |     4 +-
+ arch/powerpc/include/asm/spinlock.h                |     1 +
+ arch/powerpc/include/asm/string.h                  |     4 +-
+ arch/powerpc/include/asm/uaccess.h                 |    15 -
+ arch/powerpc/kernel/traps.c                        |     2 +-
+ arch/sparc/include/asm/cache.h                     |     4 +-
+ arch/sparc/include/asm/pgalloc_64.h                |     1 +
+ arch/sparc/include/asm/uaccess_32.h                |    65 -
+ arch/um/include/asm/cache.h                        |     3 +-
+ arch/x86/Kconfig                                   |     5 +-
+ arch/x86/crypto/crc32-pclmul_asm.S                 |     4 +-
+ arch/x86/include/asm/string_32.h                   |    12 +-
+ arch/x86/include/asm/string_64.h                   |     4 +-
+ arch/x86/include/asm/uaccess.h                     |     2 +-
+ arch/x86/kernel/hpet.c                             |     2 +-
+ arch/x86/kernel/kprobes/opt.c                      |     8 +-
+ arch/x86/kernel/ptrace.c                           |    14 +
+ arch/x86/kernel/signal.c                           |     9 +-
+ arch/x86/lib/Makefile                              |     4 +
+ arch/x86/platform/efi/efi_64.c                     |     2 +-
+ drivers/acpi/acpica/acutils.h                      |     2 +-
+ drivers/acpi/acpica/dbhistry.c                     |     2 +-
+ drivers/acpi/acpica/dbinput.c                      |    10 +-
+ drivers/acpi/acpica/dbstats.c                      |    88 +-
+ drivers/acpi/acpica/utdebug.c                      |     2 +-
+ drivers/cdrom/cdrom.c                              |     2 +-
+ drivers/char/genrtc.c                              |     1 +
+ drivers/char/random.c                              |     2 +-
+ drivers/firmware/efi/libstub/Makefile              |     2 +
+ drivers/gpu/drm/gma500/mdfld_dsi_dpi.c             |     7 +-
+ drivers/hid/hid-wiimote-debug.c                    |     2 +-
+ drivers/iommu/arm-smmu-v3.c                        |    32 +-
+ drivers/isdn/hisax/hisax.h                         |     4 +-
+ drivers/media/radio/radio-cadet.c                  |     5 +-
+ drivers/mmc/host/tmio_mmc_pio.c                    |     4 +-
+ drivers/net/tun.c                                  |     2 +-
+ drivers/net/wireless/zydas/zd1211rw/zd_usb.c       |     2 +-
+ drivers/scsi/esas2r/esas2r_init.c                  |     2 +-
+ drivers/scsi/esas2r/esas2r_ioctl.c                 |     2 +-
+ drivers/scsi/esas2r/esas2r_log.h                   |     4 +-
+ drivers/scsi/esas2r/esas2r_main.c                  |     4 +-
+ drivers/uio/uio.c                                  |     6 +-
+ drivers/video/fbdev/arcfb.c                        |     2 +-
+ fs/char_dev.c                                      |     2 +-
+ fs/exec.c                                          |    16 +-
+ fs/ext4/extents.c                                  |     2 +-
+ fs/nfsd/nfscache.c                                 |     2 +-
+ fs/ntfs/debug.h                                    |     6 +-
+ fs/ocfs2/cluster/masklog.h                         |     2 +-
+ fs/proc/task_mmu.c                                 |     5 +-
+ include/acpi/acpiosxf.h                            |     3 +-
+ include/acpi/acpixf.h                              |     2 +-
+ include/asm-generic/atomic-long.h                  |     4 +
+ include/asm-generic/bug.h                          |     5 +-
+ include/asm-generic/pgtable-nopmd.h                |     1 +
+ include/asm-generic/vmlinux.lds.h                  |     2 +
+ include/drm/drmP.h                                 |     2 +-
+ include/linux/atomic.h                             |    21 +
+ include/linux/audit.h                              |     5 +-
+ include/linux/compiler-gcc.h                       |    15 +
+ include/linux/compiler.h                           |     8 +
+ include/linux/fs.h                                 |     2 +-
+ include/linux/gfp.h                                |     4 +-
+ include/linux/init.h                               |     4 +-
+ include/linux/mm.h                                 |     2 +-
+ include/linux/printk.h                             |     2 +-
+ include/linux/random.h                             |     2 +-
+ include/linux/ratelimit.h                          |     3 +-
+ include/linux/sched.h                              |     6 +-
+ include/linux/slab.h                               |     2 +-
+ include/linux/string.h                             |    34 +-
+ include/uapi/linux/personality.h                   |     1 +
+ init/Kconfig                                       |     3 +
+ init/main.c                                        |    11 +
+ kernel/exit.c                                      |    18 +-
+ kernel/power/hibernate.c                           |    21 +-
+ kernel/power/power.h                               |     2 +
+ kernel/power/snapshot.c                            |    22 +
+ lib/Kconfig.debug                                  |     3 +-
+ lib/vsprintf.c                                     |     6 +-
+ mm/Kconfig.debug                                   |     2 -
+ mm/page_alloc.c                                    |     6 +-
+ mm/util.c                                          |     2 +-
+ net/ipv4/ip_sockglue.c                             |     3 +-
+ net/ipv4/ip_vti.c                                  |     2 +-
+ scripts/Makefile.gcc-plugins                       |    17 +-
+ scripts/gcc-plugins/initify_plugin.c               |  1588 +-
+ scripts/gcc-plugins/size_overflow_plugin/Makefile  |    26 +-
+ scripts/gcc-plugins/size_overflow_plugin/aux.data  |    97 +
+ .../gcc-plugins/size_overflow_plugin/disable.data  | 12453 +++++++++++
+ .../disable_size_overflow_hash.data                | 12445 -----------
+ .../gcc-plugins/size_overflow_plugin/e_fields.data | 18898 ++++++++++++++++
+ .../gcc-plugins/size_overflow_plugin/e_fns.data    |  4833 ++++
+ .../gcc-plugins/size_overflow_plugin/e_fptrs.data  |    56 +
+ .../gcc-plugins/size_overflow_plugin/e_vars.data   |   116 +
+ .../insert_size_overflow_asm.c                     |     2 +-
+ .../size_overflow_plugin/intentional_overflow.c    |     2 +-
+ .../size_overflow_plugin/size_overflow.h           |    14 +-
+ .../size_overflow_plugin/size_overflow_debug.c     |     4 +-
+ .../size_overflow_plugin/size_overflow_hash.data   | 22068 -------------------
+ .../size_overflow_hash_aux.data                    |    97 -
+ .../size_overflow_plugin/size_overflow_ipa.c       |    65 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    25 +-
+ .../size_overflow_plugin_hash.c                    |   120 +-
+ .../size_overflow_plugin/size_overflow_transform.c |    30 +-
+ security/Kconfig                                   |    78 +-
+ security/integrity/integrity.h                     |     2 +-
+ security/min_addr.c                                |     2 +
+ 129 files changed, 38670 insertions(+), 35263 deletions(-)
+
+commit 555de68005b90a38a9e5eee6835130d5d4291030
+Merge: b48dade c3695e4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 7 17:38:00 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c3695e458f10605aa5d59e5d16a80156c6aca5f1
+Merge: a16b512 fdf81f0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 7 17:37:31 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
 commit b48dade7b67aa153367dc38d6f3b513b93da2b07
 Merge: 14d3459 a16b512
 Author: Brad Spengler <spender@grsecurity.net>
