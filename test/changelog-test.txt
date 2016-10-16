@@ -1,3 +1,52 @@
+commit 5780e7fb9d334bfa5cc8aef32af631e620dede3f
+Merge: 7c69071 25eaf06
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 16 15:28:24 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 25eaf067f993510e5cd6cc0d9da4413cbbc12c6a
+Merge: afa87ca a0cdc25
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Oct 16 15:28:15 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
+commit 7c690715adc3d9236b25ce453b387ef9583b8dda
+Merge: 37e00aa afa87ca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 15 15:25:46 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit afa87cab2bed6b038cd5446a00bf58a71c954b43
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 15 15:18:18 2016 -0400
+
+    Update to pax-linux-4.7.6-test7.patch:
+    - backported upstream commit f5beeb1851ea6f8cfcf2657f26cb24c0582b4945 to speed up kcore handling
+    - fixed a size overflow false positive in raid10, reported by eswierk (https://forums.grsecurity.net/viewtopic.php?f=3&t=4575)
+    - fixed an integer overflow in bio handling caught by the size overflow plugin, reported by jotik (https://forums.grsecurity.net/viewtopic.php?f=3&t=4579)
+    - rate limited the logging of refcount overflows and usercopy violations
+    - changed atomic64's underlying type on i386 to be consistent with other archs
+    - sped up the RIP range check in opportunistic sysret on amd64
+
+ arch/x86/entry/entry_64.S                          | 13 ++-
+ arch/x86/include/asm/atomic64_32.h                 |  4 +-
+ block/bio.c                                        |  2 +-
+ drivers/md/raid10.c                                |  6 +-
+ drivers/usb/usbip/vudc_rx.c                        |  2 +-
+ fs/exec.c                                          | 24 ++++--
+ fs/proc/kcore.c                                    | 40 +++++----
+ include/linux/bio.h                                |  4 +-
+ scripts/gcc-plugins/size_overflow_plugin/Makefile  |  2 +-
+ scripts/gcc-plugins/size_overflow_plugin/aux.data  | 97 ----------------------
+ .../gcc-plugins/size_overflow_plugin/disable.data  | 12 ++-
+ .../gcc-plugins/size_overflow_plugin/e_aux.data    | 97 ++++++++++++++++++++++
+ .../gcc-plugins/size_overflow_plugin/e_fields.data | 14 +---
+ .../size_overflow_plugin_hash.c                    |  2 +-
+ 14 files changed, 169 insertions(+), 150 deletions(-)
+
 commit 37e00aa150c7861f77e69fe361bf19dee467dc0a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Oct 10 18:27:38 2016 -0400
