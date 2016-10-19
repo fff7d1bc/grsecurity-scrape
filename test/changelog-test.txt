@@ -1,3 +1,31 @@
+commit d291c94e650da2d8918620e6829e05218755f77b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 19 17:06:17 2016 -0400
+
+    resync with PaX
+
+ arch/arm/include/asm/atomic.h | 5 -----
+ 1 file changed, 5 deletions(-)
+
+commit 251313cb6e1d5b2ad84c62333ebafa278e861a68
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 19 17:03:14 2016 -0400
+
+    Fix bad ARM REFCOUNT merge with PaX, reported by kdave on the forums:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4588
+
+ arch/arm/include/asm/atomic.h | 1 -
+ 1 file changed, 1 deletion(-)
+
+commit b64df18d4160c6d3cd470202bb8d58f38d9acb51
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 17 07:47:53 2016 -0400
+
+    randomize layout of subprocess_info struct
+
+ include/linux/kmod.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 5780e7fb9d334bfa5cc8aef32af631e620dede3f
 Merge: 7c69071 25eaf06
 Author: Brad Spengler <spender@grsecurity.net>
