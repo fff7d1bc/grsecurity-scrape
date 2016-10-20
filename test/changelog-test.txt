@@ -1,3 +1,26 @@
+commit 7b8d5c5a1477a2b62dc7ad1c28e864d7d250739c
+Merge: ca352cc 013fc76
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 20 07:49:24 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 013fc7689892902c41d38e31057e4a5686293e40
+Merge: 25eaf06 452063d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 20 07:48:01 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
+commit ca352cccec60c85fad6dedaf229d51eddfdfea58
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Oct 20 07:06:54 2016 -0400
+
+    compile fix as reported by David Sterba
+
+ include/linux/mm.h | 1 +
+ 1 file changed, 1 insertion(+)
+
 commit 82566bede4206afba0d8b11f58570d588d39586b
 Author: Linus Torvalds <torvalds@linux-foundation.org>
 Date:   Thu Oct 13 13:07:36 2016 -0700
