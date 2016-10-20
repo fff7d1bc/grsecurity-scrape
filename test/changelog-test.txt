@@ -1,3 +1,44 @@
+commit 82566bede4206afba0d8b11f58570d588d39586b
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu Oct 13 13:07:36 2016 -0700
+
+    mm: remove gup_flags FOLL_WRITE games from __get_user_pages()
+    
+    This is an ancient bug that was actually attempted to be fixed once
+    (badly) by me eleven years ago in commit 4ceb5db9757a ("Fix
+    get_user_pages() race for write access") but that was then undone due to
+    problems on s390 by commit f33ea7f404e5 ("fix get_user_pages bug").
+    
+    In the meantime, the s390 situation has long been fixed, and we can now
+    fix it by checking the pte_dirty() bit properly (and do it better).  The
+    s390 dirty bit was implemented in abf09bed3cce ("s390/mm: implement
+    software dirty bits") which made it into v3.9.  Earlier kernels will
+    have to look at the page state itself.
+    
+    Also, the VM has become more scalable, and what used a purely
+    theoretical race back then has become easier to trigger.
+    
+    To fix it, we introduce a new internal FOLL_COW flag to mark the "yes,
+    we already did a COW" rather than play racy games with FOLL_WRITE that
+    is very fundamental, and then use the pte dirty flag to validate that
+    the FOLL_COW flag is still valid.
+    
+    Reported-and-tested-by: Phil "not Paul" Oester <kernel@linuxace.com>
+    Acked-by: Hugh Dickins <hughd@google.com>
+    Reviewed-by: Michal Hocko <mhocko@suse.com>
+    Cc: Andy Lutomirski <luto@kernel.org>
+    Cc: Kees Cook <keescook@chromium.org>
+    Cc: Oleg Nesterov <oleg@redhat.com>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Cc: Nick Piggin <npiggin@gmail.com>
+    Cc: Greg Thelen <gthelen@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ include/linux/mm.h |  2 +-
+ mm/gup.c           | 14 ++++++++++++--
+ 2 files changed, 13 insertions(+), 3 deletions(-)
+
 commit d291c94e650da2d8918620e6829e05218755f77b
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Oct 19 17:06:17 2016 -0400
