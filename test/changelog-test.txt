@@ -1,3 +1,49 @@
+commit d07e77f258d26721b33ae26dfa5fd8d408aabf57
+Merge: 4630c95 7449af19
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 22 18:32:55 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7449af196b6733891d273f46559efdc168dec22a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 22 18:31:39 2016 -0400
+
+    Update to pax-linux-4.7.10-test8.patch:
+    - Emese removed a potential false positive from the size overflow hash tables
+    - fixed a few incorrect callback types in ACPI/BGRT caught by RAP, reported by foxxx0 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4586)
+    - fixed a few size overflow false positives related to dev_t, reported by fx3 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4583)
+
+ drivers/acpi/bgrt.c                                | 30 +++++++++++-----------
+ include/linux/kobject.h                            |  7 +++++
+ scripts/gcc-plugins/size_overflow_plugin/Makefile  |  2 +-
+ .../gcc-plugins/size_overflow_plugin/disable.data  |  8 +++++-
+ .../gcc-plugins/size_overflow_plugin/e_fields.data | 10 ++------
+ 5 files changed, 32 insertions(+), 25 deletions(-)
+
+commit 4630c95d3d9c20cffe2ba65521217ad537567ac9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 22 09:19:43 2016 -0400
+
+    compile fix
+
+ fs/utimes.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit ee9aeeeb02187281bcc233dd26f6ff4d6814d309
+Merge: 7b8d5c5 309d942
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 22 08:01:34 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 309d94235d552d65c253027528a9dd46962cf385
+Merge: 013fc76 b3afc45
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 22 07:53:44 2016 -0400
+
+    Merge branch 'linux-4.7.y' into pax-test
+
 commit 7b8d5c5a1477a2b62dc7ad1c28e864d7d250739c
 Merge: ca352cc 013fc76
 Author: Brad Spengler <spender@grsecurity.net>
