@@ -1,3 +1,66 @@
+commit d0ed58f929555736ff281f7a79a9667de4c857c6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 26 19:19:08 2016 -0400
+
+    Update size_overflow hash tables
+
+ .../gcc-plugins/size_overflow_plugin/e_fields.data |  80 +++++++++--
+ .../gcc-plugins/size_overflow_plugin/e_fns.data    | 159 ++++++++++++++++++++-
+ .../gcc-plugins/size_overflow_plugin/e_vars.data   |  15 ++
+ 3 files changed, 239 insertions(+), 15 deletions(-)
+
+commit 6a222637c05d26ac8f80a3912856247cff545b12
+Merge: d07e77f ac51587
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 26 18:51:31 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ac5158781612eb239cff9767d116971e9b731a00
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Oct 26 18:50:46 2016 -0400
+
+    Update to pax-linux-4.7.10-test9.patch:
+    - fixed a false positive size overflow report in ip6_frag_queue caused by a gcc intentional overflow, reported by DrWhax and deagol (https://forums.grsecurity.net/viewtopic.php?f=3&t=4594 and https://bugs.gentoo.org/show_bug.cgi?id=597792)
+    - Emese updated the size overflow plugin
+    - Emese updated the hash tables from logs submitted by Shawn <citypw@gmail.com>
+    - fixed mm counter accounting in the vma mirroring code
+    - simplified some kernel page table allocation code
+    - simplified SMAP/UDEREF accessors
+
+ arch/x86/include/asm/asm.h                         |    24 -
+ arch/x86/include/asm/fpu/internal.h                |    21 +-
+ arch/x86/include/asm/futex.h                       |    14 +-
+ arch/x86/include/asm/pgtable_types.h               |     9 +-
+ arch/x86/include/asm/smap.h                        |     3 +
+ arch/x86/include/asm/uaccess.h                     |    36 +-
+ arch/x86/include/asm/uaccess_64.h                  |     2 -
+ arch/x86/kernel/alternative.c                      |     5 +-
+ arch/x86/lib/copy_user_64.S                        |    64 +-
+ arch/x86/lib/csum-wrappers_64.c                    |    12 +-
+ arch/x86/lib/getuser.S                             |    37 +-
+ arch/x86/lib/putuser.S                             |    14 +-
+ arch/x86/lib/usercopy_64.c                         |     9 +-
+ drivers/base/regmap/regmap-debugfs.c               |     4 +-
+ mm/memory.c                                        |   106 +-
+ net/ipv6/reassembly.c                              |     4 +-
+ scripts/Makefile.host                              |    22 +-
+ scripts/gcc-plugins/rap_plugin/rap_plugin.c        |     2 +
+ .../gcc-plugins/size_overflow_plugin/disable.data  |     1 -
+ .../gcc-plugins/size_overflow_plugin/e_fields.data | 37890 ++++++++++---------
+ .../gcc-plugins/size_overflow_plugin/e_fns.data    |  7930 ++--
+ .../gcc-plugins/size_overflow_plugin/e_fptrs.data  |   112 +-
+ .../gcc-plugins/size_overflow_plugin/e_vars.data   |   248 +-
+ .../insert_size_overflow_asm.c                     |    13 +-
+ .../size_overflow_plugin/intentional_overflow.c    |    11 +-
+ .../size_overflow_plugin/size_overflow.h           |    12 +-
+ .../size_overflow_plugin/size_overflow_debug.c     |     9 +-
+ .../size_overflow_plugin/size_overflow_ipa.c       |    74 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |     2 +-
+ .../size_overflow_plugin_hash.c                    |   209 +-
+ .../size_overflow_plugin/size_overflow_transform.c |    19 +-
+ 31 files changed, 22699 insertions(+), 24219 deletions(-)
+
 commit d07e77f258d26721b33ae26dfa5fd8d408aabf57
 Merge: 4630c95 7449af19
 Author: Brad Spengler <spender@grsecurity.net>
