@@ -1,3 +1,24 @@
+commit 36505bce59196272b6401c7dcad0812d9dc8f7f5
+Merge: d0ed58f 6129d6c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 1 19:01:50 2016 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 6129d6c8ea454dd71d6f6d067af5f31f774818a9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 1 19:01:18 2016 -0400
+
+    Update to pax-linux-4.7.10-test10.patch:
+    - fixed a compile error when both REFCOUNT and TRACING were enabled
+    - removed a few superfluous fptr casts from the prism driver
+
+ arch/arm/include/asm/atomic.h                      |   2 +-
+ arch/x86/include/asm/traps.h                       |   1 +
+ arch/x86/include/asm/uaccess.h                     |   4 +-
+ .../net/wireless/intersil/hostap/hostap_ioctl.c    | 116 ++++++++++-----------
+ 4 files changed, 62 insertions(+), 61 deletions(-)
+
 commit d0ed58f929555736ff281f7a79a9667de4c857c6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Oct 26 19:19:08 2016 -0400
