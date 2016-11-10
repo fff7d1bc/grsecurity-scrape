@@ -1,3 +1,56 @@
+commit c65bef9442a61a12256456658a6e3a3aa6f0017c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 9 17:22:04 2016 -0500
+
+    Add SLAB_USERCOPY backward compatibility for out of tree modules
+
+ include/linux/slab.h | 7 +++++++
+ mm/slab_common.c     | 3 ++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
+
+commit 9f7c67696110c732bc080f27629a93c652aa6784
+Merge: 8c2ed61 26e177d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 9 17:13:02 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 26e177df8561bd7b261090dcce16f8bc5a166e43
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 9 17:11:43 2016 -0500
+
+    Update to pax-linux-4.8.6-test2.patch:
+    - fixed resume regression on X86 caused by the recent constification of boot_cpu_data, reported by Joe Gabinsky (https://bugs.archlinux.org/task/51767)
+    - worked around a compile error with gcc enforced PIE, reported by Carlos Carvalho (https://forums.grsecurity.net/viewtopic.php?f=3&t=4607)
+    - fixed a latent entropy compile error that triggered on arm, reported by spender
+
+ Makefile                                              |  2 ++
+ arch/x86/include/asm/irqflags.h                       |  2 ++
+ arch/x86/include/asm/uaccess_32.h                     |  3 +++
+ arch/x86/include/asm/uaccess_64.h                     |  4 ++++
+ arch/x86/kernel/acpi/wakeup_32.S                      |  2 ++
+ arch/x86/kernel/acpi/wakeup_64.S                      |  2 ++
+ arch/x86/kernel/cpu/common.c                          |  6 ++++++
+ arch/x86/kernel/vm86_32.c                             |  6 ++----
+ arch/x86/power/hibernate_asm_32.S                     |  2 ++
+ arch/x86/power/hibernate_asm_64.S                     |  2 ++
+ fs/pstore/ftrace.c                                    |  1 +
+ kernel/events/hw_breakpoint.c                         |  1 +
+ mm/slab.c                                             | 14 +++++++-------
+ scripts/gcc-plugins/latent_entropy_plugin.c           |  4 ++--
+ scripts/gcc-plugins/size_overflow_plugin/disable.data |  3 +++
+ scripts/gcc-plugins/size_overflow_plugin/e_fns.data   |  5 +----
+ 16 files changed, 42 insertions(+), 17 deletions(-)
+
+commit 8c2ed61b048133cef4d19cbcfad489c5229c6d85
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 9 17:08:54 2016 -0500
+
+    re-enable latent_entropy on ARM
+
+ security/Kconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
 commit f111a022d48483a796d7f6d170e5165fa17c32aa
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Nov 8 21:10:00 2016 -0500
