@@ -1,3 +1,40 @@
+commit 972fc7c4ab01bed5011f92621c0235a29b964321
+Merge: b797a7f 179609c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 10 21:30:42 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 179609c35bcb2c28967e27dd71850a64dd8d2457
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 10 21:28:09 2016 -0500
+
+    Update to pax-linux-4.8.7-test3.patch
+
+ Makefile                                           |   5 +-
+ arch/x86/kernel/alternative.c                      |   2 +
+ arch/x86/kernel/cpu/intel.c                        |   6 +
+ arch/x86/kernel/tsc.c                              |   3 +
+ .../gcc-plugins/size_overflow_plugin/.gitignore    |   5 +-
+ .../gcc-plugins/size_overflow_plugin/e_fields.data | 240 ++++++++++++++++---
+ .../gcc-plugins/size_overflow_plugin/e_fns.data    | 262 +++++++++++++++++++--
+ .../gcc-plugins/size_overflow_plugin/e_vars.data   |   3 +
+ 8 files changed, 467 insertions(+), 59 deletions(-)
+
+commit b797a7f8f1bd6dd882c302108d3e0e24eec4eb52
+Merge: c65bef9 61c5e35
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 10 18:47:19 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 61c5e357c8e096078f3087cc1c9945311580ef58
+Merge: 26e177d 567aeca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 10 18:47:09 2016 -0500
+
+    Merge branch 'linux-4.8.y' into pax-test
+
 commit c65bef9442a61a12256456658a6e3a3aa6f0017c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Nov 9 17:22:04 2016 -0500
