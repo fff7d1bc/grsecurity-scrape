@@ -1,3 +1,35 @@
+commit 2deb6e90bf515a547273218c9e5e80362cedf5f4
+Merge: 538290f d10440d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 15 07:22:21 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d10440da199a8c4601cf572c85c240b391d7ff1c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 15 07:21:39 2016 -0500
+
+    Forward-port PaX INITIFY updates:
+    - Emese fixed an infinite recursion bug in the initify plugin that triggered with certain gcc versions, reported by spender
+    - fixed a copy-paste error in the previous initify compile error fix
+
+ scripts/gcc-plugins/initify_plugin.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+commit 538290f125d86e96ca1cb58ec6b6dc42c6df94f5
+Merge: 29790c8 0651bb9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 15 07:16:37 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0651bb9a29497614f2ac8907576e13c25d14417d
+Merge: 3dccfc8 61385cc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 15 07:16:23 2016 -0500
+
+    Merge branch 'linux-4.8.y' into pax-test
+
 commit 29790c808b36fed3643adb45a52ddd1eaf215d5a
 Merge: 884f7d7 3dccfc8
 Author: Brad Spengler <spender@grsecurity.net>
