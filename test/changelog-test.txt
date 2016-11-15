@@ -1,3 +1,50 @@
+commit 29790c808b36fed3643adb45a52ddd1eaf215d5a
+Merge: 884f7d7 3dccfc8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 14 21:55:00 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 3dccfc8eb94c31bb44f90f2d5673867d47ceeae1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 14 21:53:56 2016 -0500
+
+    Forward-ported PaX updates (so all patches can be released tonight):
+    - worked around a false positive initify report with KMEMCHECK, reported by spender
+    - fixed a compile error of the initify plugin with gcc 4.5
+
+ lib/Kconfig.kmemcheck                | 1 +
+ scripts/gcc-plugins/initify_plugin.c | 8 ++++++++
+ 2 files changed, 9 insertions(+)
+
+commit 884f7d7137f2cb388491c398a22b555c9e04bd3b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Nov 14 08:52:36 2016 -0500
+
+    re-enable INITIFY
+
+ security/Kconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+commit 1199c8fee72e0204eef6e517acf1d17e1edb35d0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 12 09:28:52 2016 -0500
+
+    always clear after restore
+
+ kernel/power/snapshot.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+commit 6ee3a03e6b4610d3a4c8536222e613c9381d310a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 12 07:48:59 2016 -0500
+
+    Remove duplicate function definition caused by bad git merge
+    Thanks to Toralf Foerster for the report
+
+ kernel/power/snapshot.c | 20 --------------------
+ 1 file changed, 20 deletions(-)
+
 commit 972fc7c4ab01bed5011f92621c0235a29b964321
 Merge: b797a7f 179609c
 Author: Brad Spengler <spender@grsecurity.net>
