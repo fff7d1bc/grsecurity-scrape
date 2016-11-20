@@ -1,3 +1,65 @@
+commit 5c7c04f7c8fcb7a3730b34db41a0842ef0dbed51
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 19 19:50:51 2016 -0500
+
+    compile fix
+
+ drivers/platform/x86/toshiba-wmi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 05eb3d0ec6643c60f794937ba562fea97f5be897
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 19 19:32:09 2016 -0500
+
+    compile fix
+
+ net/netfilter/nf_log.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit fb9517eef2f4321b99e1427728ea81e7beb6709e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 19 19:26:19 2016 -0500
+
+    compile fix
+
+ drivers/platform/x86/toshiba-wmi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit d7be8fc340893cb7a61f295adf357433684c1412
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 19 18:50:43 2016 -0500
+
+    Fix an instance of DMA on stack reported by jotik
+
+ drivers/tty/hvc/hvc_console.c | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+commit 491d119de68bd80666a5e0c9a45538b03a7e0359
+Merge: d06ab17 ec40a67
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 19 09:49:17 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ec40a67f38da6771cc50d21b8bdfef7fe85c13f9
+Merge: d10440d 8765773
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 19 09:48:59 2016 -0500
+
+    Merge branch 'linux-4.8.y' into pax-test
+
+commit d06ab1776f143f4c0f040b37b5d4be02fb4c2b2f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 16 20:06:47 2016 -0500
+
+    Move location of GRKERNSEC_BRUTE call, otherwise on systems with suid
+    dumping enabled, the crash of a suid/fscapped binary will not produce a
+    coredump as a SIGKILL to the other threads of the process will trigger
+    a group exit.  Thanks to Michael Hu and Meenakshi Selvaraj for the report!
+
+ fs/coredump.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
 commit 2deb6e90bf515a547273218c9e5e80362cedf5f4
 Merge: 538290f d10440d
 Author: Brad Spengler <spender@grsecurity.net>
