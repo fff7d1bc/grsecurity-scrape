@@ -1,3 +1,79 @@
+commit fa8c4d8069e8a83b3a30bedbb7b5281cc035722e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 23 21:36:42 2016 -0500
+
+    Fix regression on i386 KERNEXEC introduced by KSPP ripoff of USERCOPY
+
+ mm/usercopy.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+commit 7bde68e909b1592b4de453d16d9efd544fdcf5d7
+Merge: 104123c 41ec71c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 23 19:59:44 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 41ec71c4866375c87ea6d28341bfb980ec5805f3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 23 19:58:53 2016 -0500
+
+    Update to pax-linux-4.8.10-test5.patch:
+    - worked around a false positive initify report with KMEMCHECK, reported by spender
+    - fixed a compile error of the initify plugin with gcc 4.5
+    - Emese fixed an infinite recursion bug in the initify plugin that triggered with certain gcc versions, reported by spender
+    - worked around a false positive initify report with KMEMCHECK, reported by spender
+    - fixed a compile error of the initify plugin with gcc 4.5
+    - Emese fixed an infinite recursion bug in the initify plugin that triggered with certain gcc versions, reported by spender
+
+ fs/exofs/super.c                                   |   7 +-
+ kernel/trace/trace_printk.c                        |  11 +-
+ net/netfilter/nf_log.c                             |   2 +-
+ .../size_overflow_plugin/size_overflow.h           |   8 +-
+ .../size_overflow_plugin/size_overflow_debug.c     |   4 +-
+ .../size_overflow_plugin/size_overflow_ipa.c       | 143 ++++++++++++++-------
+ .../size_overflow_plugin/size_overflow_plugin.c    |   2 +-
+ .../size_overflow_plugin_hash.c                    |  40 +++---
+ .../size_overflow_plugin/size_overflow_transform.c |   6 +-
+ 9 files changed, 136 insertions(+), 87 deletions(-)
+
+commit 104123c7083b4b405c3d94e5cbcf8d82a3c1bf3b
+Author: Joerg Roedel <jroedel@suse.de>
+Date:   Wed Sep 14 11:41:59 2016 +0200
+
+    iommu/amd: Don't put completion-wait semaphore on stack
+    
+    The semaphore used by the AMD IOMMU to signal command
+    completion lived on the stack until now, which was safe as
+    the driver busy-waited on the semaphore with IRQs disabled,
+    so the stack can't go away under the driver.
+    
+    But the recently introduced vmap-based stacks break this as
+    the physical address of the semaphore can't be determinded
+    easily anymore. The driver used the __pa() macro, but that
+    only works in the direct-mapping. The result were
+    Completion-Wait timeout errors seen by the IOMMU driver,
+    breaking system boot.
+    
+    Since putting the semaphore on the stack is bad design
+    anyway, move the semaphore into 'struct amd_iommu'. It is
+    protected by the per-iommu lock and now in the direct
+    mapping again. This fixes the Completion-Wait timeout errors
+    and makes AMD IOMMU systems boot again with vmap-based
+    stacks enabled.
+    
+    Reported-by: Borislav Petkov <bp@alien8.de>
+    Signed-off-by: Joerg Roedel <jroedel@suse.de>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ drivers/iommu/amd_iommu.c       | 51 ++++++++++++++++++++++++++++-------------
+ drivers/iommu/amd_iommu_types.h |  2 ++
+ 2 files changed, 37 insertions(+), 16 deletions(-)
+
 commit fb4681fbb3ac4fbfc38c4d878a769d9521b2cadc
 Merge: 5c7c04f7 2eb064c
 Author: Brad Spengler <spender@grsecurity.net>
