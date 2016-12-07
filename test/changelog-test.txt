@@ -1,3 +1,63 @@
+commit 4d51197ad44024df9dcb2f8f3bc871d5cc185808
+Author: Philip Pettersson <philip.pettersson@gmail.com>
+Date:   Wed Nov 30 14:55:36 2016 -0800
+
+    Not unpriv privilege escalation on any version of grsecurity --
+    (contrary to copy+pasted Arch Linux security advisories)
+    we've disabled unprivileged userns ever since it existed.
+    
+    packet: fix race condition in packet_set_ring
+    
+    When packet_set_ring creates a ring buffer it will initialize a
+    struct timer_list if the packet version is TPACKET_V3. This value
+    can then be raced by a different thread calling setsockopt to
+    set the version to TPACKET_V1 before packet_set_ring has finished.
+    
+    This leads to a use-after-free on a function pointer in the
+    struct timer_list when the socket is closed as the previously
+    initialized timer will not be deleted.
+    
+    The bug is fixed by taking lock_sock(sk) in packet_setsockopt when
+    changing the packet version while also taking the lock at the start
+    of packet_set_ring.
+    
+    Fixes: f6fb8f100b80 ("af-packet: TPACKET_V3 flexible buffer implementation.")
+    Signed-off-by: Philip Pettersson <philip.pettersson@gmail.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/packet/af_packet.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+commit 8fb1a916b99396cae8f6961d1734ea51c333e8ae
+Merge: 54050b7 f3f4924
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 6 21:42:51 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f3f49240500f0393101d222410f48f68c481959b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 6 21:42:28 2016 -0500
+
+    Update to pax-linux-4.8.12-test7.patch:
+    - fixed non-executable HIBERNATION resume code on amd64, reported and partially fixed by Arseny Solokha <asolokha@gmx.com>
+    - fixed USERCOPY compile regression with old gcc versions, reported by André Ferraz
+    - fixed ENDPROC use on atomic functions on sparc64
+    - fixed return value checking of convert_ip_to_linear
+    - fixed a few function types for RAP
+
+ arch/arm64/include/asm/processor.h     |  7 -------
+ arch/sparc/lib/atomic_64.S             |  8 ++++----
+ arch/x86/kernel/step.c                 |  2 +-
+ arch/x86/mm/fault.c                    |  5 ++++-
+ arch/x86/power/cpu.c                   |  4 ++++
+ arch/x86/power/hibernate_64.c          | 11 +++++------
+ drivers/misc/lkdtm_core.c              |  2 +-
+ drivers/staging/wlan-ng/p80211netdev.c |  2 +-
+ include/linux/init_task.h              |  1 -
+ 9 files changed, 20 insertions(+), 22 deletions(-)
+
 commit 54050b78ed9dc52e72180f178a38474606a09d5c
 Merge: 736e717 34c61d4
 Author: Brad Spengler <spender@grsecurity.net>
