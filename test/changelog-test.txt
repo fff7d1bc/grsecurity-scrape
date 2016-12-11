@@ -1,3 +1,23 @@
+commit 3a0285abbc886698581f682e6d269143c1709031
+Merge: eec49c3 ccbe963
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 10 17:49:55 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ccbe96350259e7d78fb4178ab1e5ece026641816
+Merge: dd08da6 7b8c57c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 10 17:49:17 2016 -0500
+
+    Update to pax-linux-4.8.14-test8.patch:
+    - fixed hyperv hypercall page handling when compiled as a module, reported by Kyle Spiers (kyle@atomicorp.com)
+    - fixed a logic error in initify that initified some ineligible functions triggering a boot crash under hyperv, reported by Kyle Spiers (kyle@atomicorp.com)
+    - Emese turned the compile time error checking of the nocapture attribute into a warning instead
+    - prototypes were missing for make_*_pass(), reported by Andrew Donnellan <andrew.donnellan@au1.ibm.com>
+    
+    Merge branch 'linux-4.8.y' into pax-test
+
 commit eec49c307bcebdfb24cd0c9d1d69282490d30e90
 Merge: 2fd4ed6 dd08da6
 Author: Brad Spengler <spender@grsecurity.net>
