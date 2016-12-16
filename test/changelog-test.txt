@@ -1,3 +1,60 @@
+commit 61c3fa5b25ecc4a7c4f3d531a5cc76adeb89336c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 15 18:36:17 2016 -0500
+
+    Update size_overflow hash table
+
+ scripts/gcc-plugins/size_overflow_plugin/e_fns.data | 1 +
+ 1 file changed, 1 insertion(+)
+
+commit 58e3f480aa38ec2007ec86afdbe668cf30238cd2
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Wed Dec 14 12:45:25 2016 -0800
+
+    vfs,mm: fix return value of read() at s_maxbytes
+    
+    We truncated the possible read iterator to s_maxbytes in commit
+    c2a9737f45e2 ("vfs,mm: fix a dead loop in truncate_inode_pages_range()"),
+    but our end condition handling was wrong: it's not an error to try to
+    read at the end of the file.
+    
+    Reading past the end should return EOF (0), not EINVAL.
+    
+    See for example
+    
+      https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1649342
+      http://lists.gnu.org/archive/html/bug-coreutils/2016-12/msg00008.html
+    
+    where a md5sum of a maximally sized file fails because the final read is
+    exactly at s_maxbytes.
+    
+    Fixes: c2a9737f45e2 ("vfs,mm: fix a dead loop in truncate_inode_pages_range()")
+    Reported-by: Joseph Salisbury <joseph.salisbury@canonical.com>
+    Cc: Wei Fang <fangwei1@huawei.com>
+    Cc: Christoph Hellwig <hch@infradead.org>
+    Cc: Dave Chinner <david@fromorbit.com>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: Andrew Morton <akpm@linux-foundation.org>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/filemap.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 70975981c11bc45fd4ad44e9a6f5e8c2210a14f6
+Merge: 3a0285a 224c7ab
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 15 17:43:49 2016 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 224c7ab2cacdcf25cc319978f7fbe64f519f03f0
+Merge: ccbe963 8bba2e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 15 17:43:37 2016 -0500
+
+    Merge branch 'linux-4.8.y' into pax-test
+
 commit 3a0285abbc886698581f682e6d269143c1709031
 Merge: eec49c3 ccbe963
 Author: Brad Spengler <spender@grsecurity.net>
