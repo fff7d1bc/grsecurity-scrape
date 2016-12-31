@@ -1,3 +1,28 @@
+commit 9d7ca543b94c0203affd278739c77992ccaa7ba6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Dec 30 18:21:59 2016 -0500
+
+    Fix virtualbox host compatibility as reported by aurelf at:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4634
+    
+    This will be reverted once the VirtualBox devs stop disabling
+    SMAP unnecessarily, which seems like it will happen never.
+    Anyone who cares about security of their host system shouldn't
+    use VirtualBox, as it already precludes the use of KERNEXEC, UDEREF,
+    and RANDKSTACK.
+
+ arch/x86/include/asm/irqflags.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+commit cec0b19f2d7ac2d8f8357aee654dddd4418086b8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 22 22:19:33 2016 -0500
+
+    Make HIDESYM select PAX_USERCOPY instead of the now nonexistent PAX_USERCOPY_SLABS
+
+ grsecurity/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit 61c3fa5b25ecc4a7c4f3d531a5cc76adeb89336c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Dec 15 18:36:17 2016 -0500
