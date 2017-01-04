@@ -1,3 +1,54 @@
+commit c86a12c6f8a8551a0025ad531abe9d383e7388d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 3 17:37:11 2017 -0500
+
+    Fix an off-by-one in reporting some denied socket families, as reported by
+    Blub
+
+ grsecurity/gracl_ip.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 85f6681653925320e2040a772aa9526d7bdbe083
+Merge: 9d7ca54 a685c6f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 3 17:18:37 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a685c6fc603aac945ce129adfcbeb9b05b0aba62
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 3 17:18:07 2017 -0500
+
+    Update to pax-linux-4.8.15-test9.patch:
+    - fixed a few compiler warnings due to KERNEXEC and constification, reported by spender
+    - made a few micro-optimizations to lretq usage on amd64 and BUG_ON
+    - updated gcc-common.h and the plugins to eliminate some code bloat in pass registration
+    - fixed the use of build_string in all gcc plugins as it doesn't set TREE_TYPE itself
+
+ arch/x86/kernel/head_64.S                          |   6 +-
+ drivers/hv/hv.c                                    |   2 +-
+ drivers/net/ethernet/amd/xgbe/xgbe.h               |   6 +-
+ include/asm-generic/bug.h                          |   2 +-
+ scripts/gcc-plugins/checker_plugin.c               |  15 +--
+ scripts/gcc-plugins/colorize_plugin.c              |   8 +-
+ scripts/gcc-plugins/constify_plugin.c              |   9 +-
+ scripts/gcc-plugins/cyc_complexity_plugin.c        |   8 +-
+ scripts/gcc-plugins/gcc-common.h                   | 106 ++++++++++++++++++---
+ scripts/gcc-plugins/initify_plugin.c               |  12 +--
+ scripts/gcc-plugins/kallocstat_plugin.c            |   8 +-
+ scripts/gcc-plugins/kernexec_plugin.c              |  28 ++----
+ scripts/gcc-plugins/latent_entropy_plugin.c        |  10 +-
+ scripts/gcc-plugins/rap_plugin/rap_plugin.c        |  24 ++---
+ scripts/gcc-plugins/sancov_plugin.c                |  14 ++-
+ .../insert_size_overflow_asm.c                     |   6 +-
+ .../size_overflow_plugin/size_overflow_ipa.c       |   2 +-
+ .../size_overflow_plugin/size_overflow_plugin.c    |  26 ++---
+ .../size_overflow_plugin/size_overflow_transform.c |   4 +-
+ .../size_overflow_transform_core.c                 |  20 +---
+ scripts/gcc-plugins/stackleak_plugin.c             |  18 +---
+ scripts/gcc-plugins/structleak_plugin.c            |   8 +-
+ 22 files changed, 164 insertions(+), 178 deletions(-)
+
 commit 9d7ca543b94c0203affd278739c77992ccaa7ba6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Dec 30 18:21:59 2016 -0500
