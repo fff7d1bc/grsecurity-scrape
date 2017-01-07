@@ -1,3 +1,36 @@
+commit 124f5155ead017e547c2a3736a312762870d4b0d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 18:03:39 2017 -0500
+
+    compile fix
+
+ fs/exec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 655fffef715aff25550a3a90eaf4a7d06426ed8f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 17:57:28 2017 -0500
+
+    compile fix
+
+ fs/exec.c       | 2 +-
+ kernel/ptrace.c | 3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit a4f3d168f78cb8d84eaabba7dd501799b1f6e5a1
+Merge: c86a12c 2f6e197
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 09:01:05 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 2f6e19780747cdf28176251e19d15c2741b58813
+Merge: a685c6f c65ed08
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 6 08:01:20 2017 -0500
+
+    Merge branch 'linux-4.8.y' into pax-test
+
 commit c86a12c6f8a8551a0025ad531abe9d383e7388d2
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jan 3 17:37:11 2017 -0500
