@@ -1,3 +1,40 @@
+commit e86618efec929cb7f77480f35b21154368f2e7d1
+Author: John Sperbeck <jsperbeck@google.com>
+Date:   Tue Jan 10 16:58:24 2017 -0800
+
+    From the team that brought you useless improvements to the useless KASLR:
+    Useless mitigation causing likely privesc, with one of the worst commit messages
+    of all time (that wasn't written by an upstream developer for once -- to his credit,
+    Andrew Morton actually demanded more info (albeit receiving it in vague quality),
+    without which this commit message would have been even more sparse.
+    
+    Someone should request a CVE for this:
+    
+    mm/slab.c: fix SLAB freelist randomization duplicate entries
+    
+    This patch fixes a bug in the freelist randomization code.  When a high
+    random number is used, the freelist will contain duplicate entries.  It
+    will result in different allocations sharing the same chunk.
+    
+    It will result in odd behaviours and crashes.  It should be uncommon but
+    it depends on the machines.  We saw it happening more often on some
+    machines (every few hours of running tests).
+    
+    Fixes: c7ce4f60ac19 ("mm: SLAB freelist randomization")
+    Link: http://lkml.kernel.org/r/20170103181908.143178-1-thgarnie@google.com
+    Signed-off-by: John Sperbeck <jsperbeck@google.com>
+    Signed-off-by: Thomas Garnier <thgarnie@google.com>
+    Cc: Christoph Lameter <cl@linux.com>
+    Cc: Pekka Enberg <penberg@kernel.org>
+    Cc: David Rientjes <rientjes@google.com>
+    Cc: Joonsoo Kim <iamjoonsoo.kim@lge.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/slab.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
 commit f7abe91bbcb4950f9c611fadd813b6dbe68db74b
 Merge: 124f515 006324d
 Author: Brad Spengler <spender@grsecurity.net>
