@@ -1,3 +1,107 @@
+commit e5800118f68fd1553ac02b1f05bc3d567a884e22
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 15 15:50:04 2017 -0500
+
+    Fix size_overflow FP with gcc 6 reported by craftyguy at:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4640
+
+ scripts/gcc-plugins/size_overflow_plugin/disable.data  | 1 +
+ scripts/gcc-plugins/size_overflow_plugin/e_fields.data | 1 -
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+commit 5861d0ad8a1c929257f1eda7f97dadbc1818112f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 15 14:17:09 2017 -0500
+
+    Initify plugin updates from Emese Revfy:
+    
+    Fixed a logical error that caused a section mismatch
+    Forgot to handle callees from a caller that is marked by BOTH.
+    
+    WARNING: vmlinux.o(.text.unlikely+0x1b1): Section mismatch in
+    reference from the function uncore_pci_exit.part.22() to the function
+    .init.text:uncore_free_pcibus_map()
+    The function uncore_pci_exit.part.22() references
+    the function __init uncore_free_pcibus_map().
+    This is often because uncore_pci_exit.part.22 lacks a __init
+    annotation or the annotation of uncore_free_pcibus_map is wrong.
+    
+    Reported-by: Kees Cook <keescook@chromium.org>
+    
+    Examine all clones as well for __init/__exit eligibility
+    WARNING: vmlinux.o(.text+0x1087e7): Section mismatch in reference from
+    the function rebind_subsystems() to the variable
+    .init.rodata.str:__func__.4400
+    The function rebind_subsystems() references
+    the variable __initconst __func__.4400.
+    This is often because rebind_subsystems lacks a __initconst
+    annotation or the annotation of __func__.4400 is wrong.
+    
+    Reported-by: Kees Cook <keescook@chromium.org>
+
+ scripts/gcc-plugins/initify_plugin.c | 76 ++++++++++++++++++++++++------------
+ 1 file changed, 51 insertions(+), 25 deletions(-)
+
+commit 08e03c1434f26e9b56f00a6ce8236320bd557494
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 15 14:08:04 2017 -0500
+
+    After over a year of hard work, KSPP has finally released its first
+    ever contribution back to grsecurity, the project from which KSPP
+    plagiarizes^Wobtains every useful improvement to Linux security.  We are proud to
+    announce in this joint release the fruits of their hard work: a typo fix
+    to change 'unkown' to 'unknown' when reporting incorrect GCC plugin
+    command line arguments.  Many thanks to Kees Cook and KSPP for this
+    innovation in spell check, and we look forward to many future
+    contributions of the same ilk from their capable hands.  'This
+    contribution of a typo fix confirms the high level of respect and
+    commitment to long-term sustainability KSPP has for grsecurity and its
+    innovative efforts over the past 16 years in producing the state of the
+    art in Linux security' said Brad Spengler, President of Open Source
+    Security Inc.
+    
+    "Based on a patch by Kees Cook" (since like much upstream efforts this
+    one was incomplete in that it missed the rap and size_overflow typos
+    as they existed in separate directories).
+
+ scripts/gcc-plugins/checker_plugin.c                            | 2 +-
+ scripts/gcc-plugins/colorize_plugin.c                           | 2 +-
+ scripts/gcc-plugins/constify_plugin.c                           | 2 +-
+ scripts/gcc-plugins/initify_plugin.c                            | 2 +-
+ scripts/gcc-plugins/kernexec_plugin.c                           | 2 +-
+ scripts/gcc-plugins/latent_entropy_plugin.c                     | 2 +-
+ scripts/gcc-plugins/randomize_layout_plugin.c                   | 2 +-
+ scripts/gcc-plugins/rap_plugin/rap_plugin.c                     | 2 +-
+ scripts/gcc-plugins/sancov_plugin.c                             | 2 +-
+ scripts/gcc-plugins/size_overflow_plugin/size_overflow_plugin.c | 2 +-
+ scripts/gcc-plugins/stackleak_plugin.c                          | 2 +-
+ scripts/gcc-plugins/structleak_plugin.c                         | 2 +-
+ 12 files changed, 12 insertions(+), 12 deletions(-)
+
+commit 9b4ad0aa5ee41a03f02a928e2fd9679044048bde
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 15 12:18:18 2017 -0500
+
+    Fix boot hang on 32-bit 4.8 kernels with SEGMEXEC enabled, reported by
+    osea at:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4643
+
+ mm/memory.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+commit 2c93d3e0efb5b3d413cf2c0c5ac56faf47fa3e2d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 15 08:52:57 2017 -0500
+
+    Allow USERCOPY to be disabled, was a bug in PaX that somehow slipped through
+    the holiday cracks
+    
+    Reported by Chris Henhawke at:
+    https://bugs.gentoo.org/show_bug.cgi?id=603188
+
+ security/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
 commit e86618efec929cb7f77480f35b21154368f2e7d1
 Author: John Sperbeck <jsperbeck@google.com>
 Date:   Tue Jan 10 16:58:24 2017 -0800
