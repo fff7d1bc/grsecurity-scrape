@@ -92,4 +92,4 @@ system(
 );
 
 einfo 'git push ...';
-#system("git", "push");
+system("git", "push");
