@@ -1,3 +1,147 @@
+commit c3fff1a653824ad47021d536dec50e8c937e6347
+Merge: 57a5c6d b608a1f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 20:14:55 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b608a1f8eadf8287e6accf031da5f5e26964e79a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 20:14:47 2017 -0500
+
+    compile fix
+
+commit 57a5c6d747cce4a1dd99e3677ddb564c47c5305a
+Merge: f1a2106 0851ca2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 20:13:15 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 0851ca2f75213d1f9aabe2d10f98553bf642e024
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 20:13:02 2017 -0500
+
+    compile fix
+
+commit f1a2106f030f628edd9d729e8a4cf7a7cbaffe70
+Merge: fb5b3e7 5cff6ef
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 20:05:35 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5cff6ef64e73635a287a5635ed89db37b4860336
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 20:05:28 2017 -0500
+
+    compile fix
+
+commit fb5b3e71be3a859d01a3e935762125808f8dcff4
+Merge: 005e22e a85c589
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:54:55 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit a85c5893051fbbc5b97ab6504747f60d9359dabe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:54:47 2017 -0500
+
+    compile fix
+
+commit 005e22eb6f5f0630dc47c5bf4c37fe72cb8d5afa
+Merge: 230f6cf e376f96
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:49:23 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit e376f965ed749044bc294004f16b36f4ca7fab28
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:49:16 2017 -0500
+
+    compile fix
+
+commit 230f6cf74a165b342fdc05c8202422e8e243b528
+Merge: a60f9ee f4cbdea
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:38:05 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit f4cbdeaa06cfd3658346f94abb5b6e11fe025961
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:37:57 2017 -0500
+
+    compile fix
+
+commit a60f9eef51ff4133c0a713bc89c5e2137999e74c
+Merge: dc07488 d545a4c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:24:32 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit d545a4c83b3191aeee56ebda071a8476a046eb40
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 12 19:22:21 2017 -0500
+
+    Update to pax-linux-4.9.8-test2.patch:
+    - switched to upstream commit 76bee23411f8510fbf5fc5641bae2c203b726eb6 to fix LTO builds
+    - fixed the symbol export of cpu_gdt_table on x86, by corsac
+    - fixed a bunch of compile warnings, by Mathias Krause <minipli@ld-linux.so>
+    - fixed PARAVIRT/RAP boot problems, reported by quasar366 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4663) and Rhett M. Bowen (https://bugs.archlinux.org/task/52881#comment155215), tested by pierrecap@yahoo.fr
+    - fixed KERNEXEC/UEFI boot problems, reported by anoteros (https://bugs.gentoo.org/show_bug.cgi?id=608680) and Clayton Craft (https://bugs.archlinux.org/task/52881#comment155250)
+
+commit dc07488c378373e2bf6b60df31709da5ff767afd
+Author: Sean Rees <sean@erifax.org>
+Date:   Wed Feb 8 14:30:59 2017 -0800
+
+    Another bug from this pointless mitigation
+    see also: https://twitter.com/halvarflake/status/827613317296508928
+    
+    mm/slub.c: fix random_seq offset destruction
+    
+    Commit 210e7a43fa90 ("mm: SLUB freelist randomization") broke USB hub
+    initialisation as described in
+    
+      https://bugzilla.kernel.org/show_bug.cgi?id=177551.
+    
+    Bail out early from init_cache_random_seq if s->random_seq is already
+    initialised.  This prevents destroying the previously computed
+    random_seq offsets later in the function.
+    
+    If the offsets are destroyed, then shuffle_freelist will truncate
+    page->freelist to just the first object (orphaning the rest).
+    
+    Fixes: 210e7a43fa90 ("mm: SLUB freelist randomization")
+    Link: http://lkml.kernel.org/r/20170207140707.20824-1-sean@erifax.org
+    Signed-off-by: Sean Rees <sean@erifax.org>
+    Reported-by: <userwithuid@gmail.com>
+    Cc: Christoph Lameter <cl@linux.com>
+    Cc: Pekka Enberg <penberg@kernel.org>
+    Cc: David Rientjes <rientjes@google.com>
+    Cc: Joonsoo Kim <iamjoonsoo.kim@lge.com>
+    Cc: Thomas Garnier <thgarnie@google.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+commit 7bb22c6cffa5d31bd953b6161db96000edd9eb23
+Merge: a86976a8 9d73aa5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 9 07:22:12 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 9d73aa5a4dee061781926c89c592a7d447804e7d
+Merge: 709a650 d2e4b66
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 9 07:22:05 2017 -0500
+
+    Merge branch 'linux-4.9.y' into pax-test
+
 commit a86976a86e06bb353a436c2486b1ccfb471f9c50
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Feb 7 08:31:41 2017 -0500
