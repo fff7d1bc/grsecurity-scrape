@@ -1,3 +1,39 @@
+commit d7b63bad761e0ca8897ec9c5df4482483aa20201
+Merge: d310a9c b6296dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 15 20:18:47 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b6296dc3544b4a4543a45777a5cc1ecb2ce51042
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 15 20:16:32 2017 -0500
+
+    Update to pax-linux-4.9.9-test3.patch:
+    - fixed a compile error on i386 with X86_CMPXCHG64=n, by Natanael Copa <ncopa@alpinelinux.org>
+    - Emese fixed a few section mismatches and compile errors caused by the initify plugin, reported by Kees Cook, hunger and Valdis Kletnieks
+    - fixed a compile error caused by type mismatches on i386, reported by spender
+
+commit d310a9c0ab751121a5f97196857bfe4e90d86adf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 15 20:03:55 2017 -0500
+
+    compile fix, reported by ncopa
+
+commit f6fed850d763aca4162bc24b29afe5bb23d49d91
+Merge: c3fff1a 1971888
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 15 17:21:00 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 19718886c80977af99f8181fe8e91b0f6f1fb5f7
+Merge: b608a1f 390caee
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 15 17:20:51 2017 -0500
+
+    Merge branch 'linux-4.9.y' into pax-test
+
 commit c3fff1a653824ad47021d536dec50e8c937e6347
 Merge: 57a5c6d b608a1f
 Author: Brad Spengler <spender@grsecurity.net>
