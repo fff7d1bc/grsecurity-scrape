@@ -1,3 +1,27 @@
+commit 55d2e7501a1db909073644bb1b5c58effb627754
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 19:47:51 2017 -0500
+
+    Allow symbol printing for softirq change
+
+commit e489c2948bc9e1d9643c84667bf81ac8387293e0
+Merge: d7b63ba 70fbe2f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 19:47:37 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+    
+    n why this merge is necessary,
+
+commit 70fbe2fc1540632d2cc67e770d826f9637b5b73f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 16 19:46:55 2017 -0500
+
+    Update to pax-linux-4.9.10-test4.patch:
+    - worked around a gcc induced integer truncation that triggered a size overflow, reported by René Korthaus (https://bugs.gentoo.org/show_bug.cgi?id=609500)
+    - disabled size overflow checking on qdisc_tree_reduce_backlog for good as newer gcc is smart enough to get around the previous workaround, reported by craftyguy (https://forums.grsecurity.net/viewtopic.php?f=3&t=4640)
+    - fixed a SEGMEXEC/vma mirroring regression, reported by osea (https://forums.grsecurity.net/viewtopic.php?f=3&t=4643)
+
 commit d7b63bad761e0ca8897ec9c5df4482483aa20201
 Merge: d310a9c b6296dc
 Author: Brad Spengler <spender@grsecurity.net>
