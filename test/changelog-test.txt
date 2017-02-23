@@ -1,3 +1,48 @@
+commit c26d7750fb91d084a1ba3fbf84fa892cabf2cee9
+Merge: f0e6f87 b26ab25
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 22 20:46:04 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit b26ab25c73a41147b14a8edb35eec6a08fafd927
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 22 20:45:31 2017 -0500
+
+    Update to pax-linux-4.9.10-test5.patch:
+    - fixed resume regression on i386/UDEREF caused by upstream commit ffa64eff956a25548cad0391dbc14c672827be7b, reported by corsac
+    - fixed compile regression on i386/XEN, reported by bugmenot (https://forums.grsecurity.net/viewtopic.php?f=3&t=4677)
+    - worked around an intentional integer overflow caused by the amdgpu driver that was caught by the size overflow plugin, reported by foxxx0 (https://forums.grsecurity.net/viewtopic.php?f=3&t=4667)
+    - made better use of upstream's idea of invpcid
+
+commit f0e6f87d2d7d767eba1534fd8c1fa4e8e26e00c8
+Author: Andrey Konovalov <andreyknvl@google.com>
+Date:   Thu Feb 16 17:22:46 2017 +0100
+
+    dccp: fix freeing skb too early for IPV6_RECVPKTINFO
+    
+    In the current DCCP implementation an skb for a DCCP_PKT_REQUEST packet
+    is forcibly freed via __kfree_skb in dccp_rcv_state_process if
+    dccp_v6_conn_request successfully returns.
+    
+    However, if IPV6_RECVPKTINFO is set on a socket, the address of the skb
+    is saved to ireq->pktopts and the ref count for skb is incremented in
+    dccp_v6_conn_request, so skb is still in use. Nevertheless, it gets freed
+    in dccp_rcv_state_process.
+    
+    Fix by calling consume_skb instead of doing goto discard and therefore
+    calling __kfree_skb.
+    
+    Similar fixes for TCP:
+    
+    fb7e2399ec17f1004c0e0ccfd17439f8759ede01 [TCP]: skb is unexpectedly freed.
+    0aea76d35c9651d55bbaf746e7914e5f9ae5a25d tcp: SYN packets are now
+    simply consumed
+    
+    Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
 commit 9f575ef66df46cb78f751e0d8d509171afe3933e
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Feb 18 13:09:26 2017 -0500
