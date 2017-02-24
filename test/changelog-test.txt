@@ -1,3 +1,31 @@
+commit e47311b356a178a1652c88cf47aea011f0211061
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 18:25:41 2017 -0500
+
+    Update size_overflow hash table
+
+commit 7852bd5868a61b1a9c4210c0214ef8c1d3e0e7e2
+Merge: 15fc570 bce7062
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 17:41:07 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit bce7062ee9c933a4188dec2691155442df3a79e8
+Merge: b26ab25 ae7d431
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 17:40:59 2017 -0500
+
+    Merge branch 'linux-4.9.y' into pax-test
+
+commit 15fc5704b74ec1d5c4a9ecd00c9e24e9955a1e24
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 23 17:35:05 2017 -0500
+
+    Fix !GRKERNSEC_KMEM && GRKERNSEC_SYSFS_RESTRICT incompatibility with
+    KVM, reported at https://bugs.gentoo.org/show_bug.cgi?id=597554
+    by Christian Roessner, Miro Rovis, and Étienne Buira
+
 commit c26d7750fb91d084a1ba3fbf84fa892cabf2cee9
 Merge: f0e6f87 b26ab25
 Author: Brad Spengler <spender@grsecurity.net>
