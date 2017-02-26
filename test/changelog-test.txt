@@ -1,3 +1,29 @@
+commit 8019276815d5d50fb57b4a1bd9f33af0c5cd7615
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 26 10:28:40 2017 -0500
+
+    Update size_overflow hash table, from Toralf Foerster
+
+commit 5996b10c778c1b3378219a3c29ae90b504482a50
+Merge: 1d6d9f9 ef547fe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 26 07:41:37 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit ef547fea89fc7818dec64af7db1c7528fc3c1436
+Merge: bce7062 3737a5f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 26 07:41:28 2017 -0500
+
+    Merge branch 'linux-4.9.y' into pax-test
+
+commit 1d6d9f9363ebed20318f0c047dccb5a39a4441e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 24 07:11:39 2017 -0500
+
+    Silence a compiler warning, reported by Etienne Buira
+
 commit e47311b356a178a1652c88cf47aea011f0211061
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Feb 23 18:25:41 2017 -0500
