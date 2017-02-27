@@ -1,3 +1,16 @@
+commit f9c6bb92aa1205f0402085e363fa914ea34beceb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 27 06:55:25 2017 -0500
+
+    Fix softirq warnings reported by nail at:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4668
+    and reported and debugged by Jason Donenfeld.
+    
+    A stray put_cpu() was left in the pax_check_alloca code when
+    porting to Linux 4.9, which would cause a preempt imbalance
+    on interrupts making use of alloca() (either explicitly or through
+    variable length arrays).
+
 commit 8019276815d5d50fb57b4a1bd9f33af0c5cd7615
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Feb 26 10:28:40 2017 -0500
