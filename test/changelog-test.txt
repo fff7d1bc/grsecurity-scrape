@@ -1,3 +1,18 @@
+commit a0b31ddd80510c595b1db203edd009a721e68cfa
+Merge: f9c6bb9 c8102ee
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 5 18:02:18 2017 -0500
+
+    Merge branch 'pax-test' into grsec-test
+
+commit c8102eef049988a1905817e4dc4e859287c2923e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 5 18:01:22 2017 -0500
+
+    Update to pax-linux-4.9.13-test6.patch:
+    - fixed a regression where on amd64 STACKLEAK instrumented functions executed in IRQ context caused a preempt counter overdecrement, by Jason A. Donenfeld <Jason@zx2c4.com>, reported by nail (https://forums.grsecurity.net/viewtopic.php?f=3&t=4668)
+    - fixed an unbalanced pax_open_kernel call that would trigger a BUG in the zt5550 driver
+
 commit f9c6bb92aa1205f0402085e363fa914ea34beceb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Feb 27 06:55:25 2017 -0500
