@@ -1,3 +1,46 @@
+commit c9a77fb1a803a00e7ff0026ad9a87ccb7f9c3004
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 12 12:11:47 2017 -0400
+
+    Update size_overflow hash table
+
+commit 643aa0cade896df02b42428785e5cc6cb8bc2c9c
+Author: Alexander Popov <alex.popov@linux.com>
+Date:   Tue Feb 28 19:54:40 2017 +0300
+
+    tty: n_hdlc: get rid of racy n_hdlc.tbuf
+    
+    Currently N_HDLC line discipline uses a self-made singly linked list for
+    data buffers and has n_hdlc.tbuf pointer for buffer retransmitting after
+    an error.
+    
+    The commit be10eb7589337e5defbe214dae038a53dd21add8
+    ("tty: n_hdlc add buffer flushing") introduced racy access to n_hdlc.tbuf.
+    After tx error concurrent flush_tx_queue() and n_hdlc_send_frames() can put
+    one data buffer to tx_free_buf_list twice. That causes double free in
+    n_hdlc_release().
+    
+    Let's use standard kernel linked list and get rid of n_hdlc.tbuf:
+    in case of tx error put current data buffer after the head of tx_buf_list.
+    
+    Signed-off-by: Alexander Popov <alex.popov@linux.com>
+    Cc: stable <stable@vger.kernel.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+commit 0c801f1c89b85170505c8dac6c58df27155dbb1e
+Merge: a0b31dd 5fedde5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 12 08:18:58 2017 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 5fedde5358a3a9625c4e21ff8a5b5b6d5bd5d125
+Merge: c8102ee d379ab2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Mar 12 08:18:48 2017 -0400
+
+    Merge branch 'linux-4.9.y' into pax-test
+
 commit a0b31ddd80510c595b1db203edd009a721e68cfa
 Merge: f9c6bb9 c8102ee
 Author: Brad Spengler <spender@grsecurity.net>
