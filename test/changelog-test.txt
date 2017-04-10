@@ -1,3 +1,23 @@
+commit 405013951323e2835d2924a6bbde752fcd04016c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 9 19:08:16 2017 -0400
+
+    Size overflow hash updates from Toralf Foerster
+
+commit b2168c65060c63a858a46fa1f767d7c55d437934
+Merge: 11e048d 7ab0cba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 9 18:04:04 2017 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 7ab0cba9320696df7d9ce8030f04b31a07d1edc2
+Merge: aee169f 37feaf8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 9 18:03:55 2017 -0400
+
+    Merge branch 'linux-4.9.y' into pax-test
+
 commit 11e048d628025e77052220e9bf3b69376ef87759
 Merge: bc8c377 aee169f
 Author: Brad Spengler <spender@grsecurity.net>
