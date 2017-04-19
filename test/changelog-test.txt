@@ -1,3 +1,20 @@
+commit e26e5cf774b987d1ea5e866ccb416a9f4de45c02
+Merge: 4aa226b 8c03f86
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 18 17:40:11 2017 -0400
+
+    Merge branch 'pax-test' into grsec-test
+
+commit 8c03f869672b9813d2df66c7895eb7c7466f7153
+Merge: 6f940b9 c3582cc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 18 17:40:06 2017 -0400
+
+    Merge branch 'linux-4.9.y' into pax-test
+    
+    Conflicts:
+    	drivers/gpu/drm/i915/i915_irq.c
+
 commit 4aa226b223ecb0156653486ddef74bf6b195f039
 Merge: 4050139 6f940b9
 Author: Brad Spengler <spender@grsecurity.net>
