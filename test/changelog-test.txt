@@ -1,3 +1,30 @@
+commit 08ef8b44e018880f9c921c04734a7155b4060124
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 21 07:45:07 2017 -0400
+
+    Update size_overflow hash table
+
+commit 7d36ead53b4dbb86384ef6be930c3473b72110f6
+Merge: e26e5cf c4b0241
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 21 07:00:05 2017 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	drivers/media/usb/dvb-usb/dvb-usb-firmware.c
+
+commit c4b0241c552bd6cffd795a0418eb7a798bbfda2b
+Merge: 8c03f86 2f5e58e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 21 06:58:42 2017 -0400
+
+    Merge branch 'linux-4.9.y' into pax-test
+    
+    Conflicts:
+    	arch/x86/mm/init.c
+    	drivers/char/mem.c
+
 commit e26e5cf774b987d1ea5e866ccb416a9f4de45c02
 Merge: 4aa226b 8c03f86
 Author: Brad Spengler <spender@grsecurity.net>
