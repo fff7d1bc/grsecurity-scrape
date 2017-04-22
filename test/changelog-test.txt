@@ -1,3 +1,23 @@
+commit d57f26c39ebc08fd5e598b05d47f97cb5f3143ee
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 22 07:04:00 2017 -0400
+
+    Remove empty line from disable.data
+
+commit ebfb4e5857a7f38b8128e139eefc62c34f2cf67d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 22 06:55:35 2017 -0400
+
+    fixed a regression in the 4.9 port of refcount error reporting that would cause unexpected
+    code execution upon refcount errors, reported by Jann Horn <jannh@google.com>
+
+commit b87a02881f1bfd4c48466c0f00fec2ca676ae8d7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 21 19:21:56 2017 -0400
+
+    Fix size_overflow report from alaviss:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4694&p=17072#p17072
+
 commit 08ef8b44e018880f9c921c04734a7155b4060124
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri Apr 21 07:45:07 2017 -0400
