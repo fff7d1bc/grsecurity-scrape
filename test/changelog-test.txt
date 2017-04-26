@@ -1,3 +1,39 @@
+commit bfebed58aa9c8a1f3196ce0bf19767a16d0bc835
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 25 22:41:12 2017 -0400
+
+    16/34 time to blow out the candles
+    
+    Update size_overflow hash tables
+
+commit e0887f2ea8dabcf33f90286aa33c12a48a92dc17
+Merge: 8ac6745 5e7a080
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 25 22:08:55 2017 -0400
+
+    Merge branch 'pax-test' into grsec-test
+    
+    Conflicts:
+    	arch/x86/kernel/traps.c
+    	arch/x86/mm/init.c
+    	scripts/gcc-plugins/size_overflow_plugin/disable.data
+
+commit 5e7a080261fbc4b24d834505aee2680e8390cf20
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 25 21:59:38 2017 -0400
+
+    Update to pax-linux-4.9.24-test7.patch:
+    - fixed potential kmap or ioremap leaks when reading /dev/mem
+    - fixed a regression in the 4.9 port of REFCOUNT error reporting on x86 that would cause unexpected code execution upon refcount errors, reported by Jann Horn <jannh@google.com>
+    - fixed two false positive size overflow reports in binder, reported by alaviss (https://forums.grsecurity.net/viewtopic.php?f=3&t=4694)
+
+commit 8ac67450a6a11b974cb37940540fa194db9ff0b5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 25 17:36:00 2017 -0400
+
+    Fix the error message for an exec denied due to NNP disallowing
+    a subject transition.  Thanks to Andrew Flannery for the report!
+
 commit d57f26c39ebc08fd5e598b05d47f97cb5f3143ee
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Apr 22 07:04:00 2017 -0400
